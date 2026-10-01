@@ -19,6 +19,13 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 
 * Role: Developer
 
+### Feng Yi
+<img src="images/jigusheng.png" width="200px">
+
+[[github](https://github.com/Jigusheng)]
+
+* Role: Developer
+
 ### Jane Doe
 
 <img src="images/johndoe.png" width="200px">
