@@ -11,6 +11,15 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 
 ## Project team
 
+### Ng Xu Xian
+
+<img src="images/ngxuxian.png" width="200px">
+
+[[github](https://github.com/NgXuXian)]
+
+* Role: Developer
+* Responsibilities: Data
+
 ### John Doe
 
 <img src="images/johndoe.png" width="200px">
