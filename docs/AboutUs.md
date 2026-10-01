@@ -59,3 +59,12 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 
 * Role: Developer
 * Responsibilities: UI
+
+### Ng Xu Xian
+
+<img src="images/ngxuxian.png" width="200px">
+
+[[github](https://github.com/NgXuXian)]
+
+* Role: Developer
+* Responsibilities: 
