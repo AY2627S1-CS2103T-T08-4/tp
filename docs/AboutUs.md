@@ -11,6 +11,7 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 
 ## Project team
 
+
 ### Ng Xu Xian
 
 <img src="images/ngxuxian.png" width="200px">
@@ -20,15 +21,20 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 * Role: Developer
 * Responsibilities: Data
 
-### John Doe
+### Xu Haocheng
 
-<img src="images/johndoe.png" width="200px">
+<img src="images/haocheeks.png" width="200px">
 
-[[homepage](http://www.comp.nus.edu.sg/~damithch)]
-[[github](https://github.com/johndoe)]
-[[portfolio](team/johndoe.md)]
+[[github](https://github.com/Haocheeks)]
 
-* Role: Project Advisor
+* Role: Developer
+
+### Feng Yi
+<img src="images/jigusheng.png" width="200px">
+
+[[github](https://github.com/Jigusheng)]
+
+* Role: Developer
 
 ### Jane Doe
 
