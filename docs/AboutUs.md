@@ -36,15 +36,13 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 
 * Role: Developer
 
-### Jane Doe
+### Jovan Lim
 
-<img src="images/johndoe.png" width="200px">
+<img src="images/matcha1atte1.png" width="200px">
 
-[[github](http://github.com/johndoe)]
-[[portfolio](team/johndoe.md)]
+[[github](http://github.com/Matcha1atte1)]
 
-* Role: Team Lead
-* Responsibilities: UI
+* Role: Developer
 
 ### Jonathan Neo
 
