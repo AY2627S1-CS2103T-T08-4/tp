@@ -296,16 +296,106 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 ### Use cases
 
-(For all use cases below, the **System** is the `AddressBook` and the **Actor** is the `user`, unless specified otherwise)
+(For all use cases below, the **System** is `Sieve` and the **Actor** is the `tutor`, unless specified otherwise)
 
-**Use case: Delete a person**
+**Use case: UC1 - Add a client**
 
 **MSS**
 
-1.  User requests to list persons
-2.  AddressBook shows a list of persons
-3.  User requests to delete a specific person in the list
-4.  AddressBook deletes the person
+1.  Tutor requests to add a client by providing the name, phone number, email address and address
+2.  Sieve validates the details
+3.  Sieve adds the client to the end of the client list
+4.  Sieve saves the updated client list to the data file
+5.  Sieve shows a confirmation message and the new client
+
+    Use case ends.
+
+**Extensions**
+
+* 1a. A required prefix is missing.
+
+    * 1a1. Sieve shows an error message with the expected command format.
+
+      Use case resumes at step 1.
+
+* 2a. One of the details is invalid (e.g. a phone number that is not 8 digits).
+
+    * 2a1. Sieve shows an error message for the invalid field.
+
+      Use case resumes at step 1.
+
+* 2b. A client with the same name and phone number already exists.
+
+    * 2b1. Sieve shows a duplicate error message.
+
+      Use case resumes at step 1.
+
+* 4a. Sieve cannot write to the data file.
+
+    * 4a1. Sieve shows a warning that the client was added to the current view but not saved.
+
+      Use case ends.
+
+**Use case: UC2 - Find a client and update their details**
+
+**MSS**
+
+1.  Tutor requests to find clients by a name keyword
+2.  Sieve shows the clients whose names match the keyword
+3.  Tutor requests to edit a specific client in the list with the new details
+4.  Sieve validates the new details
+5.  Sieve updates the client and saves the change
+6.  Sieve shows a confirmation message and the updated client
+
+    Use case ends.
+
+**Extensions**
+
+* 1a. The keyword is blank or contains characters other than letters.
+
+    * 1a1. Sieve shows an error message.
+
+      Use case resumes at step 1.
+
+* 2a. No client matches the keyword.
+
+    * 2a1. Sieve shows that 0 clients were found.
+
+      Use case ends.
+
+* 3a. The given index is out of bounds.
+
+    * 3a1. Sieve shows an error message.
+
+      Use case resumes at step 3.
+
+* 3b. No field to edit is provided.
+
+    * 3b1. Sieve shows an error message with the expected command format.
+
+      Use case resumes at step 3.
+
+* 4a. One of the new details is invalid.
+
+    * 4a1. Sieve shows an error message for the invalid field and leaves the client unchanged.
+
+      Use case resumes at step 3.
+
+* 4b. The edit would make the client a duplicate of another client (same name and phone number).
+
+    * 4b1. Sieve shows a duplicate error message and leaves the client unchanged.
+
+      Use case resumes at step 3.
+
+**Use case: UC3 - Tag clients to organise them**
+
+**MSS**
+
+1.  Tutor requests to list all clients
+2.  Sieve shows all clients in a numbered list
+3.  Tutor requests to tag a specific client with one or more tags (e.g. a subject, a level or a lesson day)
+4.  Sieve adds the tags to the client's existing tags and saves the change
+5.  Sieve shows a confirmation message and the client with all their tags
 
     Use case ends.
 
@@ -315,13 +405,86 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
   Use case ends.
 
-* 3a. The given index is invalid.
+* 3a. The given index is out of bounds.
 
-    * 3a1. AddressBook shows an error message.
+    * 3a1. Sieve shows an error message.
 
-      Use case resumes at step 2.
+      Use case resumes at step 3.
 
-*{More to be added}*
+* 3b. No tag is provided.
+
+    * 3b1. Sieve shows an error message with the expected command format.
+
+      Use case resumes at step 3.
+
+* 3c. A tag is invalid (not 1-20 characters, or contains characters other than letters, numbers and spaces).
+
+    * 3c1. Sieve shows an error message.
+
+      Use case resumes at step 3.
+
+* 4a. The client already has the given tag.
+
+    * 4a1. Sieve ignores the duplicate tag and keeps the other tags as given.
+
+      Use case continues from step 5.
+
+**Use case: UC4 - Delete a client who no longer needs tuition**
+
+**MSS**
+
+1.  Tutor requests to find the client by name
+2.  Sieve shows the matching clients
+3.  Tutor requests to delete a specific client in the list
+4.  Sieve removes the client and saves the change
+5.  Sieve shows a confirmation message
+
+    Use case ends.
+
+**Extensions**
+
+* 2a. No client matches the keyword.
+
+    * 2a1. Sieve shows that 0 clients were found.
+
+      Use case ends.
+
+* 3a. The given index is invalid or out of bounds.
+
+    * 3a1. Sieve shows an error message.
+
+      Use case resumes at step 3.
+
+* 3b. The client list is empty.
+
+    * 3b1. Sieve shows an error message that there is nothing to delete.
+
+      Use case ends.
+
+**Use case: UC5 - Start with a clean client list on first use**
+
+**MSS**
+
+1.  Tutor launches Sieve for the first time
+2.  Sieve finds no data file and loads sample clients
+3.  Tutor explores the sample clients using the other commands
+4.  Tutor requests to clear all data
+5.  Sieve removes all clients and saves the empty list
+6.  Tutor starts adding real clients (see UC1)
+
+    Use case ends.
+
+**Extensions**
+
+* 2a. A data file exists but is corrupted.
+
+    * 2a1. Sieve starts with an empty list, shows an error message and leaves the file untouched.
+
+      Use case resumes at step 6.
+
+* 4a. Tutor decides to keep the sample clients.
+
+  Use case ends.
 
 ### Non-Functional Requirements
 
