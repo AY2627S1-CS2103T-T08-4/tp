@@ -278,21 +278,43 @@ _{Explain here how the data archiving feature will be implemented}_
 
 **Value proposition**: Manage contacts faster than with a typical mouse-driven GUI application.
 
-
 ### User stories
 
 Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unlikely to have) - `*`
 
-| Priority | As a …                                    | I want to …                 | So that I can…                                                        |
-|----------|--------------------------------------------|------------------------------|------------------------------------------------------------------------|
-| `* * *`  | new user                                   | see usage instructions       | refer to instructions when I forget how to use the App                 |
-| `* * *`  | user                                       | add a new person             |                                                                        |
-| `* * *`  | user                                       | delete a person              | remove entries that I no longer need                                   |
-| `* * *`  | user                                       | find a person by name        | locate details of persons without having to go through the entire list |
-| `* *`    | user                                       | hide private contact details | minimize chance of someone else seeing them by accident                |
-| `*`      | user with many persons in the address book | sort persons by name         | locate a person easily                                                 |
-
-*{More to be added}*
+| Priority | As a ... | I can ... | So that ... |
+| -------- | -------- | --------- | ----------- |
+| `* * *` | potential user exploring the app | see the app populated with sample data | I can easily see how the app will look when it is in use |
+| `* * *` | user ready to start using the app | purge all current data | I can get rid of sample/experimental data I used for exploring the app |
+| `* * *` | new user | add a client with their name, phone, email, and address | I have their contact details on record |
+| `* * *` | forgetful user | see an error message that shows the correct format and which part of my command was wrong | I can fix it immediately instead of guessing |
+| `* * *` | new user | see a list of all commands and their formats | I can get started without feeling lost or leaving the app to look up syntax |
+| `* * *` | tutor | edit the details of an existing client | I can fix or update information without retyping the whole entry |
+| `* * *` | tutor | find a client by name keyword | I can pull up their details immediately when needed |
+| `* * *` | tutor | delete a client I no longer tutor, e.g. a student who has graduated | I can maintain an updated and clean list |
+| `* * *` | tutor | tag a client with free-form labels, and add or remove a single tag without retyping the whole contact | I can group clients the way my business actually works and keep small corrections cheap |
+| `* * *` | tutor | see all my clients as a numbered list | I can refer to any of them by index in later commands |
+| `* * *` | careless typist | undo my last command | a mistyped delete isn't a disaster |
+| `* *` | new user switching from other tools | bulk-add multiple clients at once | I don't have to re-enter my existing client list one by one |
+| `* *` | tutor | filter clients by one or more tags, such as day, subject, and level, in a single command | I can answer questions like "Sec 4 physics on Thursday" in one go |
+| `* *` | tutor | mark a client as inactive (e.g. paused for exams or a break) instead of deleting them | I keep their record and can resume lessons later without re-adding them from scratch |
+| `* *` | long-time user | hide inactive clients from my main list and see only the clients I am currently teaching | I am not distracted by irrelevant data and can quickly see who is still active |
+| `* *` | tutor | add free-text notes to a client | I can record details that don't fit neatly into a tag |
+| `* *` | tutor | export my client list to a file | I can back it up or move it to a new computer |
+| `* *` | tutor considering a new client | check whether a proposed time slot clashes with an existing client's schedule | I avoid double-booking myself |
+| `* *` | tutor | record whether a client has paid for the current month | I know who has paid and who is still outstanding, even for parents who pay at month-end |
+| `* *` | tutor | see which clients have outstanding payments at a glance | I don't have to check each client individually |
+| `*` | tutor | link a client to a family member who is also my client, such as a sibling | I can remember which students belong to the same household |
+| `*` | tutor with limited time | sort or flag clients by priority | I know who to focus on when my own schedule is tight |
+| `*` | tutor | see a quick count of my active clients | I can gauge my current workload at a glance |
+| `*` | tutor | detect and remove duplicate client entries | my list doesn't contain confusing repeats |
+| `*` | expert user | create shortcuts for tasks | I can save time on frequently performed tasks |
+| `*` | tutor | have overdue payments flagged automatically | I don't have to manually track payment deadlines for every client |
+| `*` | long-time tutor | view a family's history with me across multiple children | I can build rapport when starting with a new sibling |
+| `*` | user with low confidence in technology | get confirmation that my data has been saved successfully | I trust the app is keeping my records safely |
+| `*` | tutor who runs group classes | record a single session covering multiple students at once | I don't have to repeat the same entry per student |
+| `*` | tutor who runs group classes | see which enrolled students are attending a specific session | I know who to expect and who is away |
+| `*` | tutor who runs group classes | bill a group class as a single unit | I don't have to track payment separately for each student in it |
 
 ### Use cases
 
