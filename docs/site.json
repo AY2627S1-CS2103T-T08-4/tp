@@ -1,7 +1,7 @@
 {
   "baseUrl": "",
   "titlePrefix": "Sieve",
-  "titleSuffix": "AddressBook Level-3",
+  "titleSuffix": "Client Manager for Private Tutors",
   "faviconPath": "images/SeEduLogo.png",
   "style": {
     "codeTheme": "light"
