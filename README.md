@@ -1,16 +1,24 @@
-[![CI Status](https://github.com/se-edu/addressbook-level3/workflows/Java%20CI/badge.svg)](https://github.com/se-edu/addressbook-level3/actions)
+# Sieve
 
-[![codecov](https://codecov.io/gh/AY2627S1-CS2103T-T08-4/tp/branch/master/graph/badge.svg?token=KSCZ68V282)](https://codecov.io/gh/AY2627S1-CS2103T-T08-4/tp)
+[![Java CI](https://github.com)](https://github.com/AY2627S1-CS2103T-T08-4/tp/actions)
+[![codecov](https://codecov.io)](https://codecov.io)
 
 ![Ui](docs/images/Ui.png)
 
-* This is **a sample project for Software Engineering (SE) students**.<br>
-  Example usages:
-  * as a starting point of a course project (as opposed to writing everything from scratch)
-  * as a case study
-* The project simulates an ongoing software project for a desktop application (called _AddressBook_) used for managing contact details.
-  * It is **written in an object-oriented programming (OOP) style** and provides a **reasonably well-written** codebase of about 6 KLoC. It is **larger** than what students typically write in beginner-level software-engineering modules, without being overwhelming.
-  * It comes with a **reasonable level of user and developer documentation**.
-* It is named `AddressBook Level 3` (`AB3` for short) because it was initially created as a part of a series of `AddressBook` projects (`Level 1`, `Level 2`, `Level 3` ...).
-* For the detailed documentation of this project, see the **[Address Book Product Website](https://se-education.org/addressbook-level3)**.
-* This project is a **part of the se-education.org** initiative. If you would like to contribute code to this project, see [se-education.org](https://se-education.org/#contributing-to-se-edu) for more info.
+* **Sieve** is a desktop application designed for solo tutors running home-based lessons to manage client details quickly and efficiently.
+* It features a powerful **Command Line Interface** (CLI) tailored for rapid, keyboard-oriented navigation, accompanied by a clean Graphical User Interface (GUI) layout.
+* The application is cross-platform and runs seamlessly on Windows, macOS, and Linux.
+
+## Key Features
+
+* **Client Registry Management:** Quickly capture structured details including names, emails, physical lesson locations, and contact variables.
+* **Singapore-Specific Validation:** Automatically checks phone numbers to ensure they match local 8-digit formats, preventing common typos.
+* **Flexible Contact Handling:** Allows distinct client profiles to securely share identical phone numbers or emails, ensuring siblings or family units can coexist within the database.
+* **Custom Dynamic Tagging:** Organise and label your students by subject matter, academic level, or scheduled lesson days using flexible, multi-tag assignments.
+* **Reliable Core Workflows:** Built-in tools for lightning-fast full-word name searching, single-client updates, and data clearing routines to manage your workspace.
+
+## Acknowledgements
+This project is based on the AddressBook-Level3 project created by the [SE-EDU initiative](https://se-education.org).
+
+## Getting Started
+For full installation details, advanced parameters, and command execution steps, please refer to our project website documentation.
