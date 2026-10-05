@@ -4,7 +4,7 @@
   pageNav: 3
 ---
 
-# AB-3 Developer Guide
+# Sieve Developer Guide
 
 <!-- * Table of Contents -->
 <page-nav-print />
@@ -13,7 +13,14 @@
 
 ## **Acknowledgements**
 
-* _{List the sources of reused or adapted ideas, code, documentation, and third-party libraries here, with links to the originals.}_
+* Sieve is based on the
+  [AddressBook-Level3 project](https://github.com/se-edu/addressbook-level3)
+  created by the [SE-EDU initiative](https://se-education.org). Parts of
+  Sieve's code and documentation were adapted from AddressBook-Level3.
+* Sieve uses [JavaFX](https://openjfx.io/) for its graphical user interface.
+* Sieve uses [Jackson](https://github.com/FasterXML/jackson) for JSON data
+  storage.
+* Sieve uses [JUnit 5](https://junit.org/junit5/) for automated testing.
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -270,13 +277,17 @@ _{Explain here how the data archiving feature will be implemented}_
 
 **Target user profile**:
 
-* has a need to manage a significant number of contacts
-* prefers desktop apps over other types of applications
-* can type fast
-* prefers typing to mouse interactions
-* is reasonably comfortable using CLI apps
+* is a self-employed private tuition teacher
+* works independently
+* manages a large and growing roster of clients
+* teaches clients across varying subjects and education levels
+* manages irregular and frequently changing schedules
 
-**Value proposition**: Manage contacts faster than with a typical mouse-driven GUI application.
+**Value proposition**: Tutors managing many clients with different subjects, levels, and 
+constantly shifting schedules often lose track of details across scattered notes or apps. 
+Sieve keeps every client organised in one place and lets tutors instantly find or filter anyone, 
+keeping admin work out of the way of teaching.
+
 
 ### User stories
 
