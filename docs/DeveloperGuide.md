@@ -521,16 +521,24 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 ### Non-Functional Requirements
 
-1.  Should work on any _mainstream OS_ as long as it has Java `25` or above installed.
-2.  Should be able to hold up to 1000 persons without noticeable sluggishness in performance for typical usage.
-3.  A user with above average typing speed for regular English text (i.e. not code, not system admin commands) should be able to accomplish most of the tasks faster using commands than using the mouse.
+1. Sieve should work on any mainstream OS that has Java `25` or later installed.
+2. Sieve should support at least 1,000 client records without noticeable sluggishness during typical usage.
+3. Sieve should respond to a user command within two seconds when managing 1,000 client records, excluding delays caused by the operating system or file system.
+4. Sieve should store client data locally and should not require an Internet connection for its core features.
+5. If the data file is missing or corrupted, Sieve should remain usable and should not overwrite the corrupted file before informing the user of the loading error.
+6. Tutor with above-average typing speed for regular English text should be able to perform most client-management tasks faster using commands than using mouse-based interactions.
 
-*{More to be added}*
 
 ### Glossary
 
-* **Mainstream OS**: Windows, Linux, Unix, or macOS
-* **Private contact detail**: A contact detail that is not meant to be shared with others
+* **Client**: A person receiving private tuition from the tutor and whose details are managed in Sieve. In the current implementation and some inherited documentation, a client may also be referred to as a *person* or *contact*.
+* **Client record**: The collection of details stored in Sieve for one client, consisting of a name, phone number, email address, physical address, and zero or more tags.
+* **Client list**: The collection of all client records stored in Sieve.
+* **Currently displayed client list**: The numbered list of clients presently shown in the application. It may contain all clients or only the clients returned by a search.
+* **Index**: The positive integer shown beside a client in the currently displayed client list. Commands such as `edit` and `delete` use this number to identify a client.
+* **Mainstream OS**: A currently supported version of Windows, Linux, or macOS that can run Java `25` or later.
+* **Prefix**: A command marker, such as `n/`, `p/`, `e/`, `a/`, or `t/`, that identifies the type of client detail following it.
+* **Tag**: A user-defined alphanumeric label attached to a client record for categorisation, such as a subject, education level, or lesson day.
 
 --------------------------------------------------------------------------------------------------------------------
 
