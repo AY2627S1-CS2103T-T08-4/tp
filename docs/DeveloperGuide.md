@@ -278,15 +278,16 @@ _{Explain here how the data archiving feature will be implemented}_
 **Target user profile**:
 
 * is a self-employed private tuition teacher
-* manages a significant number of tutees
-* needs to keep track of tutee details, lesson arrangements, and payments
-* prefers using a desktop application
-* can type quickly and prefers keyboard-driven interactions
-* is reasonably comfortable using CLI-style commands
+* works independently
+* manages a large and growing roster of clients
+* teaches clients across varying subjects and education levels
+* manages irregular and frequently changing schedules
 
-**Value proposition**: Sieve enables self-employed private tuition teachers
-to manage their tutees, lesson arrangements, and payments faster than with
-general-purpose tools such as chats, notes, and spreadsheets.
+**Value proposition**: Tutors managing many clients with different subjects, levels, and 
+constantly shifting schedules often lose track of details across scattered notes or apps. 
+Sieve keeps every client organised in one place and lets tutors instantly find or filter anyone, 
+keeping admin work out of the way of teaching.
+
 
 ### User stories
 
