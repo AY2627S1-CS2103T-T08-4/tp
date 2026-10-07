@@ -13,6 +13,8 @@ import seedu.address.model.person.NameContainsKeywordsPredicate;
  */
 public class FindCommandParser implements Parser<FindCommand> {
 
+    private static final String KEYWORD_VALIDATION_REGEX = "[A-Za-z]+";
+
     /**
      * Parses the given {@code String} of arguments in the context of the FindCommand
      * and returns a FindCommand object for execution.
@@ -26,6 +28,11 @@ public class FindCommandParser implements Parser<FindCommand> {
         }
 
         String[] nameKeywords = trimmedArgs.split("\\s+");
+        for (String keyword : nameKeywords) {
+            if (!keyword.matches(KEYWORD_VALIDATION_REGEX)) {
+                throw new ParseException(FindCommand.MESSAGE_INVALID_KEYWORDS);
+            }
+        }
 
         return new FindCommand(new NameContainsKeywordsPredicate(List.of(nameKeywords)));
     }

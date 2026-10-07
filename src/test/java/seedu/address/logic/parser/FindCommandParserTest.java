@@ -31,4 +31,19 @@ public class FindCommandParserTest {
         assertParseSuccess(parser, " \n Alice \n \t Bob  \t", expectedFindCommand);
     }
 
+    @Test
+    public void parse_nonLetterKeywords_throwsParseException() {
+        // underscore
+        assertParseFailure(parser, "Amirah_Tan", FindCommand.MESSAGE_INVALID_KEYWORDS);
+
+        // digits
+        assertParseFailure(parser, "Ravi2", FindCommand.MESSAGE_INVALID_KEYWORDS);
+
+        // punctuation
+        assertParseFailure(parser, "O'Brien", FindCommand.MESSAGE_INVALID_KEYWORDS);
+
+        // one invalid keyword among valid ones
+        assertParseFailure(parser, "Alice B0b", FindCommand.MESSAGE_INVALID_KEYWORDS);
+    }
+
 }

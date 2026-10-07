@@ -20,6 +20,9 @@ public class FindCommand extends Command {
             + "Parameters: KEYWORD [MORE_KEYWORDS]...\n"
             + "Example: " + COMMAND_WORD + " alice bob charlie";
 
+    public static final String MESSAGE_INVALID_KEYWORDS =
+            "Search keywords must only contain letters and cannot be blank.";
+
     private final NameContainsKeywordsPredicate predicate;
 
     public FindCommand(NameContainsKeywordsPredicate predicate) {
