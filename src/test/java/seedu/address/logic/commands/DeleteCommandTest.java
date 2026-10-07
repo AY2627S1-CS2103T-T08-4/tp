@@ -43,10 +43,13 @@ public class DeleteCommandTest {
 
     @Test
     public void execute_invalidIndexUnfilteredList_throwsCommandException() {
-        Index outOfBoundIndex = Index.fromOneBased(model.getFilteredPersonList().size() + 1);
+        int listSize = model.getFilteredPersonList().size();
+        Index outOfBoundIndex = Index.fromOneBased(listSize + 1);
         DeleteCommand deleteCommand = new DeleteCommand(outOfBoundIndex);
 
-        assertCommandFailure(deleteCommand, model, Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
+        String expectedMessage = String.format(DeleteCommand.MESSAGE_INDEX_OUT_OF_BOUNDS, listSize);
+
+        assertCommandFailure(deleteCommand, model, expectedMessage);
     }
 
     @Test
@@ -70,13 +73,28 @@ public class DeleteCommandTest {
     public void execute_invalidIndexFilteredList_throwsCommandException() {
         showPersonAtIndex(model, INDEX_FIRST_PERSON);
 
-        Index outOfBoundIndex = INDEX_SECOND_PERSON;
-        // ensures that outOfBoundIndex is still in bounds of address book list
-        assertTrue(outOfBoundIndex.getZeroBased() < model.getAddressBook().getPersonList().size());
+        DeleteCommand deleteCommand = new DeleteCommand(INDEX_SECOND_PERSON);
+        String expectedMessage = String.format(
+                DeleteCommand.MESSAGE_INDEX_OUT_OF_BOUNDS,
+                model.getFilteredPersonList().size());
 
-        DeleteCommand deleteCommand = new DeleteCommand(outOfBoundIndex);
+        assertCommandFailure(deleteCommand, model, expectedMessage);
+    }
 
-        assertCommandFailure(deleteCommand, model, Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
+    @Test
+    public void execute_emptyAddressBook_throwsCommandException() {
+        Model emptyModel = new ModelManager();
+        DeleteCommand deleteCommand = new DeleteCommand(INDEX_FIRST_PERSON);
+
+        assertCommandFailure(deleteCommand, emptyModel, DeleteCommand.MESSAGE_EMPTY_PERSON_LIST);
+    }
+
+    @Test
+    public void execute_emptyFilteredList_throwsCommandException() {
+        showNoPerson(model);
+        DeleteCommand deleteCommand = new DeleteCommand(INDEX_FIRST_PERSON);
+
+        assertCommandFailure(deleteCommand, model, DeleteCommand.MESSAGE_EMPTY_PERSON_LIST);
     }
 
     @Test

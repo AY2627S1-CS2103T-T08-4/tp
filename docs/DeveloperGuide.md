@@ -482,15 +482,17 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
       Use case ends.
 
-* 3a. The given index is invalid or out of bounds.
+* 3a. The given index exceeds the size of the displayed client list.
 
-    * 3a1. Sieve shows an error message.
+    * 3a1. Sieve shows:
+      `Error: The index provided is out of bounds! Current list only contains X items.`
 
       Use case resumes at step 3.
 
-* 3b. The client list is empty.
+* 3b. The displayed client list is empty.
 
-    * 3b1. Sieve shows an error message that there is nothing to delete.
+    * 3b1. Sieve shows:
+      `Error: Cannot delete from an empty client list.`
 
       Use case ends.
 
@@ -572,20 +574,49 @@ testers are expected to do more *exploratory* testing.
 
 ### Deleting a person
 
-1. Deleting a person while all persons are being shown
+1. Deleting a client from the displayed list
 
-   1. Prerequisites: List all persons using the `list` command, with multiple persons in the list.
+    1. Prerequisites: Use the `list` command to display multiple clients.
 
-   1. Test case: `delete 1`<br>
-      Expected: The first contact is deleted from the list. The status message shows the deleted contact's details.
+    1. Test case: `delete 1`<br>
+       Expected: The first displayed client is deleted. The status message shows the deleted client's details.
 
-   1. Test case: `delete 0`<br>
-      Expected: No person is deleted. The status message shows error details.
+1. Deleting using an out-of-bounds index
 
-   1. Other incorrect delete commands to try: `delete`, `delete x`, `...` (where x is larger than the list size)<br>
-      Expected: Similar to previous.
+    1. Prerequisites: Use the `list` command and note the number of displayed clients, `N`.
 
-1. _{ more test cases … }_
+    1. Test case: Enter `delete N+1`, replacing `N+1` with an actual index greater than the displayed list size.<br>
+       Expected: No client is deleted. The status message shows:<br>
+       `Error: The index provided is out of bounds! Current list only contains N items.`
+
+1. Deleting using an index outside a filtered list
+
+    1. Prerequisites: Use `find KEYWORD` so that exactly one client is displayed.
+
+    1. Test case: `delete 2`<br>
+       Expected: No client is deleted. The status message shows:<br>
+       `Error: The index provided is out of bounds! Current list only contains 1 items.`
+
+1. Deleting from an empty displayed list
+
+    1. Prerequisites: Use `find KEYWORD`, where `KEYWORD` does not match any client.
+
+    1. Test case: `delete 1`<br>
+       Expected: No client is deleted. The status message shows:<br>
+       `Error: Cannot delete from an empty client list.`
+
+1. Deleting without specifying an index
+
+    1. Test case: `delete`<br>
+       Expected: No client is deleted. The status message shows:<br>
+       `Invalid command format!`<br>
+       `Error: Index not provided!`<br>
+       `Expected format: delete INDEX`
+
+1. Deleting using an invalid index
+
+    1. Test cases: `delete 0`, `delete -1`, and `delete x`.<br>
+       Expected: No client is deleted. The status message indicates that the command format or index is invalid and displays the usage instructions.
 
 ### Saving data
 

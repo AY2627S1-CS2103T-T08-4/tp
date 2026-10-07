@@ -139,6 +139,11 @@ Format: `delete INDEX`
 * Deletes the person at the specified `INDEX`.
 * The index refers to the index number shown in the displayed person list.
 * The index **must be a positive integer** 1, 2, 3, ...
+* If the displayed client list is empty, no client will be deleted and the following error will be shown:
+    `Error: Cannot delete from an empty client list.`
+* If `INDEX` exceeds the size of the displayed client list, no client will be deleted and the following error will be shown:
+  `Error: The index provided is out of bounds! Current list only contains X items.`
+  Here, `X` is the number of clients in the displayed list.
 
 Examples:
 * `list` followed by `delete 2` deletes the 2nd person in the address book.
