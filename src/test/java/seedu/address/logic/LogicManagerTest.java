@@ -108,10 +108,14 @@ public class LogicManagerTest {
         StorageManager storage = new StorageManager(corruptStorageBackend, userPrefsStorage);
 
         Logic logicInReadOnly = new LogicManager(model, storage);
-        String addCommand = "add n/Amirah Tan p/91234567 e/amirah@gmail.com a/Blk 123 Yishun";
         String expectedError = "Error: Local data file is corrupted. Displaying empty list.";
 
-        assertThrows(CommandException.class, expectedError, () -> logicInReadOnly.execute(addCommand));
+        assertThrows(CommandException.class, expectedError, () -> logicInReadOnly.execute(
+            "add n/Amirah Tan p/91234567 e/amirah@gmail.com a/Blk 123 Yishun"));
+        assertThrows(CommandException.class, expectedError, () -> logicInReadOnly.execute("delete 1"));
+        assertThrows(CommandException.class, expectedError, () -> logicInReadOnly.execute("edit 1 n/New Name"));
+        assertThrows(CommandException.class, expectedError, () -> logicInReadOnly.execute("clear"));
+        assertThrows(CommandException.class, expectedError, () -> logicInReadOnly.execute("tag 1 t/Math"));
     }
 
     @Test
@@ -131,9 +135,9 @@ public class LogicManagerTest {
 
         Logic logicInReadOnly = new LogicManager(model, storage);
         String listCommand = ListCommand.COMMAND_WORD;
-
         CommandResult result = logicInReadOnly.execute(listCommand);
         assertEquals(ListCommand.MESSAGE_SUCCESS, result.getFeedbackToUser());
+        assertThrows(ParseException.class, () -> logicInReadOnly.execute("   "));
     }
 
     /**
