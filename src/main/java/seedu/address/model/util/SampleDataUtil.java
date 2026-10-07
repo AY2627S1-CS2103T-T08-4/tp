@@ -32,7 +32,7 @@ public class SampleDataUtil {
             new Person(new Name("Brandon Sim"), new Phone("92345678"), new Email("brandonsim@sample.com"),
                 new Address("10 Queenstown Rd"),
                 getTagSet("Physics", "Sec4")),
-            new Person(new Name("Charlotte Oliveiro"), new Phone("98765432"), new Email("chloe.ng@sample.com"),
+            new Person(new Name("Charlotte Oliveiro"), new Phone("98765432"), new Email("charlotte@sample.com"),
                 new Address("Blk 456 Bishan St 21 #11-22"),
                 getTagSet("English", "Sec2")),
             new Person(new Name("Devi Ramasamy"), new Phone("81234567"), new Email("devi.r@sample.com"),
