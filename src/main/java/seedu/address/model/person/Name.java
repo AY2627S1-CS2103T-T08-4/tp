@@ -9,14 +9,20 @@ import static seedu.address.commons.util.AppUtil.checkArgument;
  */
 public class Name {
 
-    public static final String MESSAGE_CONSTRAINTS =
-            "Names should only contain alphanumeric characters and spaces, and should not be blank";
+    public static final int MAX_LENGTH = 50;
+    public static final String MESSAGE_CONSTRAINTS = String.format(
+            "Invalid Name! Names must start with a letter and can only contain letters, digits, spaces, "
+                    + "hyphens (-), apostrophes (') and full stops (.), up to %d characters.",
+            MAX_LENGTH);
 
     /*
-     * The first character of the name must not be a whitespace,
-     * otherwise " " (a blank string) becomes a valid input.
+     * The first character of the name must be a letter,
+     * otherwise " " (a blank string) or "-" becomes a valid input.
+     * Letters, digits, spaces, hyphens, apostrophes and full stops may follow,
+     * e.g. "Nur-Aisyah", "O'Brien" or "David Ray Jr. 2nd".
+     * '/' is excluded as it is the prefix delimiter (e.g. "a/l" would be read as an address).
      */
-    public static final String VALIDATION_REGEX = "[\\p{Alnum}][\\p{Alnum} ]*";
+    public static final String VALIDATION_REGEX = "[A-Za-z][A-Za-z0-9 '.\\-]*";
 
     public final String fullName;
 
@@ -32,10 +38,22 @@ public class Name {
     }
 
     /**
+     * Returns {@code name} trimmed, with consecutive whitespaces collapsed into a single space.
+     * The result may still be an invalid name.
+     *
+     * @param name A name as typed by the user.
+     */
+    public static String normalizeName(String name) {
+        requireNonNull(name);
+        return name.trim().replaceAll("\\s+", " ");
+    }
+
+    /**
      * Returns true if a given string is a valid name.
      */
     public static boolean isValidName(String test) {
-        return test.matches(VALIDATION_REGEX);
+        requireNonNull(test);
+        return test.matches(VALIDATION_REGEX) && test.length() <= MAX_LENGTH;
     }
 
 

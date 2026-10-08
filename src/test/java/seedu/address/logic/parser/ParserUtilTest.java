@@ -78,6 +78,26 @@ public class ParserUtilTest {
     }
 
     @Test
+    public void parseName_validValueWithInternalWhitespace_returnsCollapsedName() throws Exception {
+        Name expectedName = new Name("Liam O'Brien");
+        assertEquals(expectedName, ParserUtil.parseName("Liam   O'Brien"));
+    }
+
+    @Test
+    public void parseName_maxLengthAfterCollapsing_returnsName() throws Exception {
+        // 51 characters as typed, but 50 once the double space is collapsed
+        String typedName = "a".repeat(Name.MAX_LENGTH - 2) + "  b";
+        Name expectedName = new Name("a".repeat(Name.MAX_LENGTH - 2) + " b");
+        assertEquals(expectedName, ParserUtil.parseName(typedName));
+    }
+
+    @Test
+    public void parseName_tooLong_throwsParseException() {
+        String tooLongName = "a".repeat(Name.MAX_LENGTH + 1);
+        assertThrows(ParseException.class, Name.MESSAGE_CONSTRAINTS, () -> ParserUtil.parseName(tooLongName));
+    }
+
+    @Test
     public void parsePhone_null_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> ParserUtil.parsePhone((String) null));
     }
