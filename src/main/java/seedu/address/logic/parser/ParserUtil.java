@@ -52,17 +52,17 @@ public class ParserUtil {
 
     /**
      * Parses a {@code String phone} into a {@code Phone}.
-     * Leading and trailing whitespaces will be trimmed.
+     * All whitespace, hyphens and parentheses will be removed.
      *
      * @throws ParseException if the given {@code phone} is invalid.
      */
     public static Phone parsePhone(String phone) throws ParseException {
         requireNonNull(phone);
-        String trimmedPhone = phone.trim();
-        if (!Phone.isValidPhone(trimmedPhone)) {
+        String strippedPhone = Phone.stripPhone(phone);
+        if (!Phone.isValidPhone(strippedPhone)) {
             throw new ParseException(Phone.MESSAGE_CONSTRAINTS);
         }
-        return new Phone(trimmedPhone);
+        return new Phone(strippedPhone);
     }
 
     /**

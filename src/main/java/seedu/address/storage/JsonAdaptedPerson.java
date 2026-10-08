@@ -81,10 +81,11 @@ class JsonAdaptedPerson {
         if (phone == null) {
             throw new IllegalValueException(String.format(MISSING_FIELD_MESSAGE_FORMAT, Phone.class.getSimpleName()));
         }
-        if (!Phone.isValidPhone(phone)) {
+        String strippedPhone = Phone.stripPhone(phone);
+        if (!Phone.isValidPhone(strippedPhone)) {
             throw new IllegalValueException(Phone.MESSAGE_CONSTRAINTS);
         }
-        final Phone modelPhone = new Phone(phone);
+        final Phone modelPhone = new Phone(strippedPhone);
 
         if (email == null) {
             throw new IllegalValueException(String.format(MISSING_FIELD_MESSAGE_FORMAT, Email.class.getSimpleName()));

@@ -26,7 +26,7 @@ public class ParserUtilTest {
     private static final String INVALID_TAG = "#friend";
 
     private static final String VALID_NAME = "Rachel Walker";
-    private static final String VALID_PHONE = "123456";
+    private static final String VALID_PHONE = "12345678";
     private static final String VALID_ADDRESS = "123 Main Street #0505";
     private static final String VALID_EMAIL = "rachel@example.com";
     private static final String VALID_TAG_1 = "friend";
@@ -98,6 +98,30 @@ public class ParserUtilTest {
         String phoneWithWhitespace = WHITESPACE + VALID_PHONE + WHITESPACE;
         Phone expectedPhone = new Phone(VALID_PHONE);
         assertEquals(expectedPhone, ParserUtil.parsePhone(phoneWithWhitespace));
+    }
+
+    @Test
+    public void parsePhone_validValueWithFormatting_returnsStrippedPhone() throws Exception {
+        Phone expectedPhone = new Phone("91234567");
+        assertEquals(expectedPhone, ParserUtil.parsePhone("9123 4567"));
+        assertEquals(expectedPhone, ParserUtil.parsePhone("9123-4567"));
+        assertEquals(expectedPhone, ParserUtil.parsePhone("(9123) 4567"));
+    }
+
+    @Test
+    public void parsePhone_wrongDigitCount_throwsParseException() {
+        assertThrows(ParseException.class, () -> ParserUtil.parsePhone("9123 456")); // 7 digits
+        assertThrows(ParseException.class, () -> ParserUtil.parsePhone("9123 45678")); // 9 digits
+        assertThrows(ParseException.class, () -> ParserUtil.parsePhone("- ( )")); // empty after stripping
+    }
+
+    @Test
+    public void parsePhone_disallowedCharacters_throwsParseException() {
+        // '+' is not stripped, so a country code cannot shrink into a valid 8-digit number
+        assertThrows(ParseException.class, () -> ParserUtil.parsePhone("+65 811878"));
+        assertThrows(ParseException.class, () -> ParserUtil.parsePhone("+65 9123 4567"));
+        assertThrows(ParseException.class, () -> ParserUtil.parsePhone("9123.4567"));
+        assertThrows(ParseException.class, () -> ParserUtil.parsePhone("9123a4567"));
     }
 
     @Test

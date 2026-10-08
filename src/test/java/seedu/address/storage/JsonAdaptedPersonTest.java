@@ -62,6 +62,14 @@ public class JsonAdaptedPersonTest {
     }
 
     @Test
+    public void toModelType_formattedPhone_returnsPersonWithStrippedPhone() throws Exception {
+        // a phone hand-edited into the data file with formatting characters should still load
+        JsonAdaptedPerson person =
+                new JsonAdaptedPerson(VALID_NAME, "(9876) 5432", VALID_EMAIL, VALID_ADDRESS, VALID_TAGS);
+        assertEquals(new Phone("98765432"), person.toModelType().getPhone());
+    }
+
+    @Test
     public void toModelType_nullPhone_throwsIllegalValueException() {
         JsonAdaptedPerson person = new JsonAdaptedPerson(VALID_NAME, null, VALID_EMAIL, VALID_ADDRESS, VALID_TAGS);
         String expectedMessage = String.format(MISSING_FIELD_MESSAGE_FORMAT, Phone.class.getSimpleName());
