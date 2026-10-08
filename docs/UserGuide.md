@@ -144,6 +144,9 @@ Format: `delete INDEX`
 * If `INDEX` exceeds the size of the displayed client list, no client will be deleted and the following error will be shown:
   `Error: The index provided is out of bounds! Current list only contains X items.`
   Here, `X` is the number of clients in the displayed list.
+* If `INDEX` is not provided, the following error will be shown:
+  `Error: Index not provided!
+   Expected format: delete INDEX`
 
 Examples:
 * `list` followed by `delete 2` deletes the 2nd person in the address book.

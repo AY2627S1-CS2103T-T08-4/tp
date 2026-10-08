@@ -24,7 +24,7 @@ public class DeleteCommand extends Command {
             + "Parameters: INDEX (must be a positive integer)\n"
             + "Example: " + COMMAND_WORD + " 1";
 
-    public static final String MESSAGE_DELETE_PERSON_SUCCESS = "Deleted person: %1$s";
+    public static final String MESSAGE_DELETE_PERSON_SUCCESS = "Deleted client: %1$s";
 
     public static final String MESSAGE_EMPTY_PERSON_LIST =
             "Error: Cannot delete from an empty client list.";

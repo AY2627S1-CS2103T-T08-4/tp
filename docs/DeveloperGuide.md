@@ -595,7 +595,7 @@ testers are expected to do more *exploratory* testing.
 
     1. Test case: `delete 2`<br>
        Expected: No client is deleted. The status message shows:<br>
-       `Error: The index provided is out of bounds! Current list only contains 1 items.`
+       `Error: The index provided is out of bounds! Current list only contains 1 item.`
 
 1. Deleting from an empty displayed list
 
