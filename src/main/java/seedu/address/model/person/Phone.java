@@ -9,10 +9,13 @@ import static seedu.address.commons.util.AppUtil.checkArgument;
  */
 public class Phone {
 
-
     public static final String MESSAGE_CONSTRAINTS =
-            "Phone numbers should only contain digits, and should be at least 3 digits long";
-    public static final String VALIDATION_REGEX = "\\d{3,}";
+            "Invalid Phone Number! Enter 8 digits (e.g. 91234567).";
+    public static final String VALIDATION_REGEX = "\\d{8}";
+
+    // Formatting characters users commonly type in phone numbers, e.g. "9123 4567" or "(9123)-4567".
+    public static final String FORMATTING_CHARACTERS_REGEX = "[\\s\\-()]";
+
     public final String value;
 
     /**
@@ -24,6 +27,17 @@ public class Phone {
         requireNonNull(phone);
         checkArgument(isValidPhone(phone), MESSAGE_CONSTRAINTS);
         value = phone;
+    }
+
+    /**
+     * Returns {@code phone} with all whitespace, hyphens and parentheses removed.
+     * All other characters are kept, so the result may still be an invalid phone number.
+     *
+     * @param phone A phone number as typed by the user.
+     */
+    public static String stripPhone(String phone) {
+        requireNonNull(phone);
+        return phone.replaceAll(FORMATTING_CHARACTERS_REGEX, "");
     }
 
     /**

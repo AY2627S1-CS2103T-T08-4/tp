@@ -1,5 +1,6 @@
 package seedu.address.model.person;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.testutil.Assert.assertThrows;
@@ -27,23 +28,41 @@ public class PhoneTest {
         // invalid phone numbers
         assertFalse(Phone.isValidPhone("")); // empty string
         assertFalse(Phone.isValidPhone(" ")); // spaces only
-        assertFalse(Phone.isValidPhone("91")); // less than 3 numbers
+        assertFalse(Phone.isValidPhone("9123456")); // 7 digits
+        assertFalse(Phone.isValidPhone("912345678")); // 9 digits
         assertFalse(Phone.isValidPhone("phone")); // non-numeric
         assertFalse(Phone.isValidPhone("9011p041")); // alphabets within digits
-        assertFalse(Phone.isValidPhone("9312 1534")); // spaces within digits
+        assertFalse(Phone.isValidPhone("9312 1534")); // formatting characters are not stripped by isValidPhone
+        assertFalse(Phone.isValidPhone("+6591234567")); // country code
 
         // valid phone numbers
-        assertTrue(Phone.isValidPhone("911")); // exactly 3 numbers
-        assertTrue(Phone.isValidPhone("93121534"));
-        assertTrue(Phone.isValidPhone("124293842033123")); // long phone numbers
+        assertTrue(Phone.isValidPhone("93121534")); // exactly 8 digits
+    }
+
+    @Test
+    public void stripPhone() {
+        // null phone number
+        assertThrows(NullPointerException.class, () -> Phone.stripPhone(null));
+
+        // formatting characters removed
+        assertEquals("91234567", Phone.stripPhone("9123 4567")); // space
+        assertEquals("91234567", Phone.stripPhone("9123-4567")); // hyphen
+        assertEquals("91234567", Phone.stripPhone("(9123)-4567")); // parentheses and hyphen
+        assertEquals("91234567", Phone.stripPhone("\t91234567 ")); // leading and trailing whitespace
+        assertEquals("", Phone.stripPhone("- ( )")); // formatting characters only
+
+        // other characters kept
+        assertEquals("+65811878", Phone.stripPhone("+65 811878")); // country code
+        assertEquals("9123.4567", Phone.stripPhone("9123.4567")); // period
+        assertEquals("9123a4567", Phone.stripPhone("9123a4567")); // letter
     }
 
     @Test
     public void equals() {
-        Phone phone = new Phone("999");
+        Phone phone = new Phone("99999999");
 
         // same values -> returns true
-        assertTrue(phone.equals(new Phone("999")));
+        assertTrue(phone.equals(new Phone("99999999")));
 
         // same object -> returns true
         assertTrue(phone.equals(phone));
@@ -55,6 +74,6 @@ public class PhoneTest {
         assertFalse(phone.equals(5.0f));
 
         // different values -> returns false
-        assertFalse(phone.equals(new Phone("995")));
+        assertFalse(phone.equals(new Phone("99999995")));
     }
 }

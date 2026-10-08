@@ -26,7 +26,7 @@ public class ParserUtilTest {
     private static final String INVALID_TAG = "#friend";
 
     private static final String VALID_NAME = "Rachel Walker";
-    private static final String VALID_PHONE = "123456";
+    private static final String VALID_PHONE = "12345678";
     private static final String VALID_ADDRESS = "123 Main Street #0505";
     private static final String VALID_EMAIL = "rachel@example.com";
     private static final String VALID_TAG_1 = "friend";
@@ -78,6 +78,26 @@ public class ParserUtilTest {
     }
 
     @Test
+    public void parseName_validValueWithInternalWhitespace_returnsCollapsedName() throws Exception {
+        Name expectedName = new Name("Liam O'Brien");
+        assertEquals(expectedName, ParserUtil.parseName("Liam   O'Brien"));
+    }
+
+    @Test
+    public void parseName_maxLengthAfterCollapsing_returnsName() throws Exception {
+        // 51 characters as typed, but 50 once the double space is collapsed
+        String typedName = "a".repeat(Name.MAX_LENGTH - 2) + "  b";
+        Name expectedName = new Name("a".repeat(Name.MAX_LENGTH - 2) + " b");
+        assertEquals(expectedName, ParserUtil.parseName(typedName));
+    }
+
+    @Test
+    public void parseName_tooLong_throwsParseException() {
+        String tooLongName = "a".repeat(Name.MAX_LENGTH + 1);
+        assertThrows(ParseException.class, Name.MESSAGE_CONSTRAINTS, () -> ParserUtil.parseName(tooLongName));
+    }
+
+    @Test
     public void parsePhone_null_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> ParserUtil.parsePhone((String) null));
     }
@@ -101,6 +121,30 @@ public class ParserUtilTest {
     }
 
     @Test
+    public void parsePhone_validValueWithFormatting_returnsStrippedPhone() throws Exception {
+        Phone expectedPhone = new Phone("91234567");
+        assertEquals(expectedPhone, ParserUtil.parsePhone("9123 4567"));
+        assertEquals(expectedPhone, ParserUtil.parsePhone("9123-4567"));
+        assertEquals(expectedPhone, ParserUtil.parsePhone("(9123) 4567"));
+    }
+
+    @Test
+    public void parsePhone_wrongDigitCount_throwsParseException() {
+        assertThrows(ParseException.class, () -> ParserUtil.parsePhone("9123 456")); // 7 digits
+        assertThrows(ParseException.class, () -> ParserUtil.parsePhone("9123 45678")); // 9 digits
+        assertThrows(ParseException.class, () -> ParserUtil.parsePhone("- ( )")); // empty after stripping
+    }
+
+    @Test
+    public void parsePhone_disallowedCharacters_throwsParseException() {
+        // '+' is not stripped, so a country code cannot shrink into a valid 8-digit number
+        assertThrows(ParseException.class, () -> ParserUtil.parsePhone("+65 811878"));
+        assertThrows(ParseException.class, () -> ParserUtil.parsePhone("+65 9123 4567"));
+        assertThrows(ParseException.class, () -> ParserUtil.parsePhone("9123.4567"));
+        assertThrows(ParseException.class, () -> ParserUtil.parsePhone("9123a4567"));
+    }
+
+    @Test
     public void parseAddress_null_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> ParserUtil.parseAddress((String) null));
     }
@@ -121,6 +165,26 @@ public class ParserUtilTest {
         String addressWithWhitespace = WHITESPACE + VALID_ADDRESS + WHITESPACE;
         Address expectedAddress = new Address(VALID_ADDRESS);
         assertEquals(expectedAddress, ParserUtil.parseAddress(addressWithWhitespace));
+    }
+
+    @Test
+    public void parseAddress_validValueWithInternalWhitespace_returnsCollapsedAddress() throws Exception {
+        Address expectedAddress = new Address("Blk 123 Yishun Ave 5");
+        assertEquals(expectedAddress, ParserUtil.parseAddress("Blk 123   Yishun\tAve  5"));
+    }
+
+    @Test
+    public void parseAddress_maxLengthAfterCollapsing_returnsAddress() throws Exception {
+        // 151 characters as typed, but 150 once the double space is collapsed
+        String typedAddress = "a".repeat(Address.MAX_LENGTH - 2) + "  b";
+        Address expectedAddress = new Address("a".repeat(Address.MAX_LENGTH - 2) + " b");
+        assertEquals(expectedAddress, ParserUtil.parseAddress(typedAddress));
+    }
+
+    @Test
+    public void parseAddress_tooLong_throwsParseException() {
+        String tooLongAddress = "a".repeat(Address.MAX_LENGTH + 1);
+        assertThrows(ParseException.class, Address.MESSAGE_CONSTRAINTS, () -> ParserUtil.parseAddress(tooLongAddress));
     }
 
     @Test
