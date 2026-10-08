@@ -148,6 +148,26 @@ public class ParserUtilTest {
     }
 
     @Test
+    public void parseAddress_validValueWithInternalWhitespace_returnsCollapsedAddress() throws Exception {
+        Address expectedAddress = new Address("Blk 123 Yishun Ave 5");
+        assertEquals(expectedAddress, ParserUtil.parseAddress("Blk 123   Yishun\tAve  5"));
+    }
+
+    @Test
+    public void parseAddress_maxLengthAfterCollapsing_returnsAddress() throws Exception {
+        // 151 characters as typed, but 150 once the double space is collapsed
+        String typedAddress = "a".repeat(Address.MAX_LENGTH - 2) + "  b";
+        Address expectedAddress = new Address("a".repeat(Address.MAX_LENGTH - 2) + " b");
+        assertEquals(expectedAddress, ParserUtil.parseAddress(typedAddress));
+    }
+
+    @Test
+    public void parseAddress_tooLong_throwsParseException() {
+        String tooLongAddress = "a".repeat(Address.MAX_LENGTH + 1);
+        assertThrows(ParseException.class, Address.MESSAGE_CONSTRAINTS, () -> ParserUtil.parseAddress(tooLongAddress));
+    }
+
+    @Test
     public void parseEmail_null_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> ParserUtil.parseEmail((String) null));
     }

@@ -9,7 +9,10 @@ import static seedu.address.commons.util.AppUtil.checkArgument;
  */
 public class Address {
 
-    public static final String MESSAGE_CONSTRAINTS = "Addresses can take any values, and should not be blank";
+    public static final int MAX_LENGTH = 150;
+    public static final String MESSAGE_CONSTRAINTS = String.format(
+            "Invalid Address! Address field cannot be empty or more than %d characters.",
+            MAX_LENGTH);
 
     /*
      * The first character of the address must not be a whitespace,
@@ -31,10 +34,22 @@ public class Address {
     }
 
     /**
+     * Returns {@code address} trimmed, with consecutive whitespaces collapsed into a single space.
+     * The result may still be an invalid address.
+     *
+     * @param address An address as typed by the user.
+     */
+    public static String normalizeAddress(String address) {
+        requireNonNull(address);
+        return address.trim().replaceAll("\\s+", " ");
+    }
+
+    /**
      * Returns true if a given string is a valid address.
      */
     public static boolean isValidAddress(String test) {
-        return test.matches(VALIDATION_REGEX);
+        requireNonNull(test);
+        return test.matches(VALIDATION_REGEX) && test.length() <= MAX_LENGTH;
     }
 
     @Override

@@ -100,6 +100,23 @@ public class JsonAdaptedPersonTest {
     }
 
     @Test
+    public void toModelType_addressWithExtraWhitespace_returnsPersonWithCollapsedAddress() throws Exception {
+        // an address hand-edited into the data file with extra whitespace should still load
+        JsonAdaptedPerson person =
+                new JsonAdaptedPerson(VALID_NAME, VALID_PHONE, VALID_EMAIL, " Blk 30  Geylang\nStreet 29 ", VALID_TAGS);
+        assertEquals(new Address("Blk 30 Geylang Street 29"), person.toModelType().getAddress());
+    }
+
+    @Test
+    public void toModelType_tooLongAddress_throwsIllegalValueException() {
+        String tooLongAddress = "a".repeat(Address.MAX_LENGTH + 1);
+        JsonAdaptedPerson person =
+                new JsonAdaptedPerson(VALID_NAME, VALID_PHONE, VALID_EMAIL, tooLongAddress, VALID_TAGS);
+        String expectedMessage = Address.MESSAGE_CONSTRAINTS;
+        assertThrows(IllegalValueException.class, expectedMessage, person::toModelType);
+    }
+
+    @Test
     public void toModelType_nullAddress_throwsIllegalValueException() {
         JsonAdaptedPerson person = new JsonAdaptedPerson(VALID_NAME, VALID_PHONE, VALID_EMAIL, null, VALID_TAGS);
         String expectedMessage = String.format(MISSING_FIELD_MESSAGE_FORMAT, Address.class.getSimpleName());
