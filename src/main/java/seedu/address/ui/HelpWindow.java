@@ -16,7 +16,20 @@ import seedu.address.commons.core.LogsCenter;
 public class HelpWindow extends UiPart<Stage> {
 
     public static final String USERGUIDE_URL = "https://se-education.org/addressbook-level3/UserGuide.html";
-    public static final String HELP_MESSAGE = "Refer to the user guide: " + USERGUIDE_URL;
+    public static final String HELP_MESSAGE = """
+        Available commands:
+
+        add n/NAME p/PHONE e/EMAIL a/ADDRESS [t/TAG]...
+        clear
+        delete INDEX
+        edit INDEX [n/NAME] [p/PHONE] [e/EMAIL] [a/ADDRESS] [t/TAG]...
+        exit
+        find KEYWORD [MORE_KEYWORDS]...
+        help
+        list
+        tag INDEX t/TAG [t/MORE_TAGS]...
+        """;
+    public static final String HELP_URL_MESSAGE = "Refer to the user guide: " + USERGUIDE_URL;
 
     private static final Logger logger = LogsCenter.getLogger(HelpWindow.class);
     private static final String FXML = "HelpWindow.fxml";
@@ -27,6 +40,9 @@ public class HelpWindow extends UiPart<Stage> {
     @FXML
     private Label helpMessage;
 
+    @FXML
+    private Label helpUrl;
+
     /**
      * Creates a new HelpWindow.
      *
@@ -35,6 +51,7 @@ public class HelpWindow extends UiPart<Stage> {
     public HelpWindow(Stage root) {
         super(FXML, root);
         helpMessage.setText(HELP_MESSAGE);
+        helpUrl.setText(HELP_URL_MESSAGE);
     }
 
     /**
@@ -86,6 +103,7 @@ public class HelpWindow extends UiPart<Stage> {
      * Focuses on the help window.
      */
     public void focus() {
+        getRoot().setIconified(false);
         getRoot().requestFocus();
     }
 
