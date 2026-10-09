@@ -1,0 +1,39 @@
+{
+  "persons" : [ {
+    "name" : "Amirah Tan",
+    "phone" : "91234567",
+    "email" : "amirahtan@sample.com",
+    "address" : "Blk 123 Yishun Ave 5 #04-12",
+    "tags" : [ "Urgent", "Sec4", "Free donid care", "math", "Math" ]
+  }, {
+    "name" : "Brandon Sim",
+    "phone" : "92345678",
+    "email" : "brandonsim@sample.com",
+    "address" : "10 Queenstown Rd",
+    "tags" : [ "High rate", "Sec4", "sec3", "Care the most", "Paid", "Physics" ]
+  }, {
+    "name" : "Charlotte Oliveiro",
+    "phone" : "98765432",
+    "email" : "charlotte@sample.com",
+    "address" : "Blk 456 Bishan St 21 #11-22",
+    "tags" : [ "English", "Sec2", "weeehoo" ]
+  }, {
+    "name" : "Devi Ramasamy",
+    "phone" : "81234567",
+    "email" : "devi.r@sample.com",
+    "address" : "Blk 789 Pasir Ris Drive 3 #02-05",
+    "tags" : [ "Chemistry", "JC1", "Paid" ]
+  }, {
+    "name" : "Evelyn Rodrigues",
+    "phone" : "87654321",
+    "email" : "evelyn.r@sample.com",
+    "address" : "Blk 321 Ang Mo Kio Ave 4 #08-99",
+    "tags" : [ "Weekday", "JC2", "Biology" ]
+  }, {
+    "name" : "Farhan Ali",
+    "phone" : "91122334",
+    "email" : "farhanali@sample.com",
+    "address" : "Blk 45 Aljunied Street 85 #11-31",
+    "tags" : [ "Sec1", "Math" ]
+  } ]
+}
