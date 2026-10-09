@@ -30,7 +30,7 @@ public class TagCommand extends Command {
     public static final String MESSAGE_TAG_PERSON_SUCCESS = "Tagged %1$s with: %2$s.";
 
     public static final String MESSAGE_INDEX_OUT_OF_BOUNDS =
-            "Error: The index provided is out of bounds! Current list only contains %1$d items.";
+            "Error: The index provided is out of bounds! Current list only contains %1$d item(s).";
 
     private final Index targetIndex;
     private final List<Tag> tagsToAdd;
