@@ -13,6 +13,7 @@ import static seedu.address.testutil.TypicalPersons.getTypicalAddressBook;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -50,18 +51,20 @@ public class TagCommandTest {
     }
 
     @Test
-    public void execute_existingTag_successWithoutDuplicate() {
+    public void execute_existingTagWithDifferentCase_successWithoutDuplicate() {
         Person personToTag = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
         Tag existingTag = personToTag.getTags().iterator().next();
-        TagCommand tagCommand = new TagCommand(INDEX_FIRST_PERSON, List.of(existingTag));
+        Tag differentlyCasedTag = new Tag(existingTag.tagName.toUpperCase(Locale.ROOT));
+        TagCommand tagCommand = new TagCommand(INDEX_FIRST_PERSON, List.of(differentlyCasedTag));
 
         String expectedMessage = String.format(TagCommand.MESSAGE_TAG_PERSON_SUCCESS,
-                personToTag.getName(), existingTag.tagName);
+                personToTag.getName(), differentlyCasedTag.tagName);
         ModelManager expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
 
         assertCommandSuccess(tagCommand, model, expectedMessage, expectedModel);
-        assertEquals(personToTag.getTags(), model.getFilteredPersonList()
-                .get(INDEX_FIRST_PERSON.getZeroBased()).getTags());
+        Person updatedPerson = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
+        assertEquals(personToTag.getTags(), updatedPerson.getTags());
+        assertEquals(personToTag.getTags().size(), updatedPerson.getTags().size());
     }
 
     @Test

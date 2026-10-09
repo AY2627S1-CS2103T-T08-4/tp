@@ -1,5 +1,6 @@
 package seedu.address.model.tag;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.testutil.Assert.assertThrows;
@@ -34,6 +35,15 @@ public class TagTest {
         assertTrue(Tag.isValidTagName("physics"));
         assertTrue(Tag.isValidTagName("Secondary 4"));
         assertTrue(Tag.isValidTagName("a".repeat(Tag.MAX_LENGTH)));
+    }
+
+    @Test
+    public void equals_tagsDifferOnlyInCase_returnsTrue() {
+        Tag lowercaseTag = new Tag("physics");
+        Tag uppercaseTag = new Tag("PHYSICS");
+
+        assertEquals(lowercaseTag, uppercaseTag);
+        assertEquals(lowercaseTag.hashCode(), uppercaseTag.hashCode());
     }
 
 }
