@@ -130,6 +130,22 @@ Examples:
 * `find alex david` returns `Alex Yeoh`, `David Li`<br>
   ![result for 'find alex david'](images/findAlexDavidResult.png)
 
+### Tagging a person: `tag`
+
+Adds one or more tags to an existing person.
+
+Format: `tag INDEX t/TAG [t/MORE_TAGS]...`
+
+* The index refers to the index number shown in the displayed person list and must be a positive integer.
+* Tags must be 1-20 characters long and contain only letters, numbers, and spaces.
+* New tags are added alongside the person's existing tags.
+* Adding a tag the person already has does not create a duplicate.
+* Tag filtering and searching are not supported yet.
+
+Examples:
+* `tag 1 t/physics t/sec4`
+* `tag 2 t/thursday`
+
 ### Deleting a person: `delete`
 
 Deletes the specified person from the address book.
@@ -209,4 +225,5 @@ Action     | Format, Examples
 **Edit**   | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]... `<br> e.g.,`edit 2 n/James Lee e/jameslee@example.com`
 **Find**   | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
 **List**   | `list`
+**Tag**    | `tag INDEX t/TAG [t/MORE_TAGS]...`<br> e.g., `tag 1 t/physics t/sec4`
 **Help**   | `help`
