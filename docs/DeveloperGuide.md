@@ -485,7 +485,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 * 3a. The given index exceeds the size of the displayed client list.
 
     * 3a1. Sieve shows:
-      `Error: The index provided is out of bounds! Current list only contains X items.`
+      `Error: The index provided is out of bounds! Current list only contains X clients.`
 
       Use case resumes at step 3.
 
@@ -587,7 +587,7 @@ testers are expected to do more *exploratory* testing.
 
     1. Test case: Enter `delete N+1`, replacing `N+1` with an actual index greater than the displayed list size.<br>
        Expected: No client is deleted. The status message shows:<br>
-       `Error: The index provided is out of bounds! Current list only contains N items.`
+       `Error: The index provided is out of bounds! Current list only contains N clients.`
 
 1. Deleting using an index outside a filtered list
 
@@ -595,7 +595,7 @@ testers are expected to do more *exploratory* testing.
 
     1. Test case: `delete 2`<br>
        Expected: No client is deleted. The status message shows:<br>
-       `Error: The index provided is out of bounds! Current list only contains 1 item.`
+       `Error: The index provided is out of bounds! Current list only contains 1 client.`
 
 1. Deleting from an empty displayed list
 

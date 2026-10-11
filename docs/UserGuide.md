@@ -158,8 +158,8 @@ Format: `delete INDEX`
 * If the displayed client list is empty, no client will be deleted and the following error will be shown:
     `Error: Cannot delete from an empty client list.`
 * If `INDEX` exceeds the size of the displayed client list, no client will be deleted and the following error will be shown:
-  `Error: The index provided is out of bounds! Current list only contains X items.`
-  Here, `X` is the number of clients in the displayed list.
+  `Error: The index provided is out of bounds! Current list only contains X clients.`
+  Here, `X` is the number of clients in the displayed list (`1 client` when only one client is displayed).
 * If `INDEX` is not provided, the following error will be shown:
   `Error: Index not provided!
    Expected format: delete INDEX`

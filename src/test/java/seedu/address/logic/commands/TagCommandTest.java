@@ -19,6 +19,7 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 import seedu.address.commons.core.index.Index;
+import seedu.address.logic.Messages;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
@@ -89,7 +90,7 @@ public class TagCommandTest {
         TagCommand tagCommand = new TagCommand(outOfBoundIndex, List.of(PHYSICS));
 
         assertCommandFailure(tagCommand, model,
-                String.format(TagCommand.MESSAGE_INDEX_OUT_OF_BOUNDS, listSize));
+                Messages.getIndexOutOfBoundsMessage(listSize));
     }
 
     @Test
@@ -98,7 +99,7 @@ public class TagCommandTest {
         TagCommand tagCommand = new TagCommand(INDEX_FIRST_PERSON, List.of(PHYSICS));
 
         assertCommandFailure(tagCommand, emptyModel,
-                String.format(TagCommand.MESSAGE_INDEX_OUT_OF_BOUNDS, 0));
+                "Error: The index provided is out of bounds! Current list only contains 0 clients.");
     }
 
     @Test

@@ -29,9 +29,6 @@ public class DeleteCommand extends Command {
     public static final String MESSAGE_EMPTY_PERSON_LIST =
             "Error: Cannot delete from an empty client list.";
 
-    public static final String MESSAGE_INDEX_OUT_OF_BOUNDS =
-            "Error: The index provided is out of bounds! Current list only contains %1$d items.";
-
     public static final String MESSAGE_INDEX_NOT_PRESENT = "Error: Index not provided!\nExpected format: delete INDEX";
 
     private final Index targetIndex;
@@ -50,7 +47,7 @@ public class DeleteCommand extends Command {
         }
 
         if (targetIndex.getZeroBased() >= lastShownList.size()) {
-            throw new CommandException(String.format(MESSAGE_INDEX_OUT_OF_BOUNDS, lastShownList.size()));
+            throw new CommandException(Messages.getIndexOutOfBoundsMessage(lastShownList.size()));
         }
 
         Person personToDelete = lastShownList.get(targetIndex.getZeroBased());
