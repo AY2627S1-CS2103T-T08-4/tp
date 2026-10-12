@@ -47,7 +47,7 @@ public class DeleteCommandTest {
         Index outOfBoundIndex = Index.fromOneBased(listSize + 1);
         DeleteCommand deleteCommand = new DeleteCommand(outOfBoundIndex);
 
-        String expectedMessage = String.format(DeleteCommand.MESSAGE_INDEX_OUT_OF_BOUNDS, listSize);
+        String expectedMessage = Messages.getIndexOutOfBoundsMessage(listSize);
 
         assertCommandFailure(deleteCommand, model, expectedMessage);
     }
@@ -77,10 +77,9 @@ public class DeleteCommandTest {
         // ensures that outOfBoundIndex is still in bounds of address book list
         assertTrue(outOfBoundIndex.getZeroBased() < model.getAddressBook().getPersonList().size());
 
-        DeleteCommand deleteCommand = new DeleteCommand(INDEX_SECOND_PERSON);
-        String expectedMessage = String.format(
-                DeleteCommand.MESSAGE_INDEX_OUT_OF_BOUNDS,
-                model.getFilteredPersonList().size());
+        DeleteCommand deleteCommand = new DeleteCommand(outOfBoundIndex);
+        // the filtered list has exactly one client, so the message must use the singular
+        String expectedMessage = "Error: The index provided is out of bounds! Current list only contains 1 client.";
 
         assertCommandFailure(deleteCommand, model, expectedMessage);
     }

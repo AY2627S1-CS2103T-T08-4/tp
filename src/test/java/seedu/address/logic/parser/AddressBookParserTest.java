@@ -42,6 +42,17 @@ public class AddressBookParserTest {
     }
 
     @Test
+    public void parseCommand_usageExamples_parseSuccessfully() throws Exception {
+        // the example in each usage message is shown to users, so it must be a valid command
+        String examplePrefix = "Example: ";
+        for (String usage : List.of(AddCommand.MESSAGE_USAGE, EditCommand.MESSAGE_USAGE,
+                DeleteCommand.MESSAGE_USAGE, FindCommand.MESSAGE_USAGE)) {
+            String example = usage.substring(usage.indexOf(examplePrefix) + examplePrefix.length());
+            parser.parseCommand(example);
+        }
+    }
+
+    @Test
     public void parseCommand_clear() throws Exception {
         assertTrue(parser.parseCommand(ClearCommand.COMMAND_WORD) instanceof ClearCommand);
         assertTrue(parser.parseCommand(ClearCommand.COMMAND_WORD + " 3") instanceof ClearCommand);

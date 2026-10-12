@@ -42,7 +42,29 @@ public class AddCommandIntegrationTest {
     public void execute_duplicatePerson_throwsCommandException() {
         Person personInList = model.getAddressBook().getPersonList().get(0);
         assertCommandFailure(new AddCommand(personInList), model,
-                AddCommand.MESSAGE_DUPLICATE_PERSON);
+                Messages.getClientAlreadyExistsMessage(personInList));
+    }
+
+    @Test
+    public void execute_sameNameDifferentCaseAndPhone_throwsCommandException() {
+        Person personInList = model.getAddressBook().getPersonList().get(0);
+        Person samePersonDifferentPhone = new PersonBuilder(personInList)
+                .withName(personInList.getName().fullName.toUpperCase()).withPhone("80000000").build();
+        assertCommandFailure(new AddCommand(samePersonDifferentPhone), model,
+                Messages.getNameAlreadyUsedMessage(personInList));
+    }
+
+    @Test
+    public void execute_samePhoneDifferentName_success() {
+        // siblings may share a parent's phone number, so this is not a duplicate
+        Person personInList = model.getAddressBook().getPersonList().get(0);
+        Person sibling = new PersonBuilder(personInList).withName("Sibling Of First").build();
+
+        Model expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
+        expectedModel.addPerson(sibling);
+
+        assertCommandSuccess(new AddCommand(sibling), model,
+                String.format(AddCommand.MESSAGE_SUCCESS, Messages.format(sibling)), expectedModel);
     }
 
 }

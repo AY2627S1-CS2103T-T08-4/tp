@@ -357,9 +357,11 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
       Use case resumes at step 1.
 
-* 2b. A client with the same name and phone number already exists.
+* 2b. A client with the same name (ignoring case) already exists.
 
-    * 2b1. Sieve shows a duplicate error message.
+    * 2b1. If the phone number also matches, Sieve tells the tutor the client already exists.
+      Otherwise, Sieve asks the tutor to check the spelling of the name, and suggests adding an identifier
+      to tell the clients apart (e.g. `John Tan (NHHS)`). No client is added.
 
       Use case resumes at step 1.
 
@@ -414,9 +416,10 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
       Use case resumes at step 3.
 
-* 4b. The edit would make the client a duplicate of another client (same name and phone number).
+* 4b. The edit would give the client the same name (ignoring case) as another client.
 
-    * 4b1. Sieve shows a duplicate error message and leaves the client unchanged.
+    * 4b1. Sieve shows the same duplicate messages as in UC1, extension 2b,
+      and leaves the client unchanged.
 
       Use case resumes at step 3.
 
@@ -485,7 +488,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 * 3a. The given index exceeds the size of the displayed client list.
 
     * 3a1. Sieve shows:
-      `Error: The index provided is out of bounds! Current list only contains X items.`
+      `Error: The index provided is out of bounds! Current list only contains X clients.`
 
       Use case resumes at step 3.
 
@@ -587,7 +590,7 @@ testers are expected to do more *exploratory* testing.
 
     1. Test case: Enter `delete N+1`, replacing `N+1` with an actual index greater than the displayed list size.<br>
        Expected: No client is deleted. The status message shows:<br>
-       `Error: The index provided is out of bounds! Current list only contains N items.`
+       `Error: The index provided is out of bounds! Current list only contains N clients.`
 
 1. Deleting using an index outside a filtered list
 
@@ -595,7 +598,7 @@ testers are expected to do more *exploratory* testing.
 
     1. Test case: `delete 2`<br>
        Expected: No client is deleted. The status message shows:<br>
-       `Error: The index provided is out of bounds! Current list only contains 1 item.`
+       `Error: The index provided is out of bounds! Current list only contains 1 client.`
 
 1. Deleting from an empty displayed list
 

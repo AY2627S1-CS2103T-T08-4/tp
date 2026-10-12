@@ -31,7 +31,7 @@ Sieve is a **desktop app that helps self-employed private tuition teachers keep 
 
    * `list` : Lists all contacts.
 
-   * `add n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01` : Adds a contact named `John Doe` to the Address Book.
+   * `add n/Jason Quek p/91234567 e/jasonquek@gmail.com a/Blk 123 Yishun Ave 5 #04-12` : Adds a client named `Jason Quek` to Sieve.
 
    * `delete 3` : Deletes the 3rd contact shown in the current list.
 
@@ -84,12 +84,22 @@ Format: `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]... `
 
 <box type="tip" seamless>
 
-**Tip:** A person can have any number of tags, including zero.
+**Tip:** A client can have any number of tags, including zero.
+</box>
+
+<box type="info" seamless>
+
+**Duplicate clients:**
+* Sieve does not allow two clients with the same name. Names are compared ignoring case, so `John Tan` and `john tan` count as the same name.
+* If the phone number also matches, Sieve tells you that the client already exists.
+* If the phone number is different, Sieve asks you to check the name and phone number. If it really is a different client, add a detail to the name to tell them apart, e.g. `John Tan (NHHS)`.
+* Different clients may share a phone number (e.g. siblings using a parent's number), as long as their names are different.
+* The same rules apply when you change a client's name with `edit`.
 </box>
 
 Examples:
-* `add n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01`
-* `add n/Betsy Crowe t/friend e/betsycrowe@example.com a/Newgate Prison p/1234567 t/criminal`
+* `add n/Jason Quek p/91234567 e/jasonquek@gmail.com a/Blk 123 Yishun Ave 5 #04-12`
+* `add n/Matthias Tan t/Physics e/matthias.tan@gmail.com a/10 Queenstown Rd p/8123 4567 t/Sec4` adds a client with two tags. Fields can be given in any order, and spaces in the phone number are ignored.
 
 ### Listing all persons: `list`
 
@@ -158,8 +168,8 @@ Format: `delete INDEX`
 * If the displayed client list is empty, no client will be deleted and the following error will be shown:
     `Error: Cannot delete from an empty client list.`
 * If `INDEX` exceeds the size of the displayed client list, no client will be deleted and the following error will be shown:
-  `Error: The index provided is out of bounds! Current list only contains X items.`
-  Here, `X` is the number of clients in the displayed list.
+  `Error: The index provided is out of bounds! Current list only contains X clients.`
+  Here, `X` is the number of clients in the displayed list (`1 client` when only one client is displayed).
 * If `INDEX` is not provided, the following error will be shown:
   `Error: Index not provided!
    Expected format: delete INDEX`
@@ -186,7 +196,7 @@ AddressBook automatically saves data after every command. You do not need to sav
 
 ### Editing the data file
 
-AddressBook data is saved automatically as a JSON file `[JAR file location]/data/addressbook.json`. Advanced users are welcome to update data directly by editing that data file.
+Sieve data is saved automatically as a JSON file `[JAR file location]/data/sieve.json`. Advanced users are welcome to update data directly by editing that data file.
 
 <box type="warning" seamless>
 
@@ -219,7 +229,7 @@ _Details coming soon ..._
 
 Action     | Format, Examples
 -----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------
-**Add**    | `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]... ` <br> e.g., `add n/James Ho p/22224444 e/jamesho@example.com a/123, Clementi Rd, 1234665 t/friend t/colleague`
+**Add**    | `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]... ` <br> e.g., `add n/Immanuel Lim p/98765432 e/immanuel.lim@gmail.com a/Blk 456 Bishan St 21 #11-22 t/Chemistry t/JC1`
 **Clear**  | `clear`
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
 **Edit**   | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]... `<br> e.g.,`edit 2 n/James Lee e/jameslee@example.com`

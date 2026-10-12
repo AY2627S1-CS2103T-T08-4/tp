@@ -36,6 +36,7 @@ public class NameTest {
         assertFalse(Name.isValidName("'Alex")); // starts with an apostrophe
         assertFalse(Name.isValidName(" Alex")); // starts with a space
         assertFalse(Name.isValidName("Siti a/l Rahman")); // '/' is the prefix delimiter
+        assertFalse(Name.isValidName("(NHHS) John Tan")); // starts with a parenthesis
         assertFalse(Name.isValidName("Rajesh s\\o Kumar")); // backslash
         assertFalse(Name.isValidName("a".repeat(Name.MAX_LENGTH + 1))); // one character over the limit
 
@@ -49,6 +50,7 @@ public class NameTest {
         assertTrue(Name.isValidName("Nur-Aisyah Tan")); // hyphen
         assertTrue(Name.isValidName("David Ray Jr.")); // full stop
         assertTrue(Name.isValidName("A. Kumar")); // initial with full stop
+        assertTrue(Name.isValidName("John Tan (NHHS)")); // identifier in parentheses
         assertTrue(Name.isValidName("a".repeat(Name.MAX_LENGTH))); // exactly at the limit
     }
 
@@ -64,6 +66,23 @@ public class NameTest {
 
         // already normalized -> unchanged
         assertEquals("Nur-Aisyah Tan", Name.normalizeName("Nur-Aisyah Tan"));
+    }
+
+    @Test
+    public void isSameName() {
+        Name name = new Name("John Tan");
+
+        // same name, ignoring case -> returns true
+        assertTrue(name.isSameName(new Name("John Tan")));
+        assertTrue(name.isSameName(new Name("john tan")));
+        assertTrue(name.isSameName(new Name("JOHN TAN")));
+
+        // null -> returns false
+        assertFalse(name.isSameName(null));
+
+        // different name -> returns false
+        assertFalse(name.isSameName(new Name("John Tan (NHHS)")));
+        assertFalse(name.isSameName(new Name("Jon Tan")));
     }
 
     @Test
