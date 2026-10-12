@@ -24,6 +24,10 @@ public class FindCommand extends Command {
             "Search keywords can only contain letters, digits, hyphens (-), apostrophes (') and full stops (.), "
                     + "and must include at least one letter or digit.";
 
+    public static final String MESSAGE_NO_CLIENTS_FOUND = "0 clients found matching your search term(s). "
+            + "Keywords must match a whole part of a name (e.g. Brien, not Bri). "
+            + "Check the spelling, or use list to see all clients.";
+
     private final NameContainsKeywordsPredicate predicate;
 
     public FindCommand(NameContainsKeywordsPredicate predicate) {
@@ -34,8 +38,11 @@ public class FindCommand extends Command {
     public CommandResult execute(Model model) {
         requireNonNull(model);
         model.updateFilteredPersonList(predicate);
-        return new CommandResult(
-                String.format(Messages.MESSAGE_PERSONS_LISTED_OVERVIEW, model.getFilteredPersonList().size()));
+        int matchCount = model.getFilteredPersonList().size();
+        if (matchCount == 0) {
+            return new CommandResult(MESSAGE_NO_CLIENTS_FOUND);
+        }
+        return new CommandResult(String.format(Messages.MESSAGE_PERSONS_LISTED_OVERVIEW, matchCount));
     }
 
     @Override
