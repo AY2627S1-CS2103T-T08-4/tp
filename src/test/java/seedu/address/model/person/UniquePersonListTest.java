@@ -46,6 +46,13 @@ public class UniquePersonListTest {
     }
 
     @Test
+    public void contains_personWithSameNameDifferentCaseInList_returnsTrue() {
+        uniquePersonList.add(ALICE);
+        Person upperCaseAlice = new PersonBuilder(ALICE).withName(ALICE.getName().fullName.toUpperCase()).build();
+        assertTrue(uniquePersonList.contains(upperCaseAlice));
+    }
+
+    @Test
     public void add_nullPerson_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> uniquePersonList.add(null));
     }

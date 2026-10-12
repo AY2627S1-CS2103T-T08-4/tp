@@ -12,17 +12,17 @@ public class Name {
     public static final int MAX_LENGTH = 50;
     public static final String MESSAGE_CONSTRAINTS = String.format(
             "Invalid Name! Names must start with a letter and can only contain letters, digits, spaces, "
-                    + "hyphens (-), apostrophes (') and full stops (.), up to %d characters.",
+                    + "hyphens <->, apostrophes <'>, full stops <.> and parentheses <()>, up to %d characters.",
             MAX_LENGTH);
 
     /*
      * The first character of the name must be a letter,
      * otherwise " " (a blank string) or "-" becomes a valid input.
-     * Letters, digits, spaces, hyphens, apostrophes and full stops may follow,
-     * e.g. "Nur-Aisyah", "O'Brien" or "David Ray Jr. 2nd".
+     * Letters, digits, spaces, hyphens, apostrophes, full stops and parentheses may follow,
+     * e.g. "Nur-Aisyah", "O'Brien", "David Ray Jr. 2nd" or "John Tan (NHHS)".
      * '/' is excluded as it is the prefix delimiter (e.g. "a/l" would be read as an address).
      */
-    public static final String VALIDATION_REGEX = "[A-Za-z][A-Za-z0-9 '.\\-]*";
+    public static final String VALIDATION_REGEX = "[A-Za-z][A-Za-z0-9 '.()\\-]*";
 
     public final String fullName;
 
@@ -56,6 +56,12 @@ public class Name {
         return test.matches(VALIDATION_REGEX) && test.length() <= MAX_LENGTH;
     }
 
+    /**
+     * Returns true if {@code other} is the same name as this name, ignoring case.
+     */
+    public boolean isSameName(Name other) {
+        return other != null && fullName.equalsIgnoreCase(other.fullName);
+    }
 
     @Override
     public String toString() {

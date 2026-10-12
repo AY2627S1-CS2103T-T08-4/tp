@@ -50,7 +50,6 @@ public class EditCommand extends Command {
 
     public static final String MESSAGE_EDIT_PERSON_SUCCESS = "Edited client: %1$s";
     public static final String MESSAGE_NOT_EDITED = "At least one field to edit must be provided.";
-    public static final String MESSAGE_DUPLICATE_PERSON = "This client already exists in Sieve.";
 
     private final Index index;
     private final EditPersonDescriptor editPersonDescriptor;
@@ -79,8 +78,11 @@ public class EditCommand extends Command {
         Person personToEdit = lastShownList.get(index.getZeroBased());
         Person editedPerson = createEditedPerson(personToEdit, editPersonDescriptor);
 
-        if (!personToEdit.isSamePerson(editedPerson) && model.hasPerson(editedPerson)) {
-            throw new CommandException(MESSAGE_DUPLICATE_PERSON);
+        // Skip the client being edited, so that changing only the case of their own name is allowed
+        Optional<Person> sameNamePerson = model.findPersonWithSameName(editedPerson)
+                .filter(existing -> !existing.equals(personToEdit));
+        if (sameNamePerson.isPresent()) {
+            throw new CommandException(getDuplicateMessage(sameNamePerson.get(), editedPerson));
         }
 
         model.setPerson(personToEdit, editedPerson);

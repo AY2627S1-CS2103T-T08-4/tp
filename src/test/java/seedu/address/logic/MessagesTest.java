@@ -4,6 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
+import seedu.address.model.person.Person;
+import seedu.address.testutil.PersonBuilder;
+
 public class MessagesTest {
 
     @Test
@@ -26,5 +29,22 @@ public class MessagesTest {
         assertEquals("0 clients found matching your search term(s).", Messages.getPersonsListedOverviewMessage(0));
         assertEquals("1 client found matching your search term(s).", Messages.getPersonsListedOverviewMessage(1));
         assertEquals("2 clients found matching your search term(s).", Messages.getPersonsListedOverviewMessage(2));
+    }
+
+    @Test
+    public void getClientAlreadyExistsMessage() {
+        Person existing = new PersonBuilder().withName("John Tan").withPhone("91234567").build();
+        assertEquals("This client already exists in Sieve: John Tan with the phone number 91234567. "
+                        + "They may have been added before.",
+                Messages.getClientAlreadyExistsMessage(existing));
+    }
+
+    @Test
+    public void getNameAlreadyUsedMessage() {
+        Person existing = new PersonBuilder().withName("John Tan").withPhone("91234567").build();
+        assertEquals("A client named John Tan already exists in Sieve, with the phone number 91234567. "
+                        + "Check that the name and phone numbers are correct. "
+                        + "If this is a different client, add a detail to tell them apart, e.g. \"John Tan (NHHS)\".",
+                Messages.getNameAlreadyUsedMessage(existing));
     }
 }
