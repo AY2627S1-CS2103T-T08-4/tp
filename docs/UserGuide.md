@@ -186,7 +186,7 @@ AddressBook automatically saves data after every command. You do not need to sav
 
 ### Editing the data file
 
-AddressBook data is saved automatically as a JSON file `[JAR file location]/data/addressbook.json`. Advanced users are welcome to update data directly by editing that data file.
+Sieve data is saved automatically as a JSON file `[JAR file location]/data/sieve.json`. Advanced users are welcome to update data directly by editing that data file.
 
 <box type="warning" seamless>
 
