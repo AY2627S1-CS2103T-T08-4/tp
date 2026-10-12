@@ -21,7 +21,8 @@ public class FindCommand extends Command {
             + "Example: " + COMMAND_WORD + " alice bob charlie";
 
     public static final String MESSAGE_INVALID_KEYWORDS =
-            "Search keywords must only contain letters and cannot be blank.";
+            "Search keywords can only contain letters, digits, hyphens (-), apostrophes (') and full stops (.), "
+                    + "and must include at least one letter or digit.";
 
     private final NameContainsKeywordsPredicate predicate;
 

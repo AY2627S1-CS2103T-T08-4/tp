@@ -15,6 +15,12 @@ public class Name {
                     + "hyphens (-), apostrophes (') and full stops (.), up to %d characters.",
             MAX_LENGTH);
 
+    /**
+     * Characters allowed in a name apart from spaces, for use inside a regex character class.
+     * Shared with find so that search keywords accept the same characters as names.
+     */
+    public static final String NAME_CHARACTERS = "A-Za-z0-9'.\\-";
+
     /*
      * The first character of the name must be a letter,
      * otherwise " " (a blank string) or "-" becomes a valid input.
@@ -22,7 +28,7 @@ public class Name {
      * e.g. "Nur-Aisyah", "O'Brien" or "David Ray Jr. 2nd".
      * '/' is excluded as it is the prefix delimiter (e.g. "a/l" would be read as an address).
      */
-    public static final String VALIDATION_REGEX = "[A-Za-z][A-Za-z0-9 '.\\-]*";
+    public static final String VALIDATION_REGEX = "[A-Za-z][" + NAME_CHARACTERS + " ]*";
 
     public final String fullName;
 

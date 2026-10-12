@@ -6,6 +6,7 @@ import java.util.List;
 
 import seedu.address.logic.commands.FindCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.model.person.Name;
 import seedu.address.model.person.NameContainsKeywordsPredicate;
 
 /**
@@ -13,7 +14,9 @@ import seedu.address.model.person.NameContainsKeywordsPredicate;
  */
 public class FindCommandParser implements Parser<FindCommand> {
 
-    private static final String KEYWORD_VALIDATION_REGEX = "[A-Za-z]+";
+    /** A keyword uses only name characters and contains at least one letter or digit. */
+    private static final String KEYWORD_VALIDATION_REGEX =
+            "[" + Name.NAME_CHARACTERS + "]*[A-Za-z0-9][" + Name.NAME_CHARACTERS + "]*";
 
     /**
      * Parses the given {@code String} of arguments in the context of the FindCommand
