@@ -123,11 +123,18 @@ Examples:
 *  `edit 1 p/91234567 e/johndoe@example.com` Edits the phone number and email address of the 1st person to be `91234567` and `johndoe@example.com` respectively.
 *  `edit 2 n/Betsy Crower t/` Edits the name of the 2nd person to be `Betsy Crower` and clears all existing tags.
 
-### Locating persons by name: `find`
+### Locating persons by name, phone or tag: `find`
 
-Finds persons whose names match any of the given keywords.
+Finds persons by name keywords, phone numbers and tags.
 
-Format: `find KEYWORD [MORE_KEYWORDS]`
+Format: `find [KEYWORD]... [p/PHONE]... [t/TAG]...`
+
+* At least one keyword, phone number or tag must be given.
+* If you search by more than one kind of field, a person must match **every** kind; for example, `find Amirah t/Sec4` returns only persons named Amirah who are tagged `Sec4`.
+* Within each kind of field, a person only needs to match **one** of the values; for example, `find t/Math t/Physics` returns persons tagged `Math` or `Physics`.
+
+Searching by name:
+
 
 * Keywords can contain the same characters as names: letters, digits, hyphens (`-`), apostrophes (`'`), full stops (`.`) and parentheses (`()`). Each keyword must contain at least one letter or digit.
 * The search is case-insensitive; for example, `hans` matches `Hans`.
@@ -137,19 +144,29 @@ Format: `find KEYWORD [MORE_KEYWORDS]`
 * Punctuation is ignored; for example, `obrien` and `O'Brien` both match `O'Brien`.
 * Only whole words or parts match; for example, `Han` does not match `Hans`, and `Bri` does not match `O'Brien`.
 * Persons matching at least one keyword are returned (an `OR` search); for example, `Hans Bo` returns `Hans Gruber` and `Bo Yang`.
-* If no person matches, Sieve shows `0 clients found` with tips for searching again. Use `list` to see all clients again.
+
+Searching by phone number and tag:
+
+* `p/PHONE` must be a complete 8-digit phone number. Spaces, hyphens and parentheses are ignored, so `p/9123 4567` works.
+* `t/TAG` must be a whole tag name, but case does not matter; for example, `t/sec4` matches `Sec4`, but `t/sec` does not.
+
+If no person matches, Sieve shows `0 clients found` with tips for searching again. Use `list` to see all clients again.
 
 Examples:
 * `find amirah` returns `Amirah Tan`
 * `find amirah farhan` returns `Amirah Tan` and `Farhan Ali`
 * `find Brien` returns `Liam O'Brien` (if you have added that client)<br>
   ![result for 'find Brien'](images/findBrienResult.png)
+* `find p/9112 2334` returns `Farhan Ali`
+* `find t/sec4` returns `Amirah Tan` and `Brandon Sim`
+* `find amirah t/sec4` returns `Amirah Tan` only
 
 <box type="info" seamless>
 
 **Limitations:**
 * A keyword is matched against one word of a name at a time, so a keyword that joins two words does not match. For example, `Aisyah-Tan` does not match `Nur-Aisyah Tan`; use `find Aisyah Tan` instead.
-* `find` searches names only. A keyword made of digits, such as `91234567`, is matched against names, not phone numbers.
+* A keyword without a prefix is always matched against names. To search by phone number, use `p/`; for example, `find 91234567` finds nobody, but `find p/91234567` finds the person with that number.
+* Phone numbers and tags must be complete; `p/9123` and `t/sec` do not find anything.
 </box>
 
 ### Tagging a person: `tag`
@@ -245,7 +262,7 @@ Action     | Format, Examples
 **Clear**  | `clear`
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
 **Edit**   | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]... `<br> e.g.,`edit 2 n/James Lee e/jameslee@example.com`
-**Find**   | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find Amirah O'Brien`
+**Find**   | `find [KEYWORD]... [p/PHONE]... [t/TAG]...`<br> e.g., `find Amirah O'Brien`, `find t/sec4`, `find p/91234567`
 **List**   | `list`
 **Tag**    | `tag INDEX t/TAG [t/MORE_TAGS]...`<br> e.g., `tag 1 t/physics t/sec4`
 **Help**   | `help`
