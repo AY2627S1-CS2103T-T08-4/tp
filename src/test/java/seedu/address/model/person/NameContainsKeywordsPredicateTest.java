@@ -57,6 +57,49 @@ public class NameContainsKeywordsPredicateTest {
     }
 
     @Test
+    public void test_keywordMatchesNamePart_returnsTrue() {
+        Person liam = new PersonBuilder().withName("Liam O'Brien").build();
+        Person nurAisyah = new PersonBuilder().withName("Nur-Aisyah Tan").build();
+
+        // whole word with punctuation
+        assertTrue(new NameContainsKeywordsPredicate(List.of("O'Brien")).test(liam));
+
+        // part of a word after an apostrophe
+        assertTrue(new NameContainsKeywordsPredicate(List.of("Brien")).test(liam));
+
+        // punctuation left out of the keyword
+        assertTrue(new NameContainsKeywordsPredicate(List.of("obrien")).test(liam));
+
+        // parts of a hyphenated word
+        assertTrue(new NameContainsKeywordsPredicate(List.of("Nur")).test(nurAisyah));
+        assertTrue(new NameContainsKeywordsPredicate(List.of("Aisyah")).test(nurAisyah));
+        assertTrue(new NameContainsKeywordsPredicate(List.of("NurAisyah")).test(nurAisyah));
+
+        // punctuation in the keyword but not in the name
+        assertTrue(new NameContainsKeywordsPredicate(List.of("O'Brien"))
+                .test(new PersonBuilder().withName("Liam OBrien").build()));
+
+        // full stop
+        assertTrue(new NameContainsKeywordsPredicate(List.of("Jr"))
+                .test(new PersonBuilder().withName("David Ray Jr.").build()));
+    }
+
+    @Test
+    public void test_keywordDoesNotMatchNamePart_returnsFalse() {
+        Person liam = new PersonBuilder().withName("Liam O'Brien").build();
+
+        // part of a name part
+        assertFalse(new NameContainsKeywordsPredicate(List.of("Bri")).test(liam));
+
+        // punctuation-only keyword
+        assertFalse(new NameContainsKeywordsPredicate(List.of("'")).test(liam));
+
+        // keyword spanning two words
+        assertFalse(new NameContainsKeywordsPredicate(List.of("Aisyah-Tan"))
+                .test(new PersonBuilder().withName("Nur-Aisyah Tan").build()));
+    }
+
+    @Test
     public void test_nameDoesNotContainKeywords_returnsFalse() {
         // Zero keywords
         NameContainsKeywordsPredicate predicate = new NameContainsKeywordsPredicate(List.of());

@@ -16,10 +16,16 @@ public class Name {
             MAX_LENGTH);
 
     /**
+     * Punctuation allowed in a name, for use inside a regex character class.
+     * Find ignores these when matching, so "obrien" matches "O'Brien".
+     */
+    public static final String NAME_PUNCTUATION = "'.\\-";
+
+    /**
      * Characters allowed in a name apart from spaces, for use inside a regex character class.
      * Shared with find so that search keywords accept the same characters as names.
      */
-    public static final String NAME_CHARACTERS = "A-Za-z0-9'.\\-";
+    public static final String NAME_CHARACTERS = "A-Za-z0-9" + NAME_PUNCTUATION;
 
     /*
      * The first character of the name must be a letter,
