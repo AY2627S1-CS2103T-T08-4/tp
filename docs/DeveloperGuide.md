@@ -166,6 +166,37 @@ Classes used by multiple components are in the `seedu.address.commons` package.
 
 This section describes some noteworthy details on how certain features are implemented.
 
+### Find feature
+
+`find` filters the displayed client list by name. `FindCommandParser` validates the keywords, and `NameContainsKeywordsPredicate` decides which clients match.
+
+**Keyword validation.** `Name` exposes the characters allowed in a name as `Name.NAME_CHARACTERS` (letters, digits and the punctuation in `Name.NAME_PUNCTUATION`: `'`, `.` and `-`). `Name.VALIDATION_REGEX` and `FindCommandParser`'s keyword regex are both built from this constant, so `find` always accepts the same characters as names. A keyword must also contain at least one letter or digit, so keywords such as `-` are rejected.
+
+**Matching.** For each client, `NameContainsKeywordsPredicate` builds a set of lower-case name parts:
+
+* each space-separated word with punctuation removed (`O'Brien` → `obrien`), and
+* each piece of a word split on punctuation (`O'Brien` → `o`, `brien`).
+
+Each keyword is lower-cased with punctuation removed, and a client matches if any keyword equals one of their name parts. For example, the parts of `Liam O'Brien` are `liam`, `obrien`, `o` and `brien`, so `find O'Brien`, `find obrien` and `find Brien` all match, but `find Bri` does not. Keywords that are empty after punctuation is removed never match.
+
+If no client matches, `FindCommand` returns `FindCommand.MESSAGE_NO_CLIENTS_FOUND`, which explains the matching rule and suggests `list`.
+
+#### Design considerations:
+
+**Aspect: How a keyword matches a name**
+
+* **Alternative 1 (current choice):** A keyword must equal a whole word or a whole part of a word, ignoring case and punctuation.
+  * Pros: Finds clients with hyphenated or apostrophised names. Results are predictable, since a short keyword such as `a` does not match every name containing that letter.
+  * Cons: Partial words such as `Bri` do not match, and a keyword that joins two words (`Aisyah-Tan`) does not match `Nur-Aisyah Tan`.
+
+* **Alternative 2:** A keyword matches if it appears anywhere in the name (substring matching).
+  * Pros: Requires the least typing.
+  * Cons: Short keywords return many unrelated clients, which defeats the purpose of searching a large roster.
+
+* **Alternative 3:** Whole space-separated words only (the original AB3 behaviour).
+  * Pros: Simplest to implement.
+  * Cons: Clients such as `O'Brien` or `Nur-Aisyah` cannot be found by part of their name.
+
 ### \[Proposed\] Undo/redo feature
 
 #### Proposed Implementation
@@ -384,7 +415,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 **Extensions**
 
-* 1a. The keyword is blank or contains characters other than letters.
+* 1a. The keyword is blank, contains characters not allowed in names, or contains no letter or digit.
 
     * 1a1. Sieve shows an error message.
 
@@ -392,7 +423,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 * 2a. No client matches the keyword.
 
-    * 2a1. Sieve shows that 0 clients were found.
+    * 2a1. Sieve shows that 0 clients were found, with tips for searching again.
 
       Use case ends.
 
@@ -478,7 +509,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 * 2a. No client matches the keyword.
 
-    * 2a1. Sieve shows that 0 clients were found.
+    * 2a1. Sieve shows that 0 clients were found, with tips for searching again.
 
       Use case ends.
 
@@ -571,6 +602,37 @@ testers are expected to do more *exploratory* testing.
        Expected: The most recent window size and location are retained.
 
 1. _{ more test cases … }_
+
+### Finding clients
+
+1. Finding clients by part of a name
+
+    1. Prerequisites: Add a client with `add n/Liam O'Brien p/91234567 e/liam@example.com a/Blk 1 Clementi Rd`, and another with `add n/Nur-Aisyah Tan p/92345678 e/nur@example.com a/Blk 2 Clementi Rd`.
+
+    1. Test case: `find O'Brien`, then `find Brien`, then `find obrien`<br>
+       Expected: Each command lists `Liam O'Brien`.
+
+    1. Test case: `find Nur`, then `find Aisyah`<br>
+       Expected: Each command lists `Nur-Aisyah Tan`.
+
+    1. Test case: `find Liam Aisyah`<br>
+       Expected: Both clients are listed.
+
+1. Finding with no matches
+
+    1. Test case: `find Bri`<br>
+       Expected: No clients are listed. The status message shows `0 clients found matching your search term(s).`, followed by tips for searching again.
+
+1. Finding with invalid keywords
+
+    1. Test case: `find Amirah_Tan`<br>
+       Expected: The displayed list does not change. An error message lists the characters allowed in keywords.
+
+    1. Test case: `find -`<br>
+       Expected: Same as previous.
+
+    1. Test case: `find`<br>
+       Expected: The displayed list does not change. An invalid command format error is shown.
 
 ### Deleting a person
 
