@@ -71,7 +71,7 @@ public class FindCommandTest {
     @Test
     public void execute_nonMatchingKeyword_noPersonFound() {
         String expectedMessage = FindCommand.MESSAGE_NO_CLIENTS_FOUND;
-        NameContainsKeywordsPredicate predicate = preparePredicate("Kur");
+        NameContainsKeywordsPredicate predicate = preparePredicate("urz");
         FindCommand command = new FindCommand(predicate);
         expectedModel.updateFilteredPersonList(predicate);
         assertCommandSuccess(command, model, expectedMessage, expectedModel);
@@ -86,6 +86,16 @@ public class FindCommandTest {
         expectedModel.updateFilteredPersonList(predicate);
         assertCommandSuccess(command, model, expectedMessage, expectedModel);
         assertEquals(List.of(ELLE), model.getFilteredPersonList());
+    }
+
+    @Test
+    public void execute_prefixKeyword_multiplePersonsFound() {
+        String expectedMessage = "2 clients found matching your search term(s).";
+        NameContainsKeywordsPredicate predicate = preparePredicate("mei");
+        FindCommand command = new FindCommand(predicate);
+        expectedModel.updateFilteredPersonList(predicate);
+        assertCommandSuccess(command, model, expectedMessage, expectedModel);
+        assertEquals(List.of(BENSON, DANIEL), model.getFilteredPersonList());
     }
 
     @Test

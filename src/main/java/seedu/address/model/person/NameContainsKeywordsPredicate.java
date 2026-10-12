@@ -9,8 +9,8 @@ import seedu.address.commons.util.ToStringBuilder;
 
 /**
  * Tests that a {@code Person}'s {@code Name} matches any of the keywords given.
- * A keyword matches a word of the name, or a part of a word split on punctuation
- * (e.g. "Brien" matches "O'Brien", "Aisyah" matches "Nur-Aisyah"), ignoring case and punctuation.
+ * A keyword matches the start of a word of the name, or the start of a part of a word split on punctuation
+ * (e.g. "Bri" matches "O'Brien", "Ais" matches "Nur-Aisyah"), ignoring case and punctuation.
  */
 public class NameContainsKeywordsPredicate implements Predicate<Person> {
     private static final String PUNCTUATION_REGEX = "[" + Name.NAME_PUNCTUATION + "]";
@@ -26,13 +26,20 @@ public class NameContainsKeywordsPredicate implements Predicate<Person> {
         Set<String> nameParts = getSearchableParts(person.getName().fullName);
         return keywords.stream()
                 .map(NameContainsKeywordsPredicate::normalize)
-                .anyMatch(keyword -> !keyword.isEmpty() && nameParts.contains(keyword));
+                .anyMatch(keyword -> !keyword.isEmpty() && isPrefixOfAnyPart(keyword, nameParts));
+    }
+
+    /**
+     * Returns true if some part in {@code nameParts} starts with {@code keyword}.
+     */
+    private static boolean isPrefixOfAnyPart(String keyword, Set<String> nameParts) {
+        return nameParts.stream().anyMatch(part -> part.startsWith(keyword));
     }
 
     /**
      * Returns the normalized parts of {@code fullName} that a keyword can match:
-     * each word with punctuation removed (so "obrien" matches "O'Brien"), and
-     * each piece of a word split on punctuation (so "Brien" matches "O'Brien").
+     * each word with punctuation removed (so "obri" matches "O'Brien"), and
+     * each piece of a word split on punctuation (so "Bri" matches "O'Brien").
      */
     private static Set<String> getSearchableParts(String fullName) {
         Set<String> parts = new HashSet<>();

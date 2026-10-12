@@ -90,11 +90,37 @@ public class NameContainsKeywordsPredicateTest {
     }
 
     @Test
+    public void test_keywordIsPrefixOfNamePart_returnsTrue() {
+        Person liam = new PersonBuilder().withName("Liam O'Brien").build();
+        Person nurAisyah = new PersonBuilder().withName("Nur-Aisyah Tan").build();
+
+        // start of a word
+        assertTrue(new NameContainsKeywordsPredicate(List.of("Li")).test(liam));
+
+        // start of a part after an apostrophe
+        assertTrue(new NameContainsKeywordsPredicate(List.of("Bri")).test(liam));
+
+        // start of a word with punctuation removed
+        assertTrue(new NameContainsKeywordsPredicate(List.of("obr")).test(liam));
+        assertTrue(new NameContainsKeywordsPredicate(List.of("O'Br")).test(liam));
+
+        // start of a part after a hyphen
+        assertTrue(new NameContainsKeywordsPredicate(List.of("ais")).test(nurAisyah));
+
+        // single letter
+        assertTrue(new NameContainsKeywordsPredicate(List.of("t")).test(nurAisyah));
+    }
+
+    @Test
     public void test_keywordDoesNotMatchNamePart_returnsFalse() {
         Person liam = new PersonBuilder().withName("Liam O'Brien").build();
 
-        // part of a name part
-        assertFalse(new NameContainsKeywordsPredicate(List.of("Bri")).test(liam));
+        // middle or end of a name part
+        assertFalse(new NameContainsKeywordsPredicate(List.of("rien")).test(liam));
+        assertFalse(new NameContainsKeywordsPredicate(List.of("iam")).test(liam));
+
+        // keyword longer than the name part
+        assertFalse(new NameContainsKeywordsPredicate(List.of("Liams")).test(liam));
 
         // punctuation-only keyword
         assertFalse(new NameContainsKeywordsPredicate(List.of("'")).test(liam));
