@@ -62,16 +62,25 @@ public class Person {
     }
 
     /**
-     * Returns true if both persons have the same name.
-     * This defines a weaker notion of equality between two persons.
+     * Returns true if both persons have the same name, ignoring case.
+     * Sieve does not allow two clients with the same name, so this is the weaker notion of
+     * equality used to detect duplicates.
      */
-    public boolean isSamePerson(Person otherPerson) {
+    public boolean hasSameName(Person otherPerson) {
         if (otherPerson == this) {
             return true;
         }
 
         return otherPerson != null
-                && otherPerson.getName().equals(getName());
+                && otherPerson.getName().isSameName(getName());
+    }
+
+    /**
+     * Returns true if both persons have the same phone number.
+     */
+    public boolean hasSamePhone(Person otherPerson) {
+        return otherPerson != null
+                && otherPerson.getPhone().equals(getPhone());
     }
 
     /**

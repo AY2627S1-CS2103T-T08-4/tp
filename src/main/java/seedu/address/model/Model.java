@@ -1,5 +1,8 @@
 package seedu.address.model;
 
+import static java.util.Objects.requireNonNull;
+
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import javafx.collections.ObservableList;
@@ -40,6 +43,16 @@ public interface Model {
      * Returns true if a person with the same identity as {@code person} exists in the address book.
      */
     boolean hasPerson(Person person);
+
+    /**
+     * Returns the person in the address book with the same name as {@code person}, ignoring case, if any.
+     */
+    default Optional<Person> findPersonWithSameName(Person person) {
+        requireNonNull(person);
+        return getAddressBook().getPersonList().stream()
+                .filter(person::hasSameName)
+                .findFirst();
+    }
 
     /**
      * Deletes the given person.

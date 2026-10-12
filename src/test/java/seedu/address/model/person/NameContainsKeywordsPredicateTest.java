@@ -82,6 +82,11 @@ public class NameContainsKeywordsPredicateTest {
         // full stop
         assertTrue(new NameContainsKeywordsPredicate(List.of("Jr"))
                 .test(new PersonBuilder().withName("David Ray Jr.").build()));
+
+        // parentheses
+        Person johnTan = new PersonBuilder().withName("John Tan (NHHS)").build();
+        assertTrue(new NameContainsKeywordsPredicate(List.of("NHHS")).test(johnTan));
+        assertTrue(new NameContainsKeywordsPredicate(List.of("(NHHS)")).test(johnTan));
     }
 
     @Test

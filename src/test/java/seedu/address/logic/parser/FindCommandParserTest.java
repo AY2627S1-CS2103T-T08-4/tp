@@ -34,8 +34,8 @@ public class FindCommandParserTest {
     @Test
     public void parse_nameCharacterKeywords_returnsFindCommand() {
         FindCommand expectedFindCommand = new FindCommand(
-                new NameContainsKeywordsPredicate(List.of("O'Brien", "Nur-Aisyah", "Jr.", "Ravi2")));
-        assertParseSuccess(parser, "O'Brien Nur-Aisyah Jr. Ravi2", expectedFindCommand);
+                new NameContainsKeywordsPredicate(List.of("O'Brien", "Nur-Aisyah", "Jr.", "Ravi2", "(NHHS)")));
+        assertParseSuccess(parser, "O'Brien Nur-Aisyah Jr. Ravi2 (NHHS)", expectedFindCommand);
     }
 
     @Test
@@ -49,6 +49,7 @@ public class FindCommandParserTest {
         // punctuation only
         assertParseFailure(parser, "-", FindCommand.MESSAGE_INVALID_KEYWORDS);
         assertParseFailure(parser, "'.", FindCommand.MESSAGE_INVALID_KEYWORDS);
+        assertParseFailure(parser, "()", FindCommand.MESSAGE_INVALID_KEYWORDS);
 
         // one invalid keyword among valid ones
         assertParseFailure(parser, "Alice B_b", FindCommand.MESSAGE_INVALID_KEYWORDS);

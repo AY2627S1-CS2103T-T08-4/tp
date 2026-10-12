@@ -9,24 +9,24 @@ import seedu.address.model.person.NameContainsKeywordsPredicate;
 
 /**
  * Finds and lists all persons in the address book whose name contains any of the argument keywords.
- * Keyword matching is case insensitive.
+ * Keyword matching is not case-sensitive.
  */
 public class FindCommand extends Command {
 
     public static final String COMMAND_WORD = "find";
 
-    public static final String MESSAGE_USAGE = COMMAND_WORD + ": Finds all persons whose names match any of "
-            + "the specified keywords (case-insensitive, ignoring ' . and -) "
+    public static final String MESSAGE_USAGE = COMMAND_WORD + ": Finds all clients whose names match any of "
+            + "the specified keywords (case-insensitive, ignoring punctuation) "
             + "and displays them as a list with index numbers.\n"
             + "Parameters: KEYWORD [MORE_KEYWORDS]...\n"
-            + "Example: " + COMMAND_WORD + " alice bob charlie";
+            + "Example: " + COMMAND_WORD + " immanuel krishna";
 
     public static final String MESSAGE_INVALID_KEYWORDS =
-            "Search keywords can only contain letters, digits, hyphens (-), apostrophes (') and full stops (.), "
-                    + "and must include at least one letter or digit.";
+            "Search keywords can only contain letters, digits, hyphens <->, apostrophes <'>, full stops <.> "
+                    + "and parentheses <()>, and must include at least one letter or digit.";
 
-    public static final String MESSAGE_NO_CLIENTS_FOUND = "0 clients found matching your search term(s). "
-            + "Keywords must match a whole part of a name (e.g. Brien, not Bri). "
+    public static final String MESSAGE_NO_CLIENTS_FOUND = Messages.getPersonsListedOverviewMessage(0)
+            + " Keywords must match a whole part of a name (e.g. Brien, not Bri). "
             + "Check the spelling, or use list to see all clients.";
 
     private final NameContainsKeywordsPredicate predicate;
@@ -43,7 +43,7 @@ public class FindCommand extends Command {
         if (matchCount == 0) {
             return new CommandResult(MESSAGE_NO_CLIENTS_FOUND);
         }
-        return new CommandResult(String.format(Messages.MESSAGE_PERSONS_LISTED_OVERVIEW, matchCount));
+        return new CommandResult(Messages.getPersonsListedOverviewMessage(matchCount));
     }
 
     @Override

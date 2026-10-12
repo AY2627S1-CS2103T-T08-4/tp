@@ -9,12 +9,15 @@ import static seedu.address.testutil.TypicalPersons.ALICE;
 import static seedu.address.testutil.TypicalPersons.BENSON;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.model.person.NameContainsKeywordsPredicate;
+import seedu.address.model.person.Person;
 import seedu.address.testutil.AddressBookBuilder;
+import seedu.address.testutil.PersonBuilder;
 
 public class ModelManagerTest {
 
@@ -66,6 +69,25 @@ public class ModelManagerTest {
     public void hasPerson_personInAddressBook_returnsTrue() {
         modelManager.addPerson(ALICE);
         assertTrue(modelManager.hasPerson(ALICE));
+    }
+
+    @Test
+    public void findPersonWithSameName_nullPerson_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> modelManager.findPersonWithSameName(null));
+    }
+
+    @Test
+    public void findPersonWithSameName_sameNameDifferentCase_returnsExistingPerson() {
+        modelManager.addPerson(ALICE);
+        modelManager.addPerson(BENSON);
+        Person lowerCaseBenson = new PersonBuilder(BENSON).withName(BENSON.getName().fullName.toLowerCase()).build();
+        assertEquals(Optional.of(BENSON), modelManager.findPersonWithSameName(lowerCaseBenson));
+    }
+
+    @Test
+    public void findPersonWithSameName_noSamePerson_returnsEmpty() {
+        modelManager.addPerson(ALICE);
+        assertEquals(Optional.empty(), modelManager.findPersonWithSameName(BENSON));
     }
 
     @Test

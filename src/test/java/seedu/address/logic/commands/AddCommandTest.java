@@ -49,7 +49,22 @@ public class AddCommandTest {
         AddCommand addCommand = new AddCommand(validPerson);
         ModelStub modelStub = new ModelStubWithPerson(validPerson);
 
-        assertThrows(CommandException.class, AddCommand.MESSAGE_DUPLICATE_PERSON, () -> addCommand.execute(modelStub));
+        String expectedMessage = "This client already exists in Sieve: Amy Bee with the phone number 85355255. "
+                + "They may have been added before.";
+        assertThrows(CommandException.class, expectedMessage, () -> addCommand.execute(modelStub));
+    }
+
+    @Test
+    public void execute_sameNameDifferentPhone_throwsCommandException() {
+        Person existingPerson = new PersonBuilder().build();
+        Person samePersonDifferentPhone = new PersonBuilder().withName("amy bee").withPhone("91234567").build();
+        AddCommand addCommand = new AddCommand(samePersonDifferentPhone);
+        ModelStub modelStub = new ModelStubWithPerson(existingPerson);
+
+        String expectedMessage = "A client named Amy Bee already exists in Sieve, with the phone number 85355255. "
+                + "Check that the name and phone numbers are correct. If this is a different client, "
+                + "add a detail to tell them apart, e.g. \"Amy Bee (NHHS)\".";
+        assertThrows(CommandException.class, expectedMessage, () -> addCommand.execute(modelStub));
     }
 
     @Test
@@ -155,9 +170,10 @@ public class AddCommandTest {
         }
 
         @Override
-        public boolean hasPerson(Person person) {
-            requireNonNull(person);
-            return this.person.isSamePerson(person);
+        public ReadOnlyAddressBook getAddressBook() {
+            AddressBook addressBook = new AddressBook();
+            addressBook.addPerson(person);
+            return addressBook;
         }
     }
 
@@ -168,12 +184,6 @@ public class AddCommandTest {
         final ArrayList<Person> personsAdded = new ArrayList<>();
 
         @Override
-        public boolean hasPerson(Person person) {
-            requireNonNull(person);
-            return personsAdded.stream().anyMatch(person::isSamePerson);
-        }
-
-        @Override
         public void addPerson(Person person) {
             requireNonNull(person);
             personsAdded.add(person);
@@ -181,7 +191,9 @@ public class AddCommandTest {
 
         @Override
         public ReadOnlyAddressBook getAddressBook() {
-            return new AddressBook();
+            AddressBook addressBook = new AddressBook();
+            personsAdded.forEach(addressBook::addPerson);
+            return addressBook;
         }
     }
 
