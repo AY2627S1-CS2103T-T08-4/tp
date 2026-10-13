@@ -41,9 +41,7 @@ public class UiManager implements Ui {
         logger.info("Starting UI...");
 
         //Set the application icon.
-        primaryStage
-            .getIcons()
-            .add(getImage(ICON_APPLICATION));
+        primaryStage.getIcons().add(getImage(ICON_APPLICATION));
 
         try {
             mainWindow = new MainWindow(primaryStage, logic, dataFilePath);
@@ -96,17 +94,12 @@ public class UiManager implements Ui {
     private static void showAlertDialogAndWait(Stage owner, AlertType type, String title, String headerText,
                                                String contentText) {
         final Alert alert = new Alert(type);
-        alert
-            .getDialogPane()
-            .getStylesheets()
-            .add("view/DarkTheme.css");
+        alert.getDialogPane().getStylesheets().add("view/DarkTheme.css");
         alert.initOwner(owner);
         alert.setTitle(title);
         alert.setHeaderText(headerText);
         alert.setContentText(contentText);
-        alert
-            .getDialogPane()
-            .setId(ALERT_DIALOG_PANE_FIELD_ID);
+        alert.getDialogPane().setId(ALERT_DIALOG_PANE_FIELD_ID);
         alert.showAndWait();
     }
 
