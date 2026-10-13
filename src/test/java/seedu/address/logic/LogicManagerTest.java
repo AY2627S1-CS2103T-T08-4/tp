@@ -47,13 +47,14 @@ public class LogicManagerTest {
 
     private Model model = new ModelManager();
     private Logic logic;
+    private StorageManager storage;
 
     @BeforeEach
     public void setUp() {
         JsonAddressBookStorage addressBookStorage =
             new JsonAddressBookStorage(temporaryFolder.resolve("addressBook.json"));
         JsonUserPrefsStorage userPrefsStorage = new JsonUserPrefsStorage(temporaryFolder.resolve("userPrefs.json"));
-        StorageManager storage = new StorageManager(addressBookStorage, userPrefsStorage);
+        storage = new StorageManager(addressBookStorage, userPrefsStorage);
         logic = new LogicManager(model, storage);
     }
 
@@ -107,7 +108,7 @@ public class LogicManagerTest {
         JsonUserPrefsStorage userPrefsStorage = new JsonUserPrefsStorage(temporaryFolder.resolve("corruptPrefs.json"));
         StorageManager storage = new StorageManager(corruptStorageBackend, userPrefsStorage);
 
-        Logic logicInReadOnly = new LogicManager(model, storage);
+        Logic logicInReadOnly = new LogicManager(model, storage, true);
         String expectedError = "Error: Local data file is corrupted. Displaying empty list.";
 
         assertThrows(CommandException.class, expectedError, () -> logicInReadOnly.execute(
@@ -133,11 +134,17 @@ public class LogicManagerTest {
             new JsonUserPrefsStorage(temporaryFolder.resolve("corruptListPrefs.json"));
         StorageManager storage = new StorageManager(corruptStorageBackend, userPrefsStorage);
 
-        Logic logicInReadOnly = new LogicManager(model, storage);
+        Logic logicInReadOnly = new LogicManager(model, storage, true);
         String listCommand = ListCommand.COMMAND_WORD;
         CommandResult result = logicInReadOnly.execute(listCommand);
         assertEquals(ListCommand.MESSAGE_SUCCESS, result.getFeedbackToUser());
         assertThrows(ParseException.class, () -> logicInReadOnly.execute("   "));
+    }
+
+    @Test
+    public void constructor_readOnlyExplicitInitialization_setsReadOnlyMode() {
+        LogicManager logicManager = new LogicManager(model, storage, true);
+        assertThrows(CommandException.class, () -> logicManager.execute("add n/John"));
     }
 
     /**
