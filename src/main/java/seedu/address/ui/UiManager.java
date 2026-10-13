@@ -41,17 +41,44 @@ public class UiManager implements Ui {
         logger.info("Starting UI...");
 
         //Set the application icon.
-        primaryStage.getIcons().add(getImage(ICON_APPLICATION));
+        primaryStage
+            .getIcons()
+            .add(getImage(ICON_APPLICATION));
 
         try {
             mainWindow = new MainWindow(primaryStage, logic, dataFilePath);
             mainWindow.show(); //This should be called before creating other UI parts
             mainWindow.fillInnerParts();
 
+            // Call the helper method to verify state
+            verifyStorageStateAndAlert();
+
         } catch (Throwable e) {
             logger.severe(StringUtil.getDetails(e));
             showFatalErrorDialogAndShutdown("Fatal error during initializing", e);
         }
+    }
+
+    /**
+     * Verifies the storage integration state and alerts the user if running in read-only mode.
+     */
+    void verifyStorageStateAndAlert() {
+        if (logic.isReadOnlyMode()) {
+            triggerCorruptionAlert("WARNING");
+        }
+    }
+
+    /**
+     * Triggers the UI error alert dialog window layout.
+     */
+    void triggerCorruptionAlert(String alertLevel) {
+        showAlertDialogAndWait(
+            Alert.AlertType.valueOf(alertLevel),
+            "Data File Corruption Error",
+            "Local data file is corrupted.",
+            "Displaying empty list. Please fix or delete the data file at "
+                + dataFilePath.toAbsolutePath() + " and restart."
+        );
     }
 
     private Image getImage(String imagePath) {
@@ -69,12 +96,17 @@ public class UiManager implements Ui {
     private static void showAlertDialogAndWait(Stage owner, AlertType type, String title, String headerText,
                                                String contentText) {
         final Alert alert = new Alert(type);
-        alert.getDialogPane().getStylesheets().add("view/DarkTheme.css");
+        alert
+            .getDialogPane()
+            .getStylesheets()
+            .add("view/DarkTheme.css");
         alert.initOwner(owner);
         alert.setTitle(title);
         alert.setHeaderText(headerText);
         alert.setContentText(contentText);
-        alert.getDialogPane().setId(ALERT_DIALOG_PANE_FIELD_ID);
+        alert
+            .getDialogPane()
+            .setId(ALERT_DIALOG_PANE_FIELD_ID);
         alert.showAndWait();
     }
 

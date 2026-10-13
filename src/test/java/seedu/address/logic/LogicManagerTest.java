@@ -108,7 +108,9 @@ public class LogicManagerTest {
         StorageManager storage = new StorageManager(corruptStorageBackend, userPrefsStorage);
 
         Logic logicInReadOnly = new LogicManager(model, storage);
-        String expectedError = "Error: Local data file is corrupted. Displaying empty list.";
+        String expectedError = "Error: Local data file is corrupted at "
+            + temporaryFolder.resolve("corruptedAddressBook.json")
+            + ". Displaying empty list. Please fix or delete the data file and restart.";
 
         assertThrows(CommandException.class, expectedError, () -> logicInReadOnly.execute(
             "add n/Amirah Tan p/91234567 e/amirah@gmail.com a/Blk 123 Yishun"));
@@ -139,6 +141,24 @@ public class LogicManagerTest {
         assertEquals(ListCommand.MESSAGE_SUCCESS, result.getFeedbackToUser());
         assertThrows(ParseException.class, () -> logicInReadOnly.execute("   "));
     }
+
+    @Test
+    public void isReadOnlyMode_corruptStorage_returnsTrue() {
+        Path corruptPath = temporaryFolder.resolve("coverageReadOnlyBook.json");
+        JsonAddressBookStorage corruptStorageBackend = new JsonAddressBookStorage(corruptPath) {
+            @Override
+            public Optional<ReadOnlyAddressBook> readAddressBook() throws DataLoadingException {
+                throw new DataLoadingException(new Exception("Simulated file corruption context."));
+            }
+        };
+        JsonUserPrefsStorage userPrefsStorage =
+            new JsonUserPrefsStorage(temporaryFolder.resolve("coverageReadOnlyPrefs.json"));
+        StorageManager storage = new StorageManager(corruptStorageBackend, userPrefsStorage);
+
+        Logic logicInReadOnly = new LogicManager(model, storage);
+        org.junit.jupiter.api.Assertions.assertTrue(logicInReadOnly.isReadOnlyMode());
+    }
+
 
     /**
      * Executes the command and confirms that

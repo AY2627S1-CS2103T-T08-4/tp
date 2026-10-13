@@ -25,7 +25,7 @@ public class LogicManager implements Logic {
     public static final String FILE_OPS_ERROR_FORMAT = "Could not save data due to the following error: %s";
 
     public static final String FILE_OPS_PERMISSION_ERROR_FORMAT =
-            "Could not save data to file %s due to insufficient permissions to write to the file or the folder.";
+        "Could not save data to file %s due to insufficient permissions to write to the file or the folder.";
 
     private final Logger logger = LogsCenter.getLogger(LogicManager.class);
 
@@ -55,7 +55,8 @@ public class LogicManager implements Logic {
         logger.info("----------------[USER COMMAND][" + commandText + "]");
 
         if (isReadOnlyMode && isMutatingCommand(commandText)) {
-            throw new CommandException("Error: Local data file is corrupted. Displaying empty list.");
+            throw new CommandException("Error: Local data file is corrupted at " + storage.getAddressBookFilePath()
+                + ". Displaying empty list. Please fix or delete the data file and restart.");
         }
 
         CommandResult commandResult;
@@ -104,5 +105,10 @@ public class LogicManager implements Logic {
     @Override
     public void setGuiSettings(GuiSettings guiSettings) {
         model.setGuiSettings(guiSettings);
+    }
+
+    @Override
+    public boolean isReadOnlyMode() {
+        return isReadOnlyMode;
     }
 }
