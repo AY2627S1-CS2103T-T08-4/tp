@@ -26,6 +26,15 @@ checkstyle {
 
 test {
     useJUnitPlatform()
+
+    if (System.getenv('CI') != null) {
+        systemProperty 'java.awt.headless', 'true'
+        systemProperty 'testfx.robot', 'glass'
+        systemProperty 'testfx.headless', 'true'
+        systemProperty 'prism.order', 'sw'
+        systemProperty 'prism.text', 't2k'
+    }
+
     finalizedBy jacocoTestReport
 }
 
@@ -48,6 +57,7 @@ task coverage(type: JacocoReport) {
 dependencies {
     String jUnitVersion = '5.14.4'
     String javaFxVersion = '17.0.7'
+    String testFxVersion = '4.0.18'
 
     implementation "org.openjfx:javafx-base:${javaFxVersion}:win"
     implementation "org.openjfx:javafx-base:${javaFxVersion}:mac"
@@ -69,6 +79,14 @@ dependencies {
 
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${jUnitVersion}"
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.14.4'
+
+    testImplementation "org.testfx:testfx-junit5:${testFxVersion}"
+    testRuntimeOnly "org.testfx:openjfx-monocle:17.0.10"
+
+    testImplementation "org.testfx:testfx-junit5:${testFxVersion}"
+    testImplementation "org.hamcrest:hamcrest:2.2"
+
+    testRuntimeOnly "org.testfx:openjfx-monocle:17.0.10"
 }
 
 shadowJar {
