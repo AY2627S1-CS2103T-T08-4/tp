@@ -89,7 +89,8 @@ public class LogicManager implements Logic {
             || commandWord.equals("delete")
             || commandWord.equals("edit")
             || commandWord.equals("clear")
-            || commandWord.equals("tag");
+            || commandWord.equals("tag")
+            || commandWord.equals("undo");
     }
 
     @Override

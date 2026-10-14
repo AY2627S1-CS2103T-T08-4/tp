@@ -25,6 +25,7 @@ import seedu.address.logic.commands.AddCommand;
 import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.DeleteCommand;
 import seedu.address.logic.commands.ListCommand;
+import seedu.address.logic.commands.UndoCommand;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.Model;
@@ -102,6 +103,16 @@ public class LogicManagerTest {
     }
 
     @Test
+    public void execute_undoAfterAdd_removesAddedClient() throws Exception {
+        logic.execute(AddCommand.COMMAND_WORD + NAME_DESC_AMY + PHONE_DESC_AMY + EMAIL_DESC_AMY + ADDRESS_DESC_AMY);
+        // list changes nothing, so it must not use up the undo
+        logic.execute(ListCommand.COMMAND_WORD);
+
+        assertCommandSuccess(UndoCommand.COMMAND_WORD, UndoCommand.MESSAGE_SUCCESS, new ModelManager());
+        assertCommandException(UndoCommand.COMMAND_WORD, UndoCommand.MESSAGE_NOTHING_TO_UNDO);
+    }
+
+    @Test
     public void getFilteredPersonList_modifyList_throwsUnsupportedOperationException() {
         assertThrows(UnsupportedOperationException.class, () -> logic
             .getFilteredPersonList()
@@ -130,6 +141,7 @@ public class LogicManagerTest {
         assertThrows(CommandException.class, expectedError, () -> logicInReadOnly.execute("edit 1 n/New Name"));
         assertThrows(CommandException.class, expectedError, () -> logicInReadOnly.execute("clear"));
         assertThrows(CommandException.class, expectedError, () -> logicInReadOnly.execute("tag 1 t/Math"));
+        assertThrows(CommandException.class, expectedError, () -> logicInReadOnly.execute("undo"));
     }
 
     @Test

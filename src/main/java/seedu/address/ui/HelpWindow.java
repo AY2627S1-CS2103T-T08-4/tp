@@ -28,6 +28,7 @@ public class HelpWindow extends UiPart<Stage> {
         help
         list
         tag INDEX t/TAG [t/MORE_TAGS]...
+        undo
         """;
     public static final String HELP_URL_MESSAGE = "Refer to the user guide: " + USERGUIDE_URL;
 
