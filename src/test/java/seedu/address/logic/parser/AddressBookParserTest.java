@@ -18,6 +18,7 @@ import seedu.address.logic.commands.DeleteCommand;
 import seedu.address.logic.commands.EditCommand;
 import seedu.address.logic.commands.EditCommand.EditPersonDescriptor;
 import seedu.address.logic.commands.ExitCommand;
+import seedu.address.logic.commands.FilterCommand;
 import seedu.address.logic.commands.FindCommand;
 import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.ListCommand;
@@ -25,6 +26,7 @@ import seedu.address.logic.commands.TagCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.person.NameContainsKeywordsPredicate;
 import seedu.address.model.person.Person;
+import seedu.address.model.person.TagsContainKeywordsPredicate;
 import seedu.address.model.tag.Tag;
 import seedu.address.testutil.EditPersonDescriptorBuilder;
 import seedu.address.testutil.PersonBuilder;
@@ -46,7 +48,7 @@ public class AddressBookParserTest {
         // the example in each usage message is shown to users, so it must be a valid command
         String examplePrefix = "Example: ";
         for (String usage : List.of(AddCommand.MESSAGE_USAGE, EditCommand.MESSAGE_USAGE,
-                DeleteCommand.MESSAGE_USAGE, FindCommand.MESSAGE_USAGE)) {
+                DeleteCommand.MESSAGE_USAGE, FilterCommand.MESSAGE_USAGE, FindCommand.MESSAGE_USAGE)) {
             String example = usage.substring(usage.indexOf(examplePrefix) + examplePrefix.length());
             parser.parseCommand(example);
         }
@@ -86,6 +88,15 @@ public class AddressBookParserTest {
         FindCommand command = (FindCommand) parser.parseCommand(
                 FindCommand.COMMAND_WORD + " " + keywords.stream().collect(Collectors.joining(" ")));
         assertEquals(new FindCommand(new NameContainsKeywordsPredicate(keywords)), command);
+    }
+
+    @Test
+    public void parseCommand_filter() throws Exception {
+        List<Tag> tags = List.of(new Tag("Physics"), new Tag("Secondary 4"));
+        FilterCommand command = (FilterCommand) parser.parseCommand(
+                FilterCommand.COMMAND_WORD + " t/Physics t/Secondary 4");
+
+        assertEquals(new FilterCommand(new TagsContainKeywordsPredicate(tags)), command);
     }
 
     @Test

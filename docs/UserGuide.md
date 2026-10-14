@@ -140,6 +140,20 @@ Examples:
 * `find alex david` returns `Alex Yeoh`, `David Li`<br>
   ![result for 'find alex david'](images/findAlexDavidResult.png)
 
+### Filtering persons by tags: `filter`
+
+Finds persons who have all the specified tags.
+
+Format: `filter t/TAG [t/MORE_TAGS]...`
+
+* Tag matching is case-insensitive; for example, `t/physics` matches `Physics`.
+* Tag order does not matter.
+* A person must have every specified tag to be returned (an `AND` search).
+
+Examples:
+* `filter t/Physics` returns every person tagged `Physics`.
+* `filter t/Physics t/Sec4` returns only persons tagged with both `Physics` and `Sec4`.
+
 ### Tagging a person: `tag`
 
 Adds one or more tags to an existing person.
@@ -150,8 +164,6 @@ Format: `tag INDEX t/TAG [t/MORE_TAGS]...`
 * Tags must be 1-20 characters long and contain only letters, numbers, and spaces.
 * New tags are added alongside the person's existing tags.
 * Adding a tag the person already has does not create a duplicate.
-* Tag filtering and searching are not supported yet.
-
 Examples:
 * `tag 1 t/physics t/sec4`
 * `tag 2 t/thursday`
@@ -233,6 +245,7 @@ Action     | Format, Examples
 **Clear**  | `clear`
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
 **Edit**   | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]... `<br> e.g.,`edit 2 n/James Lee e/jameslee@example.com`
+**Filter** | `filter t/TAG [t/MORE_TAGS]...`<br> e.g., `filter t/physics t/sec4`
 **Find**   | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
 **List**   | `list`
 **Tag**    | `tag INDEX t/TAG [t/MORE_TAGS]...`<br> e.g., `tag 1 t/physics t/sec4`
