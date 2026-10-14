@@ -23,8 +23,12 @@ public class VersionedAddressBook extends AddressBook {
     /**
      * Saves a copy of the current state to history.
      * Call this after each change that can be undone.
+     * Does nothing if the state has not changed since the last commit.
      */
     public void commitAddressBook() {
+        if (current.equals(this)) {
+            return;
+        }
         history.push(current);
         current = new AddressBook(this);
     }

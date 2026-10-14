@@ -42,6 +42,7 @@ public interface Model {
     /**
      * Saves a copy of the current state to the undo history.
      * Call this after each change that can be undone.
+     * Does nothing if the state has not changed since the last commit.
      */
     void commitAddressBook();
 

@@ -27,6 +27,40 @@ public class VersionedAddressBookTest {
     }
 
     @Test
+    public void commitAddressBook_noChange_nothingToUndo() {
+        versionedAddressBook.commitAddressBook();
+        assertFalse(versionedAddressBook.canUndoAddressBook());
+    }
+
+    @Test
+    public void commitAddressBook_noChangeAfterChange_undoesOnlyTheChange() {
+        versionedAddressBook.removePerson(ALICE);
+        versionedAddressBook.commitAddressBook();
+        versionedAddressBook.commitAddressBook();
+
+        versionedAddressBook.undoAddressBook();
+        assertEquals(getTypicalAddressBook(), versionedAddressBook);
+        assertFalse(versionedAddressBook.canUndoAddressBook());
+    }
+
+    @Test
+    public void commitAddressBook_changeThenRevert_bothUndoable() {
+        versionedAddressBook.removePerson(ALICE);
+        versionedAddressBook.commitAddressBook();
+        AddressBook withoutAlice = new AddressBook(versionedAddressBook);
+        versionedAddressBook.addPerson(ALICE);
+        versionedAddressBook.commitAddressBook();
+
+        // Re-adding Alice is a real change even though Alice was in an earlier state
+        versionedAddressBook.undoAddressBook();
+        assertEquals(withoutAlice, versionedAddressBook);
+
+        versionedAddressBook.undoAddressBook();
+        assertEquals(getTypicalAddressBook(), versionedAddressBook);
+        assertFalse(versionedAddressBook.canUndoAddressBook());
+    }
+
+    @Test
     public void undoAddressBook_afterChange_restoresPreviousState() {
         versionedAddressBook.removePerson(ALICE);
         versionedAddressBook.commitAddressBook();
