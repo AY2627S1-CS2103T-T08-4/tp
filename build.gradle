@@ -33,6 +33,13 @@ test {
         systemProperty 'testfx.headless', 'true'
         systemProperty 'prism.order', 'sw'
         systemProperty 'prism.text', 't2k'
+
+        jvmArgs(
+                '--add-exports=javafx.graphics/com.sun.glass.ui=ALL-UNNAMED',
+                '--add-opens=javafx.graphics/com.sun.glass.ui=ALL-UNNAMED',
+                '--add-exports=javafx.graphics/com.sun.javafx.util=ALL-UNNAMED',
+                '--add-exports=javafx.base/com.sun.javafx.logging=ALL-UNNAMED'
+        )
     }
 
     finalizedBy jacocoTestReport
