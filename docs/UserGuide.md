@@ -125,20 +125,32 @@ Examples:
 
 ### Locating persons by name: `find`
 
-Finds persons whose names contain any of the given keywords.
+Finds persons whose names match any of the given keywords.
 
 Format: `find KEYWORD [MORE_KEYWORDS]`
 
+* Keywords can contain the same characters as names: letters, digits, hyphens (`-`), apostrophes (`'`), full stops (`.`) and parentheses (`()`). Each keyword must contain at least one letter or digit.
 * The search is case-insensitive; for example, `hans` matches `Hans`.
 * Keyword order does not matter; for example, `Hans Bo` matches `Bo Hans`.
 * The search considers only names.
-* Only full words match; for example, `Han` does not match `Hans`.
+* A keyword matches a whole word of a name, or a whole part of a word separated by punctuation; for example, `Brien` matches `O'Brien`, `Aisyah` matches `Nur-Aisyah`, and `NHHS` matches `John Tan (NHHS)`.
+* Punctuation is ignored; for example, `obrien` and `O'Brien` both match `O'Brien`.
+* Only whole words or parts match; for example, `Han` does not match `Hans`, and `Bri` does not match `O'Brien`.
 * Persons matching at least one keyword are returned (an `OR` search); for example, `Hans Bo` returns `Hans Gruber` and `Bo Yang`.
+* If no person matches, Sieve shows `0 clients found` with tips for searching again. Use `list` to see all clients again.
 
 Examples:
-* `find John` returns `john` and `John Doe`
-* `find alex david` returns `Alex Yeoh`, `David Li`<br>
-  ![result for 'find alex david'](images/findAlexDavidResult.png)
+* `find amirah` returns `Amirah Tan`
+* `find amirah farhan` returns `Amirah Tan` and `Farhan Ali`
+* `find Brien` returns `Liam O'Brien` (if you have added that client)<br>
+  ![result for 'find Brien'](images/findBrienResult.png)
+
+<box type="info" seamless>
+
+**Limitations:**
+* A keyword is matched against one word of a name at a time, so a keyword that joins two words does not match. For example, `Aisyah-Tan` does not match `Nur-Aisyah Tan`; use `find Aisyah Tan` instead.
+* `find` searches names only. A keyword made of digits, such as `91234567`, is matched against names, not phone numbers.
+</box>
 
 ### Tagging a person: `tag`
 
@@ -233,7 +245,7 @@ Action     | Format, Examples
 **Clear**  | `clear`
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
 **Edit**   | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]... `<br> e.g.,`edit 2 n/James Lee e/jameslee@example.com`
-**Find**   | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
+**Find**   | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find Amirah O'Brien`
 **List**   | `list`
 **Tag**    | `tag INDEX t/TAG [t/MORE_TAGS]...`<br> e.g., `tag 1 t/physics t/sec4`
 **Help**   | `help`

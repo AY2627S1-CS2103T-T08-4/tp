@@ -15,13 +15,19 @@ public class FindCommand extends Command {
 
     public static final String COMMAND_WORD = "find";
 
-    public static final String MESSAGE_USAGE = COMMAND_WORD + ": Finds all clients whose names contain any of "
-            + "the specified keywords (case-insensitive) and displays them as a list with index numbers.\n"
+    public static final String MESSAGE_USAGE = COMMAND_WORD + ": Finds all clients whose names match any of "
+            + "the specified keywords (case-insensitive, ignoring punctuation) "
+            + "and displays them as a list with index numbers.\n"
             + "Parameters: KEYWORD [MORE_KEYWORDS]...\n"
             + "Example: " + COMMAND_WORD + " immanuel krishna";
 
     public static final String MESSAGE_INVALID_KEYWORDS =
-            "Search keywords must only contain letters and cannot be blank.";
+            "Search keywords can only contain letters, digits, hyphens <->, apostrophes <'>, full stops <.> "
+                    + "and parentheses <()>, and must include at least one letter or digit.";
+
+    public static final String MESSAGE_NO_CLIENTS_FOUND = Messages.getPersonsListedOverviewMessage(0)
+            + " Keywords must match a whole part of a name (e.g. Brien, not Bri). "
+            + "Check the spelling, or use list to see all clients.";
 
     private final NameContainsKeywordsPredicate predicate;
 
@@ -33,8 +39,11 @@ public class FindCommand extends Command {
     public CommandResult execute(Model model) {
         requireNonNull(model);
         model.updateFilteredPersonList(predicate);
-        return new CommandResult(
-                Messages.getPersonsListedOverviewMessage(model.getFilteredPersonList().size()));
+        int matchCount = model.getFilteredPersonList().size();
+        if (matchCount == 0) {
+            return new CommandResult(MESSAGE_NO_CLIENTS_FOUND);
+        }
+        return new CommandResult(Messages.getPersonsListedOverviewMessage(matchCount));
     }
 
     @Override

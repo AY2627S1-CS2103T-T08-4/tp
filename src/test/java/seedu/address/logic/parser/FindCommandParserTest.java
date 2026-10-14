@@ -32,18 +32,27 @@ public class FindCommandParserTest {
     }
 
     @Test
-    public void parse_nonLetterKeywords_throwsParseException() {
+    public void parse_nameCharacterKeywords_returnsFindCommand() {
+        FindCommand expectedFindCommand = new FindCommand(
+                new NameContainsKeywordsPredicate(List.of("O'Brien", "Nur-Aisyah", "Jr.", "Ravi2", "(NHHS)")));
+        assertParseSuccess(parser, "O'Brien Nur-Aisyah Jr. Ravi2 (NHHS)", expectedFindCommand);
+    }
+
+    @Test
+    public void parse_invalidKeywords_throwsParseException() {
         // underscore
         assertParseFailure(parser, "Amirah_Tan", FindCommand.MESSAGE_INVALID_KEYWORDS);
 
-        // digits
-        assertParseFailure(parser, "Ravi2", FindCommand.MESSAGE_INVALID_KEYWORDS);
+        // slash (prefix delimiter, not allowed in names)
+        assertParseFailure(parser, "a/l", FindCommand.MESSAGE_INVALID_KEYWORDS);
 
-        // punctuation
-        assertParseFailure(parser, "O'Brien", FindCommand.MESSAGE_INVALID_KEYWORDS);
+        // punctuation only
+        assertParseFailure(parser, "-", FindCommand.MESSAGE_INVALID_KEYWORDS);
+        assertParseFailure(parser, "'.", FindCommand.MESSAGE_INVALID_KEYWORDS);
+        assertParseFailure(parser, "()", FindCommand.MESSAGE_INVALID_KEYWORDS);
 
         // one invalid keyword among valid ones
-        assertParseFailure(parser, "Alice B0b", FindCommand.MESSAGE_INVALID_KEYWORDS);
+        assertParseFailure(parser, "Alice B_b", FindCommand.MESSAGE_INVALID_KEYWORDS);
     }
 
 }
