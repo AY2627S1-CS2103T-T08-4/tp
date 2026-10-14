@@ -27,10 +27,22 @@ deactivate UndoCommand
 AddressBookParser --> LogicManager : u
 deactivate AddressBookParser
 
-LogicManager -> UndoCommand : execute()
+LogicManager -> UndoCommand : execute(m)
 activate UndoCommand
 
+UndoCommand -> Model : canUndoAddressBook()
+activate Model
+
+Model --> UndoCommand : true
+deactivate Model
+
 UndoCommand -> Model : undoAddressBook()
+activate Model
+
+Model --> UndoCommand
+deactivate Model
+
+UndoCommand -> Model : updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS)
 activate Model
 
 Model --> UndoCommand
@@ -40,6 +52,14 @@ UndoCommand --> LogicManager : result
 deactivate UndoCommand
 UndoCommand -[hidden]-> LogicManager : result
 destroy UndoCommand
+
+LogicManager -> Model : commitAddressBook()
+activate Model
+
+note right of Model : Does nothing, as the client list\nalready matches the saved state
+
+Model --> LogicManager
+deactivate Model
 
 [<--LogicManager
 deactivate LogicManager
