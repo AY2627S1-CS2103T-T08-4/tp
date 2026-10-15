@@ -28,10 +28,10 @@ public class SampleDataUtil {
         return new Person[] {
             new Person(new Name("Amirah Tan"), new Phone("91234567"), new Email("amirahtan@sample.com"),
                 new Address("Blk 123 Yishun Ave 5 #04-12"),
-                getTagSet("Math", "Sec4", "Urgent", "HIGH rate", "PRIority")),
+                getTagSet("Math", "Sec4", "Urgent")),
             new Person(new Name("Brandon Sim"), new Phone("92345678"), new Email("brandonsim@sample.com"),
                 new Address("10 Queenstown Rd"),
-                getTagSet("Physics", "Sec4", "Free", "Dont care")),
+                getTagSet("Physics", "Sec4")),
             new Person(new Name("Charlotte Oliveiro"), new Phone("98765432"), new Email("charlotte@sample.com"),
                 new Address("Blk 456 Bishan St 21 #11-22"),
                 getTagSet("English", "Sec2")),
