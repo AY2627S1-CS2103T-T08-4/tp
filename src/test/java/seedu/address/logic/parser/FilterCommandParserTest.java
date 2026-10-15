@@ -9,7 +9,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.commands.FilterCommand;
-import seedu.address.model.person.TagsContainKeywordsPredicate;
+import seedu.address.model.person.PersonMatchesSearchPredicate;
 import seedu.address.model.tag.Tag;
 
 public class FilterCommandParserTest {
@@ -19,7 +19,8 @@ public class FilterCommandParserTest {
     @Test
     public void parse_validArgs_returnsFilterCommand() {
         FilterCommand expectedCommand = new FilterCommand(
-                new TagsContainKeywordsPredicate(List.of(new Tag("Physics"), new Tag("Secondary 4"))));
+                new PersonMatchesSearchPredicate(List.of(), List.of(),
+                        List.of(new Tag("Physics"), new Tag("Secondary 4"))));
 
         assertParseSuccess(parser, " t/Physics t/Secondary 4", expectedCommand);
     }

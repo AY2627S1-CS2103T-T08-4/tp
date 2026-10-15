@@ -5,24 +5,24 @@ import static java.util.Objects.requireNonNull;
 import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.logic.Messages;
 import seedu.address.model.Model;
-import seedu.address.model.person.TagsContainKeywordsPredicate;
+import seedu.address.model.person.PersonMatchesSearchPredicate;
 
 /**
- * Finds and lists all persons whose tags match all specified tags.
+ * Finds and lists all persons whose tags match any specified tag.
  * Tag matching is case-insensitive.
  */
 public class FilterCommand extends Command {
 
     public static final String COMMAND_WORD = "filter";
 
-    public static final String MESSAGE_USAGE = COMMAND_WORD + ": Finds all clients who have all the specified tags "
+    public static final String MESSAGE_USAGE = COMMAND_WORD + ": Finds all clients who have any of the specified tags "
             + "(case-insensitive and order-insensitive) and displays them as a list with index numbers.\n"
             + "Parameters: t/TAG [t/MORE_TAGS]...\n"
             + "Example: " + COMMAND_WORD + " t/High rate t/Priority";
 
-    private final TagsContainKeywordsPredicate predicate;
+    private final PersonMatchesSearchPredicate predicate;
 
-    public FilterCommand(TagsContainKeywordsPredicate predicate) {
+    public FilterCommand(PersonMatchesSearchPredicate predicate) {
         this.predicate = predicate;
     }
 

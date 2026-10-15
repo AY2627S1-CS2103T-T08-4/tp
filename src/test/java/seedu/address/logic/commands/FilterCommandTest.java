@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
-import seedu.address.model.person.TagsContainKeywordsPredicate;
+import seedu.address.model.person.PersonMatchesSearchPredicate;
 import seedu.address.model.tag.Tag;
 
 public class FilterCommandTest {
@@ -38,7 +38,7 @@ public class FilterCommandTest {
 
     @Test
     public void execute_singleTag_returnsAllMatchingPersons() {
-        TagsContainKeywordsPredicate predicate = predicateWith("friends");
+        PersonMatchesSearchPredicate predicate = predicateWith("friends");
         FilterCommand command = new FilterCommand(predicate);
         expectedModel.updateFilteredPersonList(predicate);
 
@@ -47,18 +47,18 @@ public class FilterCommandTest {
     }
 
     @Test
-    public void execute_multipleTags_returnsPersonsWithAllTags() {
-        TagsContainKeywordsPredicate predicate = predicateWith("FRIENDS", "owesmoney");
+    public void execute_multipleTags_returnsPersonsWithAnyTag() {
+        PersonMatchesSearchPredicate predicate = predicateWith("FRIENDS", "owesmoney");
         FilterCommand command = new FilterCommand(predicate);
         expectedModel.updateFilteredPersonList(predicate);
 
-        assertCommandSuccess(command, model, "1 client found matching your search term(s).", expectedModel);
-        assertEquals(List.of(BENSON), model.getFilteredPersonList());
+        assertCommandSuccess(command, model, "3 clients found matching your search term(s).", expectedModel);
+        assertEquals(List.of(ALICE, BENSON, DANIEL), model.getFilteredPersonList());
     }
 
     @Test
     public void toStringMethod() {
-        TagsContainKeywordsPredicate predicate = predicateWith("friends");
+        PersonMatchesSearchPredicate predicate = predicateWith("friends");
         FilterCommand command = new FilterCommand(predicate);
         String expected = FilterCommand.class.getCanonicalName() + "{predicate=" + predicate + "}";
 
@@ -69,7 +69,8 @@ public class FilterCommandTest {
         return new FilterCommand(predicateWith(tagNames));
     }
 
-    private TagsContainKeywordsPredicate predicateWith(String... tagNames) {
-        return new TagsContainKeywordsPredicate(List.of(tagNames).stream().map(Tag::new).toList());
+    private PersonMatchesSearchPredicate predicateWith(String... tagNames) {
+        List<Tag> tags = List.of(tagNames).stream().map(Tag::new).toList();
+        return new PersonMatchesSearchPredicate(List.of(), List.of(), tags);
     }
 }

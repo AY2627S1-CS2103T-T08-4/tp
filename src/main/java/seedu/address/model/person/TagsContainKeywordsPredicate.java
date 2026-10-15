@@ -1,25 +1,32 @@
 package seedu.address.model.person;
 
-import java.util.List;
+import static java.util.Objects.requireNonNull;
+
+import java.util.Collection;
+import java.util.Set;
 import java.util.function.Predicate;
 
 import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.model.tag.Tag;
 
 /**
- * Tests that a {@code Person}'s {@code Tag} matches all of the keywords given.
+ * Tests that a {@code Person} has any of the specified tags.
  */
 public class TagsContainKeywordsPredicate implements Predicate<Person> {
 
-    private final List<Tag> keywords;
+    private final Set<Tag> keywords;
 
-    public TagsContainKeywordsPredicate(List<Tag> keywords) {
-        this.keywords = keywords;
+    /**
+     * Creates a predicate that matches a person who has any tag in {@code keywords}.
+     */
+    public TagsContainKeywordsPredicate(Collection<Tag> keywords) {
+        requireNonNull(keywords);
+        this.keywords = Set.copyOf(keywords);
     }
 
     @Override
     public boolean test(Person person) {
-        return person.getTags().containsAll(keywords);
+        return person.getTags().stream().anyMatch(keywords::contains);
     }
 
     @Override
@@ -28,11 +35,12 @@ public class TagsContainKeywordsPredicate implements Predicate<Person> {
             return true;
         }
 
-        if (!(other instanceof TagsContainKeywordsPredicate otherPredicate)) {
+        // instanceof handles nulls
+        if (!(other instanceof TagsContainKeywordsPredicate otherTagsContainKeywordsPredicate)) {
             return false;
         }
 
-        return keywords.equals(otherPredicate.keywords);
+        return keywords.equals(otherTagsContainKeywordsPredicate.keywords);
     }
 
     @Override

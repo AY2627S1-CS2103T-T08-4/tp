@@ -30,7 +30,6 @@ import seedu.address.logic.commands.UndoCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.PersonMatchesSearchPredicate;
-import seedu.address.model.person.TagsContainKeywordsPredicate;
 import seedu.address.model.tag.Tag;
 import seedu.address.testutil.EditPersonDescriptorBuilder;
 import seedu.address.testutil.PersonBuilder;
@@ -122,7 +121,7 @@ public class AddressBookParserTest {
         FilterCommand command = (FilterCommand) parser.parseCommand(
                 FilterCommand.COMMAND_WORD + " t/Physics t/Secondary 4");
 
-        assertEquals(new FilterCommand(new TagsContainKeywordsPredicate(tags)), command);
+        assertEquals(new FilterCommand(new PersonMatchesSearchPredicate(List.of(), List.of(), tags)), command);
     }
 
     @Test

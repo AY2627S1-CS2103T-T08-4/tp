@@ -8,7 +8,7 @@ import java.util.List;
 
 import seedu.address.logic.commands.FilterCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
-import seedu.address.model.person.TagsContainKeywordsPredicate;
+import seedu.address.model.person.PersonMatchesSearchPredicate;
 import seedu.address.model.tag.Tag;
 
 /**
@@ -33,6 +33,6 @@ public class FilterCommandParser implements Parser<FilterCommand> {
         for (String tagValue : tagValues) {
             tags.add(ParserUtil.parseTag(tagValue));
         }
-        return new FilterCommand(new TagsContainKeywordsPredicate(tags));
+        return new FilterCommand(new PersonMatchesSearchPredicate(List.of(), List.of(), tags));
     }
 }

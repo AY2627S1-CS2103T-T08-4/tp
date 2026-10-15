@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
@@ -13,38 +14,50 @@ import seedu.address.testutil.PersonBuilder;
 
 public class TagsContainKeywordsPredicateTest {
 
-    private static final Person PERSON = new PersonBuilder().withTags("Physics", "Secondary 4").build();
+    private static final Person PERSON_WITH_TAGS = new PersonBuilder().withTags("Physics", "Secondary 4").build();
 
     @Test
     public void equals() {
-        TagsContainKeywordsPredicate firstPredicate = predicateWith("Physics");
-        TagsContainKeywordsPredicate secondPredicate = predicateWith("Secondary 4");
+        TagsContainKeywordsPredicate firstPredicate = predicateWith("Physics", "Secondary 4");
+        TagsContainKeywordsPredicate secondPredicate = predicateWith("Chemistry");
 
+        // same object -> returns true
         assertTrue(firstPredicate.equals(firstPredicate));
-        assertTrue(firstPredicate.equals(predicateWith("Physics")));
-        assertFalse(firstPredicate.equals(secondPredicate));
+
+        // same values in a different order and case -> returns true
+        assertTrue(firstPredicate.equals(predicateWith("secondary 4", "PHYSICS")));
+
+        // different types -> returns false
         assertFalse(firstPredicate.equals(1));
+
+        // null -> returns false
         assertFalse(firstPredicate.equals(null));
+
+        // different tags -> returns false
+        assertFalse(firstPredicate.equals(secondPredicate));
     }
 
     @Test
-    public void test_personHasAllTags_returnsTrue() {
-        assertTrue(predicateWith("Physics").test(PERSON));
-        assertTrue(predicateWith("Physics", "Secondary 4").test(PERSON));
-        assertTrue(predicateWith("secondary 4", "PHYSICS").test(PERSON));
+    public void test_anyKeywordMatches_returnsTrue() {
+        assertTrue(predicateWith("Physics").test(PERSON_WITH_TAGS));
+        assertTrue(predicateWith("Chemistry", "Secondary 4").test(PERSON_WITH_TAGS));
+        assertTrue(predicateWith("PHYSICS").test(PERSON_WITH_TAGS));
     }
 
     @Test
-    public void test_personDoesNotHaveAllTags_returnsFalse() {
-        assertFalse(predicateWith("Chemistry").test(PERSON));
-        assertFalse(predicateWith("Physics", "Chemistry").test(PERSON));
+    public void test_noKeywordMatches_returnsFalse() {
+        assertFalse(predicateWith().test(PERSON_WITH_TAGS));
+        assertFalse(predicateWith("Chemistry").test(PERSON_WITH_TAGS));
+
+        Person personWithoutTags = new PersonBuilder().withTags().build();
+        assertFalse(predicateWith("Physics").test(personWithoutTags));
     }
 
     @Test
     public void toStringMethod() {
-        List<Tag> tags = List.of(new Tag("Physics"), new Tag("Secondary 4"));
-        TagsContainKeywordsPredicate predicate = new TagsContainKeywordsPredicate(tags);
-        String expected = TagsContainKeywordsPredicate.class.getCanonicalName() + "{keywords=" + tags + "}";
+        Set<Tag> keywords = Set.of(new Tag("Physics"));
+        TagsContainKeywordsPredicate predicate = new TagsContainKeywordsPredicate(keywords);
+        String expected = TagsContainKeywordsPredicate.class.getCanonicalName() + "{keywords=" + keywords + "}";
 
         assertEquals(expected, predicate.toString());
     }

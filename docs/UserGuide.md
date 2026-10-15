@@ -173,17 +173,17 @@ Examples:
 
 ### Filtering clients by tags: `filter`
 
-Finds clients who have all the specified tags.
+Finds clients who have any of the specified tags.
 
 Format: `filter t/TAG [t/MORE_TAGS]...`
 
 * Tag matching is case-insensitive; for example, `t/physics` matches `Physics`.
 * Tag order does not matter.
-* A client must have every specified tag to be returned (an `AND` search).
+* A client needs at least one specified tag to be returned (an `OR` search).
 
 Examples:
 * `filter t/Physics` returns every client tagged `Physics`.
-* `filter t/Physics t/Sec4` returns only clients tagged with both `Physics` and `Sec4`.
+* `filter t/Physics t/Math` returns clients tagged with either `Physics` or `Math`.
 
 ### Tagging a client: `tag`
 
