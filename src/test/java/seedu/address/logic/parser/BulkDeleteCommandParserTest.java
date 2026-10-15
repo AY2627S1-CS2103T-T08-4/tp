@@ -15,6 +15,16 @@ public class BulkDeleteCommandParserTest {
     private BulkDeleteCommandParser parser = new BulkDeleteCommandParser();
 
     @Test
+    public void parse_singleIndex_throwsParseException() {
+        assertParseFailure(
+                parser,
+                "1",
+                String.format(
+                        MESSAGE_INVALID_COMMAND_FORMAT,
+                        BulkDeleteCommand.MESSAGE_USAGE));
+    }
+
+    @Test
     public void parse_multipleValidIndexes_returnsBulkDeleteCommand() {
         assertParseSuccess(
                 parser,
@@ -23,6 +33,27 @@ public class BulkDeleteCommandParserTest {
                         Index.fromOneBased(1),
                         Index.fromOneBased(2),
                         Index.fromOneBased(3))));
+    }
+
+    @Test
+    public void parse_multipleValidIndexesWithoutSpaces_returnsBulkDeleteCommand() {
+        assertParseSuccess(
+                parser,
+                "1,2,3",
+                new BulkDeleteCommand(List.of(
+                        Index.fromOneBased(1),
+                        Index.fromOneBased(2),
+                        Index.fromOneBased(3))));
+    }
+
+    @Test
+    public void parse_nonPositiveIndex_throwsParseException() {
+        assertParseFailure(
+                parser,
+                "0,1",
+                String.format(
+                        MESSAGE_INVALID_COMMAND_FORMAT,
+                        BulkDeleteCommand.MESSAGE_USAGE));
     }
 
     @Test
@@ -40,6 +71,36 @@ public class BulkDeleteCommandParserTest {
         assertParseFailure(
                 parser,
                 "1,,3",
+                String.format(
+                        MESSAGE_INVALID_COMMAND_FORMAT,
+                        BulkDeleteCommand.MESSAGE_USAGE));
+    }
+
+    @Test
+    public void parse_trailingComma_throwsParseException() {
+        assertParseFailure(
+                parser,
+                "1,2,",
+                String.format(
+                        MESSAGE_INVALID_COMMAND_FORMAT,
+                        BulkDeleteCommand.MESSAGE_USAGE));
+    }
+
+    @Test
+    public void parse_leadingComma_throwsParseException() {
+        assertParseFailure(
+                parser,
+                ",1,2",
+                String.format(
+                        MESSAGE_INVALID_COMMAND_FORMAT,
+                        BulkDeleteCommand.MESSAGE_USAGE));
+    }
+
+    @Test
+    public void parse_invalidIndex_throwsParseException() {
+        assertParseFailure(
+                parser,
+                "1,a,3",
                 String.format(
                         MESSAGE_INVALID_COMMAND_FORMAT,
                         BulkDeleteCommand.MESSAGE_USAGE));

@@ -6,6 +6,8 @@ import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
 import static seedu.address.logic.Messages.MESSAGE_UNKNOWN_COMMAND;
 import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalIndexes.INDEX_FIRST_PERSON;
+import static seedu.address.testutil.TypicalIndexes.INDEX_SECOND_PERSON;
+import static seedu.address.testutil.TypicalIndexes.INDEX_THIRD_PERSON;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -13,6 +15,7 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.commands.AddCommand;
+import seedu.address.logic.commands.BulkDeleteCommand;
 import seedu.address.logic.commands.ClearCommand;
 import seedu.address.logic.commands.DeleteCommand;
 import seedu.address.logic.commands.EditCommand;
@@ -45,9 +48,14 @@ public class AddressBookParserTest {
     public void parseCommand_usageExamples_parseSuccessfully() throws Exception {
         // the example in each usage message is shown to users, so it must be a valid command
         String examplePrefix = "Example: ";
-        for (String usage : List.of(AddCommand.MESSAGE_USAGE, EditCommand.MESSAGE_USAGE,
-                DeleteCommand.MESSAGE_USAGE, FindCommand.MESSAGE_USAGE)) {
-            String example = usage.substring(usage.indexOf(examplePrefix) + examplePrefix.length());
+        for (String usage : List.of(
+                AddCommand.MESSAGE_USAGE,
+                EditCommand.MESSAGE_USAGE,
+                DeleteCommand.MESSAGE_USAGE,
+                BulkDeleteCommand.MESSAGE_USAGE,
+                FindCommand.MESSAGE_USAGE)) {
+            String example = usage.substring(
+                    usage.indexOf(examplePrefix) + examplePrefix.length());
             parser.parseCommand(example);
         }
     }
@@ -63,6 +71,22 @@ public class AddressBookParserTest {
         DeleteCommand command = (DeleteCommand) parser.parseCommand(
                 DeleteCommand.COMMAND_WORD + " " + INDEX_FIRST_PERSON.getOneBased());
         assertEquals(new DeleteCommand(INDEX_FIRST_PERSON), command);
+    }
+
+    @Test
+    public void parseCommand_bulkDelete() throws Exception {
+        BulkDeleteCommand command = (BulkDeleteCommand) parser.parseCommand(
+                DeleteCommand.COMMAND_WORD + " "
+                        + INDEX_FIRST_PERSON.getOneBased() + ", "
+                        + INDEX_SECOND_PERSON.getOneBased() + ", "
+                        + INDEX_THIRD_PERSON.getOneBased());
+
+        BulkDeleteCommand expectedCommand = new BulkDeleteCommand(List.of(
+                INDEX_FIRST_PERSON,
+                INDEX_SECOND_PERSON,
+                INDEX_THIRD_PERSON));
+
+        assertEquals(expectedCommand, command);
     }
 
     @Test
