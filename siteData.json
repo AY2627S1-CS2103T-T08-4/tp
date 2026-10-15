@@ -117,7 +117,7 @@
         "locating-clients-by-name-phone-or-tag-find": "Locating clients by name, phone or tag: find",
         "filtering-clients-by-tags-filter": "Filtering clients by tags: filter",
         "tagging-a-client-tag": "Tagging a client: tag",
-        "deleting-a-client-delete": "Deleting a client: delete",
+        "deleting-clients-delete": "Deleting clients: delete",
         "clearing-all-clients-clear": "Clearing all clients: clear",
         "undoing-a-change-undo": "Undoing a change: undo",
         "exiting-the-program-exit": "Exiting the program: exit",
