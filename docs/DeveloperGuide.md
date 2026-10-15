@@ -362,11 +362,6 @@ The undo history is kept in memory only, so it is lost when the app is closed. I
   * Pros: Simplest to implement, with a fixed memory cost.
   * Cons: The user can only undo their last change, and a second mistake cannot be recovered.
 
-### \[Proposed\] Data archiving
-
-_{Explain here how the data archiving feature will be implemented}_
-
-
 --------------------------------------------------------------------------------------------------------------------
 
 ## **Documentation, logging, testing, dev-ops**
