@@ -170,6 +170,20 @@ Examples:
 * A short keyword can match many clients; for example, `find a` returns every client with a name part starting with `a`. Type more letters to narrow the results.
 </box>
 
+### Filtering clients by tags: `filter`
+
+Finds clients who have any of the specified tags.
+
+Format: `filter t/TAG [t/MORE_TAGS]...`
+
+* Tag matching is case-insensitive; for example, `t/physics` matches `Physics`.
+* Tag order does not matter.
+* A client needs at least one specified tag to be returned (an `OR` search).
+
+Examples:
+* `filter t/Physics` returns every client tagged `Physics`.
+* `filter t/Physics t/Math` returns clients tagged with either `Physics` or `Math`.
+
 ### Tagging a client: `tag`
 
 Adds one or more tags to an existing client.
@@ -180,7 +194,6 @@ Format: `tag INDEX t/TAG [t/MORE_TAGS]...`
 * Tags must be 1-20 characters long and contain only letters, numbers, and spaces.
 * New tags are added alongside the client's existing tags.
 * Adding a tag the client already has does not create a duplicate.
-* Tag filtering and searching are not supported yet.
 
 Examples:
 * `tag 1 t/physics t/sec4`
@@ -283,6 +296,7 @@ Action     | Format, Examples
 **Clear**  | `clear`
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
 **Edit**   | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]... `<br> e.g.,`edit 2 n/James Lee e/jameslee@example.com`
+**Filter** | `filter t/TAG [t/MORE_TAGS]...`<br> e.g., `filter t/physics t/sec4`
 **Find**   | `find [KEYWORD]... [p/PHONE]... [t/TAG]...`<br> e.g., `find Amirah O'Brien`, `find t/sec4`, `find p/91234567`
 **List**   | `list`
 **Tag**    | `tag INDEX t/TAG [t/MORE_TAGS]...`<br> e.g., `tag 1 t/physics t/sec4`

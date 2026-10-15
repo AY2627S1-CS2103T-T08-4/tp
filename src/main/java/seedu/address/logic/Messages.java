@@ -28,7 +28,7 @@ public class Messages {
                     + "If this is a different client, add a detail to tell them apart, e.g. \"%1$s (NHHS)\".";
 
     /**
-     * Returns {@code count} followed by "client" or "clients", e.g. "1 client" or "3 clients".
+     * Returns {@code count} followed by "client" or "clients", e.g. "0 clients", "1 client" or "3 clients".
      */
     public static String formatClientCount(int count) {
         return count + (count == 1 ? " client" : " clients");

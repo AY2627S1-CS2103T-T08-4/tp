@@ -21,6 +21,7 @@ import seedu.address.logic.commands.DeleteCommand;
 import seedu.address.logic.commands.EditCommand;
 import seedu.address.logic.commands.EditCommand.EditPersonDescriptor;
 import seedu.address.logic.commands.ExitCommand;
+import seedu.address.logic.commands.FilterCommand;
 import seedu.address.logic.commands.FindCommand;
 import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.ListCommand;
@@ -54,6 +55,7 @@ public class AddressBookParserTest {
                 EditCommand.MESSAGE_USAGE,
                 DeleteCommand.MESSAGE_USAGE,
                 BulkDeleteCommand.MESSAGE_USAGE,
+                FilterCommand.MESSAGE_USAGE,
                 FindCommand.MESSAGE_USAGE)) {
             String example = usage.substring(
                     usage.indexOf(examplePrefix) + examplePrefix.length());
@@ -111,6 +113,15 @@ public class AddressBookParserTest {
         FindCommand command = (FindCommand) parser.parseCommand(
                 FindCommand.COMMAND_WORD + " " + keywords.stream().collect(Collectors.joining(" ")));
         assertEquals(new FindCommand(new PersonMatchesSearchPredicate(keywords, List.of(), List.of())), command);
+    }
+
+    @Test
+    public void parseCommand_filter() throws Exception {
+        List<Tag> tags = List.of(new Tag("Physics"), new Tag("Secondary 4"));
+        FilterCommand command = (FilterCommand) parser.parseCommand(
+                FilterCommand.COMMAND_WORD + " t/Physics t/Secondary 4");
+
+        assertEquals(new FilterCommand(new PersonMatchesSearchPredicate(List.of(), List.of(), tags)), command);
     }
 
     @Test
