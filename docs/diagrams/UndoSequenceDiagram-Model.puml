@@ -10,11 +10,12 @@ end box
 [-> Model : undoAddressBook()
 activate Model
 
-Model -> VersionedAddressBook : undo()
+Model -> VersionedAddressBook : undoAddressBook()
 activate VersionedAddressBook
 
-VersionedAddressBook -> VersionedAddressBook :resetData(ReadOnlyAddressBook)
-VersionedAddressBook --> Model :
+VersionedAddressBook -> VersionedAddressBook : current = history.pop()
+VersionedAddressBook -> VersionedAddressBook : resetData(current)
+VersionedAddressBook --> Model
 deactivate VersionedAddressBook
 
 [<-- Model

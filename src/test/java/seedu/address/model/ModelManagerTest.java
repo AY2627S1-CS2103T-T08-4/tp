@@ -96,6 +96,17 @@ public class ModelManagerTest {
     }
 
     @Test
+    public void undoAddressBook_afterCommittedChange_restoresPreviousState() {
+        modelManager.addPerson(ALICE);
+        modelManager.commitAddressBook();
+        assertTrue(modelManager.canUndoAddressBook());
+
+        modelManager.undoAddressBook();
+        assertFalse(modelManager.hasPerson(ALICE));
+        assertFalse(modelManager.canUndoAddressBook());
+    }
+
+    @Test
     public void equals() {
         AddressBook addressBook = new AddressBookBuilder().withPerson(ALICE).withPerson(BENSON).build();
         AddressBook differentAddressBook = new AddressBook();

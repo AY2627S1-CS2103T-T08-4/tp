@@ -7,7 +7,6 @@ import java.util.logging.Logger;
 import javafx.collections.ObservableList;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.core.LogsCenter;
-import seedu.address.commons.exceptions.DataLoadingException;
 import seedu.address.logic.commands.Command;
 import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.exceptions.CommandException;
@@ -25,7 +24,7 @@ public class LogicManager implements Logic {
     public static final String FILE_OPS_ERROR_FORMAT = "Could not save data due to the following error: %s";
 
     public static final String FILE_OPS_PERMISSION_ERROR_FORMAT =
-            "Could not save data to file %s due to insufficient permissions to write to the file or the folder.";
+        "Could not save data to file %s due to insufficient permissions to write to the file or the folder.";
 
     private final Logger logger = LogsCenter.getLogger(LogicManager.class);
 
@@ -38,14 +37,20 @@ public class LogicManager implements Logic {
      * Constructs a {@code LogicManager} with the given {@code Model} and {@code Storage}.
      */
     public LogicManager(Model model, Storage storage) {
+        this(model, storage, false);
+    }
+
+    /**
+     * Constructs a {@code LogicManager} with an option to initialize in read-only mode.
+     */
+    public LogicManager(Model model, Storage storage, boolean isDataCorrupted) {
         this.model = model;
         this.storage = storage;
         addressBookParser = new AddressBookParser();
+        this.isReadOnlyMode = isDataCorrupted;
 
-        try {
-            storage.readAddressBook();
-        } catch (DataLoadingException e) {
-            this.isReadOnlyMode = true;
+        if (isReadOnlyMode) {
+            logger.warning("Local storage corruption detected on launch sequence! Logic component locked.");
             this.model.setAddressBook(new AddressBook());
         }
     }
@@ -55,12 +60,14 @@ public class LogicManager implements Logic {
         logger.info("----------------[USER COMMAND][" + commandText + "]");
 
         if (isReadOnlyMode && isMutatingCommand(commandText)) {
-            throw new CommandException("Error: Local data file is corrupted. Displaying empty list.");
+            throw new CommandException("Error: Local data file is corrupted at " + storage.getAddressBookFilePath()
+                + ". Displaying empty list. Please fix or delete the data file and restart.");
         }
 
         CommandResult commandResult;
         Command command = addressBookParser.parseCommand(commandText);
         commandResult = command.execute(model);
+        model.commitAddressBook();
 
         if (!isReadOnlyMode) {
             try {
@@ -88,7 +95,8 @@ public class LogicManager implements Logic {
             || commandWord.equals("delete")
             || commandWord.equals("edit")
             || commandWord.equals("clear")
-            || commandWord.equals("tag");
+            || commandWord.equals("tag")
+            || commandWord.equals("undo");
     }
 
     @Override
@@ -104,5 +112,10 @@ public class LogicManager implements Logic {
     @Override
     public void setGuiSettings(GuiSettings guiSettings) {
         model.setGuiSettings(guiSettings);
+    }
+
+    @Override
+    public boolean isReadOnlyMode() {
+        return isReadOnlyMode;
     }
 }

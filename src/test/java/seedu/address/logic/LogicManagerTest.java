@@ -1,6 +1,9 @@
 package seedu.address.logic;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.logic.Messages.MESSAGE_UNKNOWN_COMMAND;
 import static seedu.address.logic.commands.CommandTestUtil.ADDRESS_DESC_AMY;
 import static seedu.address.logic.commands.CommandTestUtil.EMAIL_DESC_AMY;
@@ -11,6 +14,7 @@ import static seedu.address.testutil.TypicalPersons.AMY;
 
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 
@@ -22,7 +26,9 @@ import seedu.address.commons.exceptions.DataLoadingException;
 import seedu.address.logic.commands.AddCommand;
 import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.DeleteCommand;
+import seedu.address.logic.commands.EditCommand;
 import seedu.address.logic.commands.ListCommand;
+import seedu.address.logic.commands.UndoCommand;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.Model;
@@ -47,13 +53,14 @@ public class LogicManagerTest {
 
     private Model model = new ModelManager();
     private Logic logic;
+    private StorageManager storage;
 
     @BeforeEach
     public void setUp() {
         JsonAddressBookStorage addressBookStorage =
             new JsonAddressBookStorage(temporaryFolder.resolve("addressBook.json"));
         JsonUserPrefsStorage userPrefsStorage = new JsonUserPrefsStorage(temporaryFolder.resolve("userPrefs.json"));
-        StorageManager storage = new StorageManager(addressBookStorage, userPrefsStorage);
+        storage = new StorageManager(addressBookStorage, userPrefsStorage);
         logic = new LogicManager(model, storage);
     }
 
@@ -88,6 +95,38 @@ public class LogicManagerTest {
     }
 
     @Test
+    public void execute_successfulMutatingCommand_canUndo() throws Exception {
+        logic.execute(AddCommand.COMMAND_WORD + NAME_DESC_AMY + PHONE_DESC_AMY + EMAIL_DESC_AMY + ADDRESS_DESC_AMY);
+        assertTrue(model.canUndoAddressBook());
+    }
+
+    @Test
+    public void execute_nonMutatingCommand_nothingToUndo() throws Exception {
+        logic.execute(ListCommand.COMMAND_WORD);
+        assertFalse(model.canUndoAddressBook());
+    }
+
+    @Test
+    public void execute_undoAfterAdd_removesAddedClient() throws Exception {
+        logic.execute(AddCommand.COMMAND_WORD + NAME_DESC_AMY + PHONE_DESC_AMY + EMAIL_DESC_AMY + ADDRESS_DESC_AMY);
+        // list changes nothing, so it must not use up the undo
+        logic.execute(ListCommand.COMMAND_WORD);
+
+        assertCommandSuccess(UndoCommand.COMMAND_WORD, UndoCommand.MESSAGE_SUCCESS, new ModelManager());
+        assertCommandException(UndoCommand.COMMAND_WORD, UndoCommand.MESSAGE_NOTHING_TO_UNDO);
+    }
+
+    @Test
+    public void execute_undoAfterEditThatChangesNothing_revertsChangeBeforeIt() throws Exception {
+        logic.execute(AddCommand.COMMAND_WORD + NAME_DESC_AMY + PHONE_DESC_AMY + EMAIL_DESC_AMY + ADDRESS_DESC_AMY);
+        // Amy already has this phone number, so the edit succeeds but changes nothing
+        logic.execute(EditCommand.COMMAND_WORD + " 1" + PHONE_DESC_AMY);
+
+        assertCommandSuccess(UndoCommand.COMMAND_WORD, UndoCommand.MESSAGE_SUCCESS, new ModelManager());
+        assertCommandException(UndoCommand.COMMAND_WORD, UndoCommand.MESSAGE_NOTHING_TO_UNDO);
+    }
+
+    @Test
     public void getFilteredPersonList_modifyList_throwsUnsupportedOperationException() {
         assertThrows(UnsupportedOperationException.class, () -> logic
             .getFilteredPersonList()
@@ -96,19 +135,11 @@ public class LogicManagerTest {
 
     @Test
     public void execute_mutatingCommandInReadOnlyMode_throwsCommandException() {
-        Path corruptPath = temporaryFolder.resolve("corruptedAddressBook.json");
-        JsonAddressBookStorage corruptStorageBackend = new JsonAddressBookStorage(corruptPath) {
-            @Override
-            public Optional<ReadOnlyAddressBook> readAddressBook() throws DataLoadingException {
-                throw new DataLoadingException(new Exception("Simulated file corruption context."));
-            }
-        };
-
-        JsonUserPrefsStorage userPrefsStorage = new JsonUserPrefsStorage(temporaryFolder.resolve("corruptPrefs.json"));
-        StorageManager storage = new StorageManager(corruptStorageBackend, userPrefsStorage);
-
-        Logic logicInReadOnly = new LogicManager(model, storage);
-        String expectedError = "Error: Local data file is corrupted. Displaying empty list.";
+        StorageManager storage = createCorruptStorageHelper("corruptedAddressBook.json", "corruptPrefs.json");
+        Logic logicInReadOnly = new LogicManager(model, storage, true);
+        String expectedError = "Error: Local data file is corrupted at "
+            + temporaryFolder.resolve("corruptedAddressBook.json")
+            + ". Displaying empty list. Please fix or delete the data file and restart.";
 
         assertThrows(CommandException.class, expectedError, () -> logicInReadOnly.execute(
             "add n/Amirah Tan p/91234567 e/amirah@gmail.com a/Blk 123 Yishun"));
@@ -116,28 +147,78 @@ public class LogicManagerTest {
         assertThrows(CommandException.class, expectedError, () -> logicInReadOnly.execute("edit 1 n/New Name"));
         assertThrows(CommandException.class, expectedError, () -> logicInReadOnly.execute("clear"));
         assertThrows(CommandException.class, expectedError, () -> logicInReadOnly.execute("tag 1 t/Math"));
+        assertThrows(CommandException.class, expectedError, () -> logicInReadOnly.execute("undo"));
     }
 
     @Test
     public void execute_nonMutatingCommandInReadOnlyMode_success() throws Exception {
-        Path corruptPath = temporaryFolder.resolve("corruptedAddressBookOnlyList.json");
+        StorageManager storage =
+            createCorruptStorageHelper("corruptedAddressBookOnlyList.json", "corruptListPrefs.json");
+        Logic logicInReadOnly = new LogicManager(model, storage, true);
 
+        String listCommand = ListCommand.COMMAND_WORD;
+        CommandResult result = logicInReadOnly.execute(listCommand);
+        assertEquals(ListCommand.MESSAGE_SUCCESS, result.getFeedbackToUser());
+        assertThrows(ParseException.class, () -> logicInReadOnly.execute("   "));
+    }
+
+    @Test
+    public void execute_mutatingCommandInReadOnlyMode_fileRemainsByteIdentical() throws Exception {
+        Path corruptPath = temporaryFolder.resolve("untouchedCorruptedFile.json");
+        String invalidJson = "{ invalid raw data json context }";
+        Files.writeString(corruptPath, invalidJson);
+
+        JsonAddressBookStorage corruptStorageBackend = new JsonAddressBookStorage(corruptPath);
+        JsonUserPrefsStorage userPrefsStorage =
+            new JsonUserPrefsStorage(temporaryFolder.resolve("untouchedPrefs.json"));
+        StorageManager storage = new StorageManager(corruptStorageBackend, userPrefsStorage);
+
+        Logic logicInReadOnly = new LogicManager(model, storage, true);
+        byte[] initialBytes = Files.readAllBytes(corruptPath);
+
+        assertThrows(CommandException.class, () -> logicInReadOnly.execute(
+            "add n/Amirah Tan p/91234567 e/amirah@gmail.com a/Blk 123 Yishun"));
+
+        byte[] postExecutionBytes = Files.readAllBytes(corruptPath);
+        assertArrayEquals(initialBytes, postExecutionBytes, "The corrupted file was mutated on disk!");
+    }
+
+    /**
+     * Helper method to generate an isolated, simulated file corruption StorageManager.
+     */
+    private StorageManager createCorruptStorageHelper(String addressBookFileName, String userPrefsFileName) {
+        Path corruptPath = temporaryFolder.resolve(addressBookFileName);
         JsonAddressBookStorage corruptStorageBackend = new JsonAddressBookStorage(corruptPath) {
             @Override
             public Optional<ReadOnlyAddressBook> readAddressBook() throws DataLoadingException {
                 throw new DataLoadingException(new Exception("Simulated file corruption context."));
             }
         };
+        JsonUserPrefsStorage userPrefsStorage = new JsonUserPrefsStorage(temporaryFolder.resolve(userPrefsFileName));
+        return new StorageManager(corruptStorageBackend, userPrefsStorage);
+    }
 
+    @Test
+    public void isReadOnlyMode_corruptStorage_returnsTrue() {
+        Path corruptPath = temporaryFolder.resolve("coverageReadOnlyBook.json");
+        JsonAddressBookStorage corruptStorageBackend = new JsonAddressBookStorage(corruptPath) {
+            @Override
+            public Optional<ReadOnlyAddressBook> readAddressBook() throws DataLoadingException {
+                throw new DataLoadingException(new Exception("Simulated file corruption context."));
+            }
+        };
         JsonUserPrefsStorage userPrefsStorage =
-            new JsonUserPrefsStorage(temporaryFolder.resolve("corruptListPrefs.json"));
+            new JsonUserPrefsStorage(temporaryFolder.resolve("coverageReadOnlyPrefs.json"));
         StorageManager storage = new StorageManager(corruptStorageBackend, userPrefsStorage);
 
-        Logic logicInReadOnly = new LogicManager(model, storage);
-        String listCommand = ListCommand.COMMAND_WORD;
-        CommandResult result = logicInReadOnly.execute(listCommand);
-        assertEquals(ListCommand.MESSAGE_SUCCESS, result.getFeedbackToUser());
-        assertThrows(ParseException.class, () -> logicInReadOnly.execute("   "));
+        Logic logicInReadOnly = new LogicManager(model, storage, true);
+        org.junit.jupiter.api.Assertions.assertTrue(logicInReadOnly.isReadOnlyMode());
+    }
+
+    @Test
+    public void constructor_readOnlyExplicitInitialization_setsReadOnlyMode() {
+        LogicManager logicManager = new LogicManager(model, storage, true);
+        assertThrows(CommandException.class, () -> logicManager.execute("add n/John"));
     }
 
     /**

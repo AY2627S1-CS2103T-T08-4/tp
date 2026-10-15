@@ -40,6 +40,22 @@ public interface Model {
     ReadOnlyAddressBook getAddressBook();
 
     /**
+     * Saves a copy of the current state to the undo history.
+     * Call this after each change that can be undone.
+     * Does nothing if the state has not changed since the last commit.
+     */
+    void commitAddressBook();
+
+    /** Returns true if there is an earlier state to undo to. */
+    boolean canUndoAddressBook();
+
+    /**
+     * Reverts to the state before the last {@link #commitAddressBook()}.
+     * Check {@link #canUndoAddressBook()} before calling this.
+     */
+    void undoAddressBook();
+
+    /**
      * Returns true if a person with the same identity as {@code person} exists in the address book.
      */
     boolean hasPerson(Person person);

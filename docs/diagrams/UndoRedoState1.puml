@@ -6,18 +6,20 @@ skinparam ClassBackgroundColor #FFFFAA
 
 title After command "delete 5"
 
-package States <<rectangle>> {
-    class State1 as "<u>ab0:AddressBook</u>"
-    class State2 as "<u>ab1:AddressBook</u>"
-    class State3 as "<u>ab2:AddressBook</u>"
+package "history" <<rectangle>> {
+    class H1 as "<u>ab0:AddressBook</u>"
+    class H2 as "<u>abX:AddressBook</u>"
 }
 
-State1 -[hidden]right-> State2
-State2 -[hidden]right-> State3
+H1 -[hidden]right-> H2
+hide H2
 
-hide State3
+package "current" <<rectangle>> {
+    class Current as "<u>ab1:AddressBook</u>"
+}
 
-class Pointer as "Current State" #FFFFFF
+H2 -[hidden]right-> Current
 
-Pointer -up-> State2
-@end
+class Top as "Top of history" #FFFFFF
+Top -up-> H1
+@enduml

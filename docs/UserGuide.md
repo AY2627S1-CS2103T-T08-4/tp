@@ -20,7 +20,7 @@ Sieve is a **desktop app that helps self-employed private tuition teachers keep 
 
 1. Download the latest `.jar` file from [here](https://github.com/AY2627S1-CS2103T-T08-4/tp/releases).
 
-1. Copy the file to the folder you want to use as the _home folder_ for your AddressBook.
+1. Copy the file to the folder you want to use as the _home folder_ for Sieve.
 
 1. Open a terminal, `cd` to the folder containing the JAR file, and run `java -jar sieve.jar`.<br>
    A GUI similar to the one below should appear in a few seconds. Note how the app contains some sample data.<br>
@@ -29,13 +29,13 @@ Sieve is a **desktop app that helps self-employed private tuition teachers keep 
 1. Type a command in the command box and press Enter to execute it. For example, type **`help`** and press Enter to open the help window.<br>
    Some example commands you can try:
 
-   * `list` : Lists all contacts.
+   * `list` : Lists all clients.
 
    * `add n/Jason Quek p/91234567 e/jasonquek@gmail.com a/Blk 123 Yishun Ave 5 #04-12` : Adds a client named `Jason Quek` to Sieve.
 
-   * `delete 3` : Deletes the 3rd contact shown in the current list.
+   * `delete 3` : Deletes the 3rd client shown in the current list.
 
-   * `clear` : Deletes all contacts.
+   * `clear` : Deletes all clients.
 
    * `exit` : Exits the app.
 
@@ -50,18 +50,18 @@ Sieve is a **desktop app that helps self-employed private tuition teachers keep 
 **Notes about the command format:**<br>
 
 * Words in `UPPER_CASE` are the parameters to be supplied by the user.<br>
-  For example, in `add n/NAME`, replace `NAME` with a value such as `John Doe`.
+  For example, in `add n/NAME`, replace `NAME` with a value such as `Amirah Tan`.
 
 * Items in square brackets are optional.<br>
-  For example, `n/NAME [t/TAG]` can be used as `n/John Doe t/friend` or as `n/John Doe`.
+  For example, `n/NAME [t/TAG]` can be used as `n/Amirah Tan t/Math` or as `n/Amirah Tan`.
 
 * Items followed by `...` can appear zero or more times.<br>
-  For example, `[t/TAG]... ` may be omitted, or written as `t/friend` or `t/friend t/family`.
+  For example, `[t/TAG]... ` may be omitted, or written as `t/Math` or `t/Math t/Sec4`.
 
 * Parameters can be in any order.<br>
   For example, if the command specifies `n/NAME p/PHONE_NUMBER`, `p/PHONE_NUMBER n/NAME` is also acceptable.
 
-* Extraneous parameters for commands that take no parameters, such as `help`, `list`, `exit`, and `clear`, are ignored.<br>
+* Extraneous parameters for commands that take no parameters, such as `help`, `list`, `exit`, `clear`, and `undo`, are ignored.<br>
   For example, `help 123` is interpreted as `help`.
 
 * If you are using a PDF version of this document, be careful when copying and pasting commands that span multiple lines as space characters surrounding line-breaks may be omitted when copied over to the application.
@@ -76,9 +76,9 @@ Shows a message explaining how to access the help page.
 Format: `help`
 
 
-### Adding a person: `add`
+### Adding a client: `add`
 
-Adds a person to the address book.
+Adds a client to Sieve.
 
 Format: `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]... `
 
@@ -101,81 +101,113 @@ Examples:
 * `add n/Jason Quek p/91234567 e/jasonquek@gmail.com a/Blk 123 Yishun Ave 5 #04-12`
 * `add n/Matthias Tan t/Physics e/matthias.tan@gmail.com a/10 Queenstown Rd p/8123 4567 t/Sec4` adds a client with two tags. Fields can be given in any order, and spaces in the phone number are ignored.
 
-### Listing all persons: `list`
+### Listing all clients: `list`
 
-Shows a list of all persons in the address book.
+Shows a list of all clients in Sieve.
 
 Format: `list`
 
-### Editing a person: `edit`
+### Editing a client: `edit`
 
-Edits an existing person in the address book.
+Edits an existing client in Sieve.
 
 Format: `edit INDEX [n/NAME] [p/PHONE] [e/EMAIL] [a/ADDRESS] [t/TAG]... `
 
-* Edits the person at the specified `INDEX`. The index refers to the index number shown in the displayed person list. The index **must be a positive integer** 1, 2, 3, ...
+* Edits the client at the specified `INDEX`. The index refers to the index number shown in the displayed client list. The index **must be a positive integer** 1, 2, 3, ...
 * At least one of the optional fields must be provided.
 * Existing values will be updated to the input values.
-* When editing tags, all of the person's existing tags are removed; adding tags is not cumulative.
-* To remove all of a person's tags, enter `t/` without a tag after it.
+* When editing tags, all of the client's existing tags are removed; adding tags is not cumulative.
+* To remove all of a client's tags, enter `t/` without a tag after it.
 
 Examples:
-*  `edit 1 p/91234567 e/johndoe@example.com` Edits the phone number and email address of the 1st person to be `91234567` and `johndoe@example.com` respectively.
-*  `edit 2 n/Betsy Crower t/` Edits the name of the 2nd person to be `Betsy Crower` and clears all existing tags.
+*  `edit 1 p/91234567 e/amirah.tan@gmail.com` Edits the phone number and email address of the 1st client to be `91234567` and `amirah.tan@gmail.com` respectively.
+*  `edit 2 n/Brandon Tan t/` Edits the name of the 2nd client to be `Brandon Tan` and clears all existing tags.
 
-### Locating persons by name: `find`
+### Locating clients by name, phone or tag: `find`
 
-Finds persons whose names contain any of the given keywords.
+Finds clients by name keywords, phone numbers and tags.
 
-Format: `find KEYWORD [MORE_KEYWORDS]`
+Format: `find [KEYWORD]... [p/PHONE]... [t/TAG]...`
 
-* The search is case-insensitive; for example, `hans` matches `Hans`.
-* Keyword order does not matter; for example, `Hans Bo` matches `Bo Hans`.
+* At least one keyword, phone number or tag must be given.
+* If you search by more than one kind of field, a client must match **every** kind; for example, `find Amirah t/Sec4` returns only clients named Amirah who are tagged `Sec4`.
+* Within each kind of field, a client only needs to match **one** of the values; for example, `find t/Math t/Physics` returns clients tagged `Math` or `Physics`.
+
+Searching by name:
+
+
+* Keywords can contain the same characters as names: letters, digits, hyphens (`-`), apostrophes (`'`), full stops (`.`) and parentheses (`()`). Each keyword must contain at least one letter or digit.
+* The search is case-insensitive; for example, `amirah` matches `Amirah`.
+* Keyword order does not matter; for example, `Tan Amirah` matches `Amirah Tan`.
 * The search considers only names.
-* Only full words match; for example, `Han` does not match `Hans`.
-* Persons matching at least one keyword are returned (an `OR` search); for example, `Hans Bo` returns `Hans Gruber` and `Bo Yang`.
+* A keyword matches the **start** of a word of a name, or the start of a part of a word separated by punctuation; for example, `Ami` matches `Amirah`, `Bri` matches `O'Brien`, `Ais` matches `Nur-Aisyah`, and `NHHS` matches `John Tan (NHHS)`.
+* Punctuation is ignored; for example, `obrien` and `O'Brien` both match `O'Brien`.
+* A keyword does not match the middle or end of a word; for example, `rien` does not match `O'Brien`, and `rah` does not match `Amirah`.
+* Clients matching at least one keyword are returned (an `OR` search); for example, `Amirah Farhan` returns `Amirah Tan` and `Farhan Ali`.
+
+Searching by phone number and tag:
+
+* `p/PHONE` must be a complete 8-digit phone number. Spaces, hyphens and parentheses are ignored, so `p/9123 4567` works.
+* `t/TAG` must be a whole tag name, but case does not matter; for example, `t/sec4` matches `Sec4`, but `t/sec` does not.
+
+If no client matches, Sieve shows `0 clients found` with tips for searching again. Use `list` to see all clients again.
 
 Examples:
-* `find John` returns `john` and `John Doe`
-* `find alex david` returns `Alex Yeoh`, `David Li`<br>
-  ![result for 'find alex david'](images/findAlexDavidResult.png)
+* `find amirah` returns `Amirah Tan`
+* `find amirah farhan` returns `Amirah Tan` and `Farhan Ali`
+* `find ami` returns `Amirah Tan`
+* `find Brien` returns `Liam O'Brien` (if you have added that client)<br>
+  ![result for 'find Brien'](images/findBrienResult.png)
+* `find p/9112 2334` returns `Farhan Ali`
+* `find t/sec4` returns `Amirah Tan` and `Brandon Sim`
+* `find amirah t/sec4` returns `Amirah Tan` only
 
-### Filtering persons by tags: `filter`
+<box type="info" seamless>
 
-Finds persons who have all the specified tags.
+**Limitations:**
+* A keyword is matched against one word of a name at a time, so a keyword that joins two words does not match. For example, `Aisyah-Tan` does not match `Nur-Aisyah Tan`; use `find Aisyah Tan` instead.
+* A keyword without a prefix is always matched against names. To search by phone number, use `p/`; for example, `find 91234567` finds nobody, but `find p/91234567` finds the client with that number.
+* Phone numbers and tags must be complete; `p/9123` and `t/sec` do not find anything.
+* A short keyword can match many clients; for example, `find a` returns every client with a name part starting with `a`. Type more letters to narrow the results.
+</box>
+
+### Filtering clients by tags: `filter`
+
+Finds clients who have all the specified tags.
 
 Format: `filter t/TAG [t/MORE_TAGS]...`
 
 * Tag matching is case-insensitive; for example, `t/physics` matches `Physics`.
 * Tag order does not matter.
-* A person must have every specified tag to be returned (an `AND` search).
+* A client must have every specified tag to be returned (an `AND` search).
 
 Examples:
-* `filter t/Physics` returns every person tagged `Physics`.
-* `filter t/Physics t/Sec4` returns only persons tagged with both `Physics` and `Sec4`.
+* `filter t/Physics` returns every client tagged `Physics`.
+* `filter t/Physics t/Sec4` returns only clients tagged with both `Physics` and `Sec4`.
 
-### Tagging a person: `tag`
+### Tagging a client: `tag`
 
-Adds one or more tags to an existing person.
+Adds one or more tags to an existing client.
 
 Format: `tag INDEX t/TAG [t/MORE_TAGS]...`
 
-* The index refers to the index number shown in the displayed person list and must be a positive integer.
+* The index refers to the index number shown in the displayed client list and must be a positive integer.
 * Tags must be 1-20 characters long and contain only letters, numbers, and spaces.
-* New tags are added alongside the person's existing tags.
-* Adding a tag the person already has does not create a duplicate.
+* New tags are added alongside the client's existing tags.
+* Adding a tag the client already has does not create a duplicate.
+
 Examples:
 * `tag 1 t/physics t/sec4`
 * `tag 2 t/thursday`
 
-### Deleting a person: `delete`
+### Deleting a client: `delete`
 
-Deletes the specified person from the address book.
+Deletes the specified client from Sieve.
 
 Format: `delete INDEX`
 
-* Deletes the person at the specified `INDEX`.
-* The index refers to the index number shown in the displayed person list.
+* Deletes the client at the specified `INDEX`.
+* The index refers to the index number shown in the displayed client list.
 * The index **must be a positive integer** 1, 2, 3, ...
 * If the displayed client list is empty, no client will be deleted and the following error will be shown:
     `Error: Cannot delete from an empty client list.`
@@ -187,14 +219,38 @@ Format: `delete INDEX`
    Expected format: delete INDEX`
 
 Examples:
-* `list` followed by `delete 2` deletes the 2nd person in the address book.
-* `find Betsy` followed by `delete 1` deletes the 1st person in the results of the `find` command.
+* `list` followed by `delete 2` deletes the 2nd client in Sieve.
+* `find Amirah` followed by `delete 1` deletes the 1st client in the results of the `find` command.
 
-### Clearing all entries: `clear`
+### Clearing all clients: `clear`
 
-Clears all entries from the address book.
+Deletes all clients from Sieve.
 
 Format: `clear`
+
+### Undoing a change: `undo`
+
+Reverts the last change to your client list.
+
+Format: `undo`
+
+* Changes can be undone one at a time, back to how your client list was when you opened Sieve.
+* Only commands that change your client list can be undone: `add`, `edit`, `delete`, `tag` and `clear`.
+* Commands that do not change anything, such as `list`, `find` and `help`, are skipped. Commands that fail are also skipped.
+* An `edit` or `tag` that leaves the client exactly as before is also skipped, even though it shows a success message. For example, `edit 1 p/91234567` when client 1's phone number is already `91234567`, or `tag 1 t/physics` when client 1 already has the `physics` tag. An `undo` after it reverts the change before it instead.
+* After an undo, the full client list is shown, so that the restored client is not hidden by an earlier `find`.
+* The undone change is saved to the data file straight away, like any other change.
+* If there is nothing left to undo, the following error is shown: `Error: There is nothing to undo.`
+
+<box type="warning" seamless>
+
+**Caution:** Undo history is not kept after you close Sieve. Once you reopen it, earlier changes cannot be undone.
+</box>
+
+Examples:
+* `delete 2` followed by `undo` brings back the client you just deleted.
+* `clear` followed by `undo` brings back all your clients.
+* `delete 1`, then `find Jason`, then `undo` brings back the deleted client and shows the full list again.
 
 ### Exiting the program: `exit`
 
@@ -204,7 +260,7 @@ Format: `exit`
 
 ### Saving the data
 
-AddressBook automatically saves data after every command. You do not need to save manually.
+Sieve automatically saves data after every command. You do not need to save manually.
 
 ### Editing the data file
 
@@ -213,20 +269,16 @@ Sieve data is saved automatically as a JSON file `[JAR file location]/data/sieve
 <box type="warning" seamless>
 
 **Caution:**
-If your changes make the data file invalid, AddressBook starts with an empty address book at the next run. The invalid file remains on disk until you run a command (AddressBook saves after every command). Still, we recommend backing up the file before editing it.<br>
-Furthermore, certain edits can cause the AddressBook to behave in unexpected ways (e.g., if a value entered is outside of the acceptable range). Therefore, edit the data file only if you are confident that you can update it correctly.
+If your changes make the data file invalid, Sieve launches in a read-only fallback mode, displaying an empty list and showing a warning popup message at startup. Sieve will completely block any subsequent command that attempts to mutate data, ensuring your original corrupted file is left completely untouched on disk so you can fix it safely. Still, we recommend backing up the file before editing it.<br>
+Furthermore, certain edits can cause the Sieve to behave in unexpected ways (e.g., if a value entered is outside of the acceptable range). Therefore, edit the data file only if you are confident that you can update it correctly.
 </box>
-
-### Archiving data files `[coming in v2.0]`
-
-_Details coming soon ..._
 
 --------------------------------------------------------------------------------------------------------------------
 
 ## FAQ
 
 **Q**: How do I transfer my data to another computer?<br>
-**A**: Install the app on the other computer and overwrite the data file it creates with the data file from your previous AddressBook home folder.
+**A**: Install the app on the other computer and overwrite the data file it creates with the data file from your previous Sieve home folder.
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -246,7 +298,8 @@ Action     | Format, Examples
 **Delete** | `delete INDEX`<br> e.g., `delete 3`
 **Edit**   | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]... `<br> e.g.,`edit 2 n/James Lee e/jameslee@example.com`
 **Filter** | `filter t/TAG [t/MORE_TAGS]...`<br> e.g., `filter t/physics t/sec4`
-**Find**   | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
+**Find**   | `find [KEYWORD]... [p/PHONE]... [t/TAG]...`<br> e.g., `find Amirah O'Brien`, `find t/sec4`, `find p/91234567`
 **List**   | `list`
 **Tag**    | `tag INDEX t/TAG [t/MORE_TAGS]...`<br> e.g., `tag 1 t/physics t/sec4`
+**Undo**   | `undo`
 **Help**   | `help`
