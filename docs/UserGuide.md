@@ -199,18 +199,20 @@ Examples:
 * `tag 1 t/physics t/sec4`
 * `tag 2 t/thursday`
 
-### Deleting a client: `delete`
+### Deleting clients: `delete`
 
-Deletes the specified client from Sieve.
+Deletes one or more specified clients from Sieve.
 
-Format: `delete INDEX`
+Format: `delete INDEX [, INDEX]...`
 
-* Deletes the client at the specified `INDEX`.
-* The index refers to the index number shown in the displayed client list.
-* The index **must be a positive integer** 1, 2, 3, ...
+* Deletes the clients at the specified indices.
+* Each index refers to the index number shown in the displayed client list and **must be a positive integer** 1, 2, 3, ...
+* To delete multiple clients, provide at least two comma-separated indices. Spaces around the commas are optional.
+* Duplicate indices are not allowed.
+* All indices are checked before any client is deleted. If any index is invalid, no clients will be deleted.
 * If the displayed client list is empty, no client will be deleted and the following error will be shown:
     `Error: Cannot delete from an empty client list.`
-* If `INDEX` exceeds the size of the displayed client list, no client will be deleted and the following error will be shown:
+* If any `INDEX` exceeds the size of the displayed client list, no client will be deleted and the following error will be shown:
   `Error: The index provided is out of bounds! Current list only contains X clients.`
   Here, `X` is the number of clients in the displayed list (`1 client` when only one client is displayed).
 * If `INDEX` is not provided, the following error will be shown:
@@ -220,6 +222,8 @@ Format: `delete INDEX`
 Examples:
 * `list` followed by `delete 2` deletes the 2nd client in Sieve.
 * `find Amirah` followed by `delete 1` deletes the 1st client in the results of the `find` command.
+* `list` followed by `delete 1, 3, 5` deletes the 1st, 3rd and 5th clients in Sieve.
+* `find t/physics` followed by `delete 1,2` deletes the 1st and 2nd clients in the filtered results.
 
 ### Clearing all clients: `clear`
 
@@ -294,7 +298,7 @@ Action     | Format, Examples
 -----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 **Add**    | `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]... ` <br> e.g., `add n/Immanuel Lim p/98765432 e/immanuel.lim@gmail.com a/Blk 456 Bishan St 21 #11-22 t/Chemistry t/JC1`
 **Clear**  | `clear`
-**Delete** | `delete INDEX`<br> e.g., `delete 3`
+**Delete** | `delete INDEX [, INDEX]...`<br> e.g., `delete 3`, `delete 1, 3, 5`
 **Edit**   | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]... `<br> e.g.,`edit 2 n/James Lee e/jameslee@example.com`
 **Filter** | `filter t/TAG [t/MORE_TAGS]...`<br> e.g., `filter t/physics t/sec4`
 **Find**   | `find [KEYWORD]... [p/PHONE]... [t/TAG]...`<br> e.g., `find Amirah O'Brien`, `find t/sec4`, `find p/91234567`
