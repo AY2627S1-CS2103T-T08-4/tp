@@ -99,7 +99,7 @@ public class TagCommandTest {
         TagCommand tagCommand = new TagCommand(INDEX_FIRST_PERSON, List.of(PHYSICS));
 
         assertCommandFailure(tagCommand, emptyModel,
-                "Error: The index provided is out of bounds! Current list only contains 0 client.");
+                "Error: The index provided is out of bounds! Current list only contains 0 clients.");
     }
 
     @Test
