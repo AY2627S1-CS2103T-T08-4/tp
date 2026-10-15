@@ -181,7 +181,7 @@ This section describes some noteworthy details on how certain features are imple
 * each space-separated word with punctuation removed (`O'Brien` → `obrien`), and
 * each piece of a word split on punctuation (`O'Brien` → `o`, `brien`).
 
-Each keyword is lower-cased with punctuation removed, and a client matches if any keyword equals one of their name parts. For example, the parts of `Liam O'Brien` are `liam`, `obrien`, `o` and `brien`, so `find O'Brien`, `find obrien` and `find Brien` all match, but `find Bri` does not. Keywords that are empty after punctuation is removed never match.
+Each keyword is lower-cased with punctuation removed, and a client matches if any keyword is a prefix of one of their name parts. For example, the parts of `Liam O'Brien` are `liam`, `obrien`, `o` and `brien`, so `find O'Brien`, `find obr` and `find Bri` all match, but `find rien` does not. Keywords that are empty after punctuation is removed never match.
 
 If no client matches, `FindCommand` returns `FindCommand.MESSAGE_NO_CLIENTS_FOUND`, which explains the matching rule and suggests `list`.
 
@@ -189,15 +189,19 @@ If no client matches, `FindCommand` returns `FindCommand.MESSAGE_NO_CLIENTS_FOUN
 
 **Aspect: How a keyword matches a name**
 
-* **Alternative 1 (current choice):** A keyword must equal a whole word or a whole part of a word, ignoring case and punctuation.
-  * Pros: Finds clients with hyphenated or apostrophised names. Results are predictable, since a short keyword such as `a` does not match every name containing that letter.
-  * Cons: Partial words such as `Bri` do not match, and a keyword that joins two words (`Aisyah-Tan`) does not match `Nur-Aisyah Tan`.
+* **Alternative 1 (current choice):** A keyword must be the start of a word or of a part of a word, ignoring case and punctuation.
+  * Pros: Tutors can type the first few letters of a name (`Ami` for `Amirah`) and still find clients with hyphenated or apostrophised names. Matching only the start of a part keeps results close to what the tutor typed.
+  * Cons: A very short keyword such as `a` matches many clients, and a keyword that joins two words (`Aisyah-Tan`) does not match `Nur-Aisyah Tan`.
 
-* **Alternative 2:** A keyword matches if it appears anywhere in the name (substring matching).
+* **Alternative 2:** A keyword must equal a whole word or a whole part of a word (the behaviour before prefix matching was added).
+  * Pros: Results are the most predictable.
+  * Cons: Tutors must type the full name part, so `Ami` does not find `Amirah`.
+
+* **Alternative 3:** A keyword matches if it appears anywhere in the name (substring matching).
   * Pros: Requires the least typing.
-  * Cons: Short keywords return many unrelated clients, which defeats the purpose of searching a large roster.
+  * Cons: Keywords match the middle of unrelated names (`an` matches `Tan`, `Brandon` and `Farhan`), which defeats the purpose of searching a large roster.
 
-* **Alternative 3:** Whole space-separated words only (the original AB3 behaviour).
+* **Alternative 4:** Whole space-separated words only (the original AB3 behaviour).
   * Pros: Simplest to implement.
   * Cons: Clients such as `O'Brien` or `Nur-Aisyah` cannot be found by part of their name.
 
@@ -626,10 +630,10 @@ testers are expected to do more *exploratory* testing.
 
     1. Prerequisites: Add a client with `add n/Liam O'Brien p/91234567 e/liam@example.com a/Blk 1 Clementi Rd`, and another with `add n/Nur-Aisyah Tan p/92345678 e/nur@example.com a/Blk 2 Clementi Rd`.
 
-    1. Test case: `find O'Brien`, then `find Brien`, then `find obrien`<br>
+    1. Test case: `find O'Brien`, then `find Brien`, then `find obrien`, then `find Bri`<br>
        Expected: Each command lists `Liam O'Brien`.
 
-    1. Test case: `find Nur`, then `find Aisyah`<br>
+    1. Test case: `find Nur`, then `find Aisyah`, then `find Ais`<br>
        Expected: Each command lists `Nur-Aisyah Tan`.
 
     1. Test case: `find Liam Aisyah`<br>
@@ -656,8 +660,8 @@ testers are expected to do more *exploratory* testing.
 
 1. Finding with no matches
 
-    1. Test case: `find Bri`<br>
-       Expected: No clients are listed. The status message shows `0 clients found matching your search term(s).`, followed by tips for searching again.
+    1. Test case: `find rah`<br>
+       Expected: No clients are listed (`rah` is the end of `Amirah`, not the start). The status message shows `0 clients found matching your search term(s).`, followed by tips for searching again.
 
 1. Finding with invalid keywords
 

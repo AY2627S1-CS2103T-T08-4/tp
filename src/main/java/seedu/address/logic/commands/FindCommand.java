@@ -13,14 +13,14 @@ import seedu.address.model.person.Person;
 
 /**
  * Finds and lists all persons in the address book who match the given name keywords, phone numbers and tags.
- * Name keyword matching is not case-sensitive.
+ * Name keywords match the start of a name part, and are not case-sensitive.
  */
 public class FindCommand extends Command {
 
     public static final String COMMAND_WORD = "find";
 
-    public static final String MESSAGE_USAGE = COMMAND_WORD + ": Finds all clients whose names match any of "
-            + "the specified keywords (case-insensitive, ignoring punctuation), "
+    public static final String MESSAGE_USAGE = COMMAND_WORD + ": Finds all clients with a name part that starts with "
+            + "any of the specified keywords (case-insensitive, ignoring punctuation), "
             + "and who have any of the specified phone numbers and tags, "
             + "and displays them as a list with index numbers.\n"
             + "Parameters: [KEYWORD]... [" + PREFIX_PHONE + "PHONE]... [" + PREFIX_TAG + "TAG]... "
@@ -32,7 +32,7 @@ public class FindCommand extends Command {
                     + "and parentheses <()>, and must include at least one letter or digit.";
 
     public static final String MESSAGE_NO_CLIENTS_FOUND = Messages.getPersonsListedOverviewMessage(0)
-            + " Keywords must match a whole part of a name (e.g. Brien, not Bri), phone numbers must be "
+            + " Keywords must match the start of a name part (e.g. Bri, not rien), phone numbers must be "
             + "complete, and a client must match every field you search by (name, phone, tag). "
             + "Check the spelling, or use list to see all clients.";
 

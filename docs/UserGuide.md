@@ -140,9 +140,9 @@ Searching by name:
 * The search is case-insensitive; for example, `hans` matches `Hans`.
 * Keyword order does not matter; for example, `Hans Bo` matches `Bo Hans`.
 * The search considers only names.
-* A keyword matches a whole word of a name, or a whole part of a word separated by punctuation; for example, `Brien` matches `O'Brien`, `Aisyah` matches `Nur-Aisyah`, and `NHHS` matches `John Tan (NHHS)`.
+* A keyword matches the **start** of a word of a name, or the start of a part of a word separated by punctuation; for example, `Ami` matches `Amirah`, `Bri` matches `O'Brien`, `Ais` matches `Nur-Aisyah`, and `NHHS` matches `John Tan (NHHS)`.
 * Punctuation is ignored; for example, `obrien` and `O'Brien` both match `O'Brien`.
-* Only whole words or parts match; for example, `Han` does not match `Hans`, and `Bri` does not match `O'Brien`.
+* A keyword does not match the middle or end of a word; for example, `rien` does not match `O'Brien`, and `rah` does not match `Amirah`.
 * Persons matching at least one keyword are returned (an `OR` search); for example, `Hans Bo` returns `Hans Gruber` and `Bo Yang`.
 
 Searching by phone number and tag:
@@ -155,6 +155,7 @@ If no person matches, Sieve shows `0 clients found` with tips for searching agai
 Examples:
 * `find amirah` returns `Amirah Tan`
 * `find amirah farhan` returns `Amirah Tan` and `Farhan Ali`
+* `find ami` returns `Amirah Tan`
 * `find Brien` returns `Liam O'Brien` (if you have added that client)<br>
   ![result for 'find Brien'](images/findBrienResult.png)
 * `find p/9112 2334` returns `Farhan Ali`
@@ -167,6 +168,7 @@ Examples:
 * A keyword is matched against one word of a name at a time, so a keyword that joins two words does not match. For example, `Aisyah-Tan` does not match `Nur-Aisyah Tan`; use `find Aisyah Tan` instead.
 * A keyword without a prefix is always matched against names. To search by phone number, use `p/`; for example, `find 91234567` finds nobody, but `find p/91234567` finds the person with that number.
 * Phone numbers and tags must be complete; `p/9123` and `t/sec` do not find anything.
+* A short keyword can match many clients; for example, `find a` returns every client with a name part starting with `a`. Type more letters to narrow the results.
 </box>
 
 ### Tagging a person: `tag`
