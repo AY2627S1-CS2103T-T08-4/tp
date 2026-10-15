@@ -31,7 +31,7 @@ public class Messages {
      * Returns {@code count} followed by "client" or "clients", e.g. "0 client", "1 client" or "3 clients".
      */
     public static String formatClientCount(int count) {
-        return count + (count <= 1 ? " client" : " clients");
+        return count + (count == 1 ? " client" : " clients");
     }
 
     /**
