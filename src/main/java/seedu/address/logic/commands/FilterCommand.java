@@ -18,10 +18,13 @@ public class FilterCommand extends Command {
     public static final String MESSAGE_USAGE = COMMAND_WORD + ": Finds all clients who have any of the specified tags "
             + "(case-insensitive and order-insensitive) and displays them as a list with index numbers.\n"
             + "Parameters: t/TAG [t/MORE_TAGS]...\n"
-            + "Example: " + COMMAND_WORD + " t/High rate t/Priority";
+            + "Example: " + COMMAND_WORD + " t/Physics t/Sec4";
 
     private final PersonMatchesSearchPredicate predicate;
 
+    /**
+     * Creates a FilterCommand that shows the clients matching {@code predicate}.
+     */
     public FilterCommand(PersonMatchesSearchPredicate predicate) {
         requireNonNull(predicate);
         this.predicate = predicate;
