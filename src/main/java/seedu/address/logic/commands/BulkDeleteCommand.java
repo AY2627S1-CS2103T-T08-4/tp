@@ -13,7 +13,7 @@ import seedu.address.model.Model;
 import seedu.address.model.person.Person;
 
 /**
- * Deletes multiple people identified by their displayed indices.
+ * Deletes multiple people identified by their displayed indices based on the input.
  */
 public class BulkDeleteCommand extends Command {
 
