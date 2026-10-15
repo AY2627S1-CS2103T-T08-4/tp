@@ -671,7 +671,7 @@ Given below are instructions to test the app manually.
     1. Download the JAR file and copy it into an empty folder.
 
     1. Double-click the JAR file.<br>
-       Expected: The GUI opens with a set of sample contacts. The window size may not be optimal.
+       Expected: The GUI opens with a set of sample clients. The window size may not be optimal.
 
 1. Saving window preferences
 
@@ -679,8 +679,6 @@ Given below are instructions to test the app manually.
 
     1. Relaunch the app by double-clicking the JAR file.<br>
        Expected: The most recent window size and location are retained.
-
-1. _{ more test cases … }_
 
 ### Finding clients
 
@@ -813,12 +811,4 @@ Given below are instructions to test the app manually.
     1. Prerequisites: Relaunch the app, or `undo` until every change is undone.
 
     1. Test case: `undo`<br>
-       Expected: The client list is unchanged. The status message shows `Error: There is nothing to undo.`
-
-### Saving data
-
-1. Dealing with missing/corrupted data files
-
-    1. _{Explain how to simulate missing or corrupted data files and state the expected behavior.}_
-
-1. _{ more test cases … }_
+       Expected: The client list is unchanged. The status message shows `Error: There is nothing to undo.
