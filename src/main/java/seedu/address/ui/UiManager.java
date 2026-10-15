@@ -48,10 +48,35 @@ public class UiManager implements Ui {
             mainWindow.show(); //This should be called before creating other UI parts
             mainWindow.fillInnerParts();
 
+            // Call the helper method to verify state
+            verifyStorageStateAndAlert();
+
         } catch (Throwable e) {
             logger.severe(StringUtil.getDetails(e));
             showFatalErrorDialogAndShutdown("Fatal error during initializing", e);
         }
+    }
+
+    /**
+     * Verifies the storage integration state and alerts the user if running in read-only mode.
+     */
+    void verifyStorageStateAndAlert() {
+        if (logic.isReadOnlyMode()) {
+            triggerCorruptionAlert("WARNING");
+        }
+    }
+
+    /**
+     * Triggers the UI error alert dialog window layout.
+     */
+    void triggerCorruptionAlert(String alertLevel) {
+        showAlertDialogAndWait(
+            Alert.AlertType.valueOf(alertLevel),
+            "Data File Corruption Error",
+            "Local data file is corrupted.",
+            "Displaying empty list. Please fix or delete the data file at "
+                + dataFilePath.toAbsolutePath() + " and restart."
+        );
     }
 
     private Image getImage(String imagePath) {

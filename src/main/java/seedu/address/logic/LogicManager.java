@@ -60,7 +60,8 @@ public class LogicManager implements Logic {
         logger.info("----------------[USER COMMAND][" + commandText + "]");
 
         if (isReadOnlyMode && isMutatingCommand(commandText)) {
-            throw new CommandException("Error: Local data file is corrupted. Displaying empty list.");
+            throw new CommandException("Error: Local data file is corrupted at " + storage.getAddressBookFilePath()
+                + ". Displaying empty list. Please fix or delete the data file and restart.");
         }
 
         CommandResult commandResult;
@@ -109,5 +110,10 @@ public class LogicManager implements Logic {
     @Override
     public void setGuiSettings(GuiSettings guiSettings) {
         model.setGuiSettings(guiSettings);
+    }
+
+    @Override
+    public boolean isReadOnlyMode() {
+        return isReadOnlyMode;
     }
 }
