@@ -23,6 +23,7 @@ public class FilterCommand extends Command {
     private final PersonMatchesSearchPredicate predicate;
 
     public FilterCommand(PersonMatchesSearchPredicate predicate) {
+        requireNonNull(predicate);
         this.predicate = predicate;
     }
 
