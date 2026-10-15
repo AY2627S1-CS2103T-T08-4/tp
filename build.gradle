@@ -90,7 +90,6 @@ dependencies {
     testImplementation "org.testfx:testfx-junit5:${testFxVersion}"
     testRuntimeOnly "org.testfx:openjfx-monocle:17.0.10"
 
-    testImplementation "org.testfx:testfx-junit5:${testFxVersion}"
     testImplementation "org.hamcrest:hamcrest:2.2"
 
     testRuntimeOnly "org.testfx:openjfx-monocle:17.0.10"
