@@ -67,6 +67,7 @@ public class LogicManager implements Logic {
         CommandResult commandResult;
         Command command = addressBookParser.parseCommand(commandText);
         commandResult = command.execute(model);
+        model.commitAddressBook();
 
         if (!isReadOnlyMode) {
             try {
@@ -94,7 +95,8 @@ public class LogicManager implements Logic {
             || commandWord.equals("delete")
             || commandWord.equals("edit")
             || commandWord.equals("clear")
-            || commandWord.equals("tag");
+            || commandWord.equals("tag")
+            || commandWord.equals("undo");
     }
 
     @Override

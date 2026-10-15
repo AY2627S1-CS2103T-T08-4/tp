@@ -2,6 +2,8 @@ package seedu.address.logic;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.logic.Messages.MESSAGE_UNKNOWN_COMMAND;
 import static seedu.address.logic.commands.CommandTestUtil.ADDRESS_DESC_AMY;
 import static seedu.address.logic.commands.CommandTestUtil.EMAIL_DESC_AMY;
@@ -24,7 +26,9 @@ import seedu.address.commons.exceptions.DataLoadingException;
 import seedu.address.logic.commands.AddCommand;
 import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.DeleteCommand;
+import seedu.address.logic.commands.EditCommand;
 import seedu.address.logic.commands.ListCommand;
+import seedu.address.logic.commands.UndoCommand;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.Model;
@@ -91,6 +95,38 @@ public class LogicManagerTest {
     }
 
     @Test
+    public void execute_successfulMutatingCommand_canUndo() throws Exception {
+        logic.execute(AddCommand.COMMAND_WORD + NAME_DESC_AMY + PHONE_DESC_AMY + EMAIL_DESC_AMY + ADDRESS_DESC_AMY);
+        assertTrue(model.canUndoAddressBook());
+    }
+
+    @Test
+    public void execute_nonMutatingCommand_nothingToUndo() throws Exception {
+        logic.execute(ListCommand.COMMAND_WORD);
+        assertFalse(model.canUndoAddressBook());
+    }
+
+    @Test
+    public void execute_undoAfterAdd_removesAddedClient() throws Exception {
+        logic.execute(AddCommand.COMMAND_WORD + NAME_DESC_AMY + PHONE_DESC_AMY + EMAIL_DESC_AMY + ADDRESS_DESC_AMY);
+        // list changes nothing, so it must not use up the undo
+        logic.execute(ListCommand.COMMAND_WORD);
+
+        assertCommandSuccess(UndoCommand.COMMAND_WORD, UndoCommand.MESSAGE_SUCCESS, new ModelManager());
+        assertCommandException(UndoCommand.COMMAND_WORD, UndoCommand.MESSAGE_NOTHING_TO_UNDO);
+    }
+
+    @Test
+    public void execute_undoAfterEditThatChangesNothing_revertsChangeBeforeIt() throws Exception {
+        logic.execute(AddCommand.COMMAND_WORD + NAME_DESC_AMY + PHONE_DESC_AMY + EMAIL_DESC_AMY + ADDRESS_DESC_AMY);
+        // Amy already has this phone number, so the edit succeeds but changes nothing
+        logic.execute(EditCommand.COMMAND_WORD + " 1" + PHONE_DESC_AMY);
+
+        assertCommandSuccess(UndoCommand.COMMAND_WORD, UndoCommand.MESSAGE_SUCCESS, new ModelManager());
+        assertCommandException(UndoCommand.COMMAND_WORD, UndoCommand.MESSAGE_NOTHING_TO_UNDO);
+    }
+
+    @Test
     public void getFilteredPersonList_modifyList_throwsUnsupportedOperationException() {
         assertThrows(UnsupportedOperationException.class, () -> logic
             .getFilteredPersonList()
@@ -111,6 +147,7 @@ public class LogicManagerTest {
         assertThrows(CommandException.class, expectedError, () -> logicInReadOnly.execute("edit 1 n/New Name"));
         assertThrows(CommandException.class, expectedError, () -> logicInReadOnly.execute("clear"));
         assertThrows(CommandException.class, expectedError, () -> logicInReadOnly.execute("tag 1 t/Math"));
+        assertThrows(CommandException.class, expectedError, () -> logicInReadOnly.execute("undo"));
     }
 
     @Test

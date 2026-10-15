@@ -256,22 +256,18 @@ If no client matches, `FindCommand` returns `FindCommand.MESSAGE_NO_CLIENTS_FOUN
   * Pros: One rule for everything.
   * Cons: Adding a field widens the results, so a tutor cannot narrow down a large roster.
 
-### \[Proposed\] Undo/redo feature
+### Undo feature
 
-#### Proposed Implementation
+#### Implementation
 
-The proposed undo/redo mechanism is facilitated by `VersionedAddressBook`. It extends `AddressBook` with an undo/redo
-history, stored internally as an `addressBookStateList` and `currentStatePointer`. Additionally, it implements the
-following operations:
+The `undo` command reverts the client list to its state before the last change. Changes can be undone one at a time, back to the client list at startup.
 
-* `VersionedAddressBook#commit()` -- Saves the current address book state in its history.
-* `VersionedAddressBook#undo()` -- Restores the previous address book state from its history.
-* `VersionedAddressBook#redo()` -- Restores a previously undone address book state from its history.
+The undo history is kept by `VersionedAddressBook`, which extends `AddressBook` with two fields:
 
-These operations are exposed in the `Model` interface as `Model#commitAddressBook()`, `Model#undoAddressBook()` and
-`Model#redoAddressBook()` respectively.
+* `history`: a stack (`Deque`) of earlier client lists, with the most recent on top.
+* `current`: a copy of the client list as it was at the last save to the history (or at startup).
 
-Given below is an example usage scenario and how the undo/redo mechanism behaves at each step.
+It adds the following operations, which are exposed in the `Model` interface under the same names:
 
 Step 1. The user launches the application for the first time. The `VersionedAddressBook` will be initialized with the
 initial address book state, and the `currentStatePointer` pointing to that single address book state.
@@ -291,25 +287,21 @@ Step 3. The user executes `add n/David …​` to add a new person. The `add` co
 
 <box type="info" seamless>
 
-**Note:** If a command fails its execution, it will not call `Model#commitAddressBook()`, so the address book state will
-not be saved into the `addressBookStateList`.
+**Note:** If a command fails, it throws an exception before `LogicManager` calls `Model#commitAddressBook()`, so nothing is saved to the history.
 </box>
 
-Step 4. The user now decides that adding the person was a mistake, and decides to undo that action by executing the
-`undo` command. The `undo` command will call `Model#undoAddressBook()`, which will shift the `currentStatePointer` once
-to the left, pointing it to the previous address book state, and restores the address book to that state.
+Step 4. The user executes `list`. `LogicManager` calls `Model#commitAddressBook()` as usual, but the client list still matches `current`, so the history is unchanged. This is why `list`, `find` and `help` do not use up an undo.
+
+Step 5. The user decides that adding David was a mistake, and executes `undo`. `UndoCommand` calls `Model#undoAddressBook()`, which pops `ab1` from `history`, makes it `current`, and copies it into the client list. `UndoCommand` then shows the full client list, so that a restored client is not hidden by an earlier `find`.
 
 <puml src="diagrams/UndoRedoState3.puml" alt="UndoRedoState3" />
 
-
 <box type="info" seamless>
 
-**Note:** If the `currentStatePointer` is at index 0, pointing to the initial AddressBook state, then there are no
-previous AddressBook states to restore. The `undo` command uses `Model#canUndoAddressBook()` to check if this is the
-case. If so, it will return an error to the user rather than attempting to perform the undo.
+**Note:** If `history` is empty, there is no earlier client list to restore. `UndoCommand` checks this with `Model#canUndoAddressBook()` and shows an error instead of undoing.
 </box>
 
-The following sequence diagram shows how an undo operation goes through the `Logic` component:
+The following sequence diagram shows how an undo operation goes through the `Logic` component. The commit after `undo` does nothing, because `undoAddressBook()` has already set `current` to match the client list.
 
 <puml src="diagrams/UndoSequenceDiagram-Logic.puml" alt="UndoSequenceDiagram-Logic" />
 
@@ -323,46 +315,52 @@ Similarly, how an undo operation goes through the `Model` component is shown bel
 
 <puml src="diagrams/UndoSequenceDiagram-Model.puml" alt="UndoSequenceDiagram-Model" />
 
-The `redo` command does the opposite — it calls `Model#redoAddressBook()`, which shifts the `currentStatePointer` once
-to the right, pointing to the previously undone state, and restores the address book to that state.
-
-<box type="info" seamless>
-
-**Note:** If the `currentStatePointer` is at index `addressBookStateList.size() - 1`, pointing to the latest address
-book state, then there are no undone AddressBook states to restore. The `redo` command uses `Model#canRedoAddressBook()`
-to check if this is the case. If so, it will return an error to the user rather than attempting to perform the redo.
-</box>
-
-Step 5. The user then decides to execute the command `list`. Commands that do not modify the address book, such as
-`list`, will usually not call `Model#commitAddressBook()`, `Model#undoAddressBook()` or `Model#redoAddressBook()`. Thus,
-the `addressBookStateList` remains unchanged.
+Step 6. The user executes `clear`. The commit after it pushes `ab1` onto `history`, and the empty client list (`ab3`) becomes `current`. The undone state `ab2` is no longer stored anywhere, as there is no `redo` command yet.
 
 <puml src="diagrams/UndoRedoState4.puml" alt="UndoRedoState4" />
 
-Step 6. The user executes `clear`, which calls `Model#commitAddressBook()`. Since the `currentStatePointer` is not
-pointing at the end of the `addressBookStateList`, all address book states after the `currentStatePointer` will be
-purged. Reason: It no longer makes sense to redo the `add n/David …` command. This is the behavior that most modern
-desktop applications follow.
-
-<puml src="diagrams/UndoRedoState5.puml" alt="UndoRedoState5" />
-
-The following activity diagram summarizes what happens when a user executes a new command:
+The following activity diagram summarizes what happens to the undo history when a user executes a command:
 
 <puml src="diagrams/CommitActivityDiagram.puml" width="250" />
 
+<box type="warning" seamless>
+
+**Caution:** A change to the client list only becomes its own undo step when `Model#commitAddressBook()` is called after it. A change made outside a command (e.g. by a future import feature) must call `Model#commitAddressBook()` itself, otherwise it will be merged into the undo step of the next command.
+</box>
+
+The undo history is kept in memory only, so it is lost when the app is closed. In read-only mode (when the data file is corrupted), `undo` is blocked along with the other commands that change data.
+
 #### Design considerations:
 
-**Aspect: How undo & redo execute:**
+**Aspect: How undo executes:**
 
-* **Alternative 1 (current choice):** Saves the entire address book.
-    * Pros: Easy to implement.
-    * Cons: May have performance issues in terms of memory usage.
+* **Alternative 1 (current choice):** Saves the entire client list after each change.
+  * Pros: Easy to implement, and works for every command, including new ones, without extra code.
+  * Cons: Uses more memory, as each change stores a full copy of the client list. This is acceptable for a tutor's client list of tens of clients.
 
-* **Alternative 2:** Individual command knows how to undo/redo by itself.
-    * Pros: Will use less memory (e.g. for `delete`, just save the person being deleted).
-    * Cons: We must ensure that the implementation of each individual command is correct.
+* **Alternative 2:** Each command knows how to undo itself.
+  * Pros: Uses less memory (e.g. for `delete`, just save the client being deleted).
+  * Cons: Every command that changes data needs its own undo logic, and each must be correct.
 
-_{more aspects and alternatives to be added}_
+**Aspect: Where the history is saved:**
+
+* **Alternative 1 (current choice):** `LogicManager` calls `Model#commitAddressBook()` after every successful command, and `commitAddressBook()` skips unchanged client lists.
+  * Pros: Commands do not need to know about undo, and a new command is undoable automatically.
+  * Cons: Compares the client list with `current` after every command, including commands that change nothing.
+
+* **Alternative 2:** Each command that changes data calls `Model#commitAddressBook()` itself.
+  * Pros: No comparison is needed, as only commands that change data commit.
+  * Cons: A new command that forgets the call silently cannot be undone, and `LogicManager` cannot tell whether a command changed anything.
+
+**Aspect: How many levels of undo:**
+
+* **Alternative 1 (current choice):** Multiple levels, using a stack of earlier client lists.
+  * Pros: The user can undo several mistakes in a row. The stack and `current` are also the groundwork for a `redo` command.
+  * Cons: The history grows with every change until the app is closed.
+
+* **Alternative 2:** A single level, keeping only the client list before the last change.
+  * Pros: Simplest to implement, with a fixed memory cost.
+  * Cons: The user can only undo their last change, and a second mistake cannot be recovered.
 
 ### \[Proposed\] Data archiving
 
@@ -785,6 +783,42 @@ Given below are instructions to test the app manually.
     1. Test cases: `delete 0`, `delete -1`, and `delete x`.<br>
        Expected: No client is deleted. The status message indicates that the command format or index is invalid and
        displays the usage instructions.
+
+### Undoing changes
+
+1. Undoing the last change
+
+    1. Prerequisites: Use the `list` command to display multiple clients.
+
+    1. Test case: `delete 1`, then `undo`<br>
+       Expected: The deleted client is back in the list. The status message shows `Undid the last change. Showing all clients.`
+
+1. Undoing several changes in a row
+
+    1. Test case: `delete 1`, then `delete 1`, then `undo` twice<br>
+       Expected: The first `undo` restores the second deleted client, and the second `undo` restores the first one.
+
+1. Commands that change nothing do not use up an undo
+
+    1. Test case: `delete 1`, then `list`, then `find KEYWORD`, then `undo`<br>
+       Expected: The deleted client is restored, and the full client list is shown instead of the `find` results.
+
+1. Failed commands do not use up an undo
+
+    1. Test case: `delete 1`, then `delete 0`, then `undo`<br>
+       Expected: `delete 0` shows an error. `undo` restores the client deleted by `delete 1`.
+
+1. Undoing a clear
+
+    1. Test case: `clear`, then `undo`<br>
+       Expected: All clients are restored.
+
+1. Nothing to undo
+
+    1. Prerequisites: Relaunch the app, or `undo` until every change is undone.
+
+    1. Test case: `undo`<br>
+       Expected: The client list is unchanged. The status message shows `Error: There is nothing to undo.`
 
 ### Saving data
 

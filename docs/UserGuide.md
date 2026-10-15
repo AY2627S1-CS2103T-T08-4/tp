@@ -61,7 +61,7 @@ Sieve is a **desktop app that helps self-employed private tuition teachers keep 
 * Parameters can be in any order.<br>
   For example, if the command specifies `n/NAME p/PHONE_NUMBER`, `p/PHONE_NUMBER n/NAME` is also acceptable.
 
-* Extraneous parameters for commands that take no parameters, such as `help`, `list`, `exit`, and `clear`, are ignored.<br>
+* Extraneous parameters for commands that take no parameters, such as `help`, `list`, `exit`, `clear`, and `undo`, are ignored.<br>
   For example, `help 123` is interpreted as `help`.
 
 * If you are using a PDF version of this document, be careful when copying and pasting commands that span multiple lines as space characters surrounding line-breaks may be omitted when copied over to the application.
@@ -215,6 +215,30 @@ Clears all entries from the address book.
 
 Format: `clear`
 
+### Undoing a change: `undo`
+
+Reverts the last change to your client list.
+
+Format: `undo`
+
+* Changes can be undone one at a time, back to how your client list was when you opened Sieve.
+* Only commands that change your client list can be undone: `add`, `edit`, `delete`, `tag` and `clear`.
+* Commands that do not change anything, such as `list`, `find` and `help`, are skipped. Commands that fail are also skipped.
+* An `edit` or `tag` that leaves the client exactly as before is also skipped, even though it shows a success message. For example, `edit 1 p/91234567` when client 1's phone number is already `91234567`, or `tag 1 t/physics` when client 1 already has the `physics` tag. An `undo` after it reverts the change before it instead.
+* After an undo, the full client list is shown, so that the restored client is not hidden by an earlier `find`.
+* The undone change is saved to the data file straight away, like any other change.
+* If there is nothing left to undo, the following error is shown: `Error: There is nothing to undo.`
+
+<box type="warning" seamless>
+
+**Caution:** Undo history is not kept after you close Sieve. Once you reopen it, earlier changes cannot be undone.
+</box>
+
+Examples:
+* `delete 2` followed by `undo` brings back the client you just deleted.
+* `clear` followed by `undo` brings back all your clients.
+* `delete 1`, then `find Jason`, then `undo` brings back the deleted client and shows the full list again.
+
 ### Exiting the program: `exit`
 
 Exits the program.
@@ -267,4 +291,5 @@ Action     | Format, Examples
 **Find**   | `find [KEYWORD]... [p/PHONE]... [t/TAG]...`<br> e.g., `find Amirah O'Brien`, `find t/sec4`, `find p/91234567`
 **List**   | `list`
 **Tag**    | `tag INDEX t/TAG [t/MORE_TAGS]...`<br> e.g., `tag 1 t/physics t/sec4`
+**Undo**   | `undo`
 **Help**   | `help`
