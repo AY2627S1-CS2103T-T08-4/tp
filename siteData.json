@@ -115,6 +115,7 @@
         "listing-all-clients-list": "Listing all clients: list",
         "editing-a-client-edit": "Editing a client: edit",
         "locating-clients-by-name-phone-or-tag-find": "Locating clients by name, phone or tag: find",
+        "filtering-clients-by-tags-filter": "Filtering clients by tags: filter",
         "tagging-a-client-tag": "Tagging a client: tag",
         "deleting-a-client-delete": "Deleting a client: delete",
         "clearing-all-clients-clear": "Clearing all clients: clear",
