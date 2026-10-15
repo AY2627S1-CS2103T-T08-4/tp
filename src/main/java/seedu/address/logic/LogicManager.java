@@ -7,7 +7,6 @@ import java.util.logging.Logger;
 import javafx.collections.ObservableList;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.core.LogsCenter;
-import seedu.address.commons.exceptions.DataLoadingException;
 import seedu.address.logic.commands.Command;
 import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.exceptions.CommandException;
@@ -38,14 +37,20 @@ public class LogicManager implements Logic {
      * Constructs a {@code LogicManager} with the given {@code Model} and {@code Storage}.
      */
     public LogicManager(Model model, Storage storage) {
+        this(model, storage, false);
+    }
+
+    /**
+     * Constructs a {@code LogicManager} with an option to initialize in read-only mode.
+     */
+    public LogicManager(Model model, Storage storage, boolean isDataCorrupted) {
         this.model = model;
         this.storage = storage;
         addressBookParser = new AddressBookParser();
+        this.isReadOnlyMode = isDataCorrupted;
 
-        try {
-            storage.readAddressBook();
-        } catch (DataLoadingException e) {
-            this.isReadOnlyMode = true;
+        if (isReadOnlyMode) {
+            logger.warning("Local storage corruption detected on launch sequence! Logic component locked.");
             this.model.setAddressBook(new AddressBook());
         }
     }

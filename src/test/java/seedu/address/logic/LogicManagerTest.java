@@ -49,13 +49,14 @@ public class LogicManagerTest {
 
     private Model model = new ModelManager();
     private Logic logic;
+    private StorageManager storage;
 
     @BeforeEach
     public void setUp() {
         JsonAddressBookStorage addressBookStorage =
             new JsonAddressBookStorage(temporaryFolder.resolve("addressBook.json"));
         JsonUserPrefsStorage userPrefsStorage = new JsonUserPrefsStorage(temporaryFolder.resolve("userPrefs.json"));
-        StorageManager storage = new StorageManager(addressBookStorage, userPrefsStorage);
+        storage = new StorageManager(addressBookStorage, userPrefsStorage);
         logic = new LogicManager(model, storage);
     }
 
@@ -99,7 +100,7 @@ public class LogicManagerTest {
     @Test
     public void execute_mutatingCommandInReadOnlyMode_throwsCommandException() {
         StorageManager storage = createCorruptStorageHelper("corruptedAddressBook.json", "corruptPrefs.json");
-        Logic logicInReadOnly = new LogicManager(model, storage);
+        Logic logicInReadOnly = new LogicManager(model, storage, true);
         String expectedError = "Error: Local data file is corrupted at "
             + temporaryFolder.resolve("corruptedAddressBook.json")
             + ". Displaying empty list. Please fix or delete the data file and restart.";
@@ -116,7 +117,7 @@ public class LogicManagerTest {
     public void execute_nonMutatingCommandInReadOnlyMode_success() throws Exception {
         StorageManager storage =
             createCorruptStorageHelper("corruptedAddressBookOnlyList.json", "corruptListPrefs.json");
-        Logic logicInReadOnly = new LogicManager(model, storage);
+        Logic logicInReadOnly = new LogicManager(model, storage, true);
 
         String listCommand = ListCommand.COMMAND_WORD;
         CommandResult result = logicInReadOnly.execute(listCommand);
@@ -135,7 +136,7 @@ public class LogicManagerTest {
             new JsonUserPrefsStorage(temporaryFolder.resolve("untouchedPrefs.json"));
         StorageManager storage = new StorageManager(corruptStorageBackend, userPrefsStorage);
 
-        Logic logicInReadOnly = new LogicManager(model, storage);
+        Logic logicInReadOnly = new LogicManager(model, storage, true);
         byte[] initialBytes = Files.readAllBytes(corruptPath);
 
         assertThrows(CommandException.class, () -> logicInReadOnly.execute(
@@ -173,10 +174,15 @@ public class LogicManagerTest {
             new JsonUserPrefsStorage(temporaryFolder.resolve("coverageReadOnlyPrefs.json"));
         StorageManager storage = new StorageManager(corruptStorageBackend, userPrefsStorage);
 
-        Logic logicInReadOnly = new LogicManager(model, storage);
+        Logic logicInReadOnly = new LogicManager(model, storage, true);
         org.junit.jupiter.api.Assertions.assertTrue(logicInReadOnly.isReadOnlyMode());
     }
 
+    @Test
+    public void constructor_readOnlyExplicitInitialization_setsReadOnlyMode() {
+        LogicManager logicManager = new LogicManager(model, storage, true);
+        assertThrows(CommandException.class, () -> logicManager.execute("add n/John"));
+    }
 
     /**
      * Executes the command and confirms that

@@ -95,7 +95,7 @@ public class UiManagerTest {
         };
         JsonUserPrefsStorage userPrefsStorage = new JsonUserPrefsStorage(temporaryFolder.resolve("userPrefs.json"));
         StorageManager storage = new StorageManager(addressBookStorage, userPrefsStorage);
-        return new LogicManager(new ModelManager(), storage);
+        return new LogicManager(new ModelManager(), storage, isDataCorrupted);
     }
 
     /**
