@@ -38,7 +38,6 @@
     },
     {
       "src": "DeveloperGuide.md",
-      "title": "Developer Guide",
       "headings": {
         "sieve-developer-guide": "Sieve Developer Guide",
         "acknowledgements": "Acknowledgements",
@@ -52,7 +51,7 @@
         "common-classes": "Common classes",
         "implementation": "Implementation",
         "find-feature": "Find feature",
-        "proposed-undo-redo-feature": "[Proposed] Undo/redo feature",
+        "undo-feature": "Undo feature",
         "proposed-data-archiving": "[Proposed] Data archiving",
         "documentation-logging-testing-dev-ops": "Documentation, logging, testing, dev-ops",
         "appendix-requirements": "Appendix: Requirements",
@@ -65,6 +64,7 @@
         "launch-and-shutdown": "Launch and shutdown",
         "finding-clients": "Finding clients",
         "deleting-a-person": "Deleting a person",
+        "undoing-changes": "Undoing changes",
         "saving-data": "Saving data"
       },
       "headingKeywords": {}
@@ -116,10 +116,11 @@
         "adding-a-person-add": "Adding a person: add",
         "listing-all-persons-list": "Listing all persons: list",
         "editing-a-person-edit": "Editing a person: edit",
-        "locating-persons-by-name-find": "Locating persons by name: find",
+        "locating-persons-by-name-phone-or-tag-find": "Locating persons by name, phone or tag: find",
         "tagging-a-person-tag": "Tagging a person: tag",
         "deleting-a-person-delete": "Deleting a person: delete",
         "clearing-all-entries-clear": "Clearing all entries: clear",
+        "undoing-a-change-undo": "Undoing a change: undo",
         "exiting-the-program-exit": "Exiting the program: exit",
         "saving-the-data": "Saving the data",
         "editing-the-data-file": "Editing the data file",
