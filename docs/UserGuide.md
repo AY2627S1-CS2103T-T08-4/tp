@@ -120,7 +120,7 @@ Format: `edit INDEX [n/NAME] [p/PHONE] [e/EMAIL] [a/ADDRESS] [t/TAG]... `
 * To remove all of a client's tags, enter `t/` without a tag after it.
 
 Examples:
-*  `edit 1 p/91234567 e/amirah.tan@gmail.com` Edits the phone number and email address of the 1st client to be `91234567` and `amirah.tan@gmail.com` respectively.
+*  `edit 1 p/81112222 e/amirah.tan01@gmail.com` Edits the phone number and email address of the 1st client to be `81112222` and `amirah.tan01@gmail.com` respectively.
 *  `edit 2 n/Brandon Tan t/` Edits the name of the 2nd client to be `Brandon Tan` and clears all existing tags.
 
 ### Locating clients by name, phone or tag: `find`
@@ -134,7 +134,6 @@ Format: `find [KEYWORD]... [p/PHONE]... [t/TAG]...`
 * Within each kind of field, a client only needs to match **one** of the values; for example, `find t/Math t/Physics` returns clients tagged `Math` or `Physics`.
 
 Searching by name:
-
 
 * Keywords can contain the same characters as names: letters, digits, hyphens (`-`), apostrophes (`'`), full stops (`.`) and parentheses (`()`). Each keyword must contain at least one letter or digit.
 * The search is case-insensitive; for example, `amirah` matches `Amirah`.
@@ -257,7 +256,7 @@ Sieve data is saved automatically as a JSON file `[JAR file location]/data/sieve
 
 **Caution:**
 If your changes make the data file invalid, Sieve launches in a read-only fallback mode, displaying an empty list and showing a warning popup message at startup. Sieve will completely block any subsequent command that attempts to mutate data, ensuring your original corrupted file is left completely untouched on disk so you can fix it safely. Still, we recommend backing up the file before editing it.<br>
-Furthermore, certain edits can cause the Sieve to behave in unexpected ways (e.g., if a value entered is outside of the acceptable range). Therefore, edit the data file only if you are confident that you can update it correctly.
+Furthermore, certain edits can cause Sieve to behave in unexpected ways (e.g., if a value entered is outside of the acceptable range). Therefore, edit the data file only if you are confident that you can update it correctly.
 </box>
 
 --------------------------------------------------------------------------------------------------------------------
