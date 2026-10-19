@@ -209,11 +209,9 @@ This section describes some noteworthy details on how certain features are imple
 
 ### Find feature
 
-`find` filters the displayed client list by name keywords, phone numbers and tags. `FindCommandParser` validates the input and builds a `PersonMatchesSearchPredicate`, which decides which clients match.
+`find` filters the displayed client list by name keywords. `FindCommandParser` validates the input and builds a `NameContainsKeywordsPredicate`, which decides which clients match. Searching by tag is done with `filter`.
 
-**Parsing.** `FindCommandParser` tokenizes the arguments on `p/` and `t/`. The preamble holds the name keywords. Phone numbers are parsed with `ParserUtil.parsePhone` (so `9123 4567` becomes `91234567`) and tags with `ParserUtil.parseTag`, so `find` accepts and rejects exactly what `add` does. At least one keyword, phone number or tag must be given.
-
-**Combining fields.** `PersonMatchesSearchPredicate` holds the name keywords, a set of `Phone`s and a set of `Tag`s. A client must match every field that has values (AND across fields). Within the name and phone fields, any one specified value may match; within the tag field, every specified value must match. A field with no values places no restriction. Phones are compared with `Phone#equals`, and tags with `Tag#equals`, which ignores case. Name keywords are delegated to `NameContainsKeywordsPredicate`, described below.
+**Parsing.** `FindCommandParser` splits the trimmed arguments on whitespace, and every piece must be a valid keyword. There are no prefixes, so input such as `p/91234567` or `t/sec4` is rejected as an invalid keyword (`/` is not a name character). At least one keyword must be given.
 
 **Name keyword validation.** `Name` exposes the characters allowed in a name as `Name.NAME_CHARACTERS` (letters, digits and the punctuation in `Name.NAME_PUNCTUATION`: `'`, `.`, `(`, `)` and `-`). `Name.VALIDATION_REGEX` and `FindCommandParser`'s keyword regex are both built from this constant, so `find` always accepts the same characters as names. A keyword must also contain at least one letter or digit, so keywords such as `-` are rejected.
 
@@ -245,16 +243,6 @@ If no client matches, `FindCommand` returns `FindCommand.MESSAGE_NO_CLIENTS_FOUN
 * **Alternative 4:** Whole space-separated words only (the original AB3 behaviour).
   * Pros: Simplest to implement.
   * Cons: Clients such as `O'Brien` or `Nur-Aisyah` cannot be found by part of their name.
-
-**Aspect: How fields are combined**
-
-* **Alternative 1 (current choice):** AND across fields and among tags, with OR among name keywords and phone numbers.
-  * Pros: Adding a field or tag narrows the results, e.g. `find Liam t/sec4` finds the Liam in Sec 4 among several Liams, while several phone numbers can retrieve several clients in one search.
-  * Cons: Users must run two searches to see clients matching a name *or* a tag.
-
-* **Alternative 2:** OR across all fields.
-  * Pros: One rule for everything.
-  * Cons: Adding a field widens the results, so a tutor cannot narrow down a large roster.
 
 ### Filter feature
 
@@ -761,27 +749,18 @@ Given below are instructions to test the app manually.
     1. Test case: `find Liam Aisyah`<br>
        Expected: Both clients are listed.
 
-1. Finding by phone number and tag
+1. Finding does not search by phone number or tag
 
     1. Prerequisites: Start with the sample data (delete `data/sieve.json` if it exists, or use a fresh folder).
 
     1. Test case: `find p/9112 2334`<br>
-       Expected: Only `Farhan Ali` is listed.
+       Expected: The displayed list does not change. An error message lists the characters allowed in keywords.
 
-    1. Test case: `find p/91234567 p/92345678`<br>
-       Expected: `Amirah Tan` and `Brandon Sim` are listed because each client matches one of the phone filters.
+    1. Test case: `find t/sec4`<br>
+       Expected: Same as previous.
 
-    1. Test case: `find t/sec4`, then `find t/SEC4`<br>
-       Expected: Each command lists `Amirah Tan` and `Brandon Sim`.
-
-    1. Test case: `find amirah t/sec4`<br>
-       Expected: Only `Amirah Tan` is listed.
-
-    1. Test case: `find farhan t/sec4`<br>
-       Expected: No clients are listed, because Farhan Ali is not tagged `Sec4`.
-
-    1. Test case: `find p/9123`<br>
-       Expected: The displayed list does not change. An error message about the phone number format is shown.
+    1. Test case: `find 91122334`<br>
+       Expected: No clients are listed, because a keyword is only matched against names.
 
 1. Finding with no matches
 
