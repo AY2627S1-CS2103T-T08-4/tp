@@ -17,6 +17,7 @@ import seedu.address.model.tag.Tag;
  */
 public class PersonMatchesSearchPredicate implements Predicate<Person> {
     private final NameContainsKeywordsPredicate namePredicate;
+    private final PhoneMatchesKeywordsPredicate phonePredicate;
     private final TagsContainKeywordsPredicate tagPredicate;
     private final List<String> nameKeywords;
     private final Set<Phone> phones;
@@ -32,6 +33,7 @@ public class PersonMatchesSearchPredicate implements Predicate<Person> {
         this.nameKeywords = List.copyOf(nameKeywords);
         this.namePredicate = new NameContainsKeywordsPredicate(this.nameKeywords);
         this.phones = Set.copyOf(phones);
+        this.phonePredicate = new PhoneMatchesKeywordsPredicate(this.phones);
         this.tags = Set.copyOf(tags);
         this.tagPredicate = new TagsContainKeywordsPredicate(this.tags);
     }
@@ -39,7 +41,7 @@ public class PersonMatchesSearchPredicate implements Predicate<Person> {
     @Override
     public boolean test(Person person) {
         boolean nameMatches = nameKeywords.isEmpty() || namePredicate.test(person);
-        boolean phoneMatches = phones.isEmpty() || phones.stream().allMatch(person.getPhone()::equals);
+        boolean phoneMatches = phones.isEmpty() || phonePredicate.test(person);
         boolean tagMatches = tags.isEmpty() || tagPredicate.test(person);
         return nameMatches && phoneMatches && tagMatches;
     }
