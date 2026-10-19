@@ -80,11 +80,13 @@ Format: `help`
 
 Adds a client to Sieve.
 
-Format: `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]... `
+Format: `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [nt/NOTE] [t/TAG]... `
 
 <box type="tip" seamless>
 
 **Tip:** A client can have any number of tags, including zero.
+
+A note is free text of up to 200 characters, for anything you want to remember about the client, e.g. `nt/Weak at algebra, prelims in March`. Leave it out if you have nothing to record.
 </box>
 
 <box type="info" seamless>
@@ -99,6 +101,7 @@ Format: `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]... `
 
 Examples:
 * `add n/Jason Quek p/91234567 e/jasonquek@gmail.com a/Blk 123 Yishun Ave 5 #04-12`
+* `add n/Brandon Sim p/92345678 e/brandonsim@sample.com a/10 Queenstown Rd nt/Parent prefers WhatsApp after 6pm` adds a client with a note.
 * `add n/Matthias Tan t/Physics e/matthias.tan@gmail.com a/10 Queenstown Rd p/8123 4567 t/Sec4` adds a client with two tags. Fields can be given in any order, and spaces in the phone number are ignored.
 
 ### Listing all clients: `list`
@@ -111,17 +114,21 @@ Format: `list`
 
 Edits an existing client in Sieve.
 
-Format: `edit INDEX [n/NAME] [p/PHONE] [e/EMAIL] [a/ADDRESS] [t/TAG]... `
+Format: `edit INDEX [n/NAME] [p/PHONE] [e/EMAIL] [a/ADDRESS] [nt/NOTE] [t/TAG]... `
 
 * Edits the client at the specified `INDEX`. The index refers to the index number shown in the displayed client list. The index **must be a positive integer** 1, 2, 3, ...
 * At least one of the optional fields must be provided.
 * Existing values will be updated to the input values.
 * When editing tags, all of the client's existing tags are removed; adding tags is not cumulative.
 * To remove all of a client's tags, enter `t/` without a tag after it.
+* Editing the note replaces the whole note; it does not add to the existing one. To remove a client's note, enter `nt/` without any text after it.
+* A note cannot contain text that looks like another field, such as ` t/` or ` p/`, because Sieve reads it as the start of that field.
 
 Examples:
 *  `edit 1 p/81112222 e/amirah.tan01@gmail.com` Edits the phone number and email address of the 1st client to be `81112222` and `amirah.tan01@gmail.com` respectively.
 *  `edit 2 n/Brandon Tan t/` Edits the name of the 2nd client to be `Brandon Tan` and clears all existing tags.
+*  `edit 3 nt/Exam in March` Sets the note of the 3rd client to `Exam in March`.
+*  `edit 3 nt/` Clears the note of the 3rd client.
 
 ### Locating clients by name, phone or tag: `find`
 
@@ -314,10 +321,10 @@ Furthermore, certain edits can cause Sieve to behave in unexpected ways (e.g., i
 
 Action     | Format, Examples
 -----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------
-**Add**    | `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]... ` <br> e.g., `add n/Immanuel Lim p/98765432 e/immanuel.lim@gmail.com a/Blk 456 Bishan St 21 #11-22 t/Chemistry t/JC1`
+**Add**    | `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [nt/NOTE] [t/TAG]... ` <br> e.g., `add n/Immanuel Lim p/98765432 e/immanuel.lim@gmail.com a/Blk 456 Bishan St 21 #11-22 t/Chemistry t/JC1`
 **Clear**  | `clear`
 **Delete** | `delete INDEX [, INDEX]...`<br> e.g., `delete 3`, `delete 1, 3, 5`
-**Edit**   | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]... `<br> e.g., `edit 1 p/81112222 e/amirah.tan01@gmail.com`
+**Edit**   | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [nt/NOTE] [t/TAG]... `<br> e.g., `edit 1 p/81112222 e/amirah.tan01@gmail.com`, `edit 2 nt/Exam in March`
 **Filter** | `filter t/TAG [t/MORE_TAGS]...`<br> e.g., `filter t/physics t/sec4`
 **Find**   | `find [KEYWORD]... [p/PHONE]... [t/TAG]...`<br> e.g., `find Amirah O'Brien`, `find t/sec4`, `find p/91234567`
 **List**   | `list`

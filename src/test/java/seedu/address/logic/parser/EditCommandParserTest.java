@@ -24,6 +24,7 @@ import static seedu.address.logic.commands.CommandTestUtil.VALID_TAG_FRIEND;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_TAG_HUSBAND;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_ADDRESS;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_EMAIL;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_NOTE;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_PHONE;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_TAG;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseFailure;
@@ -41,6 +42,7 @@ import seedu.address.logic.commands.EditCommand.EditPersonDescriptor;
 import seedu.address.model.person.Address;
 import seedu.address.model.person.Email;
 import seedu.address.model.person.Name;
+import seedu.address.model.person.Note;
 import seedu.address.model.person.Phone;
 import seedu.address.model.tag.Tag;
 import seedu.address.testutil.EditPersonDescriptorBuilder;
@@ -193,6 +195,29 @@ public class EditCommandParserTest {
 
         assertParseFailure(parser, userInput,
                 Messages.getErrorMessageForDuplicatePrefixes(PREFIX_PHONE, PREFIX_EMAIL, PREFIX_ADDRESS));
+    }
+
+    @Test
+    public void parse_noteSpecified_success() {
+        Index targetIndex = INDEX_FIRST_PERSON;
+
+        EditPersonDescriptor descriptor = new EditPersonDescriptorBuilder().withNote("Weak at algebra").build();
+        assertParseSuccess(parser, targetIndex.getOneBased() + " nt/Weak at algebra",
+                new EditCommand(targetIndex, descriptor));
+    }
+
+    @Test
+    public void parse_emptyNote_clearsNote() {
+        Index targetIndex = INDEX_FIRST_PERSON;
+
+        EditPersonDescriptor descriptor = new EditPersonDescriptorBuilder().withNote("").build();
+        assertParseSuccess(parser, targetIndex.getOneBased() + " nt/", new EditCommand(targetIndex, descriptor));
+    }
+
+    @Test
+    public void parse_invalidOrRepeatedNote_failure() {
+        assertParseFailure(parser, "1 nt/" + "a".repeat(Note.MAX_LENGTH + 1), Note.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, "1 nt/one nt/two", Messages.getErrorMessageForDuplicatePrefixes(PREFIX_NOTE));
     }
 
     @Test

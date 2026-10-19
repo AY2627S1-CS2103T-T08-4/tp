@@ -27,6 +27,7 @@ import static seedu.address.logic.commands.CommandTestUtil.VALID_TAG_HUSBAND;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_ADDRESS;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_EMAIL;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_NOTE;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_PHONE;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseFailure;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseSuccess;
@@ -40,6 +41,7 @@ import seedu.address.logic.commands.AddCommand;
 import seedu.address.model.person.Address;
 import seedu.address.model.person.Email;
 import seedu.address.model.person.Name;
+import seedu.address.model.person.Note;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.Phone;
 import seedu.address.model.tag.Tag;
@@ -47,6 +49,30 @@ import seedu.address.testutil.PersonBuilder;
 
 public class AddCommandParserTest {
     private AddCommandParser parser = new AddCommandParser();
+
+    @Test
+    public void parse_noteSpecified_success() {
+        Person expectedPerson = new PersonBuilder(BOB).withTags(VALID_TAG_FRIEND).withNote("Weak at algebra").build();
+        assertParseSuccess(parser, NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB + ADDRESS_DESC_BOB
+                + " nt/Weak at algebra" + TAG_DESC_FRIEND, new AddCommand(expectedPerson));
+
+        // empty note is the same as no note
+        Person expectedPersonNoNote = new PersonBuilder(BOB).withTags(VALID_TAG_FRIEND).build();
+        assertParseSuccess(parser, NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB + ADDRESS_DESC_BOB
+                + " nt/" + TAG_DESC_FRIEND, new AddCommand(expectedPersonNoNote));
+    }
+
+    @Test
+    public void parse_invalidOrRepeatedNote_failure() {
+        String validPrefix = NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB + ADDRESS_DESC_BOB;
+
+        // note over the length limit
+        assertParseFailure(parser, validPrefix + " nt/" + "a".repeat(Note.MAX_LENGTH + 1), Note.MESSAGE_CONSTRAINTS);
+
+        // multiple notes
+        assertParseFailure(parser, validPrefix + " nt/one nt/two",
+                Messages.getErrorMessageForDuplicatePrefixes(PREFIX_NOTE));
+    }
 
     @Test
     public void parse_allFieldsPresent_success() {
