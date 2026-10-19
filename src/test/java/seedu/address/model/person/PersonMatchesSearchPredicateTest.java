@@ -65,13 +65,23 @@ public class PersonMatchesSearchPredicateTest {
     }
 
     @Test
-    public void test_anyValueWithinFieldMatches_returnsTrue() {
-        // one of two phones matches
+    public void test_everyPhoneMustMatch() {
         assertTrue(new PersonMatchesSearchPredicate(List.of(),
-                List.of(new Phone("98765432"), new Phone("91234567")), List.of()).test(LIAM));
+                List.of(new Phone("91234567"), new Phone("91234567")), List.of()).test(LIAM));
 
-        // one of two tags matches
+        assertFalse(new PersonMatchesSearchPredicate(List.of(),
+                List.of(new Phone("98765432"), new Phone("91234567")), List.of()).test(LIAM));
+    }
+
+    @Test
+    public void test_everyTagMustMatch() {
         assertTrue(new PersonMatchesSearchPredicate(List.of(), List.of(),
+                List.of(new Tag("sec4"), new Tag("physics"))).test(LIAM));
+
+        assertTrue(new PersonMatchesSearchPredicate(List.of(), List.of(),
+                List.of(new Tag("physics"))).test(LIAM));
+
+        assertFalse(new PersonMatchesSearchPredicate(List.of(), List.of(),
                 List.of(new Tag("sec3"), new Tag("physics"))).test(LIAM));
     }
 

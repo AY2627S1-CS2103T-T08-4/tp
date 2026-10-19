@@ -29,6 +29,7 @@ public class TagCommand extends Command {
             + " INDEX t/TAG [t/MORE_TAGS]...";
 
     public static final String MESSAGE_TAG_PERSON_SUCCESS = "Tagged %1$s with: %2$s.";
+    public static final String MESSAGE_PERSON_ALREADY_TAGGED = "%1$s already tagged.";
 
     private final Index targetIndex;
     private final List<Tag> tagsToAdd;
@@ -55,21 +56,38 @@ public class TagCommand extends Command {
         }
 
         Person personToTag = lastShownList.get(targetIndex.getZeroBased());
-        Person taggedPerson = createTaggedPerson(personToTag);
+        List<Tag> newTagsToAdd = getNewTags(personToTag);
+
+        if (newTagsToAdd.isEmpty()) {
+            return new CommandResult(String.format(MESSAGE_PERSON_ALREADY_TAGGED, personToTag.getName()));
+        }
+
+        Person taggedPerson = createTaggedPerson(personToTag, newTagsToAdd);
         model.setPerson(personToTag, taggedPerson);
 
-        String tagNames = tagsToAdd.stream()
+        String tagNames = newTagsToAdd.stream()
                 .map(tag -> tag.tagName)
                 .collect(Collectors.joining(", "));
+
         return new CommandResult(String.format(MESSAGE_TAG_PERSON_SUCCESS, personToTag.getName(), tagNames));
+    }
+
+    /**
+     * Returns the requested tags that {@code person} does not already have.
+     */
+    private List<Tag> getNewTags(Person person) {
+        return tagsToAdd
+                .stream()
+                .filter(tag -> !person.getTags().contains(tag))
+                .toList();
     }
 
     /**
      * Returns a copy of {@code personToTag} containing both its existing tags and the requested new tags.
      */
-    private Person createTaggedPerson(Person personToTag) {
+    private Person createTaggedPerson(Person personToTag, List<Tag> newTagsToAdd) {
         Set<Tag> updatedTags = new HashSet<>(personToTag.getTags());
-        updatedTags.addAll(tagsToAdd);
+        updatedTags.addAll(newTagsToAdd);
         return new Person(personToTag.getName(), personToTag.getPhone(), personToTag.getEmail(),
                 personToTag.getAddress(), personToTag.getNote(), updatedTags);
     }
