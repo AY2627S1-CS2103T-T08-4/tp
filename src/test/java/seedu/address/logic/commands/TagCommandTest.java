@@ -30,6 +30,7 @@ public class TagCommandTest {
 
     private static final Tag PHYSICS = new Tag("physics");
     private static final Tag SECONDARY_FOUR = new Tag("Secondary 4");
+    private static final Tag FRIENDS = new Tag("friends");
 
     private final Model model = new ModelManager(getTypicalAddressBook(), new UserPrefs());
 
@@ -52,20 +53,46 @@ public class TagCommandTest {
     }
 
     @Test
-    public void execute_existingTagWithDifferentCase_successWithoutDuplicate() {
+    public void execute_existingTag_returnsAlreadyTaggedMessageWithoutChangingPerson() {
+        Person personToTag = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
+        TagCommand tagCommand = new TagCommand(INDEX_FIRST_PERSON, List.of(FRIENDS));
+
+        String expectedMessage = String.format(TagCommand.MESSAGE_PERSON_ALREADY_TAGGED, personToTag.getName());
+        Model expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
+
+        assertCommandSuccess(tagCommand, model, expectedMessage, expectedModel);
+        assertEquals(personToTag, model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased()));
+    }
+
+    @Test
+    public void execute_existingTagWithDifferentCase_returnsAlreadyTaggedMessageWithoutDuplicate() {
         Person personToTag = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
         Tag existingTag = personToTag.getTags().iterator().next();
         Tag differentlyCasedTag = new Tag(existingTag.tagName.toUpperCase(Locale.ROOT));
         TagCommand tagCommand = new TagCommand(INDEX_FIRST_PERSON, List.of(differentlyCasedTag));
 
-        String expectedMessage = String.format(TagCommand.MESSAGE_TAG_PERSON_SUCCESS,
-                personToTag.getName(), differentlyCasedTag.tagName);
+        String expectedMessage = String.format(TagCommand.MESSAGE_PERSON_ALREADY_TAGGED, personToTag.getName());
         ModelManager expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
 
         assertCommandSuccess(tagCommand, model, expectedMessage, expectedModel);
         Person updatedPerson = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
         assertEquals(personToTag.getTags(), updatedPerson.getTags());
         assertEquals(personToTag.getTags().size(), updatedPerson.getTags().size());
+    }
+
+    @Test
+    public void execute_existingAndNewTags_messageListsOnlyNewTags() {
+        Person personToTag = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
+        TagCommand tagCommand = new TagCommand(INDEX_FIRST_PERSON, List.of(FRIENDS, PHYSICS));
+        TagCommand unchangedCommand = new TagCommand(INDEX_FIRST_PERSON, List.of(FRIENDS, PHYSICS));
+
+        String expectedMessage = String.format(TagCommand.MESSAGE_TAG_PERSON_SUCCESS,
+                personToTag.getName(), PHYSICS.tagName);
+        ModelManager expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
+        expectedModel.setPerson(personToTag, withAdditionalTags(personToTag, Set.of(PHYSICS)));
+
+        assertCommandSuccess(tagCommand, model, expectedMessage, expectedModel);
+        assertEquals(unchangedCommand, tagCommand);
     }
 
     @Test

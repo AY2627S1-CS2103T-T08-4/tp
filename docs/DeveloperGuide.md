@@ -135,7 +135,7 @@ How the `Logic` component works:
 1. The result of the command execution is encapsulated as a `CommandResult` object which is returned from `Logic`.
 1. **Read-only mode block:** If a `DataLoadingException` occurs during file parsing, `LogicManager` activates its
    internal `isReadOnlyMode` flag. When this flag is true, `LogicManager#execute()` intercepts any incoming
-   data-mutating commands (such as `add`, `delete`, `edit`, `clear`, or `tag`) before parsing them, immediately throwing
+   data-mutating commands (such as `add`, `delete`, `edit`, `clear`, `tag`, or `untag`) before parsing them, immediately throwing
    a `CommandException` to protect the hard disk storage files from being accidentally overwritten. Non-mutating
    commands like `list` and `help` remain fully operational. Here are the other classes in `Logic` (omitted from the
    class diagram above) that are used for parsing a user command:
@@ -213,7 +213,7 @@ This section describes some noteworthy details on how certain features are imple
 
 **Parsing.** `FindCommandParser` tokenizes the arguments on `p/` and `t/`. The preamble holds the name keywords. Phone numbers are parsed with `ParserUtil.parsePhone` (so `9123 4567` becomes `91234567`) and tags with `ParserUtil.parseTag`, so `find` accepts and rejects exactly what `add` does. At least one keyword, phone number or tag must be given.
 
-**Combining fields.** `PersonMatchesSearchPredicate` holds the name keywords, a set of `Phone`s and a set of `Tag`s. A client must match every field that has values (AND across fields), and any one value within a field (OR within a field). A field with no values places no restriction. Phones are compared with `Phone#equals`, and tags with `Tag#equals`, which ignores case. Name keywords are delegated to `NameContainsKeywordsPredicate`, described below.
+**Combining fields.** `PersonMatchesSearchPredicate` holds the name keywords, a set of `Phone`s and a set of `Tag`s. A client must match every field that has values (AND across fields). Within the name field, any one keyword may match; within the phone and tag fields, every specified value must match. A field with no values places no restriction. Phones are compared with `Phone#equals`, and tags with `Tag#equals`, which ignores case. Name keywords are delegated to `NameContainsKeywordsPredicate`, described below.
 
 **Name keyword validation.** `Name` exposes the characters allowed in a name as `Name.NAME_CHARACTERS` (letters, digits and the punctuation in `Name.NAME_PUNCTUATION`: `'`, `.`, `(`, `)` and `-`). `Name.VALIDATION_REGEX` and `FindCommandParser`'s keyword regex are both built from this constant, so `find` always accepts the same characters as names. A keyword must also contain at least one letter or digit, so keywords such as `-` are rejected.
 
@@ -248,13 +248,25 @@ If no client matches, `FindCommand` returns `FindCommand.MESSAGE_NO_CLIENTS_FOUN
 
 **Aspect: How fields are combined**
 
-* **Alternative 1 (current choice):** AND across fields, OR within a field.
-  * Pros: Adding a field narrows the results, e.g. `find Liam t/sec4` finds the Liam in Sec 4 among several Liams. Keeps the existing OR behaviour between name keywords.
+* **Alternative 1 (current choice):** AND across fields and among phone numbers and tags, with OR only among name keywords.
+  * Pros: Adding a field, phone number or tag consistently narrows the results, e.g. `find Liam t/sec4` finds the Liam in Sec 4 among several Liams.
   * Cons: Users must run two searches to see clients matching a name *or* a tag.
 
 * **Alternative 2:** OR across all fields.
   * Pros: One rule for everything.
   * Cons: Adding a field widens the results, so a tutor cannot narrow down a large roster.
+
+### Filter feature
+
+`filter` narrows the displayed client list by exact phone numbers and tags. `FilterCommandParser` tokenizes the arguments on `p/` and `t/`, rejects unprefixed text, and requires at least one phone number or tag. It uses `ParserUtil.parsePhone` and `ParserUtil.parseTag`, giving `filter` the same validation and whitespace normalization as `find` and `add`.
+
+`FilterCommandParser` builds a `PersonMatchesSearchPredicate` without name keywords. All supplied phone numbers and tags must match, and supplying both fields requires both conditions to match. Since each client stores one phone number, distinct phone filters cannot match the same client.
+
+### Tag and untag features
+
+`TagCommandParser` and `UntagCommandParser` parse the displayed client index and one or more `t/` values using `ParserUtil.parseIndex` and `ParserUtil.parseTag`. Their command constructors remove duplicate requested tags while preserving input order.
+
+Both commands replace the selected immutable `Person` with a copy containing an updated tag set. `TagCommand` adds only tags the client does not already have, while `UntagCommand` removes only tags the client currently has. Tag equality is case-insensitive. Confirmation messages list only tags that were actually added or removed; when no change is needed, the commands leave the model unchanged and return a specific no-change message.
 
 ### Undo feature
 
@@ -407,7 +419,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 | `* * *`  | tutor                                  | see all my clients as a numbered list                                                                 | I can refer to any of them by index in later commands                                   |
 | `* * *`  | careless typist                        | undo my last command                                                                                  | a mistyped delete isn't a disaster                                                      |
 | `* *`    | new user switching from other tools    | bulk-add multiple clients at once                                                                     | I don't have to re-enter my existing client list one by one                             |
-| `* *`    | tutor                                  | filter clients by one or more tags, such as day, subject, and level, in a single command              | I can answer questions like "Sec 4 physics on Thursday" in one go                       |
+| `* *`    | tutor                                  | filter clients by one or more phone numbers or tags in a single command                               | I can locate exact contacts or answer questions like "Sec 4 physics on Thursday" in one go |
 | `* *`    | tutor                                  | mark a client as inactive (e.g. paused for exams or a break) instead of deleting them                 | I keep their record and can resume lessons later without re-adding them from scratch    |
 | `* *`    | long-time user                         | hide inactive clients from my main list and see only the clients I am currently teaching              | I am not distracted by irrelevant data and can quickly see who is still active          |
 | `* *`    | tutor                                  | add free-text notes to a client                                                                       | I can record details that don't fit neatly into a tag                                   |
@@ -530,7 +542,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 2. Sieve shows all clients in a numbered list
 3. Tutor requests to tag a specific client with one or more tags (e.g. a subject, a level or a lesson day)
 4. Sieve adds the tags to the client's existing tags and saves the change
-5. Sieve shows a confirmation message and the client with all their tags
+5. Sieve shows a confirmation listing only the newly added tags and displays the client with all their tags
 
    Use case ends.
 
@@ -560,9 +572,37 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 * 4a. The client already has the given tag.
 
-    * 4a1. Sieve ignores the duplicate tag and keeps the other tags as given.
+    * 4a1. Sieve ignores the existing tag and lists only newly added tags in the confirmation.
+
+    * 4a2. If the client already has every specified tag, Sieve reports that the client is already tagged and leaves the client unchanged.
 
       Use case continues from step 5.
+
+**Use case: UC3A - Remove tags from a client**
+
+**MSS**
+
+1. Tutor requests to list all clients
+2. Sieve shows all clients in a numbered list
+3. Tutor requests to remove one or more tags from a specific client
+4. Sieve removes the specified tags that the client currently has and preserves all other tags
+5. Sieve confirms only the tags that were removed
+
+   Use case ends.
+
+**Extensions**
+
+* 3a. The index is invalid or outside the displayed list.
+
+    * 3a1. Sieve shows an error message and no tags are removed.
+
+* 3b. A specified tag is invalid.
+
+    * 3b1. Sieve shows an error message and no tags are removed.
+
+* 4a. The client has none of the specified tags.
+
+    * 4a1. Sieve reports that the client does not have any specified tags and leaves the client unchanged.
 
 **Use case: UC4 - Delete a client who no longer needs tuition**
 
@@ -702,6 +742,9 @@ Given below are instructions to test the app manually.
     1. Test case: `find p/9112 2334`<br>
        Expected: Only `Farhan Ali` is listed.
 
+    1. Test case: `find p/91234567 p/92345678`<br>
+       Expected: No clients are listed because each client stores only one phone number and both phone filters must match.
+
     1. Test case: `find t/sec4`, then `find t/SEC4`<br>
        Expected: Each command lists `Amirah Tan` and `Brandon Sim`.
 
@@ -729,6 +772,60 @@ Given below are instructions to test the app manually.
 
     1. Test case: `find`<br>
        Expected: The displayed list does not change. An invalid command format error is shown.
+
+### Filtering clients
+
+1. Filtering by phone number and tags
+
+    1. Prerequisites: Start with the sample data (delete `data/sieve.json` if it exists, or use a fresh folder).
+
+    1. Test case: `filter p/9234 5678`<br>
+       Expected: Only `Brandon Sim` is listed.
+
+    1. Test case: `filter p/91234567 p/92345678`<br>
+       Expected: No clients are listed because each client stores only one phone number and both phone filters must match.
+
+    1. Test case: `filter t/Physics t/Sec4`<br>
+       Expected: Only `Brandon Sim` is listed because the client must have both tags.
+
+    1. Test case: `filter p/92345678 t/Sec4`<br>
+       Expected: Only `Brandon Sim` is listed because both the phone and tag filters match.
+
+    1. Test case: `filter p/9123`<br>
+       Expected: The displayed list does not change. An error message about the phone number format is shown.
+
+    1. Test case: `filter`<br>
+       Expected: The displayed list does not change. An invalid command format error is shown.
+
+### Tagging clients
+
+1. Reporting only newly added tags
+
+    1. Prerequisites: Start with the sample data, where `Amirah Tan` already has the `Math` tag.
+
+    1. Test case: `tag 1 t/Math t/Physics`<br>
+       Expected: `Physics` is added while `Math` is not duplicated. The success message lists only `Physics`.
+
+    1. Test case: `tag 1 t/Math`<br>
+       Expected: The client is unchanged and Sieve reports that `Amirah Tan` is already tagged.
+
+### Removing tags from clients
+
+1. Removing only tags that exist
+
+    1. Prerequisites: Start with the sample data, where `Amirah Tan` has the `Math`, `Sec4`, and `Urgent` tags.
+
+    1. Test case: `untag 1 t/Math t/Physics`<br>
+       Expected: `Math` is removed while `Sec4` and `Urgent` remain. The success message lists only `Math`.
+
+    1. Test case: `untag 1 t/SEC4`<br>
+       Expected: `Sec4` is removed despite the different letter case.
+
+    1. Test case: `untag 1 t/Biology`<br>
+       Expected: The client is unchanged and Sieve reports that the client does not have any specified tags.
+
+    1. Test case: `untag 1 t/`<br>
+       Expected: The client is unchanged and an error message about the tag format is shown.
 
 ### Deleting a person
 
