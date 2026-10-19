@@ -10,14 +10,14 @@ import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.model.tag.Tag;
 
 /**
- * Tests that a {@code Person} has any of the specified tags.
+ * Tests that a {@code Person} has all of the specified tags.
  */
 public class TagsContainKeywordsPredicate implements Predicate<Person> {
 
     private final Set<Tag> keywords;
 
     /**
-     * Creates a predicate that matches a person who has any tag in {@code keywords}.
+     * Creates a predicate that matches a person who has all tags in {@code keywords}.
      */
     public TagsContainKeywordsPredicate(Collection<Tag> keywords) {
         requireNonNull(keywords);
@@ -26,7 +26,7 @@ public class TagsContainKeywordsPredicate implements Predicate<Person> {
 
     @Override
     public boolean test(Person person) {
-        return person.getTags().stream().anyMatch(keywords::contains);
+        return person.getTags().containsAll(this.keywords);
     }
 
     @Override

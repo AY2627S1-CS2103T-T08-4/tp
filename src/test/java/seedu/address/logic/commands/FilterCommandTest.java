@@ -17,6 +17,7 @@ import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
 import seedu.address.model.person.PersonMatchesSearchPredicate;
+import seedu.address.model.person.Phone;
 import seedu.address.model.tag.Tag;
 
 public class FilterCommandTest {
@@ -47,13 +48,46 @@ public class FilterCommandTest {
     }
 
     @Test
-    public void execute_multipleTags_returnsPersonsWithAnyTag() {
+    public void execute_multipleTags_returnsPersonsWithAllTags() {
         PersonMatchesSearchPredicate predicate = predicateWith("FRIENDS", "owesmoney");
         FilterCommand command = new FilterCommand(predicate);
         expectedModel.updateFilteredPersonList(predicate);
 
-        assertCommandSuccess(command, model, "3 clients found matching your search term(s).", expectedModel);
-        assertEquals(List.of(ALICE, BENSON, DANIEL), model.getFilteredPersonList());
+        assertCommandSuccess(command, model, "1 client found matching your search term(s).", expectedModel);
+        assertEquals(List.of(BENSON), model.getFilteredPersonList());
+    }
+
+    @Test
+    public void execute_phone_returnsMatchingPerson() {
+        PersonMatchesSearchPredicate predicate = new PersonMatchesSearchPredicate(
+                List.of(), List.of(new Phone("94351253")), List.of());
+        FilterCommand command = new FilterCommand(predicate);
+        expectedModel.updateFilteredPersonList(predicate);
+
+        assertCommandSuccess(command, model, "1 client found matching your search term(s).", expectedModel);
+        assertEquals(List.of(ALICE), model.getFilteredPersonList());
+    }
+
+    @Test
+    public void execute_multipleDifferentPhones_returnsNoPerson() {
+        PersonMatchesSearchPredicate predicate = new PersonMatchesSearchPredicate(List.of(),
+                List.of(new Phone("94351253"), new Phone("98765432")), List.of());
+        FilterCommand command = new FilterCommand(predicate);
+        expectedModel.updateFilteredPersonList(predicate);
+
+        assertCommandSuccess(command, model, "0 clients found matching your search term(s).", expectedModel);
+        assertEquals(List.of(), model.getFilteredPersonList());
+    }
+
+    @Test
+    public void execute_phoneAndTag_returnsPersonMatchingBoth() {
+        PersonMatchesSearchPredicate predicate = new PersonMatchesSearchPredicate(
+                List.of(), List.of(new Phone("98765432")), List.of(new Tag("friends")));
+        FilterCommand command = new FilterCommand(predicate);
+        expectedModel.updateFilteredPersonList(predicate);
+
+        assertCommandSuccess(command, model, "1 client found matching your search term(s).", expectedModel);
+        assertEquals(List.of(BENSON), model.getFilteredPersonList());
     }
 
     @Test

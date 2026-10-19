@@ -21,7 +21,7 @@ public class FindCommand extends Command {
 
     public static final String MESSAGE_USAGE = COMMAND_WORD + ": Finds all clients with a name part that starts with "
             + "any of the specified keywords (case-insensitive, ignoring punctuation), "
-            + "and who have any of the specified phone numbers and tags, "
+            + "and whose phone number and tags match every specified filter, "
             + "and displays them as a list with index numbers.\n"
             + "Parameters: [KEYWORD]... [" + PREFIX_PHONE + "PHONE]... [" + PREFIX_TAG + "TAG]... "
             + "(at least one must be given)\n"
@@ -33,7 +33,7 @@ public class FindCommand extends Command {
 
     public static final String MESSAGE_NO_CLIENTS_FOUND = Messages.getPersonsListedOverviewMessage(0)
             + " Keywords must match the start of a name part (e.g. Bri, not rien), phone numbers must be "
-            + "complete, and a client must match every field you search by (name, phone, tag). "
+            + "complete, and a client must match every phone and tag filter you search by. "
             + "Check the spelling, or use list to see all clients.";
 
     private final Predicate<Person> predicate;

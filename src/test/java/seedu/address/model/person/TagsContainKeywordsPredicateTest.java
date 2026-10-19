@@ -38,19 +38,24 @@ public class TagsContainKeywordsPredicateTest {
     }
 
     @Test
-    public void test_anyKeywordMatches_returnsTrue() {
+    public void test_allKeywordsMatch_returnsTrue() {
         assertTrue(predicateWith("Physics").test(PERSON_WITH_TAGS));
-        assertTrue(predicateWith("Chemistry", "Secondary 4").test(PERSON_WITH_TAGS));
+        assertTrue(predicateWith("Physics", "Secondary 4").test(PERSON_WITH_TAGS));
         assertTrue(predicateWith("PHYSICS").test(PERSON_WITH_TAGS));
     }
 
     @Test
-    public void test_noKeywordMatches_returnsFalse() {
-        assertFalse(predicateWith().test(PERSON_WITH_TAGS));
+    public void test_notAllKeywordsMatch_returnsFalse() {
         assertFalse(predicateWith("Chemistry").test(PERSON_WITH_TAGS));
+        assertFalse(predicateWith("Chemistry", "Secondary 4").test(PERSON_WITH_TAGS));
 
         Person personWithoutTags = new PersonBuilder().withTags().build();
         assertFalse(predicateWith("Physics").test(personWithoutTags));
+    }
+
+    @Test
+    public void test_noKeywords_returnsTrue() {
+        assertTrue(predicateWith().test(PERSON_WITH_TAGS));
     }
 
     @Test

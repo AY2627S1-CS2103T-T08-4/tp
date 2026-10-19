@@ -12,11 +12,12 @@ import seedu.address.model.tag.Tag;
 
 /**
  * Tests that a {@code Person} matches every search field given: name keywords, phone numbers and tags.
- * Within a field, matching any one value is enough (e.g. any of the phone numbers).
+ * Matching any name keyword is enough, while every specified phone number and tag must match.
  * A field with no values places no restriction on the person.
  */
 public class PersonMatchesSearchPredicate implements Predicate<Person> {
     private final NameContainsKeywordsPredicate namePredicate;
+    private final PhoneMatchesKeywordsPredicate phonePredicate;
     private final TagsContainKeywordsPredicate tagPredicate;
     private final List<String> nameKeywords;
     private final Set<Phone> phones;
@@ -32,6 +33,7 @@ public class PersonMatchesSearchPredicate implements Predicate<Person> {
         this.nameKeywords = List.copyOf(nameKeywords);
         this.namePredicate = new NameContainsKeywordsPredicate(this.nameKeywords);
         this.phones = Set.copyOf(phones);
+        this.phonePredicate = new PhoneMatchesKeywordsPredicate(this.phones);
         this.tags = Set.copyOf(tags);
         this.tagPredicate = new TagsContainKeywordsPredicate(this.tags);
     }
@@ -39,7 +41,7 @@ public class PersonMatchesSearchPredicate implements Predicate<Person> {
     @Override
     public boolean test(Person person) {
         boolean nameMatches = nameKeywords.isEmpty() || namePredicate.test(person);
-        boolean phoneMatches = phones.isEmpty() || phones.contains(person.getPhone());
+        boolean phoneMatches = phones.isEmpty() || phonePredicate.test(person);
         boolean tagMatches = tags.isEmpty() || tagPredicate.test(person);
         return nameMatches && phoneMatches && tagMatches;
     }
