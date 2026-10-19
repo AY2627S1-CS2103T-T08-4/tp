@@ -13,7 +13,8 @@ activate Model
 Model -> VersionedAddressBook : undoAddressBook()
 activate VersionedAddressBook
 
-VersionedAddressBook -> VersionedAddressBook : current = history.pop()
+VersionedAddressBook -> VersionedAddressBook : redoHistory.push(current)
+VersionedAddressBook -> VersionedAddressBook : current = undoHistory.pop()
 VersionedAddressBook -> VersionedAddressBook : resetData(current)
 VersionedAddressBook --> Model
 deactivate VersionedAddressBook
