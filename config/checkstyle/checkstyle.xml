@@ -408,7 +408,7 @@
       <property name="allowMissingParamTags" value="true"/>
     </module>
 
-    <!-- Checks the Javadoc's format for every public method (excluding getters, setters and constructors). -->
+    <!-- Checks the format of existing Javadoc on public methods. Constructors are not checked. -->
     <module name="JavadocMethod">
       <property name="allowedAnnotations" value="Override, Test, BeforeAll, BeforeEach, AfterAll, AfterEach, Subscribe"/>
       <property name="accessModifiers" value="public"/>
@@ -420,7 +420,8 @@
 
     <module name="InvalidJavadocPosition"/>
 
-    <!-- Checks that every public method (excluding getters, setters and constructors) has a header comment. -->
+    <!-- Checks that every public method and constructor has a header comment, except getters, setters, main,
+         and those with a body of one line or less. -->
     <module name="MissingJavadocMethodCheck">
       <property name="minLineCount" value="1"/>
       <property name="allowMissingPropertyJavadoc" value="true"/>
