@@ -61,7 +61,7 @@ Sieve is a **desktop app that helps self-employed private tuition teachers keep 
 * Parameters can be in any order.<br>
   For example, if the command specifies `n/NAME p/PHONE_NUMBER`, `p/PHONE_NUMBER n/NAME` is also acceptable.
 
-* Extraneous parameters for commands that take no parameters, such as `help`, `list`, `exit`, `clear`, and `undo`, are ignored.<br>
+* Extraneous parameters for commands that take no parameters, such as `help`, `list`, `exit`, `clear`, `undo` and `redo`, are ignored.<br>
   For example, `help 123` is interpreted as `help`.
 
 * If you are using a PDF version of this document, be careful when copying and pasting commands that span multiple lines as space characters surrounding line-breaks may be omitted when copied over to the application.
@@ -244,16 +244,34 @@ Format: `undo`
 * After an undo, the full client list is shown, so that the restored client is not hidden by an earlier `find`.
 * The undone change is saved to the data file straight away, like any other change.
 * If there is nothing left to undo, the following error is shown: `Error: There is nothing to undo.`
+* An undo can be reversed with [`redo`](#redoing-an-undone-change-redo).
 
 <box type="warning" seamless>
 
-**Caution:** Undo history is not kept after you close Sieve. Once you reopen it, earlier changes cannot be undone.
+**Caution:** Undo and redo history are not kept after you close Sieve. Once you reopen it, earlier changes cannot be undone or redone.
 </box>
 
 Examples:
 * `delete 2` followed by `undo` brings back the client you just deleted.
 * `clear` followed by `undo` brings back all your clients.
 * `delete 1`, then `find Jason`, then `undo` brings back the deleted client and shows the full list again.
+
+### Redoing an undone change: `redo`
+
+Reapplies the last change you reverted with `undo`.
+
+Format: `redo`
+
+* Undone changes can be redone one at a time, starting from the most recently undone.
+* Once you make a new change after an `undo`, such as `add` or `delete`, the undone changes can no longer be redone.
+* Commands that do not change anything, such as `list`, `find` and `help`, are skipped and do not affect what can be redone.
+* After a redo, the full client list is shown.
+* The redone change is saved to the data file straight away, like any other change.
+* If there is nothing to redo, the following error is shown: `Error: There is nothing to redo.`
+
+Examples:
+* `delete 2`, then `undo`, then `redo` deletes the same client again.
+* `delete 1`, then `undo`, then `delete 3`, then `redo` shows an error, because `delete 3` is a new change made after the `undo`.
 
 ### Exiting the program: `exit`
 
@@ -305,4 +323,5 @@ Action     | Format, Examples
 **List**   | `list`
 **Tag**    | `tag INDEX t/TAG [t/MORE_TAGS]...`<br> e.g., `tag 1 t/physics t/sec4`
 **Undo**   | `undo`
+**Redo**   | `redo`
 **Help**   | `help`

@@ -6,20 +6,24 @@ skinparam ClassBackgroundColor #FFFFAA
 
 title After command "undo"
 
-package "history" <<rectangle>> {
-    class H1 as "<u>ab0:AddressBook</u>"
-    class H2 as "<u>abX:AddressBook</u>"
+package "undoHistory" <<rectangle>> {
+    class U1 as "<u>ab0:AddressBook</u>"
 }
-
-H1 -[hidden]right-> H2
-hide H2
 
 package "current" <<rectangle>> {
     class Current as "<u>ab1:AddressBook</u>"
 }
 
-H2 -[hidden]right-> Current
+package "redoHistory" <<rectangle>> {
+    class R1 as "<u>ab2:AddressBook</u>"
+}
 
-class Top as "Top of history" #FFFFFF
-Top -up-> H1
+U1 -[hidden]right-> Current
+Current -[hidden]right-> R1
+
+class UndoTop as "Top of undoHistory" #FFFFFF
+UndoTop -up-> U1
+
+class RedoTop as "Top of redoHistory" #FFFFFF
+RedoTop -up-> R1
 @enduml

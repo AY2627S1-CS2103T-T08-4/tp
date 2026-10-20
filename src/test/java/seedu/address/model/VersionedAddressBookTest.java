@@ -14,9 +14,10 @@ public class VersionedAddressBookTest {
     private final VersionedAddressBook versionedAddressBook = new VersionedAddressBook(getTypicalAddressBook());
 
     @Test
-    public void constructor_nothingToUndo() {
+    public void constructor_nothingToUndoOrRedo() {
         assertEquals(getTypicalAddressBook(), versionedAddressBook);
         assertFalse(versionedAddressBook.canUndoAddressBook());
+        assertFalse(versionedAddressBook.canRedoAddressBook());
     }
 
     @Test
@@ -108,5 +109,73 @@ public class VersionedAddressBookTest {
         versionedAddressBook.undoAddressBook();
         assertEquals(getTypicalAddressBook(), versionedAddressBook);
         assertFalse(versionedAddressBook.canUndoAddressBook());
+    }
+
+    @Test
+    public void undoAddressBook_afterChange_canRedo() {
+        versionedAddressBook.removePerson(ALICE);
+        versionedAddressBook.commitAddressBook();
+        assertFalse(versionedAddressBook.canRedoAddressBook());
+
+        versionedAddressBook.undoAddressBook();
+        assertTrue(versionedAddressBook.canRedoAddressBook());
+    }
+
+    @Test
+    public void redoAddressBook_afterUndo_restoresUndoneState() {
+        versionedAddressBook.removePerson(ALICE);
+        versionedAddressBook.commitAddressBook();
+        AddressBook withoutAlice = new AddressBook(versionedAddressBook);
+        versionedAddressBook.undoAddressBook();
+
+        versionedAddressBook.redoAddressBook();
+        assertEquals(withoutAlice, versionedAddressBook);
+        assertFalse(versionedAddressBook.canRedoAddressBook());
+
+        // The redone change can be undone again
+        versionedAddressBook.undoAddressBook();
+        assertEquals(getTypicalAddressBook(), versionedAddressBook);
+    }
+
+    @Test
+    public void redoAddressBook_twoUndos_redoesInOrder() {
+        versionedAddressBook.removePerson(ALICE);
+        versionedAddressBook.commitAddressBook();
+        AddressBook withoutAlice = new AddressBook(versionedAddressBook);
+        versionedAddressBook.addPerson(BOB);
+        versionedAddressBook.commitAddressBook();
+        AddressBook withBob = new AddressBook(versionedAddressBook);
+        versionedAddressBook.undoAddressBook();
+        versionedAddressBook.undoAddressBook();
+
+        versionedAddressBook.redoAddressBook();
+        assertEquals(withoutAlice, versionedAddressBook);
+        assertTrue(versionedAddressBook.canRedoAddressBook());
+
+        versionedAddressBook.redoAddressBook();
+        assertEquals(withBob, versionedAddressBook);
+        assertFalse(versionedAddressBook.canRedoAddressBook());
+    }
+
+    @Test
+    public void commitAddressBook_noChangeAfterUndo_canStillRedo() {
+        versionedAddressBook.removePerson(ALICE);
+        versionedAddressBook.commitAddressBook();
+        versionedAddressBook.undoAddressBook();
+
+        // LogicManager commits after undo too, which must not clear the redo history
+        versionedAddressBook.commitAddressBook();
+        assertTrue(versionedAddressBook.canRedoAddressBook());
+    }
+
+    @Test
+    public void commitAddressBook_changeAfterUndo_nothingToRedo() {
+        versionedAddressBook.removePerson(ALICE);
+        versionedAddressBook.commitAddressBook();
+        versionedAddressBook.undoAddressBook();
+        versionedAddressBook.addPerson(BOB);
+        versionedAddressBook.commitAddressBook();
+
+        assertFalse(versionedAddressBook.canRedoAddressBook());
     }
 }

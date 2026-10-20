@@ -1,7 +1,7 @@
 ---
   layout: default.md
-    title: "Developer Guide"
-    pageNav: 3
+  title: "Developer Guide"
+  pageNav: 3
 ---
 
 # Sieve Developer Guide
@@ -256,32 +256,38 @@ If no client matches, `FindCommand` returns `FindCommand.MESSAGE_NO_CLIENTS_FOUN
   * Pros: One rule for everything.
   * Cons: Adding a field widens the results, so a tutor cannot narrow down a large roster.
 
-### Undo feature
+### Undo/redo feature
 
 #### Implementation
 
-The `undo` command reverts the client list to its state before the last change. Changes can be undone one at a time, back to the client list at startup.
+The `undo` command reverts the client list to its state before the last change, and the `redo` command reapplies a change that was undone. Changes can be undone one at a time, back to the client list at startup.
 
-The undo history is kept by `VersionedAddressBook`, which extends `AddressBook` with two fields:
+The history is kept by `VersionedAddressBook`, which extends `AddressBook` with three fields:
 
-* `history`: a stack (`Deque`) of earlier client lists, with the most recent on top.
+* `undoHistory`: a stack (`Deque`) of earlier client lists, with the most recent on top.
+* `redoHistory`: a stack of client lists that were undone, with the most recently undone on top.
 * `current`: a copy of the client list as it was at the last save to the history (or at startup).
 
 It adds the following operations, which are exposed in the `Model` interface under the same names:
 
-Step 1. The user launches the application for the first time. The `VersionedAddressBook` will be initialized with the
-initial address book state, and the `currentStatePointer` pointing to that single address book state.
+* `VersionedAddressBook#commitAddressBook()`: pushes `current` onto `undoHistory`, empties `redoHistory`, and saves a copy of the client list as `current`. Does nothing if the client list still matches `current`.
+* `VersionedAddressBook#undoAddressBook()`: pushes `current` onto `redoHistory`, then pops the top of `undoHistory` and restores the client list to it.
+* `VersionedAddressBook#redoAddressBook()`: pushes `current` onto `undoHistory`, then pops the top of `redoHistory` and restores the client list to it.
+* `VersionedAddressBook#canUndoAddressBook()` and `VersionedAddressBook#canRedoAddressBook()`: return whether the matching stack has anything in it.
+
+`LogicManager` calls `Model#commitAddressBook()` after every command that succeeds, so commands do not need to know about undo.
+
+The example below shows how the history changes. In each diagram, `undoHistory` is on the left (oldest first), `current` is in the middle, and `redoHistory` is on the right (next to be redone first).
+
+Step 1. The user launches the application. Both stacks are empty, and `current` is a copy of the starting client list, `ab0`.
 
 <puml src="diagrams/UndoRedoState0.puml" alt="UndoRedoState0" />
 
-Step 2. The user executes `delete 5` command to delete the 5th person in the address book. The `delete` command calls
-`Model#commitAddressBook()`, causing the modified state of the address book after the `delete 5` command executes to be
-saved in the `addressBookStateList`, and the `currentStatePointer` is shifted to the newly inserted address book state.
+Step 2. The user executes `delete 5` to delete the 5th client. After it succeeds, `LogicManager` calls `Model#commitAddressBook()`. The client list no longer matches `current`, so `ab0` is pushed onto `undoHistory` and the new client list is saved as `current` (`ab1`).
 
 <puml src="diagrams/UndoRedoState1.puml" alt="UndoRedoState1" />
 
-Step 3. The user executes `add n/David …​` to add a new person. The `add` command also calls
-`Model#commitAddressBook()`, causing another modified address book state to be saved into the `addressBookStateList`.
+Step 3. The user executes `add n/David …​` to add a new client. The commit after it pushes `ab1` onto `undoHistory`, and `ab2` becomes `current`.
 
 <puml src="diagrams/UndoRedoState2.puml" alt="UndoRedoState2" />
 
@@ -292,16 +298,16 @@ Step 3. The user executes `add n/David …​` to add a new person. The `add` co
 
 Step 4. The user executes `list`. `LogicManager` calls `Model#commitAddressBook()` as usual, but the client list still matches `current`, so the history is unchanged. This is why `list`, `find` and `help` do not use up an undo.
 
-Step 5. The user decides that adding David was a mistake, and executes `undo`. `UndoCommand` calls `Model#undoAddressBook()`, which pops `ab1` from `history`, makes it `current`, and copies it into the client list. `UndoCommand` then shows the full client list, so that a restored client is not hidden by an earlier `find`.
+Step 5. The user decides that adding David was a mistake, and executes `undo`. `UndoCommand` calls `Model#undoAddressBook()`, which pushes `ab2` onto `redoHistory`, pops `ab1` from `undoHistory`, makes it `current`, and copies it into the client list. `UndoCommand` then shows the full client list, so that a restored client is not hidden by an earlier `find`.
 
 <puml src="diagrams/UndoRedoState3.puml" alt="UndoRedoState3" />
 
 <box type="info" seamless>
 
-**Note:** If `history` is empty, there is no earlier client list to restore. `UndoCommand` checks this with `Model#canUndoAddressBook()` and shows an error instead of undoing.
+**Note:** If `undoHistory` is empty, there is no earlier client list to restore. `UndoCommand` checks this with `Model#canUndoAddressBook()` and shows an error instead of undoing.
 </box>
 
-The following sequence diagram shows how an undo operation goes through the `Logic` component. The commit after `undo` does nothing, because `undoAddressBook()` has already set `current` to match the client list.
+The following sequence diagram shows how an undo operation goes through the `Logic` component. The commit after `undo` does nothing, because `undoAddressBook()` has already set `current` to match the client list. This is also why the commit does not empty `redoHistory`.
 
 <puml src="diagrams/UndoSequenceDiagram-Logic.puml" alt="UndoSequenceDiagram-Logic" />
 
@@ -315,11 +321,20 @@ Similarly, how an undo operation goes through the `Model` component is shown bel
 
 <puml src="diagrams/UndoSequenceDiagram-Model.puml" alt="UndoSequenceDiagram-Model" />
 
-Step 6. The user executes `clear`. The commit after it pushes `ab1` onto `history`, and the empty client list (`ab3`) becomes `current`. The undone state `ab2` is no longer stored anywhere, as there is no `redo` command yet.
+Step 6. The user changes their mind and executes `redo`. `RedoCommand` calls `Model#redoAddressBook()`, which pushes `ab1` back onto `undoHistory`, pops `ab2` from `redoHistory`, makes it `current`, and copies it into the client list. The history is now the same as after Step 3. `redo` goes through the `Logic` and `Model` components in the same way as `undo`, with the two stacks swapped.
 
 <puml src="diagrams/UndoRedoState4.puml" alt="UndoRedoState4" />
 
-The following activity diagram summarizes what happens to the undo history when a user executes a command:
+<box type="info" seamless>
+
+**Note:** If `redoHistory` is empty, there is no undone client list to restore. `RedoCommand` checks this with `Model#canRedoAddressBook()` and shows an error instead of redoing.
+</box>
+
+Step 7. The user executes `undo` again, which returns to the history in Step 5, and then executes `clear`. The commit after `clear` pushes `ab1` onto `undoHistory`, makes the empty client list (`ab3`) `current`, and empties `redoHistory`. `ab2` is no longer stored anywhere, so it can no longer be redone.
+
+<puml src="diagrams/UndoRedoState5.puml" alt="UndoRedoState5" />
+
+The following activity diagram summarizes what happens to the history when a user executes a command:
 
 <puml src="diagrams/CommitActivityDiagram.puml" width="250" />
 
@@ -328,7 +343,7 @@ The following activity diagram summarizes what happens to the undo history when 
 **Caution:** A change to the client list only becomes its own undo step when `Model#commitAddressBook()` is called after it. A change made outside a command (e.g. by a future import feature) must call `Model#commitAddressBook()` itself, otherwise it will be merged into the undo step of the next command.
 </box>
 
-The undo history is kept in memory only, so it is lost when the app is closed. In read-only mode (when the data file is corrupted), `undo` is blocked along with the other commands that change data.
+The history is kept in memory only, so it is lost when the app is closed. In read-only mode (when the data file is corrupted), `undo` and `redo` are blocked along with the other commands that change data.
 
 #### Design considerations:
 
@@ -338,9 +353,9 @@ The undo history is kept in memory only, so it is lost when the app is closed. I
   * Pros: Easy to implement, and works for every command, including new ones, without extra code.
   * Cons: Uses more memory, as each change stores a full copy of the client list. This is acceptable for a tutor's client list of tens of clients.
 
-* **Alternative 2:** Each command knows how to undo itself.
+* **Alternative 2:** Each command knows how to undo and redo itself.
   * Pros: Uses less memory (e.g. for `delete`, just save the client being deleted).
-  * Cons: Every command that changes data needs its own undo logic, and each must be correct.
+  * Cons: Every command that changes data needs its own undo and redo logic, and each must be correct.
 
 **Aspect: Where the history is saved:**
 
@@ -355,12 +370,22 @@ The undo history is kept in memory only, so it is lost when the app is closed. I
 **Aspect: How many levels of undo:**
 
 * **Alternative 1 (current choice):** Multiple levels, using a stack of earlier client lists.
-  * Pros: The user can undo several mistakes in a row. The stack and `current` are also the groundwork for a `redo` command.
+  * Pros: The user can undo several mistakes in a row, and `redo` only needs a second stack for the undone client lists.
   * Cons: The history grows with every change until the app is closed.
 
 * **Alternative 2:** A single level, keeping only the client list before the last change.
   * Pros: Simplest to implement, with a fixed memory cost.
   * Cons: The user can only undo their last change, and a second mistake cannot be recovered.
+
+**Aspect: What happens to undone changes after a new change:**
+
+* **Alternative 1 (current choice):** A new change empties `redoHistory`.
+  * Pros: The history stays a single line of changes, which is easy for users to predict and matches most other apps.
+  * Cons: Undone changes are lost once the user makes a new change.
+
+* **Alternative 2:** Keep every branch of the history, so undone changes can still be reached.
+  * Pros: Nothing is ever lost.
+  * Cons: Much harder to implement, and users would need a way to choose which branch to redo.
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -406,6 +431,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 | `* * *`  | tutor                                  | tag a client with free-form labels, and add or remove a single tag without retyping the whole contact | I can group clients the way my business actually works and keep small corrections cheap |
 | `* * *`  | tutor                                  | see all my clients as a numbered list                                                                 | I can refer to any of them by index in later commands                                   |
 | `* * *`  | careless typist                        | undo my last command                                                                                  | a mistyped delete isn't a disaster                                                      |
+| `* *`    | careless typist                        | redo a change I undid                                                                                 | undoing one step too far is easy to fix                                                 |
 | `* *`    | new user switching from other tools    | bulk-add multiple clients at once                                                                     | I don't have to re-enter my existing client list one by one                             |
 | `* *`    | tutor                                  | filter clients by one or more tags, such as day, subject, and level, in a single command              | I can answer questions like "Sec 4 physics on Thursday" in one go                       |
 | `* *`    | tutor                                  | mark a client as inactive (e.g. paused for exams or a break) instead of deleting them                 | I keep their record and can resume lessons later without re-adding them from scratch    |
@@ -811,4 +837,35 @@ Given below are instructions to test the app manually.
     1. Prerequisites: Relaunch the app, or `undo` until every change is undone.
 
     1. Test case: `undo`<br>
-       Expected: The client list is unchanged. The status message shows `Error: There is nothing to undo.
+       Expected: The client list is unchanged. The status message shows `Error: There is nothing to undo.`
+
+### Redoing changes
+
+1. Redoing an undone change
+
+    1. Prerequisites: Use the `list` command to display multiple clients.
+
+    1. Test case: `delete 1`, then `undo`, then `redo`<br>
+       Expected: The client is deleted again. The status message shows `Redid the last undone change. Showing all clients.`
+
+1. Redoing several undone changes in a row
+
+    1. Test case: `delete 1`, then `delete 1`, then `undo` twice, then `redo` twice<br>
+       Expected: The first `redo` deletes the first client again, and the second `redo` deletes the second one again.
+
+1. A new change clears the redo history
+
+    1. Test case: `delete 1`, then `undo`, then `delete 2`, then `redo`<br>
+       Expected: `redo` shows `Error: There is nothing to redo.` and the client list is unchanged.
+
+1. Commands that change nothing do not clear the redo history
+
+    1. Test case: `delete 1`, then `undo`, then `list`, then `redo`<br>
+       Expected: The client is deleted again.
+
+1. Nothing to redo
+
+    1. Prerequisites: Relaunch the app.
+
+    1. Test case: `redo`<br>
+       Expected: The client list is unchanged. The status message shows `Error: There is nothing to redo.`

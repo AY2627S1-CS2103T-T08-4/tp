@@ -6,21 +6,18 @@ skinparam ClassBackgroundColor #FFFFAA
 
 title Initial state
 
-package "history" <<rectangle>> {
-    class H1 as "(empty)" #FFFFFF
-    class H2 as "<u>abX:AddressBook</u>"
+package "undoHistory" <<rectangle>> {
+    class U0 as "(empty)" #FFFFFF
 }
-
-H1 -[hidden]right-> H2
-hide H2
 
 package "current" <<rectangle>> {
     class Current as "<u>ab0:AddressBook</u>"
 }
 
-H2 -[hidden]right-> Current
+package "redoHistory" <<rectangle>> {
+    class R0 as "(empty)" #FFFFFF
+}
 
-class Top as "Top of history" #FFFFFF
-Top -up-> H1
-hide Top
+U0 -[hidden]right-> Current
+Current -[hidden]right-> R0
 @enduml

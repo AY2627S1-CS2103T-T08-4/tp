@@ -28,6 +28,7 @@ import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.DeleteCommand;
 import seedu.address.logic.commands.EditCommand;
 import seedu.address.logic.commands.ListCommand;
+import seedu.address.logic.commands.RedoCommand;
 import seedu.address.logic.commands.UndoCommand;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.exceptions.ParseException;
@@ -127,6 +128,28 @@ public class LogicManagerTest {
     }
 
     @Test
+    public void execute_redoAfterUndo_restoresAddedClient() throws Exception {
+        logic.execute(AddCommand.COMMAND_WORD + NAME_DESC_AMY + PHONE_DESC_AMY + EMAIL_DESC_AMY + ADDRESS_DESC_AMY);
+        ModelManager expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
+        logic.execute(UndoCommand.COMMAND_WORD);
+        // list changes nothing, so it must not clear the redo history
+        logic.execute(ListCommand.COMMAND_WORD);
+
+        assertCommandSuccess(RedoCommand.COMMAND_WORD, RedoCommand.MESSAGE_SUCCESS, expectedModel);
+        assertCommandException(RedoCommand.COMMAND_WORD, RedoCommand.MESSAGE_NOTHING_TO_REDO);
+    }
+
+    @Test
+    public void execute_redoAfterNewChange_throwsCommandException() throws Exception {
+        logic.execute(AddCommand.COMMAND_WORD + NAME_DESC_AMY + PHONE_DESC_AMY + EMAIL_DESC_AMY + ADDRESS_DESC_AMY);
+        logic.execute(UndoCommand.COMMAND_WORD);
+        // adding Amy again is a new change, so the undone add can no longer be redone
+        logic.execute(AddCommand.COMMAND_WORD + NAME_DESC_AMY + PHONE_DESC_AMY + EMAIL_DESC_AMY + ADDRESS_DESC_AMY);
+
+        assertCommandException(RedoCommand.COMMAND_WORD, RedoCommand.MESSAGE_NOTHING_TO_REDO);
+    }
+
+    @Test
     public void getFilteredPersonList_modifyList_throwsUnsupportedOperationException() {
         assertThrows(UnsupportedOperationException.class, () -> logic
             .getFilteredPersonList()
@@ -148,6 +171,7 @@ public class LogicManagerTest {
         assertThrows(CommandException.class, expectedError, () -> logicInReadOnly.execute("clear"));
         assertThrows(CommandException.class, expectedError, () -> logicInReadOnly.execute("tag 1 t/Math"));
         assertThrows(CommandException.class, expectedError, () -> logicInReadOnly.execute("undo"));
+        assertThrows(CommandException.class, expectedError, () -> logicInReadOnly.execute("redo"));
     }
 
     @Test

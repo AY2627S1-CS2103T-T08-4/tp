@@ -4,21 +4,25 @@ skinparam ClassFontColor #000000
 skinparam ClassBorderColor #000000
 skinparam ClassBackgroundColor #FFFFAA
 
-title After command "clear"
+title After command "redo"
 
-package "history" <<rectangle>> {
-    class H1 as "<u>ab0:AddressBook</u>"
-    class H2 as "<u>ab1:AddressBook</u>"
+package "undoHistory" <<rectangle>> {
+    class U1 as "<u>ab0:AddressBook</u>"
+    class U2 as "<u>ab1:AddressBook</u>"
 }
-
-H1 -[hidden]right-> H2
 
 package "current" <<rectangle>> {
-    class Current as "<u>ab3:AddressBook</u>"
+    class Current as "<u>ab2:AddressBook</u>"
 }
 
-H2 -[hidden]right-> Current
+package "redoHistory" <<rectangle>> {
+    class R0 as "(empty)" #FFFFFF
+}
 
-class Top as "Top of history" #FFFFFF
-Top -up-> H2
+U1 -[hidden]right-> U2
+U2 -[hidden]right-> Current
+Current -[hidden]right-> R0
+
+class UndoTop as "Top of undoHistory" #FFFFFF
+UndoTop -up-> U2
 @enduml

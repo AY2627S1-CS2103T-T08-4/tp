@@ -28,6 +28,7 @@ public class HelpWindow extends UiPart<Stage> {
         find [KEYWORD]... [p/PHONE]... [t/TAG]...
         help
         list
+        redo
         tag INDEX t/TAG [t/MORE_TAGS]...
         undo
         """;
