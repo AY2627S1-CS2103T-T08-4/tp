@@ -749,7 +749,7 @@ Given below are instructions to test the app manually.
     1. Test case: `find Liam Aisyah`<br>
        Expected: Both clients are listed.
 
-1. Finding does not search by phone number or tag
+1. Find command searches by name only
 
     1. Prerequisites: Start with the sample data (delete `data/sieve.json` if it exists, or use a fresh folder).
 
