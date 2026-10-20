@@ -273,6 +273,21 @@ Examples:
 * `delete 2`, then `undo`, then `redo` deletes the same client again.
 * `delete 1`, then `undo`, then `delete 3`, then `redo` shows an error, because `delete 3` is a new change made after the `undo`.
 
+### Recalling previous commands: Up and Down keys
+
+Brings back commands you entered earlier, so you can run them again or fix a typo without retyping the whole command.
+
+* Press **Up** in the command box to show your previous command. Press it again to go further back. It stops at your oldest command.
+* Press **Down** to go forward again. Going past your newest command clears the command box.
+* Every command you enter is remembered, including commands that failed and repeats of the same command.
+* A recalled command only runs when you press Enter, so you can edit it first. The cursor is placed at the end of the command.
+* Pressing Down while typing a new command keeps what you typed. Pressing Up replaces it with your previous command.
+* Your command history is cleared when you close Sieve.
+
+Examples:
+* `edit 1 p/9123 456` fails because the phone number has only 7 digits. Press Up, add the missing digit, and press Enter.
+* After `find Amirah`, `delete 1` and `list`, press Up three times to bring back `find Amirah`.
+
 ### Exiting the program: `exit`
 
 Exits the program.
