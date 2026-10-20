@@ -2,6 +2,7 @@ package seedu.address.model.person;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.testutil.Assert.assertThrows;
 
@@ -74,5 +75,22 @@ public class NoteTest {
         // different values -> returns false
         assertFalse(note.equals(new Note("Strong at algebra")));
         assertFalse(note.equals(Note.EMPTY));
+    }
+
+    @Test
+    public void hashCodeMethod() {
+        Note note = new Note("Weak at algebra");
+
+        // same values -> same hash code
+        assertEquals(note.hashCode(), new Note("Weak at algebra").hashCode());
+
+        // different values -> different hash code
+        assertNotEquals(note.hashCode(), Note.EMPTY.hashCode());
+    }
+
+    @Test
+    public void toStringMethod() {
+        assertEquals("Weak at algebra", new Note("Weak at algebra").toString());
+        assertEquals("", Note.EMPTY.toString());
     }
 }

@@ -17,6 +17,23 @@ public class MessagesTest {
     }
 
     @Test
+    public void format_personWithoutNote_omitsNote() {
+        Person person = new PersonBuilder().withName("John Tan").withPhone("91234567")
+                .withEmail("john@example.com").withAddress("Blk 1").withNote("").withTags("sec4").build();
+        assertEquals("John Tan; Phone: 91234567; Email: john@example.com; Address: Blk 1; Tags: [sec4]",
+                Messages.format(person));
+    }
+
+    @Test
+    public void format_personWithNote_includesNote() {
+        Person person = new PersonBuilder().withName("John Tan").withPhone("91234567")
+                .withEmail("john@example.com").withAddress("Blk 1").withNote("Weak at algebra")
+                .withTags("sec4").build();
+        assertEquals("John Tan; Phone: 91234567; Email: john@example.com; Address: Blk 1; "
+                + "Note: Weak at algebra; Tags: [sec4]", Messages.format(person));
+    }
+
+    @Test
     public void getIndexOutOfBoundsMessage() {
         String prefix = "Error: The index provided is out of bounds! Current list only contains ";
         assertEquals(prefix + "0 clients.", Messages.getIndexOutOfBoundsMessage(0));
