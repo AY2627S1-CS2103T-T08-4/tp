@@ -1,0 +1,28 @@
+@startuml
+!include style.puml
+skinparam ClassFontColor #000000
+skinparam ClassBorderColor #000000
+skinparam ClassBackgroundColor #FFFFAA
+
+title After commands "undo" and "clear"
+
+package "undoHistory" <<rectangle>> {
+    class U1 as "<u>ab0:AddressBook</u>"
+    class U2 as "<u>ab1:AddressBook</u>"
+}
+
+package "current" <<rectangle>> {
+    class Current as "<u>ab3:AddressBook</u>"
+}
+
+package "redoHistory" <<rectangle>> {
+    class R0 as "(empty)" #FFFFFF
+}
+
+U1 -[hidden]right-> U2
+U2 -[hidden]right-> Current
+Current -[hidden]right-> R0
+
+class UndoTop as "Top of undoHistory" #FFFFFF
+UndoTop -up-> U2
+@enduml

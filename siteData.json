@@ -38,6 +38,7 @@
     },
     {
       "src": "DeveloperGuide.md",
+      "title": "Developer Guide",
       "headings": {
         "sieve-developer-guide": "Sieve Developer Guide",
         "acknowledgements": "Acknowledgements",
@@ -51,7 +52,7 @@
         "common-classes": "Common classes",
         "implementation": "Implementation",
         "find-feature": "Find feature",
-        "undo-feature": "Undo feature",
+        "undo-redo-feature": "Undo/redo feature",
         "documentation-logging-testing-dev-ops": "Documentation, logging, testing, dev-ops",
         "appendix-requirements": "Appendix: Requirements",
         "product-scope": "Product scope",
@@ -63,7 +64,8 @@
         "launch-and-shutdown": "Launch and shutdown",
         "finding-clients": "Finding clients",
         "deleting-a-person": "Deleting a person",
-        "undoing-changes": "Undoing changes"
+        "undoing-changes": "Undoing changes",
+        "redoing-changes": "Redoing changes"
       },
       "headingKeywords": {}
     },
@@ -120,6 +122,7 @@
         "deleting-clients-delete": "Deleting clients: delete",
         "clearing-all-clients-clear": "Clearing all clients: clear",
         "undoing-a-change-undo": "Undoing a change: undo",
+        "redoing-an-undone-change-redo": "Redoing an undone change: redo",
         "exiting-the-program-exit": "Exiting the program: exit",
         "saving-the-data": "Saving the data",
         "editing-the-data-file": "Editing the data file",

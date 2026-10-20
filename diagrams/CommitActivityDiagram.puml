@@ -11,7 +11,8 @@ start
 if () then ([command succeeds])
     if () then ([client list differs
 from current])
-        :Push current onto history;
+        :Push current onto undoHistory;
+        :Empty redoHistory;
         :Save a copy of the
         client list as current;
     else ([else])
