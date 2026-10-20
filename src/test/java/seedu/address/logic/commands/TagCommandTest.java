@@ -129,6 +129,7 @@ public class TagCommandTest {
     private Person withAdditionalTags(Person person, Set<Tag> additionalTags) {
         Set<Tag> combinedTags = new HashSet<>(person.getTags());
         combinedTags.addAll(additionalTags);
-        return new Person(person.getName(), person.getPhone(), person.getEmail(), person.getAddress(), combinedTags);
+        return new Person(person.getName(), person.getPhone(), person.getEmail(), person.getAddress(),
+                person.getNote(), combinedTags);
     }
 }

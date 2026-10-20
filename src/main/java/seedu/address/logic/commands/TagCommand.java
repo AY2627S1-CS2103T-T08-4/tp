@@ -71,7 +71,7 @@ public class TagCommand extends Command {
         Set<Tag> updatedTags = new HashSet<>(personToTag.getTags());
         updatedTags.addAll(tagsToAdd);
         return new Person(personToTag.getName(), personToTag.getPhone(), personToTag.getEmail(),
-                personToTag.getAddress(), updatedTags);
+                personToTag.getAddress(), personToTag.getNote(), updatedTags);
     }
 
     @Override

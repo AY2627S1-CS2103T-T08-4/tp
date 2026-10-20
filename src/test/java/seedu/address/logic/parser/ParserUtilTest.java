@@ -15,6 +15,7 @@ import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.person.Address;
 import seedu.address.model.person.Email;
 import seedu.address.model.person.Name;
+import seedu.address.model.person.Note;
 import seedu.address.model.person.Phone;
 import seedu.address.model.tag.Tag;
 
@@ -185,6 +186,35 @@ public class ParserUtilTest {
     public void parseAddress_tooLong_throwsParseException() {
         String tooLongAddress = "a".repeat(Address.MAX_LENGTH + 1);
         assertThrows(ParseException.class, Address.MESSAGE_CONSTRAINTS, () -> ParserUtil.parseAddress(tooLongAddress));
+    }
+
+    @Test
+    public void parseNote_null_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> ParserUtil.parseNote((String) null));
+    }
+
+    @Test
+    public void parseNote_tooLong_throwsParseException() {
+        String tooLongNote = "a".repeat(Note.MAX_LENGTH + 1);
+        assertThrows(ParseException.class, Note.MESSAGE_CONSTRAINTS, () -> ParserUtil.parseNote(tooLongNote));
+    }
+
+    @Test
+    public void parseNote_emptyValue_returnsEmptyNote() throws Exception {
+        assertEquals(Note.EMPTY, ParserUtil.parseNote(""));
+        assertEquals(Note.EMPTY, ParserUtil.parseNote(WHITESPACE));
+    }
+
+    @Test
+    public void parseNote_validValueWithWhitespace_returnsTrimmedAndCollapsedNote() throws Exception {
+        assertEquals(new Note("Weak at algebra"), ParserUtil.parseNote(WHITESPACE + "Weak   at\talgebra" + WHITESPACE));
+    }
+
+    @Test
+    public void parseNote_maxLengthAfterCollapsing_returnsNote() throws Exception {
+        // 201 characters as typed, but 200 once the double space is collapsed
+        String typedNote = "a".repeat(Note.MAX_LENGTH - 2) + "  b";
+        assertEquals(new Note("a".repeat(Note.MAX_LENGTH - 2) + " b"), ParserUtil.parseNote(typedNote));
     }
 
     @Test
