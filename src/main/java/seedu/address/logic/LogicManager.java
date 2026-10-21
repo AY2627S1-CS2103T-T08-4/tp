@@ -26,6 +26,9 @@ public class LogicManager implements Logic {
     public static final String FILE_OPS_PERMISSION_ERROR_FORMAT =
         "Could not save data to file %s due to insufficient permissions to write to the file or the folder.";
 
+    public static final String READ_ONLY_ERROR_FORMAT = "Error: Local data file is corrupted at %s. "
+        + "Displaying empty list. Please fix or delete the data file and restart.";
+
     private final Logger logger = LogsCenter.getLogger(LogicManager.class);
 
     private final Model model;
@@ -59,13 +62,13 @@ public class LogicManager implements Logic {
     public CommandResult execute(String commandText) throws CommandException, ParseException {
         logger.info("----------------[USER COMMAND][" + commandText + "]");
 
-        if (isReadOnlyMode && isMutatingCommand(commandText)) {
-            throw new CommandException("Error: Local data file is corrupted at " + storage.getAddressBookFilePath()
-                + ". Displaying empty list. Please fix or delete the data file and restart.");
-        }
-
         CommandResult commandResult;
         Command command = addressBookParser.parseCommand(commandText);
+
+        if (isReadOnlyMode && command.isMutating()) {
+            throw new CommandException(String.format(READ_ONLY_ERROR_FORMAT, storage.getAddressBookFilePath()));
+        }
+
         commandResult = command.execute(model);
         model.commitAddressBook();
 
@@ -80,25 +83,6 @@ public class LogicManager implements Logic {
         }
 
         return commandResult;
-    }
-
-    /**
-     * Checks if the user input text represents a data-mutating command.
-     */
-    private boolean isMutatingCommand(String commandText) {
-        String trimmedInput = commandText.trim();
-        if (trimmedInput.isEmpty()) {
-            return false;
-        }
-        String commandWord = trimmedInput.split("\\s+")[0].toLowerCase();
-        return commandWord.equals("add")
-            || commandWord.equals("delete")
-            || commandWord.equals("edit")
-            || commandWord.equals("clear")
-            || commandWord.equals("tag")
-            || commandWord.equals("untag")
-            || commandWord.equals("undo")
-            || commandWord.equals("redo");
     }
 
     @Override
