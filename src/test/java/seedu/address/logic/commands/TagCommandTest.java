@@ -53,7 +53,7 @@ public class TagCommandTest {
     }
 
     @Test
-    public void execute_existingTag_returnsAlreadyTaggedMessageWithoutChangingPerson() {
+    public void execute_existingTag_returnsAllTagsMessageWithoutChangingPerson() {
         Person personToTag = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
         TagCommand tagCommand = new TagCommand(INDEX_FIRST_PERSON, List.of(FRIENDS));
 
@@ -65,7 +65,7 @@ public class TagCommandTest {
     }
 
     @Test
-    public void execute_existingTagWithDifferentCase_returnsAlreadyTaggedMessageWithoutDuplicate() {
+    public void execute_existingTagWithDifferentCase_returnsAllTagsMessageWithoutDuplicate() {
         Person personToTag = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
         Tag existingTag = personToTag.getTags().iterator().next();
         Tag differentlyCasedTag = new Tag(existingTag.tagName.toUpperCase(Locale.ROOT));

@@ -155,6 +155,7 @@ public class UntagCommandTest {
     private Person withoutTags(Person person, Set<Tag> tagsToRemove) {
         Set<Tag> remainingTags = new HashSet<>(person.getTags());
         remainingTags.removeAll(tagsToRemove);
-        return new Person(person.getName(), person.getPhone(), person.getEmail(), person.getAddress(), remainingTags);
+        return new Person(person.getName(), person.getPhone(), person.getEmail(), person.getAddress(), person.getNote(),
+                remainingTags);
     }
 }

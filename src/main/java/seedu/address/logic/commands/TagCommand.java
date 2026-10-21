@@ -29,7 +29,7 @@ public class TagCommand extends Command {
             + " INDEX t/TAG [t/MORE_TAGS]...";
 
     public static final String MESSAGE_TAG_PERSON_SUCCESS = "Tagged %1$s with: %2$s.";
-    public static final String MESSAGE_PERSON_ALREADY_TAGGED = "%1$s already tagged.";
+    public static final String MESSAGE_PERSON_ALREADY_TAGGED = "%1$s has all of the tag(s).";
 
     private final Index targetIndex;
     private final List<Tag> tagsToAdd;

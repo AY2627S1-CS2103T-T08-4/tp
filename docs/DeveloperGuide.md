@@ -213,7 +213,7 @@ This section describes some noteworthy details on how certain features are imple
 
 **Parsing.** `FindCommandParser` tokenizes the arguments on `p/` and `t/`. The preamble holds the name keywords. Phone numbers are parsed with `ParserUtil.parsePhone` (so `9123 4567` becomes `91234567`) and tags with `ParserUtil.parseTag`, so `find` accepts and rejects exactly what `add` does. At least one keyword, phone number or tag must be given.
 
-**Combining fields.** `PersonMatchesSearchPredicate` holds the name keywords, a set of `Phone`s and a set of `Tag`s. A client must match every field that has values (AND across fields). Within the name field, any one keyword may match; within the phone and tag fields, every specified value must match. A field with no values places no restriction. Phones are compared with `Phone#equals`, and tags with `Tag#equals`, which ignores case. Name keywords are delegated to `NameContainsKeywordsPredicate`, described below.
+**Combining fields.** `PersonMatchesSearchPredicate` holds the name keywords, a set of `Phone`s and a set of `Tag`s. A client must match every field that has values (AND across fields). Within the name and phone fields, any one specified value may match; within the tag field, every specified value must match. A field with no values places no restriction. Phones are compared with `Phone#equals`, and tags with `Tag#equals`, which ignores case. Name keywords are delegated to `NameContainsKeywordsPredicate`, described below.
 
 **Name keyword validation.** `Name` exposes the characters allowed in a name as `Name.NAME_CHARACTERS` (letters, digits and the punctuation in `Name.NAME_PUNCTUATION`: `'`, `.`, `(`, `)` and `-`). `Name.VALIDATION_REGEX` and `FindCommandParser`'s keyword regex are both built from this constant, so `find` always accepts the same characters as names. A keyword must also contain at least one letter or digit, so keywords such as `-` are rejected.
 
@@ -248,8 +248,8 @@ If no client matches, `FindCommand` returns `FindCommand.MESSAGE_NO_CLIENTS_FOUN
 
 **Aspect: How fields are combined**
 
-* **Alternative 1 (current choice):** AND across fields and among phone numbers and tags, with OR only among name keywords.
-  * Pros: Adding a field, phone number or tag consistently narrows the results, e.g. `find Liam t/sec4` finds the Liam in Sec 4 among several Liams.
+* **Alternative 1 (current choice):** AND across fields and among tags, with OR among name keywords and phone numbers.
+  * Pros: Adding a field or tag narrows the results, e.g. `find Liam t/sec4` finds the Liam in Sec 4 among several Liams, while several phone numbers can retrieve several clients in one search.
   * Cons: Users must run two searches to see clients matching a name *or* a tag.
 
 * **Alternative 2:** OR across all fields.
@@ -260,7 +260,7 @@ If no client matches, `FindCommand` returns `FindCommand.MESSAGE_NO_CLIENTS_FOUN
 
 `filter` narrows the displayed client list by exact phone numbers and tags. `FilterCommandParser` tokenizes the arguments on `p/` and `t/`, rejects unprefixed text, and requires at least one phone number or tag. It uses `ParserUtil.parsePhone` and `ParserUtil.parseTag`, giving `filter` the same validation and whitespace normalization as `find` and `add`.
 
-`FilterCommandParser` builds a `PersonMatchesSearchPredicate` without name keywords. All supplied phone numbers and tags must match, and supplying both fields requires both conditions to match. Since each client stores one phone number, distinct phone filters cannot match the same client.
+`FilterCommandParser` builds a `PersonMatchesSearchPredicate` without name keywords. Any supplied phone number may match, all supplied tags must match, and supplying both fields requires both conditions to match.
 
 ### Tag and untag features
 
@@ -600,7 +600,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
     * 4a1. Sieve ignores the existing tag and lists only newly added tags in the confirmation.
 
-    * 4a2. If the client already has every specified tag, Sieve reports that the client is already tagged and leaves the client unchanged.
+    * 4a2. If the client already has every specified tag, Sieve reports that the client "has all of the tag(s)" and leaves the client unchanged.
 
       Use case continues from step 5.
 
@@ -769,7 +769,7 @@ Given below are instructions to test the app manually.
        Expected: Only `Farhan Ali` is listed.
 
     1. Test case: `find p/91234567 p/92345678`<br>
-       Expected: No clients are listed because each client stores only one phone number and both phone filters must match.
+       Expected: `Amirah Tan` and `Brandon Sim` are listed because each client matches one of the phone filters.
 
     1. Test case: `find t/sec4`, then `find t/SEC4`<br>
        Expected: Each command lists `Amirah Tan` and `Brandon Sim`.
@@ -809,7 +809,7 @@ Given below are instructions to test the app manually.
        Expected: Only `Brandon Sim` is listed.
 
     1. Test case: `filter p/91234567 p/92345678`<br>
-       Expected: No clients are listed because each client stores only one phone number and both phone filters must match.
+       Expected: `Amirah Tan` and `Brandon Sim` are listed because each client matches one of the phone filters.
 
     1. Test case: `filter t/Physics t/Sec4`<br>
        Expected: Only `Brandon Sim` is listed because the client must have both tags.
@@ -833,7 +833,7 @@ Given below are instructions to test the app manually.
        Expected: `Physics` is added while `Math` is not duplicated. The success message lists only `Physics`.
 
     1. Test case: `tag 1 t/Math`<br>
-       Expected: The client is unchanged and Sieve reports that `Amirah Tan` is already tagged.
+       Expected: The client is unchanged and Sieve shows `Amirah Tan has all of the tag(s).`
 
 ### Removing tags from clients
 

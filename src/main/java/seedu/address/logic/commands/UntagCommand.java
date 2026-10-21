@@ -89,7 +89,7 @@ public class UntagCommand extends Command {
         Set<Tag> updatedTags = new HashSet<>(personToUntag.getTags());
         updatedTags.removeAll(existingTagsToRemove);
         return new Person(personToUntag.getName(), personToUntag.getPhone(), personToUntag.getEmail(),
-                personToUntag.getAddress(), updatedTags);
+                personToUntag.getAddress(), personToUntag.getNote(), updatedTags);
     }
 
     @Override

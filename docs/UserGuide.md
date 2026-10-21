@@ -138,7 +138,7 @@ Format: `find [KEYWORD]... [p/PHONE]... [t/TAG]...`
 
 * At least one keyword, phone number or tag must be given.
 * If you search by more than one kind of field, a client must match **every** kind; for example, `find Amirah t/Sec4` returns only clients named Amirah who are tagged `Sec4`.
-* Within names, a client only needs to match **one** supplied keyword. A client must match **all** supplied phone numbers and tags; for example, `find t/Math t/Sec4` returns only clients tagged with both `Math` and `Sec4`.
+* Within names and phone numbers, a client only needs to match **one** supplied value. A client must match **all** supplied tags; for example, `find t/Math t/Sec4` returns only clients tagged with both `Math` and `Sec4`.
 
 Searching by name:
 
@@ -154,7 +154,7 @@ Searching by name:
 Searching by phone number and tag:
 
 * `p/PHONE` must be a complete 8-digit phone number. Spaces, hyphens and parentheses are ignored, so `p/9123 4567` works.
-* Every supplied `p/PHONE` must match. Because a client stores one phone number, two different phone filters return no clients.
+* If several `p/PHONE` values are supplied, clients matching any of those phone numbers are returned.
 * `t/TAG` must be a whole tag name, but case does not matter; for example, `t/sec4` matches `Sec4`, but `t/sec` does not.
 
 If no client matches, Sieve shows `0 clients found` with tips for searching again. Use `list` to see all clients again.
@@ -186,7 +186,7 @@ Format: `filter [p/PHONE]... [t/TAG]...`
 
 * At least one phone number or tag must be given.
 * `p/PHONE` must be a complete 8-digit phone number. Spaces, hyphens and parentheses are ignored.
-* Every supplied phone number must match. Because a client stores one phone number, two different `p/` filters return no clients.
+* If several phone numbers are supplied, clients matching any of them are returned.
 * Tag matching is case-insensitive; for example, `t/physics` matches `Physics`.
 * Tag order does not matter.
 * A client must have every specified tag.
@@ -194,7 +194,7 @@ Format: `filter [p/PHONE]... [t/TAG]...`
 
 Examples:
 * `filter p/9123 4567` returns the client with phone number `91234567`.
-* `filter p/91234567 p/92345678` returns no clients because no client can have both phone numbers.
+* `filter p/91234567 p/92345678` returns the clients with either phone number.
 * `filter t/Physics` returns every client tagged `Physics`.
 * `filter t/Physics t/Sec4` returns clients tagged with both `Physics` and `Sec4`.
 * `filter p/92345678 t/Sec4` returns the client matching that phone number who is also tagged `Sec4`.
@@ -209,7 +209,7 @@ Format: `tag INDEX t/TAG [t/MORE_TAGS]...`
 * Tags must be 1-20 characters long and contain only letters, numbers, and spaces.
 * New tags are added alongside the client's existing tags.
 * Adding a tag the client already has does not create a duplicate.
-* The success message lists only newly added tags. If the client already has every specified tag, Sieve reports that the client is already tagged and leaves the client unchanged.
+* The success message lists only newly added tags. If the client already has every specified tag, Sieve reports that the client "has all of the tag(s)" and leaves the client unchanged.
 
 Examples:
 * `tag 1 t/physics t/sec4`

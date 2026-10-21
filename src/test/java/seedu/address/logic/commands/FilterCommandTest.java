@@ -69,14 +69,14 @@ public class FilterCommandTest {
     }
 
     @Test
-    public void execute_multipleDifferentPhones_returnsNoPerson() {
+    public void execute_multipleDifferentPhones_returnsMatchingPersons() {
         PersonMatchesSearchPredicate predicate = new PersonMatchesSearchPredicate(List.of(),
                 List.of(new Phone("94351253"), new Phone("98765432")), List.of());
         FilterCommand command = new FilterCommand(predicate);
         expectedModel.updateFilteredPersonList(predicate);
 
-        assertCommandSuccess(command, model, "0 clients found matching your search term(s).", expectedModel);
-        assertEquals(List.of(), model.getFilteredPersonList());
+        assertCommandSuccess(command, model, "2 clients found matching your search term(s).", expectedModel);
+        assertEquals(List.of(ALICE, BENSON), model.getFilteredPersonList());
     }
 
     @Test

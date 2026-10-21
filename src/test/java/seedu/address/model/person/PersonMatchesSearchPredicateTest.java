@@ -65,11 +65,11 @@ public class PersonMatchesSearchPredicateTest {
     }
 
     @Test
-    public void test_everyPhoneMustMatch() {
+    public void test_anyPhoneMayMatch() {
         assertTrue(new PersonMatchesSearchPredicate(List.of(),
                 List.of(new Phone("91234567"), new Phone("91234567")), List.of()).test(LIAM));
 
-        assertFalse(new PersonMatchesSearchPredicate(List.of(),
+        assertTrue(new PersonMatchesSearchPredicate(List.of(),
                 List.of(new Phone("98765432"), new Phone("91234567")), List.of()).test(LIAM));
     }
 

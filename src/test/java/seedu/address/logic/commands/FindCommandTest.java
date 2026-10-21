@@ -143,14 +143,14 @@ public class FindCommandTest {
     }
 
     @Test
-    public void execute_multipleDifferentPhones_noPersonFound() {
+    public void execute_multipleDifferentPhones_multiplePersonsFound() {
         PersonMatchesSearchPredicate predicate = new PersonMatchesSearchPredicate(List.of(),
                 List.of(new Phone("94351253"), new Phone("98765432")), List.of());
         FindCommand command = new FindCommand(predicate);
         expectedModel.updateFilteredPersonList(predicate);
 
-        assertCommandSuccess(command, model, FindCommand.MESSAGE_NO_CLIENTS_FOUND, expectedModel);
-        assertEquals(List.of(), model.getFilteredPersonList());
+        assertCommandSuccess(command, model, "2 clients found matching your search term(s).", expectedModel);
+        assertEquals(List.of(ALICE, BENSON), model.getFilteredPersonList());
     }
 
     @Test
