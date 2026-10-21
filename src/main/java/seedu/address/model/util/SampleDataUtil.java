@@ -7,7 +7,9 @@ import java.util.stream.Collectors;
 import seedu.address.model.AddressBook;
 import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.model.person.Address;
+import seedu.address.model.person.DueDate;
 import seedu.address.model.person.Email;
+import seedu.address.model.person.Fee;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Note;
 import seedu.address.model.person.Person;
@@ -30,26 +32,32 @@ public class SampleDataUtil {
             new Person(new Name("Amirah Tan"), new Phone("91234567"), new Email("amirahtan@sample.com"),
                 new Address("Blk 123 Yishun Ave 5 #04-12"),
                 new Note("Weak at algebra, prelims in March"),
+                new Fee("250"), new DueDate("01-11-2026"),
                 getTagSet("Math", "Sec4", "Urgent")),
             new Person(new Name("Brandon Sim"), new Phone("92345678"), new Email("brandonsim@sample.com"),
                 new Address("10 Queenstown Rd"),
                 Note.EMPTY,
+                new Fee("180.50"), new DueDate("15-11-2026"),
                 getTagSet("Physics", "Sec4")),
             new Person(new Name("Charlotte Oliveiro"), new Phone("98765432"), new Email("charlotte@sample.com"),
                 new Address("Blk 456 Bishan St 21 #11-22"),
                 new Note("Parent prefers WhatsApp after 6pm"),
+                new Fee("300"), new DueDate("01-12-2026"),
                 getTagSet("English", "Sec2")),
             new Person(new Name("Devi Ramasamy"), new Phone("81234567"), new Email("devi.r@sample.com"),
                 new Address("Blk 789 Pasir Ris Drive 3 #02-05"),
                 Note.EMPTY,
+                Fee.EMPTY, DueDate.EMPTY,
                 getTagSet("Chemistry", "JC1", "Paid")),
             new Person(new Name("Evelyn Rodrigues"), new Phone("87654321"), new Email("evelyn.r@sample.com"),
                 new Address("Blk 321 Ang Mo Kio Ave 4 #08-99"),
                 Note.EMPTY,
+                new Fee("100"), DueDate.EMPTY,
                 getTagSet("Biology", "JC2", "Weekday")),
             new Person(new Name("Farhan Ali"), new Phone("91122334"), new Email("farhanali@sample.com"),
                 new Address("Blk 45 Aljunied Street 85 #11-31"),
                 Note.EMPTY,
+                new Fee("200"), DueDate.EMPTY,
                 getTagSet("Math", "Sec1"))
         };
     }

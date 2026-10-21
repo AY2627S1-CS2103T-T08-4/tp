@@ -3,10 +3,14 @@ package seedu.address.logic.parser;
 import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
 import static seedu.address.logic.commands.CommandTestUtil.ADDRESS_DESC_AMY;
 import static seedu.address.logic.commands.CommandTestUtil.ADDRESS_DESC_BOB;
+import static seedu.address.logic.commands.CommandTestUtil.DUE_DATE_DESC;
 import static seedu.address.logic.commands.CommandTestUtil.EMAIL_DESC_AMY;
 import static seedu.address.logic.commands.CommandTestUtil.EMAIL_DESC_BOB;
+import static seedu.address.logic.commands.CommandTestUtil.FEE_DESC;
 import static seedu.address.logic.commands.CommandTestUtil.INVALID_ADDRESS_DESC;
+import static seedu.address.logic.commands.CommandTestUtil.INVALID_DUE_DATE_DESC;
 import static seedu.address.logic.commands.CommandTestUtil.INVALID_EMAIL_DESC;
+import static seedu.address.logic.commands.CommandTestUtil.INVALID_FEE_DESC;
 import static seedu.address.logic.commands.CommandTestUtil.INVALID_NAME_DESC;
 import static seedu.address.logic.commands.CommandTestUtil.INVALID_PHONE_DESC;
 import static seedu.address.logic.commands.CommandTestUtil.INVALID_TAG_DESC;
@@ -16,14 +20,18 @@ import static seedu.address.logic.commands.CommandTestUtil.PHONE_DESC_BOB;
 import static seedu.address.logic.commands.CommandTestUtil.TAG_DESC_FRIEND;
 import static seedu.address.logic.commands.CommandTestUtil.TAG_DESC_HUSBAND;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_ADDRESS_AMY;
+import static seedu.address.logic.commands.CommandTestUtil.VALID_DUE_DATE;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_EMAIL_AMY;
+import static seedu.address.logic.commands.CommandTestUtil.VALID_FEE;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_NAME_AMY;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_PHONE_AMY;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_PHONE_BOB;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_TAG_FRIEND;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_TAG_HUSBAND;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_ADDRESS;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_DUE_DATE;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_EMAIL;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_FEE;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_NOTE;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_PHONE;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_TAG;
@@ -40,7 +48,9 @@ import seedu.address.logic.Messages;
 import seedu.address.logic.commands.EditCommand;
 import seedu.address.logic.commands.EditCommand.EditPersonDescriptor;
 import seedu.address.model.person.Address;
+import seedu.address.model.person.DueDate;
 import seedu.address.model.person.Email;
+import seedu.address.model.person.Fee;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Note;
 import seedu.address.model.person.Phone;
@@ -218,6 +228,34 @@ public class EditCommandParserTest {
     public void parse_invalidOrRepeatedNote_failure() {
         assertParseFailure(parser, "1 nt/" + "a".repeat(Note.MAX_LENGTH + 1), Note.MESSAGE_CONSTRAINTS);
         assertParseFailure(parser, "1 nt/one nt/two", Messages.getErrorMessageForDuplicatePrefixes(PREFIX_NOTE));
+    }
+
+    @Test
+    public void parse_feeAndDueDateSpecified_success() {
+        Index targetIndex = INDEX_FIRST_PERSON;
+
+        EditPersonDescriptor descriptor = new EditPersonDescriptorBuilder().withFee(VALID_FEE)
+            .withDueDate(VALID_DUE_DATE).build();
+        assertParseSuccess(parser, targetIndex.getOneBased() + FEE_DESC + DUE_DATE_DESC,
+            new EditCommand(targetIndex, descriptor));
+    }
+
+    @Test
+    public void parse_emptyFeeAndDueDate_clearsFields() {
+        Index targetIndex = INDEX_FIRST_PERSON;
+
+        EditPersonDescriptor descriptor = new EditPersonDescriptorBuilder().withFee("").withDueDate("").build();
+        assertParseSuccess(parser, targetIndex.getOneBased() + " fee/ due/",
+            new EditCommand(targetIndex, descriptor));
+    }
+
+    @Test
+    public void parse_invalidOrRepeatedFeeAndDueDate_failure() {
+        assertParseFailure(parser, "1" + INVALID_FEE_DESC, Fee.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, "1" + INVALID_DUE_DATE_DESC, DueDate.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, "1 fee/1 fee/2", Messages.getErrorMessageForDuplicatePrefixes(PREFIX_FEE));
+        assertParseFailure(parser, "1 due/01-11-2026 due/02-11-2026",
+            Messages.getErrorMessageForDuplicatePrefixes(PREFIX_DUE_DATE));
     }
 
     @Test

@@ -10,7 +10,9 @@ import seedu.address.commons.core.index.Index;
 import seedu.address.commons.util.StringUtil;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.person.Address;
+import seedu.address.model.person.DueDate;
 import seedu.address.model.person.Email;
+import seedu.address.model.person.Fee;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Note;
 import seedu.address.model.person.Phone;
@@ -96,6 +98,36 @@ public class ParserUtil {
             throw new ParseException(Note.MESSAGE_CONSTRAINTS);
         }
         return new Note(normalizedNote);
+    }
+
+    /**
+     * Parses a {@code String fee} into a {@code Fee}. An empty {@code fee} gives an empty {@code Fee}.
+     * Leading and trailing whitespaces will be trimmed.
+     *
+     * @throws ParseException if the given {@code fee} is invalid.
+     */
+    public static Fee parseFee(String fee) throws ParseException {
+        requireNonNull(fee);
+        String normalizedFee = Fee.normalizeFee(fee);
+        if (!Fee.isValidFee(normalizedFee)) {
+            throw new ParseException(Fee.MESSAGE_CONSTRAINTS);
+        }
+        return new Fee(normalizedFee);
+    }
+
+    /**
+     * Parses a {@code String dueDate} into a {@code DueDate}. An empty {@code dueDate} gives an empty
+     * {@code DueDate}. Leading and trailing whitespaces will be trimmed.
+     *
+     * @throws ParseException if the given {@code dueDate} is invalid.
+     */
+    public static DueDate parseDueDate(String dueDate) throws ParseException {
+        requireNonNull(dueDate);
+        String normalizedDueDate = DueDate.normalizeDueDate(dueDate);
+        if (!DueDate.isValidDueDate(normalizedDueDate)) {
+            throw new ParseException(DueDate.MESSAGE_CONSTRAINTS);
+        }
+        return new DueDate(normalizedDueDate);
     }
 
     /**

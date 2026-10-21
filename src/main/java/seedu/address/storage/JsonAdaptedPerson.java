@@ -11,7 +11,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import seedu.address.commons.exceptions.IllegalValueException;
 import seedu.address.model.person.Address;
+import seedu.address.model.person.DueDate;
 import seedu.address.model.person.Email;
+import seedu.address.model.person.Fee;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Note;
 import seedu.address.model.person.Person;
@@ -30,6 +32,8 @@ class JsonAdaptedPerson {
     private final String email;
     private final String address;
     private final String note;
+    private final String fee;
+    private final String dueDate;
     private final List<JsonAdaptedTag> tags = new ArrayList<>();
 
     /**
@@ -38,12 +42,15 @@ class JsonAdaptedPerson {
     @JsonCreator
     public JsonAdaptedPerson(@JsonProperty("name") String name, @JsonProperty("phone") String phone,
             @JsonProperty("email") String email, @JsonProperty("address") String address,
-            @JsonProperty("note") String note, @JsonProperty("tags") List<JsonAdaptedTag> tags) {
+            @JsonProperty("note") String note, @JsonProperty("fee") String fee,
+            @JsonProperty("dueDate") String dueDate, @JsonProperty("tags") List<JsonAdaptedTag> tags) {
         this.name = name;
         this.phone = phone;
         this.email = email;
         this.address = address;
         this.note = note;
+        this.fee = fee;
+        this.dueDate = dueDate;
         if (tags != null) {
             this.tags.addAll(tags);
         }
@@ -58,6 +65,8 @@ class JsonAdaptedPerson {
         email = source.getEmail().value;
         address = source.getAddress().value;
         note = source.getNote().value;
+        fee = source.getFee().value;
+        dueDate = source.getDueDate().value;
         tags.addAll(source.getTags().stream()
                 .map(JsonAdaptedTag::new)
                 .collect(Collectors.toList()));
@@ -116,8 +125,21 @@ class JsonAdaptedPerson {
         }
         final Note modelNote = new Note(normalizedNote);
 
+        String normalizedFee = Fee.normalizeFee(fee == null ? "" : fee);
+        if (!Fee.isValidFee(normalizedFee)) {
+            throw new IllegalValueException(Fee.MESSAGE_CONSTRAINTS);
+        }
+        final Fee modelFee = new Fee(normalizedFee);
+
+        String normalizedDueDate = DueDate.normalizeDueDate(dueDate == null ? "" : dueDate);
+        if (!DueDate.isValidDueDate(normalizedDueDate)) {
+            throw new IllegalValueException(DueDate.MESSAGE_CONSTRAINTS);
+        }
+        final DueDate modelDueDate = new DueDate(normalizedDueDate);
+
         final Set<Tag> modelTags = new HashSet<>(personTags);
-        return new Person(modelName, modelPhone, modelEmail, modelAddress, modelNote, modelTags);
+        return new Person(modelName, modelPhone, modelEmail, modelAddress, modelNote, modelFee, modelDueDate,
+            modelTags);
     }
 
 }

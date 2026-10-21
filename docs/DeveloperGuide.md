@@ -284,6 +284,70 @@ If no client matches, `FindCommand` returns `FindCommand.MESSAGE_NO_CLIENTS_FOUN
 
 Both commands replace the selected immutable `Person` with a copy containing an updated tag set. `TagCommand` adds only tags the client does not already have, while `UntagCommand` removes only tags the client currently has. Tag equality is case-insensitive. Confirmation messages list only tags that were actually added or removed; when no change is needed, the commands leave the model unchanged and return a specific no-change message.
 
+### Fee and due date 
+
+`Fee` and `DueDate` record what a client pays and when their next payment is due. They follow the same pattern as `Note`: each is an immutable class in `seedu.address.model.person`, is held by `Person`, is set through the `add` and `edit` commands, and is optional.
+
+**Model.** `Person` holds a `Fee` and a `DueDate` next to its `Note`. An empty value (`Fee.EMPTY` or `DueDate.EMPTY`) means "not set", so `Person` never holds `null`.
+
+* `Fee` accepts 1 to 7 digits with an optional fractional part of 1 or 2 digits. It stores the value with exactly two decimal places (using `BigDecimal#setScale`), so `250`, `250.0` and `250.00` are the same fee.
+* `DueDate` accepts a real calendar date in the format `DD-MM-YYYY`. It is checked with a `DateTimeFormatter` in `ResolverStyle.STRICT` mode, so dates such as `30-02-2026` are rejected. Dates in the past are allowed, so that overdue payments can be recorded.
+* Both classes keep their value as a `String`, like `Note`, and provide a `normalize...` method (trim only) that the parser and storage call before validating.
+
+**Parsing.** `CliSyntax` defines the prefixes `fee/` and `due/`. `ParserUtil#parseFee` and `ParserUtil#parseDueDate` trim and validate the input, and an empty input gives the empty value.
+
+* `AddCommandParser` uses the empty value when a prefix is missing, so both fields are optional.
+* `EditCommandParser` sets a field in the `EditPersonDescriptor` only when its prefix is present. A present prefix with no value sets the empty value, which clears the field, while a missing prefix leaves the field unchanged.
+* Repeating a prefix is rejected with `verifyNoDuplicatePrefixesFor`.
+* The prefix is `fee/` rather than a single letter because `a/` (address) and `e/` (email) are already taken. `ArgumentTokenizer` only matches a prefix that follows a space, so ` fee/` is never confused with ` e/`.
+
+**Storage.** `JsonAdaptedPerson` stores `fee` and `dueDate` as strings. `toModelType()` treats a missing (`null`) value as empty, as it does for notes, so data files saved before this feature still load and do not trigger the read-only fallback mode. A value that is present but invalid throws an `IllegalValueException`, like every other field.
+
+**UI.** `PersonCard` shows `Fee: 250.00` and `Due: 01-11-2026`, and hides each label (`setVisible(false)` and `setManaged(false)`) when its value is empty.
+
+<box type="warning" seamless>
+
+**Caution:** Any command that builds a new `Person` from an existing one (such as `EditCommand` and `TagCommand`) must copy every field, including `fee` and `dueDate`. A command that forgets them silently erases a client's billing details.
+</box>
+
+No command was added, so nothing new needs `isMutating()`. `add` and `edit` already override it.
+
+#### Design considerations:
+
+**Aspect: Where the billing details live**
+
+* **Alternative 1 (current choice):** Two optional fields on `Person`, set through `add` and `edit`.
+    * Pros: Follows the `Note` pattern, is small, and needs no new command, so there is nothing new to block in read-only mode.
+    * Cons: There is no payment history, so the tutor updates the due date by hand.
+
+* **Alternative 2:** A dedicated command (for example `billing INDEX ...`).
+    * Pros: Billing is edited separately from the other details.
+    * Cons: Needs a new command and parser, an `isMutating()` override and more documentation, and `Person` still needs the new fields.
+
+* **Alternative 3:** Full payment tracking, with a payment history and commands that record payments and move the due date forward.
+    * Pros: Shows who has paid and when.
+    * Cons: Needs rules for billing cycles, duplicate and backdated payments, and rolling back on deletion. Left for a later version.
+
+**Aspect: How the values are represented**
+
+* **Alternative 1 (current choice):** Validated `String`s, like `Note`.
+    * Pros: Consistent with the rest of the model, and simple to store as JSON.
+    * Cons: A future feature that compares dates or amounts (for example flagging overdue payments) must parse them again.
+
+* **Alternative 2:** `LocalDate` and `BigDecimal`.
+    * Pros: Type-safe, and ready for date and number operations.
+    * Cons: "Not set" needs `Optional` or `null`, and the JSON conversion is more involved.
+
+**Aspect: Date format**
+
+* **Alternative 1 (current choice):** `DD-MM-YYYY`.
+    * Pros: Day first, as dates are usually written in Singapore.
+    * Cons: The text does not sort in date order.
+
+* **Alternative 2:** `YYYY-MM-DD`.
+    * Pros: Sorts in date order, and is unambiguous.
+    * Cons: Less natural to type for most tutors.
+  
 ### Undo/redo feature
 
 #### Implementation
@@ -525,6 +589,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 | `* *`    | tutor                                  | mark a client as inactive (e.g. paused for exams or a break) instead of deleting them                 | I keep their record and can resume lessons later without re-adding them from scratch    |
 | `* *`    | long-time user                         | hide inactive clients from my main list and see only the clients I am currently teaching              | I am not distracted by irrelevant data and can quickly see who is still active          |
 | `* *`    | tutor                                  | add free-text notes to a client                                                                       | I can record details that don't fit neatly into a tag                                   |
+| `* *`    | tutor                                  | record each client's fee and the date their next payment is due                                       | I know what to charge and when                                                          |
 | `* *`    | tutor                                  | export my client list to a file                                                                       | I can back it up or move it to a new computer                                           |
 | `* *`    | tutor considering a new client         | check whether a proposed time slot clashes with an existing client's schedule                         | I avoid double-booking myself                                                           |
 | `* *`    | tutor                                  | record whether a client has paid for the current month                                                | I know who has paid and who is still outstanding, even for parents who pay at month-end |
@@ -796,14 +861,14 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 * **Client**: A person receiving private tuition from the tutor and whose details are managed in Sieve. In the current
   implementation and some inherited documentation, a client may also be referred to as a *person* or *contact*.
 * **Client record**: The collection of details stored in Sieve for one client, consisting of a name, phone number, email
-  address, physical address, and zero or more tags.
+  address, physical address, an optional note, an optional fee, an optional payment due date, and zero or more tags.
 * **Client list**: The collection of all client records stored in Sieve.
 * **Currently displayed client list**: The numbered list of clients presently shown in the application. It may contain
   all clients or only the clients returned by a search.
 * **Index**: The positive integer shown beside a client in the currently displayed client list. Commands such as `edit`
   and `delete` use this number to identify a client.
 * **Mainstream OS**: A currently supported version of Windows, Linux, or macOS that can run Java `25` or later.
-* **Prefix**: A command marker, such as `n/`, `p/`, `e/`, `a/`, or `t/`, that identifies the type of client detail
+* **Prefix**: A command marker, such as `n/`, `p/`, `e/`, `a/`, `nt/`, `fee/`, `due/` or `t/`, that identifies the type of client detail
   following it.
 * **Tag**: A user-defined alphanumeric label attached to a client record for categorisation, such as a subject,
   education level, or lesson day.
@@ -933,6 +998,65 @@ Given below are instructions to test the app manually.
 
     1. Test case: `untag 1 t/`<br>
        Expected: The client is unchanged and an error message about the tag format is shown.
+
+### Recording a client's fee and due date
+
+1. Sample data
+
+    1. Prerequisites: Start with the sample data (delete `data/sieve.json` if it exists, or use a fresh folder).
+
+    1. Test case: Look at the cards for `Amirah Tan` and `Charlotte Oliveiro`.<br>
+       Expected: `Amirah Tan` shows `Fee: 250.00` and `Due: 01-11-2026`. `Charlotte Oliveiro` shows neither line.
+
+1. Adding a client with a fee and due date
+
+    1. Test case: `add n/Lena Ong p/91230000 e/lena@example.com a/Blk 3 Clementi Rd fee/250 due/01-11-2026`<br>
+       Expected: The new client's card shows `Fee: 250.00` and `Due: 01-11-2026`.
+
+    1. Test case: `add n/Kai Lim p/91230001 e/kai@example.com a/Blk 4 Clementi Rd fee/180.5`<br>
+       Expected: The card shows `Fee: 180.50` and no due date.
+
+1. Editing and clearing
+
+    1. Prerequisites: Use the `list` command, and note the index of `Lena Ong`.
+
+    1. Test case: `edit INDEX fee/300 due/15-11-2026`<br>
+       Expected: The card shows `Fee: 300.00` and `Due: 15-11-2026`. The other details are unchanged.
+
+    1. Test case: `edit INDEX fee/`<br>
+       Expected: The fee line disappears. The due date is unchanged.
+
+    1. Test case: `edit INDEX due/`<br>
+       Expected: The due date line disappears.
+
+1. Invalid values
+
+    1. Test cases: `edit INDEX fee/-5`, `edit INDEX fee/abc`, `edit INDEX fee/250.555`<br>
+       Expected: The client is unchanged. The status message shows the fee constraints.
+
+    1. Test cases: `edit INDEX due/30-02-2026`, `edit INDEX due/2026-11-01`, `edit INDEX due/1-1-2026`<br>
+       Expected: The client is unchanged. The status message shows the due date constraints.
+
+    1. Test case: `edit INDEX fee/1 fee/2`<br>
+       Expected: The client is unchanged. The status message reports the repeated `fee/` prefix.
+
+1. Billing details survive other commands
+
+    1. Test case: `tag INDEX t/Math` for a client with a fee and due date.<br>
+       Expected: The tag is added, and the fee and due date are still shown.
+
+    1. Test case: `edit INDEX fee/999`, then `undo`<br>
+       Expected: The previous fee is restored.
+
+1. Data files saved before this feature
+
+    1. Prerequisites: Close the app. In `data/sieve.json`, delete the `"fee"` and `"dueDate"` lines of one client (and the comma before them if needed).
+
+    1. Test case: Relaunch the app.<br>
+       Expected: The app opens normally with no warning popup. The client shows no fee or due date.
+
+    1. Test case: Set a client's `"fee"` to `"-5"` in the file and relaunch.<br>
+       Expected: The warning popup appears and the app starts in read-only mode with an empty list.
 
 ### Deleting clients
 

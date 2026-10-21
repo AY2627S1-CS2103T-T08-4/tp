@@ -49,6 +49,13 @@ public class AddressBookParserTest {
     }
 
     @Test
+    public void parseCommand_addWithBilling() throws Exception {
+        Person person = new PersonBuilder().withFee("250").withDueDate("01-11-2026").build();
+        AddCommand command = (AddCommand) parser.parseCommand(PersonUtil.getAddCommand(person));
+        assertEquals(new AddCommand(person), command);
+    }
+
+    @Test
     public void parseCommand_usageExamples_parseSuccessfully() throws Exception {
         // the example in each usage message is shown to users, so it must be a valid command
         String examplePrefix = "Example: ";

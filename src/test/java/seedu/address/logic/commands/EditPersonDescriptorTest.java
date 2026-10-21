@@ -6,7 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.logic.commands.CommandTestUtil.DESC_AMY;
 import static seedu.address.logic.commands.CommandTestUtil.DESC_BOB;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_ADDRESS_BOB;
+import static seedu.address.logic.commands.CommandTestUtil.VALID_DUE_DATE;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_EMAIL_BOB;
+import static seedu.address.logic.commands.CommandTestUtil.VALID_FEE;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_NAME_BOB;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_PHONE_BOB;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_TAG_HUSBAND;
@@ -56,6 +58,14 @@ public class EditPersonDescriptorTest {
         editedAmy = new EditPersonDescriptorBuilder(DESC_AMY).withNote("Weak at algebra").build();
         assertFalse(DESC_AMY.equals(editedAmy));
 
+        // different fee -> returns false
+        editedAmy = new EditPersonDescriptorBuilder(DESC_AMY).withFee(VALID_FEE).build();
+        assertFalse(DESC_AMY.equals(editedAmy));
+
+        // different due date -> returns false
+        editedAmy = new EditPersonDescriptorBuilder(DESC_AMY).withDueDate(VALID_DUE_DATE).build();
+        assertFalse(DESC_AMY.equals(editedAmy));
+
         // different tags -> returns false
         editedAmy = new EditPersonDescriptorBuilder(DESC_AMY).withTags(VALID_TAG_HUSBAND).build();
         assertFalse(DESC_AMY.equals(editedAmy));
@@ -69,7 +79,9 @@ public class EditPersonDescriptorTest {
                 + editPersonDescriptor.getPhone().orElse(null) + ", email="
                 + editPersonDescriptor.getEmail().orElse(null) + ", address="
                 + editPersonDescriptor.getAddress().orElse(null) + ", note="
-                + editPersonDescriptor.getNote().orElse(null) + ", tags="
+                + editPersonDescriptor.getNote().orElse(null) + ", fee="
+                + editPersonDescriptor.getFee().orElse(null) + ", dueDate="
+                + editPersonDescriptor.getDueDate().orElse(null) + ", tags="
                 + editPersonDescriptor.getTags().orElse(null) + "}";
         assertEquals(expected, editPersonDescriptor.toString());
     }

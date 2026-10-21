@@ -24,18 +24,23 @@ public class Person {
     // Data fields
     private final Address address;
     private final Note note;
+    private final Fee fee;
+    private final DueDate dueDate;
     private final Set<Tag> tags = new HashSet<>();
 
     /**
      * Every field must be present and not null.
      */
-    public Person(Name name, Phone phone, Email email, Address address, Note note, Set<Tag> tags) {
-        requireAllNonNull(name, phone, email, address, note, tags);
+    public Person(Name name, Phone phone, Email email, Address address, Note note, Fee fee, DueDate dueDate,
+                  Set<Tag> tags) {
+        requireAllNonNull(name, phone, email, address, note, fee, dueDate, tags);
         this.name = name;
         this.phone = phone;
         this.email = email;
         this.address = address;
         this.note = note;
+        this.fee = fee;
+        this.dueDate = dueDate;
         this.tags.addAll(tags);
     }
 
@@ -59,6 +64,14 @@ public class Person {
         return note;
     }
 
+    public Fee getFee() {
+        return fee;
+    }
+
+    public DueDate getDueDate() {
+        return dueDate;
+    }
+
     /**
      * Returns an immutable tag set, which throws {@code UnsupportedOperationException}
      * if modification is attempted.
@@ -78,7 +91,9 @@ public class Person {
         }
 
         return otherPerson != null
-                && otherPerson.getName().isSameName(getName());
+            && otherPerson
+            .getName()
+            .isSameName(getName());
     }
 
     /**
@@ -86,7 +101,9 @@ public class Person {
      */
     public boolean hasSamePhone(Person otherPerson) {
         return otherPerson != null
-                && otherPerson.getPhone().equals(getPhone());
+            && otherPerson
+            .getPhone()
+            .equals(getPhone());
     }
 
     /**
@@ -105,29 +122,33 @@ public class Person {
         }
 
         return name.equals(otherPerson.name)
-                && phone.equals(otherPerson.phone)
-                && email.equals(otherPerson.email)
-                && address.equals(otherPerson.address)
-                && note.equals(otherPerson.note)
-                && tags.equals(otherPerson.tags);
+            && phone.equals(otherPerson.phone)
+            && email.equals(otherPerson.email)
+            && address.equals(otherPerson.address)
+            && note.equals(otherPerson.note)
+            && fee.equals(otherPerson.fee)
+            && dueDate.equals(otherPerson.dueDate)
+            && tags.equals(otherPerson.tags);
     }
 
     @Override
     public int hashCode() {
         // use this method for custom fields hashing instead of implementing your own
-        return Objects.hash(name, phone, email, address, note, tags);
+        return Objects.hash(name, phone, email, address, note, fee, dueDate, tags);
     }
 
     @Override
     public String toString() {
         return new ToStringBuilder(this)
-                .add("name", name)
-                .add("phone", phone)
-                .add("email", email)
-                .add("address", address)
-                .add("note", note)
-                .add("tags", tags)
-                .toString();
+            .add("name", name)
+            .add("phone", phone)
+            .add("email", email)
+            .add("address", address)
+            .add("note", note)
+            .add("fee", fee)
+            .add("dueDate", dueDate)
+            .add("tags", tags)
+            .toString();
     }
 
 }
