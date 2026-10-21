@@ -96,6 +96,23 @@ The `UI` component uses the JavaFX UI framework. The layouts of these UI parts a
 specifies the layout of [
 `MainWindow`](https://github.com/AY2627S1-CS2103T-T08-4/tp/tree/master/src/main/java/seedu/address/ui/MainWindow.java).
 
+The look of the UI is defined in `.css` files in the same folder:
+
+* `LightTheme.css` defines the colour palette once, as looked-up colours on `.root` (e.g. `-sieve-accent`), and every
+  other rule refers to these names. To change a colour, change it in `.root` only. Each window is a separate JavaFX
+  `Scene` with its own stylesheets, so both `MainWindow.fxml` and `HelpWindow.fxml` load `LightTheme.css`.
+* `Extensions.css` adds a few rules to the main window, such as the style of a command that failed.
+
+Two parts of the client list are worth knowing about when changing it:
+
+* **Tag colours.** `PersonCard` gives each tag a style class from `TagColor`, from `tag-color-0` to `tag-color-11`.
+  `TagColor` picks it from the tag's name, ignoring case, so a tag has the same colour on every client and every
+  launch. `LightTheme.css` has one `#tags .tag-color-N` rule for each class. To add a colour, add a rule and raise
+  `TagColor.PALETTE_SIZE` to match.
+* **Client count.** `PersonListPanel` binds the text of the count above the list to the displayed client list, which
+  is the `Model`'s filtered list. The count therefore updates after any command that changes or narrows down the
+  list, such as `delete` or `find`, without the commands having to update it.
+
 The `UI` component,
 
 * executes user commands using the `Logic` component.
