@@ -60,6 +60,15 @@ public class PersonCard extends UiPart<Region> {
         note.setManaged(!person.getNote().isEmpty());
         person.getTags().stream()
                 .sorted(Comparator.comparing(tag -> tag.tagName))
-                .forEach(tag -> tags.getChildren().add(new Label(tag.tagName)));
+                .forEach(tag -> tags.getChildren().add(createTagLabel(tag.tagName)));
+    }
+
+    /**
+     * Returns a pill-shaped label for the tag called {@code tagName}, coloured by {@link TagColor}.
+     */
+    private static Label createTagLabel(String tagName) {
+        Label tagLabel = new Label(tagName);
+        tagLabel.getStyleClass().add(TagColor.getStyleClass(tagName));
+        return tagLabel;
     }
 }
