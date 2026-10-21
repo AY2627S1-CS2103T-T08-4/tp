@@ -104,9 +104,17 @@ The look of the UI is defined in `.css` files in the same folder:
 * `LightTheme.css` defines the colour palette once, as looked-up colours on `.root` (e.g. `-sieve-accent`), and every
   other rule refers to these names. To change a colour, change it in `.root` only. Each window is a separate JavaFX
   `Scene` with its own stylesheets, so both `MainWindow.fxml` and `HelpWindow.fxml` load `LightTheme.css`.
-* `Extensions.css` adds a few rules to the main window, such as the style of a command that failed.
+* `LightTheme.css` also loads the bundled Inter font from `src/main/resources/fonts` with `@font-face`, and sets it on
+  `.root`, so all text uses it on every platform. JavaFX registers the SemiBold font as a separate family, so rules
+  that need it use `-fx-font-family: "Inter SemiBold"` rather than `-fx-font-weight`.
+* `Extensions.css` adds a few rules to the main window, such as the background of the empty rows below the last client.
 
-Two parts of the client list are worth knowing about when changing it:
+A few parts of the main window are worth knowing about when changing them:
+
+* **Command results.** `MainWindow` shows the result of a command with `ResultDisplay#setFeedbackToUser(String)`, or
+  with `ResultDisplay#setErrorToUser(String)` if the command failed. `ResultDisplay` turns its `:error` pseudo-class on
+  or off to match, and `LightTheme.css` uses it to show a green tick or a red cross and red text. The icons are empty
+  `Region`s shaped with `-fx-shape`, so no image files are needed. The result line is hidden until the first command.
 
 * **Tag colours.** `PersonCard` gives each tag a style class from `TagColor`, from `tag-color-0` to `tag-color-11`.
   `TagColor` picks it from the tag's name, ignoring case, so a tag has the same colour on every client and every
