@@ -18,7 +18,7 @@ public class FilterCommand extends Command {
     public static final String COMMAND_WORD = "filter";
 
     public static final String MESSAGE_USAGE = COMMAND_WORD
-            + ": Finds all clients who match the specified phone and tag filters "
+            + ": Shows all clients who match the specified phone and tag filters "
             + "and displays them as a list with index numbers.\n"
             + "Parameters: [" + PREFIX_PHONE + "PHONE]... [" + PREFIX_TAG + "TAG]...\n"
             + "Example: " + COMMAND_WORD + " " + PREFIX_PHONE + "91234567 " + PREFIX_TAG + "Physics";
