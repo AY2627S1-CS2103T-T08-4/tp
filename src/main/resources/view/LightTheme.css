@@ -32,6 +32,15 @@
     -fx-background-color: -sieve-surface;
 }
 
+/* The client count above the list, e.g. "7 clients" */
+.client-count {
+    -fx-background-color: -sieve-surface;
+    -fx-border-color: transparent transparent -sieve-border transparent;
+    -fx-padding: 6 16 6 16;
+    -fx-font-size: 12px;
+    -fx-text-fill: -sieve-text;
+}
+
 .list-cell {
     -fx-label-padding: 0 0 0 0;
     -fx-graphic-text-gap : 0;
