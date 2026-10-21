@@ -1,7 +1,11 @@
 package seedu.address.logic.commands;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.joining;
+import static seedu.address.commons.util.AppUtil.checkArgument;
+import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
 
+import java.util.Arrays;
 import java.util.List;
 
 import seedu.address.commons.core.index.Index;
@@ -21,38 +25,86 @@ public class DeleteCommand extends Command {
     public static final String MESSAGE_USAGE =
             COMMAND_WORD
             + ": Deletes the client identified by the index number used in the displayed client list.\n"
-            + "Parameters: INDEX (must be a positive integer)\n"
-            + "Example: " + COMMAND_WORD + " 1";
+            + "Parameters: INDEX [, INDEX]...\n"
+            + "Example: " + COMMAND_WORD + " 1, 2, 3";
 
     public static final String MESSAGE_DELETE_PERSON_SUCCESS = "Deleted client: %1$s";
+    public static final String MESSAGE_DELETE_PERSONS_SUCCESS = "Deleted clients: %1$s";
 
     public static final String MESSAGE_EMPTY_PERSON_LIST =
             "Error: Cannot delete from an empty client list.";
 
-    public static final String MESSAGE_INDEX_NOT_PRESENT = "Error: Index not provided!\nExpected format: delete INDEX";
+    public static final String MESSAGE_INDEX_NOT_PRESENT =
+            "Error: Index not provided!\n"
+                    + "Expected format: delete INDEX [, INDEX]...";
 
-    private final Index targetIndex;
+    private final List<Index> targetIndexes;
 
-    public DeleteCommand(Index targetIndex) {
-        this.targetIndex = targetIndex;
+    /**
+     * Creates a {@code DeleteCommand} that deletes the clients at
+     * {@code targetIndexes}.
+     */
+    public DeleteCommand(Index... targetIndexes) {
+        requireNonNull(targetIndexes);
+        requireAllNonNull(List.of(targetIndexes));
+
+        checkArgument(
+                targetIndexes.length > 0,
+                "At least one target index must be provided.");
+
+        checkArgument(
+                Arrays.stream(targetIndexes)
+                        .mapToInt(Index::getZeroBased)
+                        .distinct()
+                        .count()
+                        == targetIndexes.length,
+                "Target indexes must not contain duplicates.");
+
+        this.targetIndexes = List.copyOf(List.of(targetIndexes));
     }
 
     @Override
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
-        List<Person> lastShownList = model.getFilteredPersonList();
+
+        // The displayed list can change when clients are deleted, so all
+        // indices must be resolved against an unchanged snapshot.
+        List<Person> lastShownList =
+                List.copyOf(model.getFilteredPersonList());
 
         if (lastShownList.isEmpty()) {
             throw new CommandException(MESSAGE_EMPTY_PERSON_LIST);
         }
 
-        if (targetIndex.getZeroBased() >= lastShownList.size()) {
-            throw new CommandException(Messages.getIndexOutOfBoundsMessage(lastShownList.size()));
+        // Validate every index before changing the model.
+        for (Index index : targetIndexes) {
+            if (index.getZeroBased() >= lastShownList.size()) {
+                throw new CommandException(
+                        Messages.getIndexOutOfBoundsMessage(
+                                lastShownList.size()));
+            }
         }
 
-        Person personToDelete = lastShownList.get(targetIndex.getZeroBased());
-        model.deletePerson(personToDelete);
-        return new CommandResult(String.format(MESSAGE_DELETE_PERSON_SUCCESS, Messages.format(personToDelete)));
+        // Resolve every person against the original displayed list.
+        List<Person> personsToDelete = targetIndexes.stream()
+                .map(index -> lastShownList.get(index.getZeroBased()))
+                .toList();
+
+        personsToDelete.forEach(model::deletePerson);
+
+        if (personsToDelete.size() == 1) {
+            return new CommandResult(String.format(
+                    MESSAGE_DELETE_PERSON_SUCCESS,
+                    Messages.format(personsToDelete.get(0))));
+        }
+
+        String deletedPersons = personsToDelete.stream()
+                .map(Messages::format)
+                .collect(joining("\n"));
+
+        return new CommandResult(String.format(
+                MESSAGE_DELETE_PERSONS_SUCCESS,
+                deletedPersons));
     }
 
     @Override
@@ -66,13 +118,13 @@ public class DeleteCommand extends Command {
             return false;
         }
 
-        return targetIndex.equals(otherDeleteCommand.targetIndex);
+        return targetIndexes.equals(otherDeleteCommand.targetIndexes);
     }
 
     @Override
     public String toString() {
         return new ToStringBuilder(this)
-                .add("targetIndex", targetIndex)
+                .add("targetIndexes", targetIndexes)
                 .toString();
     }
 }
