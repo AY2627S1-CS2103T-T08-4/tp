@@ -20,6 +20,14 @@ public abstract class Command {
     public abstract CommandResult execute(Model model) throws CommandException;
 
     /**
+     * Returns true if this command changes client data, so it is blocked when the data file is corrupted
+     * (read-only mode). Commands that change data must override this to return true.
+     */
+    public boolean isMutating() {
+        return false;
+    }
+
+    /**
      * Returns the error message for {@code person} having the same name as the {@code existing} client.
      * If their phone numbers also match, the client was most likely added before.
      * Otherwise, they may be a different client who happens to have the same name.

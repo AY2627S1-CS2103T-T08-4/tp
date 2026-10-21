@@ -72,6 +72,11 @@ public class TagCommand extends Command {
         return new CommandResult(String.format(MESSAGE_TAG_PERSON_SUCCESS, personToTag.getName(), tagNames));
     }
 
+    @Override
+    public boolean isMutating() {
+        return true;
+    }
+
     /**
      * Returns the requested tags that {@code person} does not already have.
      */

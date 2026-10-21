@@ -145,6 +145,11 @@ public class TagCommandTest {
     }
 
     @Test
+    public void isMutating_tagCommand_returnsTrue() {
+        assertTrue(new TagCommand(INDEX_FIRST_PERSON, List.of(new Tag("Math"))).isMutating());
+    }
+
+    @Test
     public void toStringMethod() {
         TagCommand tagCommand = new TagCommand(INDEX_FIRST_PERSON, List.of(PHYSICS));
         String expected = TagCommand.class.getCanonicalName() + "{targetIndex=" + INDEX_FIRST_PERSON
