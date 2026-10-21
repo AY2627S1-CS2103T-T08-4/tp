@@ -22,6 +22,10 @@ public class UiManager implements Ui {
 
     private static final Logger logger = LogsCenter.getLogger(UiManager.class);
     private static final String ICON_APPLICATION = "/images/address_book_32.png";
+    private static final String CORRUPTION_ALERT_TITLE = "Data File Corruption Error";
+    private static final String CORRUPTION_ALERT_HEADER = "Local data file is corrupted.";
+    private static final String CORRUPTION_ALERT_CONTENT_FORMAT =
+        "Displaying empty list. Please fix or delete the data file at %s and restart.";
 
     private Logic logic;
     private Path dataFilePath;
@@ -62,20 +66,19 @@ public class UiManager implements Ui {
      */
     void verifyStorageStateAndAlert() {
         if (logic.isReadOnlyMode()) {
-            triggerCorruptionAlert("WARNING");
+            triggerCorruptionAlert(AlertType.WARNING);
         }
     }
 
     /**
      * Triggers the UI error alert dialog window layout.
      */
-    void triggerCorruptionAlert(String alertLevel) {
+    void triggerCorruptionAlert(AlertType alertType) {
         showAlertDialogAndWait(
-            Alert.AlertType.valueOf(alertLevel),
-            "Data File Corruption Error",
-            "Local data file is corrupted.",
-            "Displaying empty list. Please fix or delete the data file at "
-                + dataFilePath.toAbsolutePath() + " and restart."
+            alertType,
+            CORRUPTION_ALERT_TITLE,
+            CORRUPTION_ALERT_HEADER,
+            String.format(CORRUPTION_ALERT_CONTENT_FORMAT, dataFilePath.toAbsolutePath())
         );
     }
 
