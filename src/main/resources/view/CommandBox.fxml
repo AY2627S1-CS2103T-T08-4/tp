@@ -1,9 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 
 <StackPane styleClass="stack-pane" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
-  <TextField fx:id="commandTextField" onAction="#handleCommandEntered" promptText="Enter command here..."/>
+  <TextField fx:id="commandTextField" onAction="#handleCommandEntered"
+             promptText="Type a command, e.g. find Amirah, or type help"/>
+  <!--
+    The ">" drawn on top of the text field, at its left edge. The text field's left padding leaves room for it.
+    mouseTransparent lets clicks on it go through to the text field underneath.
+  -->
+  <Region styleClass="command-prompt-icon" mouseTransparent="true" StackPane.alignment="CENTER_LEFT">
+    <StackPane.margin>
+      <Insets left="16" />
+    </StackPane.margin>
+  </Region>
 </StackPane>
-

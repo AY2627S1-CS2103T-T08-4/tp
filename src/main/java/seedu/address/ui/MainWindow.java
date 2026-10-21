@@ -93,10 +93,9 @@ public class MainWindow extends UiPart<Stage> {
          * is fixed in a later version of the SDK.
          *
          * According to the bug report, TextInputControl (TextField, TextArea) will
-         * consume function-key events. Because CommandBox contains a TextField and
-         * ResultDisplay contains a TextArea, some accelerators (e.g., F1) will
-         * not work when the focus is in them because the key event is consumed by
-         * the TextInputControl(s).
+         * consume function-key events. Because CommandBox contains a TextField, some
+         * accelerators (e.g., F1) will not work when the focus is in it because the key
+         * event is consumed by the TextInputControl.
          *
          * For now, we add the following event filter to capture such key events and open
          * the help window purposely so as to support accelerators even when focus is
@@ -193,7 +192,7 @@ public class MainWindow extends UiPart<Stage> {
             return commandResult;
         } catch (CommandException | ParseException e) {
             logger.info("An error occurred while executing command: " + commandText);
-            resultDisplay.setFeedbackToUser(e.getMessage());
+            resultDisplay.setErrorToUser(e.getMessage());
             throw e;
         }
     }

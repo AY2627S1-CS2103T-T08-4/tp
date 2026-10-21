@@ -1,12 +1,29 @@
+/*
+ * Inter is bundled in src/main/resources/fonts, so the app looks the same on every computer.
+ * JavaFX names the SemiBold file as its own family, "Inter SemiBold", so it is used by that name
+ * instead of with -fx-font-weight.
+ */
+@font-face {
+    src: url("../fonts/Inter-Regular.ttf");
+}
+
+@font-face {
+    src: url("../fonts/Inter-SemiBold.ttf");
+}
+
 .root {
+    /* Every label, button and menu inherits this unless a rule below sets its own font */
+    -fx-font-family: "Inter";
     -sieve-window: #f4f5f9;     /* window background */
     -sieve-surface: #ffffff;    /* panels the content sits on */
+    -sieve-list: #f9fafc;       /* client list, a softer white that is easier on the eyes */
     -sieve-border: #e2e5ec;
     -sieve-text: #1f2430;
     -sieve-text-muted: #6b7280;
     -sieve-accent: #2f4fd8;     /* the blue in the mockup */
     -sieve-selected: #eef2ff;   /* selected client row */
     -sieve-error: #c0392b;
+    -sieve-success: #1e8e3e;
 }
 
 .background {
@@ -16,28 +33,26 @@
 
 .label {
     -fx-font-size: 11pt;
-    -fx-font-family: "Segoe UI Semibold";
     -fx-text-fill: -sieve-text;
     -fx-opacity: 0.9;
 }
 
 .text-field {
     -fx-font-size: 12pt;
-    -fx-font-family: "Segoe UI Semibold";
 }
 
 .list-view {
     -fx-background-insets: 0;
     -fx-padding: 0;
-    -fx-background-color: -sieve-surface;
+    -fx-background-color: -sieve-list;
 }
 
 /* The client count above the list, e.g. "7 clients" */
 .client-count {
-    -fx-background-color: -sieve-surface;
+    -fx-background-color: -sieve-list;
     -fx-border-color: transparent transparent -sieve-border transparent;
-    -fx-padding: 6 16 6 16;
-    -fx-font-size: 12px;
+    -fx-padding: 8 16 8 16;
+    -fx-font-size: 13px;
     -fx-text-fill: -sieve-text;
 }
 
@@ -49,7 +64,7 @@
 
 .list-cell:filled:even,
 .list-cell:filled:odd {
-    -fx-background-color: -sieve-surface;
+    -fx-background-color: -sieve-list;
     /* top right bottom left: a thin line under each client instead of stripes */
     -fx-border-color: transparent transparent -sieve-border transparent;
 }
@@ -68,8 +83,8 @@
 }
 
 .cell_big_label {
-    -fx-font-family: "Segoe UI Semibold";
-    -fx-font-size: 15px;
+    -fx-font-family: "Inter SemiBold";
+    -fx-font-size: 16px;
 }
 
 /*
@@ -77,14 +92,13 @@
  * so they are more specific than it and win.
  */
 .list-cell .cell_small_label {
-    -fx-font-family: "Segoe UI";
-    -fx-font-size: 12px;
+    -fx-font-size: 13px;
     -fx-text-fill: -sieve-text-muted;
 }
 
 .list-cell .cell_index_label,
 .list-cell .cell_phone_label {
-    -fx-font-size: 13px;
+    -fx-font-size: 14px;
     -fx-text-fill: -sieve-text;
 }
 
@@ -106,19 +120,40 @@
     -fx-background-color: -sieve-window;
 }
 
-.result-display {
-    -fx-background-color: transparent;
-    -fx-font-family: "Segoe UI Light";
-    -fx-font-size: 13pt;
+.result-display .label {
+    -fx-font-size: 16px;
     -fx-text-fill: -sieve-text;
 }
 
-.result-display .label {
-    -fx-text-fill: -sieve-text !important;
+/*
+ * The icon is an empty Region given a shape: -fx-shape takes an SVG path, and the
+ * background colour fills that shape. The shape is scaled to the region's size.
+ */
+.result-icon {
+    -fx-min-width: 16;
+    -fx-pref-width: 16;
+    -fx-max-width: 16;
+    -fx-min-height: 16;
+    -fx-pref-height: 16;
+    -fx-max-height: 16;
+    -fx-translate-y: 3; /* line the icon up with the first line of text */
+    -fx-background-color: -sieve-success;
+    /* a tick */
+    -fx-shape: "M1 8 L3.5 5.5 L6 8 L12.5 1.5 L15 4 L6 13 Z";
+}
+
+/* :error is set by ResultDisplay while the message is an error */
+.result-display:error .result-icon {
+    -fx-background-color: -sieve-error;
+    /* a cross */
+    -fx-shape: "M3 1 L8 6 L13 1 L15 3 L10 8 L15 13 L13 15 L8 10 L3 15 L1 13 L6 8 L1 3 Z";
+}
+
+.result-display:error .label {
+    -fx-text-fill: -sieve-error;
 }
 
 .status-bar .label {
-    -fx-font-family: "Segoe UI Light";
     -fx-text-fill: -sieve-text-muted;
     -fx-padding: 4px;
     -fx-pref-height: 30px;
@@ -139,7 +174,6 @@
 
 .menu-bar .label {
     -fx-font-size: 14pt;
-    -fx-font-family: "Segoe UI Light";
     -fx-text-fill: -sieve-text;
     -fx-opacity: 0.9;
 }
@@ -154,7 +188,6 @@
     -fx-background-radius: 6;
     -fx-border-color: -sieve-border;
     -fx-border-radius: 6;
-    -fx-font-family: "Segoe UI";
     -fx-font-size: 11pt;
     -fx-text-fill: -sieve-text;
 }
@@ -240,21 +273,30 @@
     -fx-border-color: -sieve-accent;
     -fx-border-width: 2;
     -fx-border-radius: 8;
-    -fx-padding: 8 12 8 12;
-    -fx-font-family: "Segoe UI Light";
+    /* top right bottom left: extra room on the left for the ">" icon */
+    -fx-padding: 8 12 8 36;
     -fx-font-size: 13pt;
     -fx-text-fill: -sieve-text;
+    /* JavaFX hides placeholder text in a focused field by default, and the command box is always focused */
+    -fx-prompt-text-fill: -sieve-text-muted;
+}
+
+/* The ">" at the start of the command box, drawn the same way as the result icons */
+.command-prompt-icon {
+    -fx-min-width: 9;
+    -fx-pref-width: 9;
+    -fx-max-width: 9;
+    -fx-min-height: 14;
+    -fx-pref-height: 14;
+    -fx-max-height: 14;
+    -fx-background-color: -sieve-accent;
+    -fx-shape: "M0 1.5 L1.5 0 L7.5 6 L1.5 12 L0 10.5 L4.5 6 Z";
 }
 
 /* A command that failed. CommandBox removes the error class as soon as the user edits the text. */
 #commandTextField.error {
     -fx-border-color: -sieve-error;
     -fx-background-color: #fdecec;
-}
-
-#resultDisplay .content {
-    -fx-background-color: -sieve-window;
-    -fx-background-radius: 0;
 }
 
 #tags {

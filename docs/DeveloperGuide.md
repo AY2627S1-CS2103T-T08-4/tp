@@ -17,6 +17,9 @@
   [AddressBook-Level3 project](https://github.com/se-edu/addressbook-level3)
   created by the [SE-EDU initiative](https://se-education.org). Parts of Sieve's code and documentation were adapted
   from AddressBook-Level3.
+* Sieve's UI uses the [Inter](https://github.com/rsms/inter) font by Rasmus Andersson and the Inter Project Authors,
+  licensed under the [SIL Open Font License 1.1](https://openfontlicense.org). A copy of the license is included in
+  `src/main/resources/fonts/Inter-LICENSE.txt`.
 * Sieve uses [JavaFX](https://openjfx.io/) for its graphical user interface.
 * Sieve uses [Jackson](https://github.com/FasterXML/jackson) for JSON data storage.
 * Sieve uses [JUnit 5](https://junit.org/junit5/) for automated testing.

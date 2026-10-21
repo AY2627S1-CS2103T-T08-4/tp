@@ -1,6 +1,6 @@
 .list-cell:empty {
     /* Empty cells will not have alternating colours */
-    -fx-background: -sieve-surface;
+    -fx-background: -sieve-list;
 }
 
 .tag-selector {
