@@ -28,7 +28,12 @@
     </HBox>
     <FlowPane fx:id="tags" />
     <HBox spacing="16">
-      <Label fx:id="email" styleClass="cell_small_label" text="\$email" />
+      <Label fx:id="email" styleClass="cell_small_label" text="\$email">
+        <minWidth>
+          <!-- When the row is too narrow, the address is shortened first -->
+          <Region fx:constant="USE_PREF_SIZE" />
+        </minWidth>
+      </Label>
       <Label fx:id="address" styleClass="cell_small_label" text="\$address" />
     </HBox>
     <Label fx:id="note" styleClass="cell_small_label" wrapText="true" text="\$note" />

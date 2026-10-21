@@ -1,6 +1,7 @@
 package seedu.address.ui;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.testutil.TypicalPersons.ALICE;
 import static seedu.address.testutil.TypicalPersons.BENSON;
 import static seedu.address.testutil.TypicalPersons.CARL;
@@ -16,6 +17,7 @@ import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.stage.Stage;
 import seedu.address.model.person.Person;
 
@@ -50,6 +52,16 @@ public class PersonListPanelTest {
 
         robot.interact(persons::clear);
         assertEquals("0 clients", clientCount.getText());
+    }
+
+    @Test
+    public void personListView_noClients_showsPlaceholder(FxRobot robot) {
+        robot.interact(persons::clear);
+
+        ListView<?> personListView = robot.lookup("#personListView").queryAs(ListView.class);
+        Label placeholder = (Label) personListView.getPlaceholder();
+        assertTrue(placeholder.isVisible());
+        assertTrue(placeholder.getText().startsWith("No clients to show."));
     }
 
     @Test

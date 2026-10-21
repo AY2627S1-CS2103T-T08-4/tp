@@ -58,8 +58,12 @@ public class PersonCard extends UiPart<Region> {
         // An empty note takes up no space on the card
         note.setVisible(!person.getNote().isEmpty());
         note.setManaged(!person.getNote().isEmpty());
+        // A client without tags gets no empty row of tags
+        tags.setVisible(!person.getTags().isEmpty());
+        tags.setManaged(!person.getTags().isEmpty());
+        // Tags are case-insensitive, so they are sorted that way too (Math, physics, Sec4)
         person.getTags().stream()
-                .sorted(Comparator.comparing(tag -> tag.tagName))
+                .sorted(Comparator.comparing(tag -> tag.tagName, String.CASE_INSENSITIVE_ORDER))
                 .forEach(tag -> tags.getChildren().add(createTagLabel(tag.tagName)));
     }
 

@@ -26,15 +26,9 @@
     -sieve-success: #1e8e3e;
 }
 
-.background {
-    -fx-background-color: -sieve-window;
-    background-color: -sieve-window;
-}
-
 .label {
     -fx-font-size: 11pt;
     -fx-text-fill: -sieve-text;
-    -fx-opacity: 0.9;
 }
 
 .text-field {
@@ -54,6 +48,12 @@
     -fx-padding: 8 16 8 16;
     -fx-font-size: 13px;
     -fx-text-fill: -sieve-text;
+}
+
+/* Shown by the list when there are no clients to display */
+.list-placeholder {
+    -fx-font-size: 14px;
+    -fx-text-fill: -sieve-text-muted;
 }
 
 .list-cell {
@@ -100,6 +100,11 @@
 .list-cell .cell_phone_label {
     -fx-font-size: 14px;
     -fx-text-fill: -sieve-text;
+}
+
+/* The index is smaller than the name, so it is moved down to line up with it */
+.list-cell .cell_index_label {
+    -fx-padding: 2 0 0 0;
 }
 
 .list-cell:filled:selected .cell_index_label {
@@ -168,6 +173,18 @@
     -fx-text-fill: -sieve-text;
 }
 
+/* The highlighted item in a drop-down or right-click menu */
+.menu-item:focused {
+    -fx-background-color: -sieve-selected;
+}
+
+/* File and Help in the menu bar, while hovered or open */
+.menu-bar > .container > .menu-button:hover,
+.menu-bar > .container > .menu-button:focused,
+.menu-bar > .container > .menu-button:showing {
+    -fx-background-color: -sieve-selected;
+}
+
 .menu-bar {
     -fx-background-color: -sieve-window;
 }
@@ -175,7 +192,6 @@
 .menu-bar .label {
     -fx-font-size: 14pt;
     -fx-text-fill: -sieve-text;
-    -fx-opacity: 0.9;
 }
 
 .menu .left-container {
