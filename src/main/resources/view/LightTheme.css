@@ -246,6 +246,12 @@
     -fx-text-fill: -sieve-text;
 }
 
+/* A command that failed. CommandBox removes the error class as soon as the user edits the text. */
+#commandTextField.error {
+    -fx-border-color: -sieve-error;
+    -fx-background-color: #fdecec;
+}
+
 #resultDisplay .content {
     -fx-background-color: -sieve-window;
     -fx-background-radius: 0;
