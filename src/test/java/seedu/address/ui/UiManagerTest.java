@@ -74,7 +74,7 @@ public class UiManagerTest {
     public void triggerCorruptionAlert_errorLevel_usesGivenAlertType() {
         UiManager uiManager = createUiManager(createLogic(true));
 
-        uiManager.triggerCorruptionAlert("ERROR");
+        uiManager.triggerCorruptionAlert(AlertType.ERROR);
 
         assertEquals(1, alertCount);
         assertEquals(AlertType.ERROR, shownType);
