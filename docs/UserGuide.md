@@ -157,7 +157,7 @@ Examples:
 <box type="info" seamless>
 
 **Limitations:**
-* `find` searches names only. To search by tag, use [`filter`](#filtering-clients-by-phone-number-or-tags-filter).
+* `find` searches names only. To search by phone number or tag, use [`filter`](#filtering-clients-by-phone-number-or-tags-filter).
 * A keyword is matched against one word of a name at a time, so a keyword that joins two words does not match. For example, `Aisyah-Tan` does not match `Nur-Aisyah Tan`; use `find Aisyah Tan` instead.
 * A short keyword can match many clients; for example, `find a` returns every client with a name part starting with `a`. Type more letters to narrow the results.
 </box>
