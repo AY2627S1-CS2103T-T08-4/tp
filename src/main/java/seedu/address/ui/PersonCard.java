@@ -39,6 +39,12 @@ public class PersonCard extends UiPart<Region> {
     @FXML
     private Label email;
     @FXML
+    private HBox billing;
+    @FXML
+    private Label fee;
+    @FXML
+    private Label dueDate;
+    @FXML
     private Label note;
     @FXML
     private FlowPane tags;
@@ -54,6 +60,15 @@ public class PersonCard extends UiPart<Region> {
         phone.setText(person.getPhone().value);
         address.setText(person.getAddress().value);
         email.setText(person.getEmail().value);
+        fee.setText("Fee: " + person.getFee().value);
+        fee.setVisible(!person.getFee().isEmpty());
+        fee.setManaged(!person.getFee().isEmpty());
+        dueDate.setText("Due: " + person.getDueDate().value);
+        dueDate.setVisible(!person.getDueDate().isEmpty());
+        dueDate.setManaged(!person.getDueDate().isEmpty());
+        boolean hasBilling = !person.getFee().isEmpty() || !person.getDueDate().isEmpty();
+        billing.setVisible(hasBilling);
+        billing.setManaged(hasBilling);
         note.setText(person.getNote().value);
         // An empty note takes up no space on the card
         note.setVisible(!person.getNote().isEmpty());

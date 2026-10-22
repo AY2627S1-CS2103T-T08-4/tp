@@ -4,7 +4,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import seedu.address.model.person.Address;
+import seedu.address.model.person.DueDate;
 import seedu.address.model.person.Email;
+import seedu.address.model.person.Fee;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Note;
 import seedu.address.model.person.Person;
@@ -22,12 +24,16 @@ public class PersonBuilder {
     public static final String DEFAULT_EMAIL = "amy@gmail.com";
     public static final String DEFAULT_ADDRESS = "123, Jurong West Ave 6, #08-111";
     public static final String DEFAULT_NOTE = "";
+    public static final String DEFAULT_FEE = "";
+    public static final String DEFAULT_DUE_DATE = "";
 
     private Name name;
     private Phone phone;
     private Email email;
     private Address address;
     private Note note;
+    private Fee fee;
+    private DueDate dueDate;
     private Set<Tag> tags;
 
     /**
@@ -39,6 +45,8 @@ public class PersonBuilder {
         email = new Email(DEFAULT_EMAIL);
         address = new Address(DEFAULT_ADDRESS);
         note = new Note(DEFAULT_NOTE);
+        fee = new Fee(DEFAULT_FEE);
+        dueDate = new DueDate(DEFAULT_DUE_DATE);
         tags = new HashSet<>();
     }
 
@@ -51,6 +59,8 @@ public class PersonBuilder {
         email = personToCopy.getEmail();
         address = personToCopy.getAddress();
         note = personToCopy.getNote();
+        fee = personToCopy.getFee();
+        dueDate = personToCopy.getDueDate();
         tags = new HashSet<>(personToCopy.getTags());
     }
 
@@ -87,6 +97,22 @@ public class PersonBuilder {
     }
 
     /**
+     * Sets the {@code Fee} of the {@code Person} that we are building.
+     */
+    public PersonBuilder withFee(String fee) {
+        this.fee = new Fee(fee);
+        return this;
+    }
+
+    /**
+     * Sets the {@code DueDate} of the {@code Person} that we are building.
+     */
+    public PersonBuilder withDueDate(String dueDate) {
+        this.dueDate = new DueDate(dueDate);
+        return this;
+    }
+
+    /**
      * Sets the {@code Phone} of the {@code Person} that we are building.
      */
     public PersonBuilder withPhone(String phone) {
@@ -103,7 +129,7 @@ public class PersonBuilder {
     }
 
     public Person build() {
-        return new Person(name, phone, email, address, note, tags);
+        return new Person(name, phone, email, address, note, fee, dueDate, tags);
     }
 
 }

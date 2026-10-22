@@ -80,13 +80,15 @@ Format: `help`
 
 Adds a client to Sieve.
 
-Format: `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [nt/NOTE] [t/TAG]... `
+Format: `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [nt/NOTE] [fee/FEE] [due/DUE_DATE] [t/TAG]... `
 
 <box type="tip" seamless>
 
 **Tip:** A client can have any number of tags, including zero.
 
-A note is free text of up to 200 characters, for anything you want to remember about the client, e.g. `nt/Weak at algebra, prelims in March`. Leave it out if you have nothing to record.
+* A note is free text of up to 200 characters, for anything you want to remember about the client, e.g. `nt/Weak at algebra, prelims in March`. Leave it out if you have nothing to record.
+* A fee is the amount you charge the client, e.g. `fee/250` or `fee/180.50`. It is a number that is up to 7 digits and up to 2 decimal places, with no currency symbol. Sieve shows it with 2 decimal places (`250.00`).
+* A due date is the date the next payment is due, in the format `DD-MM-YYYY`, e.g. `due/01-11-2026`. It must be a real date, and dates in the past are allowed. Sieve only stores these two values and shows them on the client's card. It does not track payments or send reminders. Leave them out if you do not need them.
 </box>
 
 <box type="info" seamless>
@@ -103,6 +105,7 @@ Examples:
 * `add n/Jason Quek p/91234567 e/jasonquek@gmail.com a/Blk 123 Yishun Ave 5 #04-12`
 * `add n/Brandon Sim p/92345678 e/brandonsim@sample.com a/10 Queenstown Rd nt/Parent prefers WhatsApp after 6pm` adds a client with a note.
 * `add n/Matthias Tan t/Physics e/matthias.tan@gmail.com a/10 Queenstown Rd p/8123 4567 t/Sec4` adds a client with two tags. Fields can be given in any order, and spaces in the phone number are ignored.
+* `add n/Lena Ong p/91230000 e/lena@example.com a/Blk 3 Clementi Rd fee/250 due/01-11-2026` adds a client with a fee and a due date.
 
 ### Listing all clients: `list`
 
@@ -114,7 +117,7 @@ Format: `list`
 
 Edits an existing client in Sieve.
 
-Format: `edit INDEX [n/NAME] [p/PHONE] [e/EMAIL] [a/ADDRESS] [nt/NOTE] [t/TAG]... `
+Format: `edit INDEX [n/NAME] [p/PHONE] [e/EMAIL] [a/ADDRESS] [nt/NOTE] [fee/FEE] [due/DUE_DATE] [t/TAG]... `
 
 * Edits the client at the specified `INDEX`. The index refers to the index number shown in the displayed client list. The index **must be a positive integer** 1, 2, 3, ...
 * At least one of the optional fields must be provided.
@@ -122,6 +125,7 @@ Format: `edit INDEX [n/NAME] [p/PHONE] [e/EMAIL] [a/ADDRESS] [nt/NOTE] [t/TAG]..
 * When editing tags, all of the client's existing tags are removed; adding tags is not cumulative.
 * To remove all of a client's tags, enter `t/` without a tag after it.
 * Editing the note replaces the whole note; it does not add to the existing one. To remove a client's note, enter `nt/` without any text after it.
+* Editing the fee or due date replaces the existing value. To remove a client's fee, enter `fee/` without a value after it. To remove a client's due date, enter `due/` without a value after it.
 * A note cannot contain text that looks like another field, such as ` t/` or ` p/`, because Sieve reads it as the start of that field.
 
 Examples:
@@ -129,6 +133,8 @@ Examples:
 *  `edit 2 n/Brandon Tan t/` Edits the name of the 2nd client to be `Brandon Tan` and clears all existing tags.
 *  `edit 3 nt/Exam in March` Sets the note of the 3rd client to `Exam in March`.
 *  `edit 3 nt/` Clears the note of the 3rd client.
+*  `edit 1 fee/300 due/01-12-2026` Sets the fee of the 1st client to `300.00` and their due date to `01-12-2026`.
+*  `edit 1 fee/ due/` Clears the fee and due date of the 1st client.
 
 ### Locating clients by name: `find`
 
@@ -345,12 +351,12 @@ Furthermore, certain edits can cause Sieve to behave in unexpected ways (e.g., i
 
 Action     | Format, Examples
 -----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------
-**Add**    | `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [nt/NOTE] [t/TAG]... ` <br> e.g., `add n/Immanuel Lim p/98765432 e/immanuel.lim@gmail.com a/Blk 456 Bishan St 21 #11-22 t/Chemistry t/JC1`
+**Add**    | `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [nt/NOTE] [fee/FEE] [due/DUE_DATE] [t/TAG]... ` <br> e.g., `add n/Immanuel Lim p/98765432 e/immanuel.lim@gmail.com a/Blk 456 Bishan St 21 #11-22 t/Chemistry t/JC1`
 **Clear**  | `clear`
 **Delete** | `delete INDEX [, INDEX]...`<br> e.g., `delete 3`, `delete 1, 3, 5`
-**Edit**   | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [nt/NOTE] [t/TAG]... `<br> e.g., `edit 1 p/81112222 e/amirah.tan01@gmail.com`, `edit 2 nt/Exam in March`
-**Filter** | `filter [p/PHONE]... [t/TAG]...`<br> e.g., `filter p/92345678 t/sec4`
-**Find**   | `find KEYWORD [MORE_KEYWORDS]...`<br> e.g., `find Amirah O'Brien`
+**Edit**   | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [nt/NOTE] [fee/FEE] [due/DUE_DATE] [t/TAG]... `<br> e.g., `edit 1 p/81112222 e/amirah.tan01@gmail.com`, `edit 2 nt/Exam in March`
+**Filter** | `filter t/TAG [t/MORE_TAGS]...`<br> e.g., `filter t/physics t/sec4`
+**Find**   | `find [KEYWORD]... [p/PHONE]... [t/TAG]...`<br> e.g., `find Amirah O'Brien`, `find t/sec4`, `find p/91234567`
 **List**   | `list`
 **Tag**    | `tag INDEX t/TAG [t/MORE_TAGS]...`<br> e.g., `tag 1 t/physics t/sec4`
 **Untag**  | `untag INDEX t/TAG [t/MORE_TAGS]...`<br> e.g., `untag 1 t/physics`

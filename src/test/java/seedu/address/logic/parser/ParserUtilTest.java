@@ -13,7 +13,9 @@ import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.person.Address;
+import seedu.address.model.person.DueDate;
 import seedu.address.model.person.Email;
+import seedu.address.model.person.Fee;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Note;
 import seedu.address.model.person.Phone;
@@ -215,6 +217,50 @@ public class ParserUtilTest {
         // 201 characters as typed, but 200 once the double space is collapsed
         String typedNote = "a".repeat(Note.MAX_LENGTH - 2) + "  b";
         assertEquals(new Note("a".repeat(Note.MAX_LENGTH - 2) + " b"), ParserUtil.parseNote(typedNote));
+    }
+
+    @Test
+    public void parseFee_null_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> ParserUtil.parseFee((String) null));
+    }
+
+    @Test
+    public void parseFee_invalidValue_throwsParseException() {
+        assertThrows(ParseException.class, Fee.MESSAGE_CONSTRAINTS, () -> ParserUtil.parseFee("-5"));
+        assertThrows(ParseException.class, Fee.MESSAGE_CONSTRAINTS, () -> ParserUtil.parseFee("abc"));
+    }
+
+    @Test
+    public void parseFee_emptyValue_returnsEmptyFee() throws Exception {
+        assertEquals(Fee.EMPTY, ParserUtil.parseFee(""));
+        assertEquals(Fee.EMPTY, ParserUtil.parseFee(WHITESPACE));
+    }
+
+    @Test
+    public void parseFee_validValueWithWhitespace_returnsTrimmedFee() throws Exception {
+        assertEquals(new Fee("250.50"), ParserUtil.parseFee(WHITESPACE + "250.50" + WHITESPACE));
+    }
+
+    @Test
+    public void parseDueDate_null_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> ParserUtil.parseDueDate((String) null));
+    }
+
+    @Test
+    public void parseDueDate_invalidValue_throwsParseException() {
+        assertThrows(ParseException.class, DueDate.MESSAGE_CONSTRAINTS, () -> ParserUtil.parseDueDate("30-02-2026"));
+        assertThrows(ParseException.class, DueDate.MESSAGE_CONSTRAINTS, () -> ParserUtil.parseDueDate("tomorrow"));
+    }
+
+    @Test
+    public void parseDueDate_emptyValue_returnsEmptyDueDate() throws Exception {
+        assertEquals(DueDate.EMPTY, ParserUtil.parseDueDate(""));
+        assertEquals(DueDate.EMPTY, ParserUtil.parseDueDate(WHITESPACE));
+    }
+
+    @Test
+    public void parseDueDate_validValueWithWhitespace_returnsTrimmedDueDate() throws Exception {
+        assertEquals(new DueDate("01-11-2026"), ParserUtil.parseDueDate(WHITESPACE + "01-11-2026" + WHITESPACE));
     }
 
     @Test

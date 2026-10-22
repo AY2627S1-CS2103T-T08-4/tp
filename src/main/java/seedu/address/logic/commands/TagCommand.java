@@ -26,7 +26,7 @@ public class TagCommand extends Command {
     public static final String COMMAND_WORD = "tag";
 
     public static final String MESSAGE_USAGE = "Expected format: " + COMMAND_WORD
-            + " INDEX t/TAG [t/MORE_TAGS]...";
+        + " INDEX t/TAG [t/MORE_TAGS]...";
 
     public static final String MESSAGE_TAG_PERSON_SUCCESS = "Tagged %1$s with: %2$s.";
     public static final String MESSAGE_PERSON_ALREADY_TAGGED = "%1$s has all of the tag(s).";
@@ -94,7 +94,8 @@ public class TagCommand extends Command {
         Set<Tag> updatedTags = new HashSet<>(personToTag.getTags());
         updatedTags.addAll(newTagsToAdd);
         return new Person(personToTag.getName(), personToTag.getPhone(), personToTag.getEmail(),
-                personToTag.getAddress(), personToTag.getNote(), updatedTags);
+            personToTag.getAddress(), personToTag.getNote(), personToTag.getFee(), personToTag.getDueDate(),
+            updatedTags);
     }
 
     @Override
@@ -108,14 +109,14 @@ public class TagCommand extends Command {
         }
 
         return targetIndex.equals(otherTagCommand.targetIndex)
-                && tagsToAdd.equals(otherTagCommand.tagsToAdd);
+            && tagsToAdd.equals(otherTagCommand.tagsToAdd);
     }
 
     @Override
     public String toString() {
         return new ToStringBuilder(this)
-                .add("targetIndex", targetIndex)
-                .add("tagsToAdd", tagsToAdd)
-                .toString();
+            .add("targetIndex", targetIndex)
+            .add("tagsToAdd", tagsToAdd)
+            .toString();
     }
 }

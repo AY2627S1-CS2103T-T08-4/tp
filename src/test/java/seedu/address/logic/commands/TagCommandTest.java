@@ -162,6 +162,6 @@ public class TagCommandTest {
         Set<Tag> combinedTags = new HashSet<>(person.getTags());
         combinedTags.addAll(additionalTags);
         return new Person(person.getName(), person.getPhone(), person.getEmail(), person.getAddress(),
-                person.getNote(), combinedTags);
+                person.getNote(), person.getFee(), person.getDueDate(), combinedTags);
     }
 }

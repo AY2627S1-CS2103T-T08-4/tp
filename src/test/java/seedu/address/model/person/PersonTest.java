@@ -109,6 +109,14 @@ public class PersonTest {
         editedAlice = new PersonBuilder(ALICE).withNote("Weak at algebra").build();
         assertFalse(ALICE.equals(editedAlice));
 
+        // different fee -> returns false
+        editedAlice = new PersonBuilder(ALICE).withFee("250").build();
+        assertFalse(ALICE.equals(editedAlice));
+
+        // different due date -> returns false
+        editedAlice = new PersonBuilder(ALICE).withDueDate("01-11-2026").build();
+        assertFalse(ALICE.equals(editedAlice));
+
         // different tags -> returns false
         editedAlice = new PersonBuilder(ALICE).withTags(VALID_TAG_HUSBAND).build();
         assertFalse(ALICE.equals(editedAlice));
@@ -121,12 +129,19 @@ public class PersonTest {
 
         // different note -> different hash code
         assertNotEquals(ALICE.hashCode(), new PersonBuilder(ALICE).withNote("Weak at algebra").build().hashCode());
+
+        // different fee -> different hash code
+        assertNotEquals(ALICE.hashCode(), new PersonBuilder(ALICE).withFee("250").build().hashCode());
+
+        // different due date -> different hash code
+        assertNotEquals(ALICE.hashCode(), new PersonBuilder(ALICE).withDueDate("01-11-2026").build().hashCode());
     }
 
     @Test
     public void toStringMethod() {
         String expected = Person.class.getCanonicalName() + "{name=" + ALICE.getName() + ", phone=" + ALICE.getPhone()
                 + ", email=" + ALICE.getEmail() + ", address=" + ALICE.getAddress() + ", note=" + ALICE.getNote()
+                + ", fee=" + ALICE.getFee() + ", dueDate=" + ALICE.getDueDate()
                 + ", tags=" + ALICE.getTags() + "}";
         assertEquals(expected, ALICE.toString());
     }
