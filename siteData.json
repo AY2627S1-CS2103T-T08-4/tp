@@ -55,6 +55,7 @@
         "filter-feature": "Filter feature",
         "tag-and-untag-features": "Tag and untag features",
         "undo-redo-feature": "Undo/redo feature",
+        "command-history-feature": "Command history feature",
         "documentation-logging-testing-dev-ops": "Documentation, logging, testing, dev-ops",
         "appendix-requirements": "Appendix: Requirements",
         "product-scope": "Product scope",
@@ -70,7 +71,8 @@
         "removing-tags-from-clients": "Removing tags from clients",
         "deleting-a-person": "Deleting a person",
         "undoing-changes": "Undoing changes",
-        "redoing-changes": "Redoing changes"
+        "redoing-changes": "Redoing changes",
+        "recalling-previous-commands": "Recalling previous commands"
       },
       "headingKeywords": {}
     },
@@ -129,6 +131,7 @@
         "clearing-all-clients-clear": "Clearing all clients: clear",
         "undoing-a-change-undo": "Undoing a change: undo",
         "redoing-an-undone-change-redo": "Redoing an undone change: redo",
+        "recalling-previous-commands-up-and-down-keys": "Recalling previous commands: Up and Down keys",
         "exiting-the-program-exit": "Exiting the program: exit",
         "saving-the-data": "Saving the data",
         "editing-the-data-file": "Editing the data file",
