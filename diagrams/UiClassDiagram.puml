@@ -13,6 +13,7 @@ Class HelpWindow
 Class ResultDisplay
 Class PersonListPanel
 Class PersonCard
+Class TagColor
 Class StatusBarFooter
 Class CommandBox
 Class CommandHistory
@@ -39,6 +40,7 @@ MainWindow *-down-> "1" StatusBarFooter
 MainWindow --> "0..1" HelpWindow
 
 PersonListPanel -down-> "*" PersonCard
+PersonCard ..> TagColor
 
 MainWindow -left-|> UiPart
 
