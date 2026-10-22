@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.logic.commands.CommandTestUtil.assertCommandSuccess;
-import static seedu.address.testutil.TypicalPersons.ALICE;
 import static seedu.address.testutil.TypicalPersons.BENSON;
 import static seedu.address.testutil.TypicalPersons.CARL;
 import static seedu.address.testutil.TypicalPersons.DANIEL;
@@ -20,9 +19,6 @@ import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
 import seedu.address.model.person.NameContainsKeywordsPredicate;
-import seedu.address.model.person.PersonMatchesSearchPredicate;
-import seedu.address.model.person.Phone;
-import seedu.address.model.tag.Tag;
 
 /**
  * Contains integration tests (interaction with the Model) for {@code FindCommand}.
@@ -106,51 +102,6 @@ public class FindCommandTest {
         expectedModel.updateFilteredPersonList(predicate);
         assertCommandSuccess(command, model, expectedMessage, expectedModel);
         assertEquals(List.of(CARL, ELLE, FIONA), model.getFilteredPersonList());
-    }
-
-    @Test
-    public void execute_tag_taggedPersonsFound() {
-        String expectedMessage = "3 clients found matching your search term(s).";
-        PersonMatchesSearchPredicate predicate =
-                new PersonMatchesSearchPredicate(List.of(), List.of(), List.of(new Tag("friends")));
-        FindCommand command = new FindCommand(predicate);
-        expectedModel.updateFilteredPersonList(predicate);
-        assertCommandSuccess(command, model, expectedMessage, expectedModel);
-        assertEquals(List.of(ALICE, BENSON, DANIEL), model.getFilteredPersonList());
-    }
-
-    @Test
-    public void execute_nameAndTag_personsMatchingBothFound() {
-        // Hoon Meier is not tagged friends, so only Benson and Daniel match
-        String expectedMessage = "2 clients found matching your search term(s).";
-        PersonMatchesSearchPredicate predicate =
-                new PersonMatchesSearchPredicate(List.of("Meier"), List.of(), List.of(new Tag("friends")));
-        FindCommand command = new FindCommand(predicate);
-        expectedModel.updateFilteredPersonList(predicate);
-        assertCommandSuccess(command, model, expectedMessage, expectedModel);
-        assertEquals(List.of(BENSON, DANIEL), model.getFilteredPersonList());
-    }
-
-    @Test
-    public void execute_phone_onePersonFound() {
-        String expectedMessage = "1 client found matching your search term(s).";
-        PersonMatchesSearchPredicate predicate =
-                new PersonMatchesSearchPredicate(List.of(), List.of(new Phone("94351253")), List.of());
-        FindCommand command = new FindCommand(predicate);
-        expectedModel.updateFilteredPersonList(predicate);
-        assertCommandSuccess(command, model, expectedMessage, expectedModel);
-        assertEquals(List.of(ALICE), model.getFilteredPersonList());
-    }
-
-    @Test
-    public void execute_multipleDifferentPhones_multiplePersonsFound() {
-        PersonMatchesSearchPredicate predicate = new PersonMatchesSearchPredicate(List.of(),
-                List.of(new Phone("94351253"), new Phone("98765432")), List.of());
-        FindCommand command = new FindCommand(predicate);
-        expectedModel.updateFilteredPersonList(predicate);
-
-        assertCommandSuccess(command, model, "2 clients found matching your search term(s).", expectedModel);
-        assertEquals(List.of(ALICE, BENSON), model.getFilteredPersonList());
     }
 
     @Test

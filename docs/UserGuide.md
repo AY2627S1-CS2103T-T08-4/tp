@@ -130,32 +130,20 @@ Examples:
 *  `edit 3 nt/Exam in March` Sets the note of the 3rd client to `Exam in March`.
 *  `edit 3 nt/` Clears the note of the 3rd client.
 
-### Locating clients by name, phone or tag: `find`
+### Locating clients by name: `find`
 
-Finds clients by name keywords, phone numbers and tags.
+Finds clients by name keywords.
 
-Format: `find [KEYWORD]... [p/PHONE]... [t/TAG]...`
+Format: `find KEYWORD [MORE_KEYWORDS]...`
 
-* At least one keyword, phone number or tag must be given.
-* If you search by more than one kind of field, a client must match **every** kind; for example, `find Amirah t/Sec4` returns only clients named Amirah who are tagged `Sec4`.
-* Within names and phone numbers, a client only needs to match **one** supplied value. A client must match **all** supplied tags; for example, `find t/Math t/Sec4` returns only clients tagged with both `Math` and `Sec4`.
-
-Searching by name:
-
+* At least one keyword must be given.
 * Keywords can contain the same characters as names: letters, digits, hyphens (`-`), apostrophes (`'`), full stops (`.`) and parentheses (`()`). Each keyword must contain at least one letter or digit.
 * The search is case-insensitive; for example, `amirah` matches `Amirah`.
 * Keyword order does not matter; for example, `Tan Amirah` matches `Amirah Tan`.
-* The search considers only names.
 * A keyword matches the **start** of a word of a name, or the start of a part of a word separated by punctuation; for example, `Ami` matches `Amirah`, `Bri` matches `O'Brien`, `Ais` matches `Nur-Aisyah`, and `NHHS` matches `John Tan (NHHS)`.
 * Punctuation is ignored; for example, `obrien` and `O'Brien` both match `O'Brien`.
 * A keyword does not match the middle or end of a word; for example, `rien` does not match `O'Brien`, and `rah` does not match `Amirah`.
 * Clients matching at least one keyword are returned (an `OR` search); for example, `Amirah Farhan` returns `Amirah Tan` and `Farhan Ali`.
-
-Searching by phone number and tag:
-
-* `p/PHONE` must be a complete 8-digit phone number. Spaces, hyphens and parentheses are ignored, so `p/9123 4567` works.
-* If several `p/PHONE` values are supplied, clients matching any of those phone numbers are returned.
-* `t/TAG` must be a whole tag name, but case does not matter; for example, `t/sec4` matches `Sec4`, but `t/sec` does not.
 
 If no client matches, Sieve shows `0 clients found` with tips for searching again. Use `list` to see all clients again.
 
@@ -165,16 +153,12 @@ Examples:
 * `find ami` returns `Amirah Tan`
 * `find Brien` returns `Liam O'Brien` (if you have added that client)<br>
   ![result for 'find Brien'](images/findBrienResult.png)
-* `find p/9112 2334` returns `Farhan Ali`
-* `find t/sec4` returns `Amirah Tan` and `Brandon Sim`
-* `find amirah t/sec4` returns `Amirah Tan` only
 
 <box type="info" seamless>
 
 **Limitations:**
+* `find` searches names only. To search by phone number or tag, use [`filter`](#filtering-clients-by-phone-number-or-tags-filter).
 * A keyword is matched against one word of a name at a time, so a keyword that joins two words does not match. For example, `Aisyah-Tan` does not match `Nur-Aisyah Tan`; use `find Aisyah Tan` instead.
-* A keyword without a prefix is always matched against names. To search by phone number, use `p/`; for example, `find 91234567` finds nobody, but `find p/91234567` finds the client with that number.
-* Phone numbers and tags must be complete; `p/9123` and `t/sec` do not find anything.
 * A short keyword can match many clients; for example, `find a` returns every client with a name part starting with `a`. Type more letters to narrow the results.
 </box>
 
@@ -255,7 +239,7 @@ Examples:
 * `list` followed by `delete 2` deletes the 2nd client in Sieve.
 * `find Amirah` followed by `delete 1` deletes the 1st client in the results of the `find` command.
 * `list` followed by `delete 1, 3, 5` deletes the 1st, 3rd and 5th clients in Sieve.
-* `find t/physics` followed by `delete 1,2` deletes the 1st and 2nd clients in the filtered results.
+* `filter t/physics` followed by `delete 1,2` deletes the 1st and 2nd clients in the filtered results.
 
 ### Clearing all clients: `clear`
 
@@ -351,7 +335,7 @@ Action     | Format, Examples
 **Delete** | `delete INDEX [, INDEX]...`<br> e.g., `delete 3`, `delete 1, 3, 5`
 **Edit**   | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [nt/NOTE] [t/TAG]... `<br> e.g., `edit 1 p/81112222 e/amirah.tan01@gmail.com`, `edit 2 nt/Exam in March`
 **Filter** | `filter [p/PHONE]... [t/TAG]...`<br> e.g., `filter p/92345678 t/sec4`
-**Find**   | `find [KEYWORD]... [p/PHONE]... [t/TAG]...`<br> e.g., `find Amirah O'Brien`, `find t/sec4`, `find p/91234567`
+**Find**   | `find KEYWORD [MORE_KEYWORDS]...`<br> e.g., `find Amirah O'Brien`
 **List**   | `list`
 **Tag**    | `tag INDEX t/TAG [t/MORE_TAGS]...`<br> e.g., `tag 1 t/physics t/sec4`
 **Untag**  | `untag INDEX t/TAG [t/MORE_TAGS]...`<br> e.g., `untag 1 t/physics`
