@@ -17,6 +17,9 @@
   [AddressBook-Level3 project](https://github.com/se-edu/addressbook-level3)
   created by the [SE-EDU initiative](https://se-education.org). Parts of Sieve's code and documentation were adapted
   from AddressBook-Level3.
+* Sieve's UI uses the [Inter](https://github.com/rsms/inter) font by Rasmus Andersson and the Inter Project Authors,
+  licensed under the [SIL Open Font License 1.1](https://openfontlicense.org). A copy of the license is included in
+  `src/main/resources/fonts/Inter-LICENSE.txt`.
 * Sieve uses [JavaFX](https://openjfx.io/) for its graphical user interface.
 * Sieve uses [Jackson](https://github.com/FasterXML/jackson) for JSON data storage.
 * Sieve uses [JUnit 5](https://junit.org/junit5/) for automated testing.
@@ -95,6 +98,31 @@ The `UI` component uses the JavaFX UI framework. The layouts of these UI parts a
 `MainWindow.fxml`](https://github.com/AY2627S1-CS2103T-T08-4/tp/tree/master/src/main/resources/view/MainWindow.fxml)
 specifies the layout of [
 `MainWindow`](https://github.com/AY2627S1-CS2103T-T08-4/tp/tree/master/src/main/java/seedu/address/ui/MainWindow.java).
+
+The look of the UI is defined in `.css` files in the same folder:
+
+* `LightTheme.css` defines the colour palette once, as looked-up colours on `.root` (e.g. `-sieve-accent`), and every
+  other rule refers to these names. To change a colour, change it in `.root` only. Each window is a separate JavaFX
+  `Scene` with its own stylesheets, so both `MainWindow.fxml` and `HelpWindow.fxml` load `LightTheme.css`.
+* `LightTheme.css` also loads the bundled Inter font from `src/main/resources/fonts` with `@font-face`, and sets it on
+  `.root`, so all text uses it on every platform. JavaFX registers the SemiBold font as a separate family, so rules
+  that need it use `-fx-font-family: "Inter SemiBold"` rather than `-fx-font-weight`.
+* `Extensions.css` adds a few rules to the main window, such as the background of the empty rows below the last client.
+
+A few parts of the main window are worth knowing about when changing them:
+
+* **Command results.** `MainWindow` shows the result of a command with `ResultDisplay#setFeedbackToUser(String)`, or
+  with `ResultDisplay#setErrorToUser(String)` if the command failed. `ResultDisplay` turns its `:error` pseudo-class on
+  or off to match, and `LightTheme.css` uses it to show a green tick or a red cross and red text. The icons are empty
+  `Region`s shaped with `-fx-shape`, so no image files are needed. The result line is hidden until the first command.
+
+* **Tag colours.** `PersonCard` gives each tag a style class from `TagColor`, from `tag-color-0` to `tag-color-11`.
+  `TagColor` picks it from the tag's name, ignoring case, so a tag has the same colour on every client and every
+  launch. `LightTheme.css` has one `#tags .tag-color-N` rule for each class. To add a colour, add a rule and raise
+  `TagColor.PALETTE_SIZE` to match.
+* **Client count.** `PersonListPanel` binds the text of the count above the list to the displayed client list, which
+  is the `Model`'s filtered list. The count therefore updates after any command that changes or narrows down the
+  list, such as `delete` or `find`, without the commands having to update it.
 
 The `UI` component,
 

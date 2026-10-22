@@ -49,7 +49,7 @@ public class PersonCard extends UiPart<Region> {
     public PersonCard(Person person, int displayedIndex) {
         super(FXML);
         this.person = person;
-        id.setText(displayedIndex + ". ");
+        id.setText(String.valueOf(displayedIndex));
         name.setText(person.getName().fullName);
         phone.setText(person.getPhone().value);
         address.setText(person.getAddress().value);
@@ -58,8 +58,21 @@ public class PersonCard extends UiPart<Region> {
         // An empty note takes up no space on the card
         note.setVisible(!person.getNote().isEmpty());
         note.setManaged(!person.getNote().isEmpty());
+        // A client without tags gets no empty row of tags
+        tags.setVisible(!person.getTags().isEmpty());
+        tags.setManaged(!person.getTags().isEmpty());
+        // Tags are case-insensitive, so they are sorted that way too (Math, physics, Sec4)
         person.getTags().stream()
-                .sorted(Comparator.comparing(tag -> tag.tagName))
-                .forEach(tag -> tags.getChildren().add(new Label(tag.tagName)));
+                .sorted(Comparator.comparing(tag -> tag.tagName, String.CASE_INSENSITIVE_ORDER))
+                .forEach(tag -> tags.getChildren().add(createTagLabel(tag.tagName)));
+    }
+
+    /**
+     * Returns a pill-shaped label for the tag called {@code tagName}, coloured by {@link TagColor}.
+     */
+    private static Label createTagLabel(String tagName) {
+        Label tagLabel = new Label(tagName);
+        tagLabel.getStyleClass().add(TagColor.getStyleClass(tagName));
+        return tagLabel;
     }
 }

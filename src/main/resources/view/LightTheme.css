@@ -1,0 +1,393 @@
+/*
+ * Inter is bundled in src/main/resources/fonts, so the app looks the same on every computer.
+ * JavaFX names the SemiBold file as its own family, "Inter SemiBold", so it is used by that name
+ * instead of with -fx-font-weight.
+ */
+@font-face {
+    src: url("../fonts/Inter-Regular.ttf");
+}
+
+@font-face {
+    src: url("../fonts/Inter-SemiBold.ttf");
+}
+
+.root {
+    /* Every label, button and menu inherits this unless a rule below sets its own font */
+    -fx-font-family: "Inter";
+    -sieve-window: #f4f5f9;     /* window background */
+    -sieve-surface: #ffffff;    /* panels the content sits on */
+    -sieve-list: #f9fafc;       /* client list, a softer white that is easier on the eyes */
+    -sieve-border: #e2e5ec;
+    -sieve-text: #1f2430;
+    -sieve-text-muted: #6b7280;
+    -sieve-accent: #2f4fd8;     /* the blue in the mockup */
+    -sieve-selected: #eef2ff;   /* selected client row */
+    -sieve-error: #c0392b;
+    -sieve-success: #1e8e3e;
+}
+
+.label {
+    -fx-font-size: 11pt;
+    -fx-text-fill: -sieve-text;
+}
+
+.text-field {
+    -fx-font-size: 12pt;
+}
+
+.list-view {
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+    -fx-background-color: -sieve-list;
+}
+
+/* The client count above the list, e.g. "7 clients" */
+.client-count {
+    -fx-background-color: -sieve-list;
+    -fx-border-color: transparent transparent -sieve-border transparent;
+    -fx-padding: 8 16 8 16;
+    -fx-font-size: 13px;
+    -fx-text-fill: -sieve-text;
+}
+
+/* Shown by the list when there are no clients to display */
+.list-placeholder {
+    -fx-font-size: 14px;
+    -fx-text-fill: -sieve-text-muted;
+}
+
+.list-cell {
+    -fx-label-padding: 0 0 0 0;
+    -fx-graphic-text-gap : 0;
+    -fx-padding: 0 0 0 0;
+}
+
+.list-cell:filled:even,
+.list-cell:filled:odd {
+    -fx-background-color: -sieve-list;
+    /* top right bottom left: a thin line under each client instead of stripes */
+    -fx-border-color: transparent transparent -sieve-border transparent;
+}
+
+.list-cell:filled:selected {
+    -fx-background-color: -sieve-selected;
+}
+
+.list-cell:filled:selected #cardPane {
+    /* blue bar on the left of the selected client, as in the mockup */
+    -fx-border-color: -sieve-accent;
+}
+
+.list-cell .label {
+    -fx-text-fill: -sieve-text;
+}
+
+.cell_big_label {
+    -fx-font-family: "Inter SemiBold";
+    -fx-font-size: 16px;
+}
+
+/*
+ * .list-cell .label sets every label in a row to -sieve-text. These rules start with .list-cell too,
+ * so they are more specific than it and win.
+ */
+.list-cell .cell_small_label {
+    -fx-font-size: 13px;
+    -fx-text-fill: -sieve-text-muted;
+}
+
+.list-cell .cell_index_label,
+.list-cell .cell_phone_label {
+    -fx-font-size: 14px;
+    -fx-text-fill: -sieve-text;
+}
+
+/* The index is smaller than the name, so it is moved down to line up with it */
+.list-cell .cell_index_label {
+    -fx-padding: 2 0 0 0;
+}
+
+.list-cell:filled:selected .cell_index_label {
+    -fx-text-fill: -sieve-accent;
+}
+
+.stack-pane {
+     -fx-background-color: -sieve-window;
+}
+
+.pane-with-border {
+     -fx-background-color: -sieve-window;
+     -fx-border-color: -sieve-border;
+     -fx-border-top-width: 1px;
+}
+
+.status-bar {
+    -fx-background-color: -sieve-window;
+}
+
+.result-display .label {
+    -fx-font-size: 16px;
+    -fx-text-fill: -sieve-text;
+}
+
+/*
+ * The icon is an empty Region given a shape: -fx-shape takes an SVG path, and the
+ * background colour fills that shape. The shape is scaled to the region's size.
+ */
+.result-icon {
+    -fx-min-width: 16;
+    -fx-pref-width: 16;
+    -fx-max-width: 16;
+    -fx-min-height: 16;
+    -fx-pref-height: 16;
+    -fx-max-height: 16;
+    -fx-translate-y: 3; /* line the icon up with the first line of text */
+    -fx-background-color: -sieve-success;
+    /* a tick */
+    -fx-shape: "M1 8 L3.5 5.5 L6 8 L12.5 1.5 L15 4 L6 13 Z";
+}
+
+/* :error is set by ResultDisplay while the message is an error */
+.result-display:error .result-icon {
+    -fx-background-color: -sieve-error;
+    /* a cross */
+    -fx-shape: "M3 1 L8 6 L13 1 L15 3 L10 8 L15 13 L13 15 L8 10 L3 15 L1 13 L6 8 L1 3 Z";
+}
+
+.result-display:error .label {
+    -fx-text-fill: -sieve-error;
+}
+
+.status-bar .label {
+    -fx-text-fill: -sieve-text-muted;
+    -fx-padding: 4px;
+    -fx-pref-height: 30px;
+}
+
+.context-menu {
+    -fx-background-color: -sieve-surface;
+    -fx-border-color: -sieve-border;
+}
+
+.context-menu .label {
+    -fx-text-fill: -sieve-text;
+}
+
+/* The highlighted item in a drop-down or right-click menu */
+.menu-item:focused {
+    -fx-background-color: -sieve-selected;
+}
+
+/* File and Help in the menu bar, while hovered or open */
+.menu-bar > .container > .menu-button:hover,
+.menu-bar > .container > .menu-button:focused,
+.menu-bar > .container > .menu-button:showing {
+    -fx-background-color: -sieve-selected;
+}
+
+.menu-bar {
+    -fx-background-color: -sieve-window;
+}
+
+.menu-bar .label {
+    -fx-font-size: 14pt;
+    -fx-text-fill: -sieve-text;
+}
+
+.menu .left-container {
+    -fx-background-color: transparent;
+}
+
+.button {
+    -fx-padding: 5 18 5 18;
+    -fx-background-color: -sieve-surface;
+    -fx-background-radius: 6;
+    -fx-border-color: -sieve-border;
+    -fx-border-radius: 6;
+    -fx-font-size: 11pt;
+    -fx-text-fill: -sieve-text;
+}
+
+.button:hover {
+    -fx-background-color: -sieve-selected;
+}
+
+.button:pressed {
+    -fx-background-color: derive(-sieve-selected, -10%);
+}
+
+/* The button that Enter presses, e.g. OK in a pop-up */
+.button:default {
+    -fx-background-color: -sieve-accent;
+    -fx-border-color: -sieve-accent;
+    -fx-text-fill: white;
+}
+
+.button:default:hover {
+    -fx-background-color: derive(-sieve-accent, 20%);
+}
+
+.dialog-pane {
+    -fx-background-color: -sieve-window;
+}
+
+.dialog-pane > *.button-bar > *.container {
+    -fx-background-color: -sieve-window;
+}
+
+.dialog-pane > *.label.content {
+    -fx-font-size: 14px;
+    -fx-text-fill: -sieve-text;
+}
+
+.dialog-pane:header *.header-panel {
+    -fx-background-color: -sieve-surface;
+}
+
+.dialog-pane:header *.header-panel *.label {
+    -fx-font-size: 18px;
+    -fx-text-fill: -sieve-text;
+}
+
+.scroll-bar {
+    -fx-background-color: -sieve-surface;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: derive(-sieve-border, -15%);
+    -fx-background-insets: 3;
+    -fx-background-radius: 4;
+}
+
+.scroll-bar .increment-button, .scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0 0 0 0;
+}
+
+.scroll-bar .increment-arrow, .scroll-bar .decrement-arrow {
+    -fx-shape: " ";
+}
+
+.scroll-bar:vertical .increment-arrow, .scroll-bar:vertical .decrement-arrow {
+    -fx-padding: 1 8 1 8;
+}
+
+.scroll-bar:horizontal .increment-arrow, .scroll-bar:horizontal .decrement-arrow {
+    -fx-padding: 8 1 8 1;
+}
+
+#cardPane {
+    -fx-background-color: transparent;
+    /* Always keep room for the selected bar, so the card does not shift when it is selected */
+    -fx-border-color: transparent;
+    -fx-border-width: 0 0 0 3;
+}
+
+#commandTextField {
+    -fx-background-color: -sieve-surface;
+    -fx-background-radius: 8;
+    -fx-border-color: -sieve-accent;
+    -fx-border-width: 2;
+    -fx-border-radius: 8;
+    /* top right bottom left: extra room on the left for the ">" icon */
+    -fx-padding: 8 12 8 36;
+    -fx-font-size: 13pt;
+    -fx-text-fill: -sieve-text;
+    /* JavaFX hides placeholder text in a focused field by default, and the command box is always focused */
+    -fx-prompt-text-fill: -sieve-text-muted;
+}
+
+/* The ">" at the start of the command box, drawn the same way as the result icons */
+.command-prompt-icon {
+    -fx-min-width: 9;
+    -fx-pref-width: 9;
+    -fx-max-width: 9;
+    -fx-min-height: 14;
+    -fx-pref-height: 14;
+    -fx-max-height: 14;
+    -fx-background-color: -sieve-accent;
+    -fx-shape: "M0 1.5 L1.5 0 L7.5 6 L1.5 12 L0 10.5 L4.5 6 Z";
+}
+
+/* A command that failed. CommandBox removes the error class as soon as the user edits the text. */
+#commandTextField.error {
+    -fx-border-color: -sieve-error;
+    -fx-background-color: #fdecec;
+}
+
+#tags {
+    -fx-hgap: 6;
+    -fx-vgap: 4;
+}
+
+/* The pill shape. A radius of half the height or more gives fully rounded ends. */
+#tags .label {
+    -fx-padding: 1 8 1 8;
+    -fx-background-radius: 10;
+    -fx-font-size: 12px;
+}
+
+/*
+ * One background and text colour pair for each palette entry, chosen in TagColor.java.
+ * Keep the number of rules equal to TagColor.PALETTE_SIZE.
+ * #tags is an id, which outranks any number of classes, so these beat .list-cell .label.
+ */
+#tags .tag-color-0 {
+    -fx-background-color: #e7ecff; /* blue */
+    -fx-text-fill: #2f4fd8;
+}
+
+#tags .tag-color-1 {
+    -fx-background-color: #e2f4e6; /* green */
+    -fx-text-fill: #1e7a3c;
+}
+
+#tags .tag-color-2 {
+    -fx-background-color: #fdf0d5; /* amber */
+    -fx-text-fill: #8a5a00;
+}
+
+#tags .tag-color-3 {
+    -fx-background-color: #efe8fb; /* purple */
+    -fx-text-fill: #6b3fb5;
+}
+
+#tags .tag-color-4 {
+    -fx-background-color: #fde4e6; /* red */
+    -fx-text-fill: #b4232f;
+}
+
+#tags .tag-color-5 {
+    -fx-background-color: #ddf3f4; /* teal */
+    -fx-text-fill: #0f6e76;
+}
+
+#tags .tag-color-6 {
+    -fx-background-color: #fce7f3; /* pink */
+    -fx-text-fill: #a3185e;
+}
+
+#tags .tag-color-7 {
+    -fx-background-color: #ffeddb; /* orange */
+    -fx-text-fill: #b04a0a;
+}
+
+#tags .tag-color-8 {
+    -fx-background-color: #eef6d8; /* lime */
+    -fx-text-fill: #4d6b0f;
+}
+
+#tags .tag-color-9 {
+    -fx-background-color: #e0f2fe; /* sky */
+    -fx-text-fill: #0369a1;
+}
+
+#tags .tag-color-10 {
+    -fx-background-color: #f3e9e1; /* brown */
+    -fx-text-fill: #7a4b26;
+}
+
+#tags .tag-color-11 {
+    -fx-background-color: #e9edf3; /* slate */
+    -fx-text-fill: #3f4b5e;
+}

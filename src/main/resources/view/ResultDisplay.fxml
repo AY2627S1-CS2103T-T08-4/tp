@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.TextArea?>
-<?import javafx.scene.layout.StackPane?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 
-<StackPane fx:id="placeHolder" styleClass="pane-with-border" xmlns="http://javafx.com/javafx/17"
-    xmlns:fx="http://javafx.com/fxml/1">
-  <TextArea fx:id="resultDisplay" editable="false" styleClass="result-display"/>
-</StackPane>
+<!-- An icon and the message, only as tall as the message needs -->
+<HBox styleClass="result-display" spacing="10" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
+  <padding>
+    <Insets top="2" right="16" bottom="8" left="16" />
+  </padding>
+  <Region fx:id="resultIcon" styleClass="result-icon" />
+  <Label fx:id="resultMessage" wrapText="true" HBox.hgrow="ALWAYS" />
+</HBox>

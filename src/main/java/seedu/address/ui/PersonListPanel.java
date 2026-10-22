@@ -2,12 +2,15 @@ package seedu.address.ui;
 
 import java.util.logging.Logger;
 
+import javafx.beans.binding.Bindings;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.Region;
 import seedu.address.commons.core.LogsCenter;
+import seedu.address.logic.Messages;
 import seedu.address.model.person.Person;
 
 /**
@@ -18,6 +21,8 @@ public class PersonListPanel extends UiPart<Region> {
     private final Logger logger = LogsCenter.getLogger(PersonListPanel.class);
 
     @FXML
+    private Label clientCount;
+    @FXML
     private ListView<Person> personListView;
 
     /**
@@ -27,12 +32,20 @@ public class PersonListPanel extends UiPart<Region> {
         super(FXML);
         personListView.setItems(personList);
         personListView.setCellFactory(listView -> new PersonListViewCell());
+        // Recomputes the count whenever personList changes, e.g. after add, delete, find or filter
+        clientCount.textProperty().bind(
+                Bindings.createStringBinding(() -> Messages.formatClientCount(personList.size()), personList));
     }
 
     /**
      * Custom {@code ListCell} that displays the graphics of a {@code Person} using a {@code PersonCard}.
      */
     class PersonListViewCell extends ListCell<Person> {
+        PersonListViewCell() {
+            // Size each row to the list's width instead of its content, so long details are shortened or wrapped
+            setPrefWidth(0);
+        }
+
         @Override
         protected void updateItem(Person person, boolean empty) {
             super.updateItem(person, empty);
