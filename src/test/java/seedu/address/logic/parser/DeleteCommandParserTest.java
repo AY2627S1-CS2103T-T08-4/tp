@@ -7,6 +7,7 @@ import static seedu.address.testutil.TypicalIndexes.INDEX_FIRST_PERSON;
 
 import org.junit.jupiter.api.Test;
 
+import seedu.address.commons.core.index.Index;
 import seedu.address.logic.commands.DeleteCommand;
 
 /**
@@ -22,7 +23,20 @@ public class DeleteCommandParserTest {
 
     @Test
     public void parse_validArgs_returnsDeleteCommand() {
-        assertParseSuccess(parser, "1", new DeleteCommand(INDEX_FIRST_PERSON));
+        assertParseSuccess(
+                parser,
+                "1",
+                new DeleteCommand(INDEX_FIRST_PERSON));
+    }
+
+    @Test
+    public void parse_zeroIndex_throwsParseException() {
+        assertParseFailure(
+                parser,
+                "0",
+                String.format(
+                        MESSAGE_INVALID_COMMAND_FORMAT,
+                        ParserUtil.MESSAGE_INVALID_INDEX));
     }
 
     @Test
@@ -30,7 +44,7 @@ public class DeleteCommandParserTest {
         assertParseFailure(
                 parser,
                 "a",
-                String.format(MESSAGE_INVALID_COMMAND_FORMAT, DeleteCommand.MESSAGE_USAGE));
+                String.format(MESSAGE_INVALID_COMMAND_FORMAT, ParserUtil.MESSAGE_INVALID_INDEX));
     }
 
     @Test
@@ -39,5 +53,87 @@ public class DeleteCommandParserTest {
                 parser,
                 "",
                 String.format(MESSAGE_INVALID_COMMAND_FORMAT, DeleteCommand.MESSAGE_INDEX_NOT_PRESENT));
+    }
+
+    @Test
+    public void parse_multipleValidIndexes_returnsBulkDeleteCommand() {
+        assertParseSuccess(
+                parser,
+                "1, 2, 3",
+                new DeleteCommand(
+                        Index.fromOneBased(1),
+                        Index.fromOneBased(2),
+                        Index.fromOneBased(3)));
+    }
+
+    @Test
+    public void parse_multipleValidIndexesWithoutSpaces_returnsBulkDeleteCommand() {
+        assertParseSuccess(
+                parser,
+                "1,2,3",
+                new DeleteCommand(
+                        Index.fromOneBased(1),
+                        Index.fromOneBased(2),
+                        Index.fromOneBased(3)));
+    }
+
+    @Test
+    public void parse_nonPositiveIndex_throwsParseException() {
+        assertParseFailure(
+                parser,
+                "0,1",
+                String.format(
+                        MESSAGE_INVALID_COMMAND_FORMAT,
+                        ParserUtil.MESSAGE_INVALID_INDEX));
+    }
+
+    @Test
+    public void parse_duplicateIndexes_throwsParseException() {
+        assertParseFailure(
+                parser,
+                "1, 1",
+                String.format(
+                        MESSAGE_INVALID_COMMAND_FORMAT,
+                        IndexListParser.MESSAGE_DUPLICATE_INDEX));
+    }
+
+    @Test
+    public void parse_emptyIndex_throwsParseException() {
+        assertParseFailure(
+                parser,
+                "1,,3",
+                String.format(
+                        MESSAGE_INVALID_COMMAND_FORMAT,
+                        DeleteCommand.MESSAGE_USAGE));
+    }
+
+    @Test
+    public void parse_trailingComma_throwsParseException() {
+        assertParseFailure(
+                parser,
+                "1,2,",
+                String.format(
+                        MESSAGE_INVALID_COMMAND_FORMAT,
+                        DeleteCommand.MESSAGE_USAGE));
+    }
+
+    @Test
+    public void parse_leadingComma_throwsParseException() {
+        assertParseFailure(
+                parser,
+                ",1,2",
+                String.format(
+                        MESSAGE_INVALID_COMMAND_FORMAT,
+                        DeleteCommand.MESSAGE_USAGE));
+    }
+
+    @Test
+    public void parse_invalidIndex_throwsParseException() {
+        assertParseFailure(
+                parser,
+                "1,a,3",
+                String.format(
+                        MESSAGE_INVALID_COMMAND_FORMAT,
+                        ParserUtil.MESSAGE_INVALID_INDEX));
     }
 }

@@ -515,6 +515,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 | `* * *`  | tutor                                  | edit the details of an existing client                                                                | I can fix or update information without retyping the whole entry                        |
 | `* * *`  | tutor                                  | find a client by name keyword                                                                         | I can pull up their details immediately when needed                                     |
 | `* * *`  | tutor                                  | delete a client I no longer tutor, e.g. a student who has graduated                                   | I can maintain an updated and clean list                                                |
+| `* *`    | tutor managing several former clients  | delete multiple clients in one command                                                                | I can clean up my client list without repeating the same command                        |
 | `* * *`  | tutor                                  | tag a client with free-form labels, and add or remove a single tag without retyping the whole contact | I can group clients the way my business actually works and keep small corrections cheap |
 | `* * *`  | tutor                                  | see all my clients as a numbered list                                                                 | I can refer to any of them by index in later commands                                   |
 | `* * *`  | careless typist                        | undo my last command                                                                                  | a mistyped delete isn't a disaster                                                      |
@@ -705,39 +706,53 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
     * 4a1. Sieve reports that the client does not have any specified tags and leaves the client unchanged.
 
-**Use case: UC4 - Delete a client who no longer needs tuition**
+**Use case: UC4 - Delete one or more clients who no longer need tuition**
 
 **MSS**
 
-1. Tutor requests to find the client by name
-2. Sieve shows the matching clients
-3. Tutor requests to delete a specific client in the list
-4. Sieve removes the client and saves the change
-5. Sieve shows a confirmation message
+1. Tutor displays the clients to be deleted
+2. Sieve shows the clients in a numbered list
+3. Tutor requests to delete one or more clients by their displayed indices
+4. Sieve validates all the supplied indices
+5. Sieve removes the specified clients and saves the change
+6. Sieve shows a confirmation message containing the deleted clients
 
    Use case ends.
 
 **Extensions**
 
-* 2a. No client matches the keyword.
+* 2a. No clients are displayed.
 
-    * 2a1. Sieve shows that 0 clients were found, with tips for searching again.
-
-      Use case ends.
-
-* 3a. The given index exceeds the size of the displayed client list.
-
-    * 3a1. Sieve shows:
-      `Error: The index provided is out of bounds! Current list only contains X clients.`
-
-      Use case resumes at step 3.
-
-* 3b. The displayed client list is empty.
-
-    * 3b1. Sieve shows:
+    * 2a1. Sieve shows:
       `Error: Cannot delete from an empty client list.`
 
       Use case ends.
+
+* 3a. No index is provided.
+
+    * 3a1. Sieve shows an error message with the expected command format.
+
+      Use case resumes at step 3.
+
+* 3b. An index is not a positive integer, or an index is missing between two commas.
+
+    * 3b1. Sieve shows an error message with the expected command format.
+
+      Use case resumes at step 3.
+
+* 3c. The same index is provided more than once.
+
+    * 3c1. Sieve shows:
+      `Duplicate indexes are not allowed.`
+
+      Use case resumes at step 3.
+
+* 4a. Any supplied index exceeds the size of the displayed client list.
+
+    * 4a1. Sieve does not delete any client and shows:
+      `Error: The index provided is out of bounds! Current list only contains X clients.`
+
+      Use case resumes at step 3.
 
 **Use case: UC5 - Start with a clean client list on first use**
 
@@ -919,7 +934,7 @@ Given below are instructions to test the app manually.
     1. Test case: `untag 1 t/`<br>
        Expected: The client is unchanged and an error message about the tag format is shown.
 
-### Deleting a person
+### Deleting clients
 
 1. Deleting a client from the displayed list
 
@@ -965,6 +980,67 @@ Given below are instructions to test the app manually.
     1. Test cases: `delete 0`, `delete -1`, and `delete x`.<br>
        Expected: No client is deleted. The status message indicates that the command format or index is invalid and
        displays the usage instructions.
+
+1. Deleting multiple clients
+
+    1. Prerequisites: Use `list` to display at least five clients. Note the clients currently displayed at indices
+       1, 3 and 5.
+
+    1. Test case: `delete 1, 3, 5`<br>
+       Expected: The clients originally displayed at indices 1, 3 and 5 are deleted. The status message starts with
+       `Deleted clients:` and shows the details of all three deleted clients.
+
+1. Deleting multiple clients without spaces after commas
+
+    1. Prerequisites: Use `list` to display at least three clients. Note the clients currently displayed at indices
+       1 and 3.
+
+    1. Test case: `delete 1,3`<br>
+       Expected: The clients originally displayed at indices 1 and 3 are deleted. This behaves the same as
+       `delete 1, 3`.
+
+1. Deleting clients using non-ascending indices
+
+    1. Prerequisites: Use `list` to display at least three clients. Note the clients currently displayed at indices
+       1 and 3.
+
+    1. Test case: `delete 3, 1`<br>
+       Expected: The clients originally displayed at indices 3 and 1 are deleted. The change in list indices after
+       deleting one client does not cause a different client to be deleted.
+
+1. Bulk deleting from a filtered list
+
+    1. Prerequisites: Start with the sample data and enter `filter t/sec4`. Confirm that `Amirah Tan` and
+       `Brandon Sim` are displayed.
+
+    1. Test case: `delete 1, 2`<br>
+       Expected: Both displayed clients are deleted. Clients that were not part of the filtered results remain
+       unchanged.
+
+1. Bulk deleting with a duplicate index
+
+    1. Prerequisites: Use `list` to display multiple clients and note the displayed clients.
+
+    1. Test case: `delete 1, 1`<br>
+       Expected: No client is deleted. The status message shows:<br>
+       `Invalid command format!`<br>
+       `Duplicate indexes are not allowed.`
+
+1. Bulk deleting with missing indices
+
+    1. Prerequisites: Use `list` to display multiple clients and note the displayed clients.
+
+    1. Test cases: `delete 1,,3`, `delete ,1,2`, `delete 1,2,`, `delete 1,x` and `delete 0,1`.<br>
+       Expected: No client is deleted. The status message indicates that the command format is invalid and displays
+       the bulk-delete usage instructions.
+
+1. Undoing a bulk deletion
+
+    1. Prerequisites: Use `list` to display at least three clients and note the clients at indices 1 and 2.
+
+    1. Test case: `delete 1, 2`, followed by `undo`.<br>
+       Expected: Both deleted clients are restored by the single `undo` command. The full client list is displayed and
+       the status message shows `Undid the last change. Showing all clients.`
 
 ### Undoing changes
 

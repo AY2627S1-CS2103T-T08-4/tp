@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.commands.AddCommand;
-import seedu.address.logic.commands.BulkDeleteCommand;
 import seedu.address.logic.commands.ClearCommand;
 import seedu.address.logic.commands.DeleteCommand;
 import seedu.address.logic.commands.EditCommand;
@@ -57,7 +56,6 @@ public class AddressBookParserTest {
                 AddCommand.MESSAGE_USAGE,
                 EditCommand.MESSAGE_USAGE,
                 DeleteCommand.MESSAGE_USAGE,
-                BulkDeleteCommand.MESSAGE_USAGE,
                 FilterCommand.MESSAGE_USAGE,
                 FindCommand.MESSAGE_USAGE)) {
             String example = usage.substring(
@@ -81,16 +79,17 @@ public class AddressBookParserTest {
 
     @Test
     public void parseCommand_bulkDelete() throws Exception {
-        BulkDeleteCommand command = (BulkDeleteCommand) parser.parseCommand(
-                DeleteCommand.COMMAND_WORD + " "
-                        + INDEX_FIRST_PERSON.getOneBased() + ", "
-                        + INDEX_SECOND_PERSON.getOneBased() + ", "
-                        + INDEX_THIRD_PERSON.getOneBased());
+        DeleteCommand command =
+                (DeleteCommand) parser.parseCommand(
+                        DeleteCommand.COMMAND_WORD + " "
+                                + INDEX_FIRST_PERSON.getOneBased() + ", "
+                                + INDEX_SECOND_PERSON.getOneBased() + ", "
+                                + INDEX_THIRD_PERSON.getOneBased());
 
-        BulkDeleteCommand expectedCommand = new BulkDeleteCommand(List.of(
+        DeleteCommand expectedCommand = new DeleteCommand(
                 INDEX_FIRST_PERSON,
                 INDEX_SECOND_PERSON,
-                INDEX_THIRD_PERSON));
+                INDEX_THIRD_PERSON);
 
         assertEquals(expectedCommand, command);
     }
