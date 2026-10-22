@@ -144,6 +144,11 @@ public class UntagCommandTest {
     }
 
     @Test
+    public void isMutating_untagCommand_returnsTrue() {
+        assertTrue(new UntagCommand(INDEX_FIRST_PERSON, List.of(new Tag("Math"))).isMutating());
+    }
+
+    @Test
     public void toStringMethod() {
         UntagCommand untagCommand = new UntagCommand(INDEX_FIRST_PERSON, List.of(FRIENDS));
         String expected = UntagCommand.class.getCanonicalName() + "{targetIndex=" + INDEX_FIRST_PERSON
