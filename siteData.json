@@ -121,7 +121,7 @@
         "adding-a-client-add": "Adding a client: add",
         "listing-all-clients-list": "Listing all clients: list",
         "editing-a-client-edit": "Editing a client: edit",
-        "locating-clients-by-name-phone-or-tag-find": "Locating clients by name, phone or tag: find",
+        "locating-clients-by-name-find": "Locating clients by name: find",
         "filtering-clients-by-phone-number-or-tags-filter": "Filtering clients by phone number or tags: filter",
         "tagging-a-client-tag": "Tagging a client: tag",
         "removing-tags-from-a-client-untag": "Removing tags from a client: untag",
