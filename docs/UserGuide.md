@@ -170,7 +170,7 @@ Examples:
 
 ### Filtering clients by phone number or tags: `filter`
 
-Finds clients who match the specified phone and tag filters.
+Shows only the clients who match the specified phone numbers and tags.
 
 Format: `filter [p/PHONE]... [t/TAG]...`
 
@@ -355,8 +355,9 @@ Action     | Format, Examples
 **Clear**  | `clear`
 **Delete** | `delete INDEX [, INDEX]...`<br> e.g., `delete 3`, `delete 1, 3, 5`
 **Edit**   | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [nt/NOTE] [fee/FEE] [due/DUE_DATE] [t/TAG]... `<br> e.g., `edit 1 p/81112222 e/amirah.tan01@gmail.com`, `edit 2 nt/Exam in March`
-**Filter** | `filter t/TAG [t/MORE_TAGS]...`<br> e.g., `filter t/physics t/sec4`
-**Find**   | `find [KEYWORD]... [p/PHONE]... [t/TAG]...`<br> e.g., `find Amirah O'Brien`, `find t/sec4`, `find p/91234567`
+**Exit**   | `exit`
+**Filter** | `filter [p/PHONE]... [t/TAG]...`<br> e.g., `filter t/physics t/sec4`, `filter p/91234567`
+**Find**   | `find KEYWORD [MORE_KEYWORDS]...`<br> e.g., `find Amirah`, `find Amirah O'Brien`
 **List**   | `list`
 **Tag**    | `tag INDEX t/TAG [t/MORE_TAGS]...`<br> e.g., `tag 1 t/physics t/sec4`
 **Untag**  | `untag INDEX t/TAG [t/MORE_TAGS]...`<br> e.g., `untag 1 t/physics`
