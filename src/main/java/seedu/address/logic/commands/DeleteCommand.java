@@ -29,7 +29,7 @@ public class DeleteCommand extends Command {
             + "Example: " + COMMAND_WORD + " 1, 2, 3";
 
     public static final String MESSAGE_DELETE_PERSON_SUCCESS = "Deleted client: %1$s";
-    public static final String MESSAGE_DELETE_PERSONS_SUCCESS = "Deleted clients: %1$s";
+    public static final String MESSAGE_DELETE_PERSONS_SUCCESS = "Deleted clients:\n%1$s";
 
     public static final String MESSAGE_EMPTY_PERSON_LIST =
             "Error: Cannot delete from an empty client list.";
