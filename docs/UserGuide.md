@@ -138,7 +138,7 @@ Format: `find [KEYWORD]... [p/PHONE]... [t/TAG]...`
 
 * At least one keyword, phone number or tag must be given.
 * If you search by more than one kind of field, a client must match **every** kind; for example, `find Amirah t/Sec4` returns only clients named Amirah who are tagged `Sec4`.
-* Within each kind of field, a client only needs to match **one** of the values; for example, `find t/Math t/Physics` returns clients tagged `Math` or `Physics`.
+* Within names and phone numbers, a client only needs to match **one** supplied value. A client must match **all** supplied tags; for example, `find t/Math t/Sec4` returns only clients tagged with both `Math` and `Sec4`.
 
 Searching by name:
 
@@ -154,6 +154,7 @@ Searching by name:
 Searching by phone number and tag:
 
 * `p/PHONE` must be a complete 8-digit phone number. Spaces, hyphens and parentheses are ignored, so `p/9123 4567` works.
+* If several `p/PHONE` values are supplied, clients matching any of those phone numbers are returned.
 * `t/TAG` must be a whole tag name, but case does not matter; for example, `t/sec4` matches `Sec4`, but `t/sec` does not.
 
 If no client matches, Sieve shows `0 clients found` with tips for searching again. Use `list` to see all clients again.
@@ -177,19 +178,26 @@ Examples:
 * A short keyword can match many clients; for example, `find a` returns every client with a name part starting with `a`. Type more letters to narrow the results.
 </box>
 
-### Filtering clients by tags: `filter`
+### Filtering clients by phone number or tags: `filter`
 
-Finds clients who have any of the specified tags.
+Finds clients who match the specified phone and tag filters.
 
-Format: `filter t/TAG [t/MORE_TAGS]...`
+Format: `filter [p/PHONE]... [t/TAG]...`
 
+* At least one phone number or tag must be given.
+* `p/PHONE` must be a complete 8-digit phone number. Spaces, hyphens and parentheses are ignored.
+* If several phone numbers are supplied, clients matching any of them are returned.
 * Tag matching is case-insensitive; for example, `t/physics` matches `Physics`.
 * Tag order does not matter.
-* A client needs at least one specified tag to be returned (an `OR` search).
+* A client must have every specified tag.
+* When phone numbers and tags are combined, a client must match both fields.
 
 Examples:
+* `filter p/9123 4567` returns the client with phone number `91234567`.
+* `filter p/91234567 p/92345678` returns the clients with either phone number.
 * `filter t/Physics` returns every client tagged `Physics`.
-* `filter t/Physics t/Math` returns clients tagged with either `Physics` or `Math`.
+* `filter t/Physics t/Sec4` returns clients tagged with both `Physics` and `Sec4`.
+* `filter p/92345678 t/Sec4` returns the client matching that phone number who is also tagged `Sec4`.
 
 ### Tagging a client: `tag`
 
@@ -201,10 +209,27 @@ Format: `tag INDEX t/TAG [t/MORE_TAGS]...`
 * Tags must be 1-20 characters long and contain only letters, numbers, and spaces.
 * New tags are added alongside the client's existing tags.
 * Adding a tag the client already has does not create a duplicate.
+* The success message lists only newly added tags. If the client already has every specified tag, Sieve reports that the client "has all of the tag(s)" and leaves the client unchanged.
 
 Examples:
 * `tag 1 t/physics t/sec4`
 * `tag 2 t/thursday`
+
+### Removing tags from a client: `untag`
+
+Removes one or more tags from an existing client.
+
+Format: `untag INDEX t/TAG [t/MORE_TAGS]...`
+
+* The index refers to the index number shown in the displayed client list and must be a positive integer.
+* Tag matching is case-insensitive; for example, `t/math` removes an existing `Math` tag.
+* Tags not currently attached to the client are ignored.
+* Other tags remain unchanged.
+* The success message lists only tags that were actually removed. If none of the specified tags exist, Sieve reports that the client does not have any of them and leaves the client unchanged.
+
+Examples:
+* `untag 1 t/Math`
+* `untag 2 t/Physics t/Sec4`
 
 ### Deleting clients: `delete`
 
@@ -245,9 +270,9 @@ Reverts the last change to your client list.
 Format: `undo`
 
 * Changes can be undone one at a time, back to how your client list was when you opened Sieve.
-* Only commands that change your client list can be undone: `add`, `edit`, `delete`, `tag` and `clear`.
+* Only commands that change your client list can be undone: `add`, `edit`, `delete`, `tag`, `untag` and `clear`.
 * Commands that do not change anything, such as `list`, `find` and `help`, are skipped. Commands that fail are also skipped.
-* An `edit` or `tag` that leaves the client exactly as before is also skipped, even though it shows a success message. For example, `edit 1 p/91234567` when client 1's phone number is already `91234567`, or `tag 1 t/physics` when client 1 already has the `physics` tag. An `undo` after it reverts the change before it instead.
+* An `edit`, `tag`, or `untag` that leaves the client exactly as before is also skipped. For example, this happens when the edited value is unchanged, every requested tag already exists, or none of the requested tags exist. An `undo` after it reverts the preceding change instead.
 * After an undo, the full client list is shown, so that the restored client is not hidden by an earlier `find`.
 * The undone change is saved to the data file straight away, like any other change.
 * If there is nothing left to undo, the following error is shown: `Error: There is nothing to undo.`
@@ -325,10 +350,11 @@ Action     | Format, Examples
 **Clear**  | `clear`
 **Delete** | `delete INDEX [, INDEX]...`<br> e.g., `delete 3`, `delete 1, 3, 5`
 **Edit**   | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [nt/NOTE] [t/TAG]... `<br> e.g., `edit 1 p/81112222 e/amirah.tan01@gmail.com`, `edit 2 nt/Exam in March`
-**Filter** | `filter t/TAG [t/MORE_TAGS]...`<br> e.g., `filter t/physics t/sec4`
+**Filter** | `filter [p/PHONE]... [t/TAG]...`<br> e.g., `filter p/92345678 t/sec4`
 **Find**   | `find [KEYWORD]... [p/PHONE]... [t/TAG]...`<br> e.g., `find Amirah O'Brien`, `find t/sec4`, `find p/91234567`
 **List**   | `list`
 **Tag**    | `tag INDEX t/TAG [t/MORE_TAGS]...`<br> e.g., `tag 1 t/physics t/sec4`
+**Untag**  | `untag INDEX t/TAG [t/MORE_TAGS]...`<br> e.g., `untag 1 t/physics`
 **Undo**   | `undo`
 **Redo**   | `redo`
 **Help**   | `help`

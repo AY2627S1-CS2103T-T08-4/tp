@@ -30,6 +30,7 @@ import seedu.address.logic.commands.EditCommand;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.RedoCommand;
 import seedu.address.logic.commands.UndoCommand;
+import seedu.address.logic.commands.UntagCommand;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.Model;
@@ -128,6 +129,18 @@ public class LogicManagerTest {
     }
 
     @Test
+    public void execute_undoAfterUntag_restoresRemovedTag() throws Exception {
+        String addCommand = AddCommand.COMMAND_WORD + NAME_DESC_AMY + PHONE_DESC_AMY
+                + EMAIL_DESC_AMY + ADDRESS_DESC_AMY + " t/friends";
+        logic.execute(addCommand);
+        Model expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
+
+        logic.execute(UntagCommand.COMMAND_WORD + " 1 t/friends");
+
+        assertCommandSuccess(UndoCommand.COMMAND_WORD, UndoCommand.MESSAGE_SUCCESS, expectedModel);
+    }
+
+    @Test
     public void execute_redoAfterUndo_restoresAddedClient() throws Exception {
         logic.execute(AddCommand.COMMAND_WORD + NAME_DESC_AMY + PHONE_DESC_AMY + EMAIL_DESC_AMY + ADDRESS_DESC_AMY);
         ModelManager expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
@@ -170,6 +183,7 @@ public class LogicManagerTest {
         assertThrows(CommandException.class, expectedError, () -> logicInReadOnly.execute("edit 1 n/New Name"));
         assertThrows(CommandException.class, expectedError, () -> logicInReadOnly.execute("clear"));
         assertThrows(CommandException.class, expectedError, () -> logicInReadOnly.execute("tag 1 t/Math"));
+        assertThrows(CommandException.class, expectedError, () -> logicInReadOnly.execute("untag 1 t/Math"));
         assertThrows(CommandException.class, expectedError, () -> logicInReadOnly.execute("undo"));
         assertThrows(CommandException.class, expectedError, () -> logicInReadOnly.execute("redo"));
     }

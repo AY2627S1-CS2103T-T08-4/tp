@@ -28,6 +28,7 @@ import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.RedoCommand;
 import seedu.address.logic.commands.TagCommand;
 import seedu.address.logic.commands.UndoCommand;
+import seedu.address.logic.commands.UntagCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.PersonMatchesSearchPredicate;
@@ -142,6 +143,13 @@ public class AddressBookParserTest {
         TagCommand command = (TagCommand) parser.parseCommand(
                 TagCommand.COMMAND_WORD + " " + INDEX_FIRST_PERSON.getOneBased() + " t/physics");
         assertEquals(new TagCommand(INDEX_FIRST_PERSON, List.of(new Tag("physics"))), command);
+    }
+
+    @Test
+    public void parseCommand_untag() throws Exception {
+        UntagCommand command = (UntagCommand) parser.parseCommand(
+                UntagCommand.COMMAND_WORD + " " + INDEX_FIRST_PERSON.getOneBased() + " t/physics");
+        assertEquals(new UntagCommand(INDEX_FIRST_PERSON, List.of(new Tag("physics"))), command);
     }
 
     @Test

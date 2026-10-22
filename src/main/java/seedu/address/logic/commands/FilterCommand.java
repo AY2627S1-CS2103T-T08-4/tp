@@ -1,6 +1,8 @@
 package seedu.address.logic.commands;
 
 import static java.util.Objects.requireNonNull;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_PHONE;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_TAG;
 
 import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.logic.Messages;
@@ -8,17 +10,18 @@ import seedu.address.model.Model;
 import seedu.address.model.person.PersonMatchesSearchPredicate;
 
 /**
- * Finds and lists all persons whose tags match any specified tag.
- * Tag matching is case-insensitive.
+ * Finds and lists all persons who match the specified phone and tag filters.
+ * Phone numbers are matched exactly, while tag matching is case-insensitive.
  */
 public class FilterCommand extends Command {
 
     public static final String COMMAND_WORD = "filter";
 
-    public static final String MESSAGE_USAGE = COMMAND_WORD + ": Finds all clients who have any of the specified tags "
-            + "(case-insensitive and order-insensitive) and displays them as a list with index numbers.\n"
-            + "Parameters: t/TAG [t/MORE_TAGS]...\n"
-            + "Example: " + COMMAND_WORD + " t/Physics t/Sec4";
+    public static final String MESSAGE_USAGE = COMMAND_WORD
+            + ": Shows all clients who match the specified phone and tag filters "
+            + "and displays them as a list with index numbers.\n"
+            + "Parameters: [" + PREFIX_PHONE + "PHONE]... [" + PREFIX_TAG + "TAG]...\n"
+            + "Example: " + COMMAND_WORD + " " + PREFIX_PHONE + "91234567 " + PREFIX_TAG + "Physics";
 
     private final PersonMatchesSearchPredicate predicate;
 

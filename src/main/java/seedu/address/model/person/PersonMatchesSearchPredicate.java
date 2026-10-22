@@ -12,7 +12,7 @@ import seedu.address.model.tag.Tag;
 
 /**
  * Tests that a {@code Person} matches every search field given: name keywords, phone numbers and tags.
- * Within a field, matching any one value is enough (e.g. any of the phone numbers).
+ * Matching any name keyword or phone number is enough, while every specified tag must match.
  * A field with no values places no restriction on the person.
  */
 public class PersonMatchesSearchPredicate implements Predicate<Person> {
