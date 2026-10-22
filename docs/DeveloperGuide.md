@@ -387,6 +387,65 @@ The history is kept in memory only, so it is lost when the app is closed. In rea
   * Pros: Nothing is ever lost.
   * Cons: Much harder to implement, and users would need a way to choose which branch to redo.
 
+### Command history feature
+
+#### Implementation
+
+The command history lets users bring back earlier commands with the Up and Down keys. It is handled entirely by the `UI` component: `CommandBox` owns a `CommandHistory`, which stores the commands. `Logic` and `Model` are not involved.
+
+`CommandHistory` has no JavaFX code, so it can be unit tested on its own. It keeps two fields:
+
+* `commands`: every command entered in this session, oldest first.
+* `current`: the position of the command shown in the command box. It equals `commands.size()` when no command is being recalled.
+
+It has the following operations:
+
+* `CommandHistory#add(command)`: adds the command to the end of `commands` and sets `current` to `commands.size()`, so the next Up starts from the newest command.
+* `CommandHistory#getPreviousCommand()`: moves `current` back one and returns that command. Returns an empty `Optional` if `current` is already 0.
+* `CommandHistory#getNextCommand()`: moves `current` forward one and returns that command. Returns an empty string when moving past the most recent command, so the command box is cleared, and an empty `Optional` if no command is being recalled.
+
+`CommandBox` uses it in two places:
+
+* `CommandBox#handleCommandEntered()` adds every non-blank command to the history before executing it. This way, a command that fails is kept and can be recalled to fix it.
+* `CommandBox#handleKeyPressed()` handles Up and Down. If the history returns a command, it is put in the text field with the cursor at the end. The key event is then consumed, so the text field does not also move the cursor. Other keys are left to the text field, so the cursor can still be moved within a recalled command.
+
+The following sequence diagram shows what happens when the user presses Up:
+
+<puml src="diagrams/CommandHistorySequenceDiagram.puml" alt="CommandHistorySequenceDiagram" />
+
+The table below shows how `current` changes after the user enters `list` and then `find Amirah`, so `commands` is `[list, find Amirah]` and `current` is 2.
+
+Key pressed | `current` after | Command box shows
+------------|-----------------|------------------
+Up          | 1               | `find Amirah`
+Up          | 0               | `list`
+Up          | 0               | `list` (unchanged, as there is no earlier command)
+Down        | 1               | `find Amirah`
+Down        | 2               | nothing (cleared)
+Down        | 2               | unchanged, so any text the user has typed is kept
+
+#### Design considerations:
+
+**Aspect: Where the history is kept:**
+
+* **Alternative 1 (current choice):** In the `UI` component, owned by `CommandBox`.
+  * Pros: Only the command box needs the history, so the `Logic` API does not change.
+  * Cons: A future command that lists past commands (e.g. `history`) could not reach it without moving it to `Logic`.
+
+* **Alternative 2:** In the `Logic` component, with `LogicManager` recording each command it executes.
+  * Pros: Commands could read the history.
+  * Cons: Adds to the `Logic` API for a feature that only the command box uses.
+
+**Aspect: Which commands are recorded:**
+
+* **Alternative 1 (current choice):** Every non-blank command, including failed commands and repeats.
+  * Pros: A mistyped command can be recalled and fixed, which is the most common reason to recall a command.
+  * Cons: Repeated commands take several presses to go past.
+
+* **Alternative 2:** Only commands that succeed.
+  * Pros: The history is shorter.
+  * Cons: A failed command cannot be recalled, so the user must retype it to fix a typo.
+
 --------------------------------------------------------------------------------------------------------------------
 
 ## **Documentation, logging, testing, dev-ops**
@@ -945,3 +1004,28 @@ Given below are instructions to test the app manually.
 
     1. Test case: `redo`<br>
        Expected: The client list is unchanged. The status message shows `Error: There is nothing to redo.`
+
+### Recalling previous commands
+
+1. Going back and forward through the history
+
+    1. Test case: `list`, then `find Amirah`, then press Up three times<br>
+       Expected: The command box shows `find Amirah`, then `list`, then stays on `list`.
+
+    1. Test case: continuing from above, press Down twice<br>
+       Expected: The command box shows `find Amirah`, then is cleared.
+
+1. Recalling a failed command
+
+    1. Test case: `edit 1 p/123`, then press Up, then use Left to move the cursor and change it to `edit 1 p/91234567`, then press Enter<br>
+       Expected: Up shows `edit 1 p/123` with the cursor at the end. Left moves the cursor normally, and the corrected command succeeds.
+
+1. Keeping typed text
+
+    1. Test case: type `list` without pressing Enter, then press Down<br>
+       Expected: The command box still shows `list`.
+
+1. History after restarting
+
+    1. Test case: enter a few commands, close Sieve, reopen it, then press Up<br>
+       Expected: The command box stays empty.

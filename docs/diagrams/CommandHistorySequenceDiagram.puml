@@ -1,0 +1,38 @@
+@startuml
+!include style.puml
+skinparam ArrowFontStyle plain
+
+Actor User as user USER_COLOR
+
+box UI UI_COLOR_T1
+participant ":CommandBox" as CommandBox UI_COLOR
+participant ":CommandHistory" as CommandHistory UI_COLOR
+participant ":TextField" as TextField UI_COLOR
+end box
+
+user -[USER_COLOR]> CommandBox : press Up
+activate CommandBox
+
+CommandBox -> CommandHistory : getPreviousCommand()
+activate CommandHistory
+
+CommandHistory --> CommandBox : recalledCommand
+deactivate CommandHistory
+
+opt recalledCommand is present
+    CommandBox -> TextField : setText(command)
+    activate TextField
+    TextField --> CommandBox
+    deactivate TextField
+
+    CommandBox -> TextField : end()
+    activate TextField
+    TextField --> CommandBox
+    deactivate TextField
+end
+
+CommandBox -> CommandBox : event.consume()
+
+CommandBox --> user
+deactivate CommandBox
+@enduml
