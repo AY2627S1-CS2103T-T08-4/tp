@@ -93,6 +93,11 @@ public class UntagCommand extends Command {
     }
 
     @Override
+    public boolean isMutating() {
+        return true;
+    }
+
+    @Override
     public boolean equals(Object other) {
         if (other == this) {
             return true;

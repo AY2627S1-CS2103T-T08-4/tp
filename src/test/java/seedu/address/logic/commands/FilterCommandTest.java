@@ -91,6 +91,11 @@ public class FilterCommandTest {
     }
 
     @Test
+    public void isMutating_filterCommand_returnsFalse() {
+        assertFalse(commandWith("friends").isMutating());
+    }
+
+    @Test
     public void toStringMethod() {
         PersonMatchesSearchPredicate predicate = predicateWith("friends");
         FilterCommand command = new FilterCommand(predicate);

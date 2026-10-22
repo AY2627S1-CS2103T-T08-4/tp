@@ -234,6 +234,11 @@ public class DeleteCommandTest {
     }
 
     @Test
+    public void isMutating_deleteCommand_returnsTrue() {
+        assertTrue(new DeleteCommand(INDEX_FIRST_PERSON).isMutating());
+    }
+
+    @Test
     public void toStringMethod() {
         DeleteCommand deleteCommand = new DeleteCommand(
                 INDEX_FIRST_PERSON,

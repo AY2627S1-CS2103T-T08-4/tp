@@ -105,6 +105,11 @@ public class FindCommandTest {
     }
 
     @Test
+    public void isMutating_findCommand_returnsFalse() {
+        assertFalse(new FindCommand(preparePredicate("keyword")).isMutating());
+    }
+
+    @Test
     public void toStringMethod() {
         NameContainsKeywordsPredicate predicate = new NameContainsKeywordsPredicate(List.of("keyword"));
         FindCommand findCommand = new FindCommand(predicate);

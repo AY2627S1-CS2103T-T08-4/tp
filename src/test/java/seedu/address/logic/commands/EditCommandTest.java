@@ -200,6 +200,11 @@ public class EditCommandTest {
     }
 
     @Test
+    public void isMutating_editCommand_returnsTrue() {
+        assertTrue(new EditCommand(INDEX_FIRST_PERSON, new EditPersonDescriptor()).isMutating());
+    }
+
+    @Test
     public void toStringMethod() {
         Index index = Index.fromOneBased(1);
         EditPersonDescriptor editPersonDescriptor = new EditPersonDescriptor();

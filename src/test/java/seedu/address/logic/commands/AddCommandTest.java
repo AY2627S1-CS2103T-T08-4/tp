@@ -92,6 +92,11 @@ public class AddCommandTest {
     }
 
     @Test
+    public void isMutating_addCommand_returnsTrue() {
+        assertTrue(new AddCommand(new PersonBuilder().build()).isMutating());
+    }
+
+    @Test
     public void toStringMethod() {
         AddCommand addCommand = new AddCommand(ALICE);
         String expected = AddCommand.class.getCanonicalName() + "{toAdd=" + ALICE + "}";

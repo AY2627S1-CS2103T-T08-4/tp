@@ -180,6 +180,7 @@ public class LogicManagerTest {
         assertThrows(CommandException.class, expectedError, () -> logicInReadOnly.execute(
             "add n/Amirah Tan p/91234567 e/amirah@gmail.com a/Blk 123 Yishun"));
         assertThrows(CommandException.class, expectedError, () -> logicInReadOnly.execute("delete 1"));
+        assertThrows(CommandException.class, expectedError, () -> logicInReadOnly.execute("delete 1, 2"));
         assertThrows(CommandException.class, expectedError, () -> logicInReadOnly.execute("edit 1 n/New Name"));
         assertThrows(CommandException.class, expectedError, () -> logicInReadOnly.execute("clear"));
         assertThrows(CommandException.class, expectedError, () -> logicInReadOnly.execute("tag 1 t/Math"));
@@ -221,6 +222,13 @@ public class LogicManagerTest {
         assertArrayEquals(initialBytes, postExecutionBytes, "The corrupted file was mutated on disk!");
     }
 
+    @Test
+    public void execute_malformedMutatingCommandInReadOnlyMode_throwsParseException() {
+        Logic logicInReadOnly = new LogicManager(model, storage, true);
+
+        assertThrows(ParseException.class, () -> logicInReadOnly.execute("add n/John"));
+    }
+
     /**
      * Helper method to generate an isolated, simulated file corruption StorageManager.
      */
@@ -256,7 +264,8 @@ public class LogicManagerTest {
     @Test
     public void constructor_readOnlyExplicitInitialization_setsReadOnlyMode() {
         LogicManager logicManager = new LogicManager(model, storage, true);
-        assertThrows(CommandException.class, () -> logicManager.execute("add n/John"));
+        assertThrows(CommandException.class, () -> logicManager.execute(
+            AddCommand.COMMAND_WORD + NAME_DESC_AMY + PHONE_DESC_AMY + EMAIL_DESC_AMY + ADDRESS_DESC_AMY));
     }
 
     /**

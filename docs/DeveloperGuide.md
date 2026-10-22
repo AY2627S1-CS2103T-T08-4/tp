@@ -162,10 +162,12 @@ How the `Logic` component works:
    interactions between the command object and the `Model` to complete the operation.
 1. The result of the command execution is encapsulated as a `CommandResult` object which is returned from `Logic`.
 1. **Read-only mode block:** If a `DataLoadingException` occurs during file parsing, `LogicManager` activates its
-   internal `isReadOnlyMode` flag. When this flag is true, `LogicManager#execute()` intercepts any incoming
-   data-mutating commands (such as `add`, `delete`, `edit`, `clear`, `tag`, or `untag`) before parsing them, immediately throwing
-   a `CommandException` to protect the hard disk storage files from being accidentally overwritten. Non-mutating
-   commands like `list` and `help` remain fully operational. Here are the other classes in `Logic` (omitted from the
+   internal `isReadOnlyMode` flag. When this flag is true, `LogicManager#execute()` parses the command and then checks
+   `Command#isMutating()`. A command that changes data (such as `add`, `delete`, `edit`, `clear`, `tag`, `untag`,
+   `undo` or `redo`) is rejected with a `CommandException` before it runs, to protect the data file from being
+   overwritten, while a malformed command still shows its usual parse error. Non-mutating commands like `list`, `find`
+   and `help` remain fully operational. Every command that changes data must override `Command#isMutating()` to
+   return `true`. Here are the other classes in `Logic` (omitted from the
    class diagram above) that are used for parsing a user command:
 
 <puml src="diagrams/ParserClasses.puml" width="600"/>
@@ -835,6 +837,66 @@ Given below are instructions to test the app manually.
 
     1. Relaunch the app by double-clicking the JAR file.<br>
        Expected: The most recent window size and location are retained.
+
+### Handling data files
+
+Run these cases from a scratch folder (copy the JAR into an empty folder) so that your real data is not changed.
+The data file is `data/sieve.json` inside that folder.
+
+1. Missing data file
+
+    1. Prerequisites: Delete `data/sieve.json` if it exists. Launch the app.<br>
+       Expected: The GUI opens with the sample clients. No popup is shown.
+
+    1. Test case: `delete 1`<br>
+       Expected: The first client is deleted, and `data/sieve.json` is created.
+
+1. Malformed data file
+
+    1. Prerequisites: Close the app. Replace the contents of `data/sieve.json` with `{ invalid`. Note the file's
+       checksum (for example, `Get-FileHash data\sieve.json` in Windows PowerShell, or `shasum -a 256 data/sieve.json`
+       on macOS and Linux). Launch the app.<br>
+       Expected: A warning popup titled `Data File Corruption Error` appears. Its header is
+       `Local data file is corrupted.` and its message is `Displaying empty list. Please fix or delete the data file at
+       PATH and restart.`, where `PATH` is the location of the data file. After you click OK, the client list is empty.
+
+    1. Test case: Enter each of these commands, one at a time:
+       `add n/Amirah Tan p/91234567 e/amirah@gmail.com a/Blk 123 Yishun`, `edit 1 n/New Name`, `delete 1`,
+       `delete 1, 2`, `clear`, `tag 1 t/Math`, `untag 1 t/Math`, `undo`, `redo`.<br>
+       Expected: Every command is rejected with `Error: Local data file is corrupted at PATH. Displaying
+       empty list. Please fix or delete the data file and restart.`, where `PATH` is the location of the data file
+       (for example `data\sieve.json` on Windows, or `data/sieve.json` on macOS and Linux). The client list stays
+       empty.
+
+    1. Test case: `add n/John`<br>
+       Expected: The usual `Invalid command format!` error for `add` is shown, because a command is parsed before
+       the read-only check.
+
+    1. Test case: `list`, then `find amirah`, then `help`<br>
+       Expected: Each command works as normal. `find amirah` lists no clients because the list is empty.
+
+    1. Close the app and compare the file's checksum with the one you noted.<br>
+       Expected: The checksums are identical, so the data file was not overwritten.
+
+1. Valid JSON with invalid values
+
+    1. Prerequisites: Start from a valid data file (for example, run the missing-file case above, then close the
+       app). Change the phone number of one client in `data/sieve.json` to `abc`. Note the file's checksum. Launch
+       the app.<br>
+       Expected: The same popup as for a malformed file appears, and the client list is empty.
+
+    1. Test case: Repeat the command, `add n/John`, `list`/`find`/`help` and checksum steps from the malformed
+       data file case.<br>
+       Expected: The same results as for a malformed file.
+
+1. Recovering from a corrupted data file
+
+    1. Prerequisites: Close the app after one of the corrupted cases above.
+
+    1. Test case: Fix the invalid value in `data/sieve.json`, or delete the file. Relaunch the app, then enter
+       `delete 1`.<br>
+       Expected: The app opens without a popup and shows its clients. Commands that change data work again, and
+       the change is saved to `data/sieve.json`.
 
 ### Finding clients
 
