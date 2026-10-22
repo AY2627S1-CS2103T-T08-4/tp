@@ -854,16 +854,19 @@ The data file is `data/sieve.json` inside that folder.
 1. Malformed data file
 
     1. Prerequisites: Close the app. Replace the contents of `data/sieve.json` with `{ invalid`. Note the file's
-       checksum (for example, `Get-FileHash data\sieve.json` in Windows PowerShell). Launch the app.<br>
+       checksum (for example, `Get-FileHash data\sieve.json` in Windows PowerShell, or `shasum -a 256 data/sieve.json`
+       on macOS and Linux). Launch the app.<br>
        Expected: A warning popup titled `Data File Corruption Error` appears. Its header is
        `Local data file is corrupted.` and its message is `Displaying empty list. Please fix or delete the data file at
        PATH and restart.`, where `PATH` is the location of the data file. After you click OK, the client list is empty.
 
     1. Test case: Enter each of these commands, one at a time:
        `add n/Amirah Tan p/91234567 e/amirah@gmail.com a/Blk 123 Yishun`, `edit 1 n/New Name`, `delete 1`,
-       `delete 1, 2`, `clear`, `tag 1 t/Math`, `undo`, `redo`.<br>
-       Expected: Every command is rejected with `Error: Local data file is corrupted at data\sieve.json. Displaying
-       empty list. Please fix or delete the data file and restart.` The client list stays empty.
+       `delete 1, 2`, `clear`, `tag 1 t/Math`, `untag 1 t/Math`, `undo`, `redo`.<br>
+       Expected: Every command is rejected with `Error: Local data file is corrupted at PATH. Displaying
+       empty list. Please fix or delete the data file and restart.`, where `PATH` is the location of the data file
+       (for example `data\sieve.json` on Windows, or `data/sieve.json` on macOS and Linux). The client list stays
+       empty.
 
     1. Test case: `add n/John`<br>
        Expected: The usual `Invalid command format!` error for `add` is shown, because a command is parsed before
