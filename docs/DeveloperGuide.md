@@ -286,6 +286,36 @@ If no client matches, `FindCommand` returns `FindCommand.MESSAGE_NO_CLIENTS_FOUN
 
 Both commands replace the selected immutable `Person` with a copy containing an updated tag set. `TagCommand` adds only tags the client does not already have, while `UntagCommand` removes only tags the client currently has. Tag equality is case-insensitive. Confirmation messages list only tags that were actually added or removed; when no change is needed, the commands leave the model unchanged and return a specific no-change message.
 
+### Notes feature
+
+`Note` is a free-text field for details about a client that do not fit a tag, such as a student's exam date or a parent's preferred contact time. It is an immutable class in `seedu.address.model.person`, is held by `Person`, is set through the `add` and `edit` commands with the `nt/` prefix, and is optional.
+
+**Model.** `Person` holds a `Note` next to its `Address`. An empty note (`Note.EMPTY`) means "not set", so `Person` never holds `null`. `Note` accepts up to 200 characters (`Note.MAX_LENGTH`). `Note#normalizeNote` trims the input and collapses repeated spaces before it is validated.
+
+**Parsing.** `ParserUtil#parseNote` normalizes and validates the input, and an empty input gives `Note.EMPTY`.
+
+* `AddCommandParser` uses `Note.EMPTY` when `nt/` is missing.
+* `EditCommandParser` sets the note in the `EditPersonDescriptor` only when `nt/` is present. A bare `nt/` sets `Note.EMPTY`, which clears the note, while a missing prefix leaves the note unchanged.
+* Repeating `nt/` is rejected with `verifyNoDuplicatePrefixesFor`.
+
+**Storage.** `JsonAdaptedPerson` stores the note as a string. `toModelType()` treats a missing (`null`) note as empty, so data files saved before notes existed still load and do not trigger the read-only fallback mode. A note that is present but longer than 200 characters throws an `IllegalValueException`.
+
+**UI.** `PersonCard` shows the note and hides the note line (`setVisible(false)` and `setManaged(false)`) when the note is empty, so it takes up no space.
+
+No command was added, so nothing new needs `isMutating()`. `add` and `edit` already override it.
+
+#### Design considerations:
+
+**Aspect: Representing "no note"**
+
+* **Alternative 1 (current choice):** A `Note.EMPTY` constant holding an empty string.
+    * Pros: `Person` never holds `null`, so callers need no null checks, and `edit 1 nt/` clearing the note falls out naturally.
+    * Cons: Callers must use `isEmpty()` to tell whether a note is set.
+
+* **Alternative 2:** `Optional<Note>` on `Person`.
+    * Pros: Makes "not set" explicit in the type.
+    * Cons: Every caller, the storage layer and the UI must unwrap it, for a field that has no behaviour of its own.
+
 ### Fee and due date 
 
 `Fee` and `DueDate` record what a client pays and when their next payment is due. They follow the same pattern as `Note`: each is an immutable class in `seedu.address.model.person`, is held by `Person`, is set through the `add` and `edit` commands, and is optional.
