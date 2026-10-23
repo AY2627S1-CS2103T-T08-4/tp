@@ -167,8 +167,11 @@ How the `Logic` component works:
    `undo` or `redo`) is rejected with a `CommandException` before it runs, to protect the data file from being
    overwritten, while a malformed command still shows its usual parse error. Non-mutating commands like `list`, `find`
    and `help` remain fully operational. Every command that changes data must override `Command#isMutating()` to
-   return `true`. Here are the other classes in `Logic` (omitted from the
-   class diagram above) that are used for parsing a user command:
+   return `true`. The activity diagram below shows how `LogicManager` handles a parsed command in read-only mode.
+
+<puml src="diagrams/ReadOnlyActivityDiagram.puml" width="300" />
+
+Here are the other classes in `Logic` (omitted from the class diagram above) that are used for parsing a user command:
 
 <puml src="diagrams/ParserClasses.puml" width="600"/>
 
