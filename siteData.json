@@ -54,6 +54,7 @@
         "find-feature": "Find feature",
         "filter-feature": "Filter feature",
         "tag-and-untag-features": "Tag and untag features",
+        "notes-feature": "Notes feature",
         "fee-and-due-date": "Fee and due date",
         "undo-redo-feature": "Undo/redo feature",
         "command-history-feature": "Command history feature",
