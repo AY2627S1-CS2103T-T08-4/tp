@@ -1,0 +1,83 @@
+@startuml
+!include style.puml
+skinparam ArrowFontStyle plain
+
+box Logic LOGIC_COLOR_T1
+participant ":LogicManager" as LogicManager LOGIC_COLOR
+participant ":AddressBookParser" as AddressBookParser LOGIC_COLOR
+participant ":UntagCommandParser" as UntagCommandParser LOGIC_COLOR
+participant "ArgumentTokenizer" as ArgumentTokenizer LOGIC_COLOR
+participant "ParserUtil" as ParserUtil LOGIC_COLOR
+participant "u:UntagCommand" as UntagCommand LOGIC_COLOR
+participant "r:CommandResult" as CommandResult LOGIC_COLOR
+end box
+
+box Model MODEL_COLOR_T1
+participant "m:Model" as Model MODEL_COLOR
+end box
+
+[-> LogicManager : execute("untag 1 t/Physics")
+activate LogicManager
+
+LogicManager -> AddressBookParser : parseCommand("untag 1 t/Physics")
+activate AddressBookParser
+
+create UntagCommandParser
+AddressBookParser -> UntagCommandParser
+activate UntagCommandParser
+UntagCommandParser --> AddressBookParser
+deactivate UntagCommandParser
+
+AddressBookParser -> UntagCommandParser : parse("1 t/Physics")
+activate UntagCommandParser
+UntagCommandParser -> ArgumentTokenizer : tokenize(args, PREFIX_TAG)
+activate ArgumentTokenizer
+ArgumentTokenizer --> UntagCommandParser : index and tag values
+deactivate ArgumentTokenizer
+UntagCommandParser -> ParserUtil : parseIndex(preamble)
+activate ParserUtil
+ParserUtil --> UntagCommandParser : index
+deactivate ParserUtil
+
+loop for each tag value
+    UntagCommandParser -> ParserUtil : parseTag(tagValue)
+    activate ParserUtil
+    ParserUtil --> UntagCommandParser : Tag
+    deactivate ParserUtil
+end
+
+create UntagCommand
+UntagCommandParser -> UntagCommand : create(index, tags)
+activate UntagCommand
+UntagCommandParser --> AddressBookParser : u
+deactivate UntagCommandParser
+AddressBookParser --> LogicManager : u
+deactivate AddressBookParser
+
+LogicManager -> UntagCommand : execute(m)
+activate UntagCommand
+UntagCommand -> Model : getFilteredPersonList()
+activate Model
+Model --> UntagCommand : displayed clients
+deactivate Model
+UntagCommand -> UntagCommand : find requested tags that exist
+alt at least one existing tag
+    UntagCommand -> Model : setPerson(personToUntag, untaggedPerson)
+    activate Model
+    Model --> UntagCommand
+    deactivate Model
+else none of the requested tags exist
+    note right of UntagCommand: Leave the model unchanged
+end
+
+create CommandResult
+UntagCommand -> CommandResult : create(success or no-change message)
+activate CommandResult
+CommandResult --> UntagCommand
+deactivate CommandResult
+UntagCommand --> LogicManager : r
+deactivate UntagCommand
+
+[<--LogicManager
+deactivate LogicManager
+@enduml

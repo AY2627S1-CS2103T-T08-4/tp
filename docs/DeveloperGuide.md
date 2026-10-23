@@ -280,11 +280,21 @@ If no client matches, `FindCommand` returns `FindCommand.MESSAGE_NO_CLIENTS_FOUN
 
 `FilterCommandParser` builds a `PersonMatchesSearchPredicate` without name keywords. Any supplied phone number may match, all supplied tags must match, and supplying both fields requires both conditions to match.
 
+The following sequence diagram shows how `filter` parses its phone and tag criteria, creates a predicate, and updates the model's filtered list.
+
+<puml src="diagrams/FilterSequenceDiagram.puml" alt="Interactions Inside the Logic and Model Components for the filter command" />
+
 ### Tag and untag features
 
 `TagCommandParser` and `UntagCommandParser` parse the displayed client index and one or more `t/` values using `ParserUtil.parseIndex` and `ParserUtil.parseTag`. Their command constructors remove duplicate requested tags while preserving input order.
 
 Both commands replace the selected immutable `Person` with a copy containing an updated tag set. `TagCommand` adds only tags the client does not already have, while `UntagCommand` removes only tags the client currently has. Tag equality is case-insensitive. Confirmation messages list only tags that were actually added or removed; when no change is needed, the commands leave the model unchanged and return a specific no-change message.
+
+The following sequence diagrams show the parsing and execution flow for the two commands:
+
+<puml src="diagrams/TagSequenceDiagram.puml" alt="Interactions Inside the Logic and Model Components for the tag command" />
+
+<puml src="diagrams/UntagSequenceDiagram.puml" alt="Interactions Inside the Logic and Model Components for the untag command" />
 
 ### Fee and due date 
 
