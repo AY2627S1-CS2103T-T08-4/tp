@@ -113,7 +113,10 @@ A few parts of the main window are worth knowing about when changing them:
 
 * **Command results.** `MainWindow` shows the result of a command with `ResultDisplay#setFeedbackToUser(String)`, or
   with `ResultDisplay#setErrorToUser(String)` if the command failed. `ResultDisplay` turns its `:error` pseudo-class on
-  or off to match, and `LightTheme.css` uses it to show a green tick or a red cross and red text. The icons are empty
+  or off to match, and `LightTheme.css` uses it to show a green tick or a red cross and red text. When `find` or
+  `filter` matches no clients, the command returns `CommandResult#forEmptySearch(String)`, and `MainWindow` calls
+  `ResultDisplay#setEmptySearchToUser(String)` instead, which turns on the `:empty-search` pseudo-class to show a grey
+  "i". A search that finds nothing has still run correctly, so it is neither a success nor an error. The icons are empty
   `Region`s shaped with `-fx-shape`, so no image files are needed. The result line is hidden until the first command.
 
 * **Tag colours.** `PersonCard` gives each tag a style class from `TagColor`, from `tag-color-0` to `tag-color-11`.

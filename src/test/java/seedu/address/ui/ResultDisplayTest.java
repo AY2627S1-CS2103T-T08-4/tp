@@ -21,8 +21,10 @@ import javafx.stage.Stage;
 public class ResultDisplayTest {
 
     private static final PseudoClass ERROR_PSEUDO_CLASS = PseudoClass.getPseudoClass("error");
+    private static final PseudoClass EMPTY_SEARCH_PSEUDO_CLASS = PseudoClass.getPseudoClass("empty-search");
     private static final String SUCCESS_MESSAGE = "Listed all clients.";
     private static final String ERROR_MESSAGE = "Invalid command format!";
+    private static final String EMPTY_SEARCH_MESSAGE = "No clients found.";
 
     private ResultDisplay resultDisplay;
     private Region root;
@@ -72,12 +74,36 @@ public class ResultDisplayTest {
     }
 
     @Test
+    public void setEmptySearchToUser_message_shownAsEmptySearch(FxRobot robot) {
+        robot.interact(() -> resultDisplay.setErrorToUser(ERROR_MESSAGE));
+        robot.interact(() -> resultDisplay.setEmptySearchToUser(EMPTY_SEARCH_MESSAGE));
+
+        assertEquals(EMPTY_SEARCH_MESSAGE, resultMessage.getText());
+        assertTrue(root.isVisible());
+        assertTrue(isShownAsEmptySearch());
+        assertFalse(isShownAsError());
+    }
+
+    @Test
+    public void setFeedbackToUser_afterEmptySearch_noLongerShownAsEmptySearch(FxRobot robot) {
+        robot.interact(() -> resultDisplay.setEmptySearchToUser(EMPTY_SEARCH_MESSAGE));
+        robot.interact(() -> resultDisplay.setFeedbackToUser(SUCCESS_MESSAGE));
+
+        assertFalse(isShownAsEmptySearch());
+    }
+
+    @Test
     public void setMessage_null_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> resultDisplay.setFeedbackToUser(null));
+        assertThrows(NullPointerException.class, () -> resultDisplay.setEmptySearchToUser(null));
         assertThrows(NullPointerException.class, () -> resultDisplay.setErrorToUser(null));
     }
 
     private boolean isShownAsError() {
         return root.getPseudoClassStates().contains(ERROR_PSEUDO_CLASS);
+    }
+
+    private boolean isShownAsEmptySearch() {
+        return root.getPseudoClassStates().contains(EMPTY_SEARCH_PSEUDO_CLASS);
     }
 }

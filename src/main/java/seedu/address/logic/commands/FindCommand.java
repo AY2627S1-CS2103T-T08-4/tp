@@ -43,7 +43,7 @@ public class FindCommand extends Command {
         model.updateFilteredPersonList(predicate);
         int matchCount = model.getFilteredPersonList().size();
         if (matchCount == 0) {
-            return new CommandResult(MESSAGE_NO_CLIENTS_FOUND);
+            return CommandResult.forEmptySearch(MESSAGE_NO_CLIENTS_FOUND);
         }
         return new CommandResult(Messages.getPersonsListedOverviewMessage(matchCount));
     }
