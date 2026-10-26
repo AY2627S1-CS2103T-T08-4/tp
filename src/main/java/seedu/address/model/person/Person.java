@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.model.tag.Tag;
@@ -109,6 +110,8 @@ public class Person {
     /**
      * Returns true if both persons have the same identity and data fields.
      * This defines a stronger notion of equality between two persons.
+     * Tag names are compared exactly, so a change from {@code Math} to {@code MATH} makes the persons different,
+     * even though {@link Tag#equals(Object)} treats the two tags as duplicates.
      */
     @Override
     public boolean equals(Object other) {
@@ -128,7 +131,13 @@ public class Person {
             && note.equals(otherPerson.note)
             && fee.equals(otherPerson.fee)
             && dueDate.equals(otherPerson.dueDate)
-            && tags.equals(otherPerson.tags);
+            && getTagNames().equals(otherPerson.getTagNames());
+    }
+
+    private Set<String> getTagNames() {
+        return tags.stream()
+                .map(tag -> tag.tagName)
+                .collect(Collectors.toSet());
     }
 
     @Override

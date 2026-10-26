@@ -4,14 +4,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.testutil.TypicalPersons.ALICE;
+import static seedu.address.testutil.TypicalPersons.BENSON;
 import static seedu.address.testutil.TypicalPersons.BOB;
 import static seedu.address.testutil.TypicalPersons.getTypicalAddressBook;
 
 import org.junit.jupiter.api.Test;
 
+import seedu.address.model.person.Person;
+import seedu.address.testutil.PersonBuilder;
+
 public class VersionedAddressBookTest {
 
     private final VersionedAddressBook versionedAddressBook = new VersionedAddressBook(getTypicalAddressBook());
+    private final Person aliceWithUpperCaseTag = new PersonBuilder(ALICE).withTags("FRIENDS").build();
 
     @Test
     public void constructor_nothingToUndoOrRedo() {
@@ -59,6 +64,35 @@ public class VersionedAddressBookTest {
         versionedAddressBook.undoAddressBook();
         assertEquals(getTypicalAddressBook(), versionedAddressBook);
         assertFalse(versionedAddressBook.canUndoAddressBook());
+    }
+
+    @Test
+    public void commitAddressBook_tagCaseOnlyChange_canUndo() {
+        versionedAddressBook.setPerson(ALICE, aliceWithUpperCaseTag);
+        versionedAddressBook.commitAddressBook();
+        assertTrue(versionedAddressBook.canUndoAddressBook());
+
+        versionedAddressBook.undoAddressBook();
+        assertEquals(getTypicalAddressBook(), versionedAddressBook);
+    }
+
+    @Test
+    public void undoAddressBook_tagCaseOnlyChangeAfterDelete_undoesOneAtATime() {
+        versionedAddressBook.removePerson(BENSON);
+        versionedAddressBook.commitAddressBook();
+        AddressBook withoutBenson = new AddressBook(versionedAddressBook);
+        versionedAddressBook.setPerson(ALICE, aliceWithUpperCaseTag);
+        versionedAddressBook.commitAddressBook();
+        AddressBook withUpperCaseTag = new AddressBook(versionedAddressBook);
+
+        // The first undo reverts only the tag case change, so Benson stays deleted
+        versionedAddressBook.undoAddressBook();
+        assertEquals(withoutBenson, versionedAddressBook);
+        assertTrue(versionedAddressBook.canUndoAddressBook());
+
+        // The tag case change is not lost, and can be redone
+        versionedAddressBook.redoAddressBook();
+        assertEquals(withUpperCaseTag, versionedAddressBook);
     }
 
     @Test
