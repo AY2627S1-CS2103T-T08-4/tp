@@ -10,8 +10,9 @@ import static seedu.address.commons.util.AppUtil.checkArgument;
 public class Phone {
 
     public static final String MESSAGE_CONSTRAINTS =
-            "Invalid Phone Number! Enter 8 digits (e.g. 91234567).";
-    public static final String VALIDATION_REGEX = "\\d{8}";
+            "Invalid Phone Number! Enter an 8-digit Singapore number starting with 3, 6, 8 or 9 (e.g. 91234567).";
+    // Singapore numbers start with 3 (VoIP), 6 (landline), 8 or 9 (mobile)
+    public static final String VALIDATION_REGEX = "[3689]\\d{7}";
 
     // Formatting characters users commonly type in phone numbers, e.g. "9123 4567" or "(9123)-4567".
     public static final String FORMATTING_CHARACTERS_REGEX = "[\\s\\-()]";
