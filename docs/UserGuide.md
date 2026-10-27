@@ -61,6 +61,9 @@ Sieve is a **desktop app that helps self-employed private tuition teachers keep 
 * Parameters can be in any order.<br>
   For example, if the command specifies `n/NAME p/PHONE_NUMBER`, `p/PHONE_NUMBER n/NAME` is also acceptable.
 
+* In `add` and `edit`, a word that looks like a prefix but is not one, such as `z/` in `a/Blk 1 z/x`, is rejected as an unknown prefix, so that a mistyped prefix is not saved as part of a detail.<br>
+  This applies to every parameter except the note, so a note such as `nt/Meet w/ parent` is fine. In an address, write `c/o` as `care of`.
+
 * Extraneous parameters for commands that take no parameters, such as `help`, `list`, `exit`, `clear`, `undo` and `redo`, are ignored.<br>
   For example, `help 123` is interpreted as `help`.
 

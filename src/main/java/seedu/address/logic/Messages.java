@@ -17,6 +17,8 @@ public class Messages {
     public static final String MESSAGE_DUPLICATE_FIELDS =
                 "Multiple values specified for the following single-valued field(s): ";
 
+    private static final String MESSAGE_UNKNOWN_PREFIX =
+            "Unknown prefix %1$s. Check it for a typo, or type help to see the prefixes each command accepts.";
     private static final String MESSAGE_INDEX_OUT_OF_BOUNDS =
             "Error: The index provided is out of bounds! Current list only contains %1$s.";
     private static final String MESSAGE_PERSONS_LISTED_OVERVIEW = "%1$s found matching your search term(s).";
@@ -26,6 +28,14 @@ public class Messages {
             "A client named %1$s already exists in Sieve, with the phone number %2$s. "
                     + "Check that the name and phone numbers are correct. "
                     + "If this is a different client, add a detail to tell them apart, e.g. \"%1$s (NHHS)\".";
+
+    /**
+     * Returns an error message for {@code unknownPrefix}, a word such as {@code z/} that looks like a prefix
+     * but is not one.
+     */
+    public static String getErrorMessageForUnknownPrefix(String unknownPrefix) {
+        return String.format(MESSAGE_UNKNOWN_PREFIX, unknownPrefix);
+    }
 
     /**
      * Returns {@code count} followed by "client" or "clients", e.g. "0 clients", "1 client" or "3 clients".
