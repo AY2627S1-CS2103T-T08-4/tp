@@ -15,6 +15,7 @@ import org.testfx.framework.junit5.Start;
 import javafx.css.PseudoClass;
 import javafx.event.ActionEvent;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
@@ -61,6 +62,27 @@ public class MainWindowTest {
 
         assertTrue(getResultMessage().getText().startsWith("Invalid command format!"));
         assertTrue(getResultDisplay().getPseudoClassStates().contains(ERROR_PSEUDO_CLASS));
+    }
+
+    @Test
+    public void toggleTheme_switchesBetweenDarkAndLightThemes(FxRobot robot) {
+        Button themeToggleButton = (Button) stage.getScene().lookup("#themeToggleButton");
+
+        assertTrue(stage.getScene().getStylesheets().stream()
+                .noneMatch(stylesheet -> stylesheet.endsWith("DarkTheme.css")));
+        assertTrue(themeToggleButton.getText().equals("Dark theme"));
+
+        robot.interact(themeToggleButton::fire);
+
+        assertTrue(stage.getScene().getStylesheets().stream()
+                .anyMatch(stylesheet -> stylesheet.endsWith("DarkTheme.css")));
+        assertTrue(themeToggleButton.getText().equals("Light theme"));
+
+        robot.interact(themeToggleButton::fire);
+
+        assertTrue(stage.getScene().getStylesheets().stream()
+                .noneMatch(stylesheet -> stylesheet.endsWith("DarkTheme.css")));
+        assertTrue(themeToggleButton.getText().equals("Dark theme"));
     }
 
     /**
