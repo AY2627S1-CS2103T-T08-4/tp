@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static seedu.address.testutil.Assert.assertThrows;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
@@ -68,6 +69,24 @@ public class JsonUserPrefsStorageTest {
         UserPrefs actual = readUserPrefs("ExtraValuesUserPref.json").get();
 
         assertEquals(expected, actual);
+    }
+
+    @Test
+    public void readUserPrefs_nullGuiSettings_throwsDataLoadingException() throws IOException {
+        Path prefsFilePath = testFolder.resolve("NullGuiSettings.json");
+        Files.writeString(prefsFilePath, "{\"guiSettings\":null}");
+
+        JsonUserPrefsStorage storage = new JsonUserPrefsStorage(prefsFilePath);
+        assertThrows(DataLoadingException.class, storage::readUserPrefs);
+    }
+
+    @Test
+    public void readUserPrefs_topLevelNull_throwsDataLoadingException() throws IOException {
+        Path prefsFilePath = testFolder.resolve("TopLevelNull.json");
+        Files.writeString(prefsFilePath, "null");
+
+        JsonUserPrefsStorage storage = new JsonUserPrefsStorage(prefsFilePath);
+        assertThrows(DataLoadingException.class, storage::readUserPrefs);
     }
 
     private UserPrefs getTypicalUserPrefs() {
