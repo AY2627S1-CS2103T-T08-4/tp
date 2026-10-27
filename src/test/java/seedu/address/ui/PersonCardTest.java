@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.testfx.api.FxRobot;
 import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 
@@ -15,20 +16,27 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import seedu.address.testutil.PersonBuilder;
 
 @ExtendWith(ApplicationExtension.class)
 public class PersonCardTest {
 
+    private static final String LONG_EMAIL = "a".repeat(110) + "@example.com";
+
+    private Stage stage;
     private PersonCard taggedCard;
     private PersonCard untaggedCard;
+    private PersonCard longEmailCard;
 
     @Start
     public void start(Stage stage) {
+        this.stage = stage;
         taggedCard = new PersonCard(new PersonBuilder().withTags("math", "Sec4", "english", "Zoology").build(), 1);
         untaggedCard = new PersonCard(new PersonBuilder().withTags().build(), 2);
-        stage.setScene(new Scene(new VBox(taggedCard.getRoot(), untaggedCard.getRoot())));
+        longEmailCard = new PersonCard(new PersonBuilder().withEmail(LONG_EMAIL).build(), 3);
+        stage.setScene(new Scene(new VBox(taggedCard.getRoot(), untaggedCard.getRoot(), longEmailCard.getRoot())));
         stage.show();
     }
 
@@ -53,6 +61,22 @@ public class PersonCardTest {
         FlowPane tags = getTags(untaggedCard);
         assertFalse(tags.isVisible());
         assertFalse(tags.isManaged());
+    }
+
+    @Test
+    public void constructor_longEmail_phoneAndFullEmailShown(FxRobot robot) {
+        Label phone = (Label) longEmailCard.getRoot().lookup("#phone");
+        Label email = (Label) longEmailCard.getRoot().lookup("#email");
+        for (double width : new double[] {450, 800}) {
+            // Tall enough for all the cards, so that none is squeezed, as the client list would scroll instead
+            robot.interact(() -> stage.setWidth(width));
+            robot.interact(() -> stage.setHeight(1000));
+
+            double phoneRightEdge = phone.localToScene(phone.getBoundsInLocal()).getMaxX();
+            assertTrue(phoneRightEdge <= stage.getScene().getWidth(), "phone cut off at width " + width);
+            // A label that runs out of room shows a shortened copy of its text, ending in "..."
+            assertEquals(LONG_EMAIL, ((Text) email.lookup(".text")).getText(), "email shortened at width " + width);
+        }
     }
 
     private FlowPane getTags(PersonCard card) {
