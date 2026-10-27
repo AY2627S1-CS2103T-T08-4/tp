@@ -189,6 +189,16 @@
     -fx-background-color: -sieve-window;
 }
 
+.top-bar {
+    -fx-background-color: -sieve-window;
+    -fx-padding: 0 8 0 0;
+}
+
+.theme-toggle-button {
+    -fx-padding: 4 12 4 12;
+    -fx-font-size: 10pt;
+}
+
 .menu-bar .label {
     -fx-font-size: 14pt;
     -fx-text-fill: -sieve-text;

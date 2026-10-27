@@ -45,4 +45,24 @@ public class HelpWindowTest {
 
         assertFalse(helpWindow.getRoot().isIconified());
     }
+
+    @Test
+    public void setDarkTheme_enableTwiceThenDisable_updatesStylesheetWithoutDuplicates() throws Exception {
+        assertEquals(0, getDarkThemeStylesheetCount());
+
+        FxToolkit.setupFixture(() -> helpWindow.setDarkTheme(true));
+        assertEquals(1, getDarkThemeStylesheetCount());
+
+        FxToolkit.setupFixture(() -> helpWindow.setDarkTheme(true));
+        assertEquals(1, getDarkThemeStylesheetCount());
+
+        FxToolkit.setupFixture(() -> helpWindow.setDarkTheme(false));
+        assertEquals(0, getDarkThemeStylesheetCount());
+    }
+
+    private long getDarkThemeStylesheetCount() {
+        return helpWindow.getRoot().getScene().getStylesheets().stream()
+                .filter(stylesheet -> stylesheet.endsWith("DarkTheme.css"))
+                .count();
+    }
 }
