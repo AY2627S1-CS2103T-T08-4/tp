@@ -397,7 +397,7 @@ The history is kept by `VersionedAddressBook`, which extends `AddressBook` with 
 
 It adds the following operations, which are exposed in the `Model` interface under the same names:
 
-* `VersionedAddressBook#commitAddressBook()`: pushes `current` onto `undoHistory`, empties `redoHistory`, and saves a copy of the client list as `current`. Does nothing if the client list still matches `current`.
+* `VersionedAddressBook#commitAddressBook()`: pushes `current` onto `undoHistory`, empties `redoHistory`, and saves a copy of the client list as `current`. Does nothing if the client list still matches `current`. The check uses `equals()`, so `Person#equals()` compares tag names exactly, even though `Tag#equals()` ignores letter case to prevent duplicate tags. Otherwise, an edit that only changes `Math` to `MATH` would be saved to the data file but not committed, and the next `undo` would revert it together with the change before it.
 * `VersionedAddressBook#undoAddressBook()`: pushes `current` onto `redoHistory`, then pops the top of `undoHistory` and restores the client list to it.
 * `VersionedAddressBook#redoAddressBook()`: pushes `current` onto `undoHistory`, then pops the top of `redoHistory` and restores the client list to it.
 * `VersionedAddressBook#canUndoAddressBook()` and `VersionedAddressBook#canRedoAddressBook()`: return whether the matching stack has anything in it.
@@ -1284,6 +1284,13 @@ The data file is `data/sieve.json` inside that folder.
 
     1. Test case: `delete 1`, then `delete 0`, then `undo`<br>
        Expected: `delete 0` shows an error. `undo` restores the client deleted by `delete 1`.
+
+1. Undoing an edit that only changes the letter case of a tag
+
+    1. Prerequisites: The first client has the tag `Math`.
+
+    1. Test case: `delete 2`, then `edit 1 t/MATH`, then `undo`<br>
+       Expected: The first client's tag is back to `Math`, and the client deleted by `delete 2` is still deleted. A second `undo` restores that client.
 
 1. Undoing a clear
 

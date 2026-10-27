@@ -120,6 +120,10 @@ public class PersonTest {
         // different tags -> returns false
         editedAlice = new PersonBuilder(ALICE).withTags(VALID_TAG_HUSBAND).build();
         assertFalse(ALICE.equals(editedAlice));
+
+        // tag differs only in case -> returns false, although the two tags count as duplicates
+        editedAlice = new PersonBuilder(ALICE).withTags("FRIENDS").build();
+        assertFalse(ALICE.equals(editedAlice));
     }
 
     @Test

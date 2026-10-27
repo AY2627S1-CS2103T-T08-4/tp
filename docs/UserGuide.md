@@ -276,6 +276,7 @@ Format: `undo`
 * Only commands that change your client list can be undone: `add`, `edit`, `delete`, `tag`, `untag` and `clear`.
 * Commands that do not change anything, such as `list`, `find` and `help`, are skipped. Commands that fail are also skipped.
 * An `edit`, `tag`, or `untag` that leaves the client exactly as before is also skipped. For example, this happens when the edited value is unchanged, every requested tag already exists, or none of the requested tags exist. An `undo` after it reverts the preceding change instead.
+* An `edit` that only changes the letter case of a tag, e.g. from `Math` to `MATH`, counts as a change and can be undone.
 * After an undo, the full client list is shown, so that the restored client is not hidden by an earlier `find`.
 * The undone change is saved to the data file straight away, like any other change.
 * If there is nothing left to undo, the following error is shown: `Error: There is nothing to undo.`
