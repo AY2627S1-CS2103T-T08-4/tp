@@ -93,6 +93,15 @@ Format: `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [nt/NOTE] [fee/FEE] [due/DU
 
 <box type="info" seamless>
 
+**Names:**
+* A name must start with a letter, and can only contain letters, digits, spaces, hyphens (`-`), apostrophes (`'`), full stops (`.`) and parentheses (`()`), up to 50 characters.
+* For example, `John Tan (NHHS)` and `Nur-Aisyah O'Brien` are accepted, but `Ravi s/o Kumar` is not, because of the `/`.
+* Letters means `A` to `Z`, so names with accented letters (e.g. `José`) or Chinese characters are not supported.
+* Write such names without the `/` or accents, e.g. `Ravi s.o. Kumar` or `Jose`.
+</box>
+
+<box type="info" seamless>
+
 **Duplicate clients:**
 * Sieve does not allow two clients with the same name. Names are compared ignoring case, so `John Tan` and `john tan` count as the same name.
 * If the phone number also matches, Sieve tells you that the client already exists.
@@ -122,6 +131,7 @@ Format: `edit INDEX [n/NAME] [p/PHONE] [e/EMAIL] [a/ADDRESS] [nt/NOTE] [fee/FEE]
 * Edits the client at the specified `INDEX`. The index refers to the index number shown in the displayed client list. The index **must be a positive integer** 1, 2, 3, ...
 * At least one of the optional fields must be provided.
 * Existing values will be updated to the input values.
+* A new name must follow the same [rules as in `add`](#adding-a-client-add).
 * When editing tags, all of the client's existing tags are removed; adding tags is not cumulative.
 * To remove all of a client's tags, enter `t/` without a tag after it.
 * Editing the note replaces the whole note; it does not add to the existing one. To remove a client's note, enter `nt/` without any text after it.
