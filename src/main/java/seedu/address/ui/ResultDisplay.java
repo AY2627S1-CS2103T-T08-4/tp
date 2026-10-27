@@ -4,7 +4,9 @@ import static java.util.Objects.requireNonNull;
 
 import javafx.css.PseudoClass;
 import javafx.fxml.FXML;
+import javafx.geometry.VerticalDirection;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.Region;
 
 /**
@@ -19,6 +21,8 @@ public class ResultDisplay extends UiPart<Region> {
 
     @FXML
     private Region resultIcon;
+    @FXML
+    private ScrollPane resultScrollPane;
     @FXML
     private Label resultMessage;
 
@@ -47,8 +51,30 @@ public class ResultDisplay extends UiPart<Region> {
         showMessage(errorMessage, true);
     }
 
+    /**
+     * Scrolls a message that is too long to show in full by one page in {@code direction}, stopping at its first or
+     * last line. Does nothing if the whole message is already shown.
+     */
+    public void scrollPage(VerticalDirection direction) {
+        requireNonNull(direction);
+        double pageHeight = resultScrollPane.getViewportBounds().getHeight();
+        double hiddenHeight = resultMessage.getHeight() - pageHeight;
+        if (hiddenHeight <= 0) {
+            return;
+        }
+
+        // The scroll position goes from vmin (first line at the top) to vmax (last line at the bottom),
+        // which is a distance of hiddenHeight pixels
+        double vmin = resultScrollPane.getVmin();
+        double vmax = resultScrollPane.getVmax();
+        double pageStep = pageHeight / hiddenHeight * (vmax - vmin);
+        double step = direction == VerticalDirection.UP ? -pageStep : pageStep;
+        resultScrollPane.setVvalue(Math.clamp(resultScrollPane.getVvalue() + step, vmin, vmax));
+    }
+
     private void showMessage(String message, boolean isError) {
         resultMessage.setText(message);
+        resultScrollPane.setVvalue(0); // start each new message from its first line
         getRoot().pseudoClassStateChanged(ERROR_PSEUDO_CLASS, isError);
         getRoot().setVisible(true);
         getRoot().setManaged(true);

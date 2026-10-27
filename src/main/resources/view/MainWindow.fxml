@@ -41,7 +41,9 @@
 
         <StackPane VBox.vgrow="NEVER" fx:id="resultDisplayPlaceholder" styleClass="stack-pane" />
 
-        <VBox fx:id="personList" styleClass="pane-with-border" minWidth="340" prefWidth="340" VBox.vgrow="ALWAYS">
+        <!-- A small prefHeight, as the list grows to fill whatever space is left after the command result -->
+        <VBox fx:id="personList" styleClass="pane-with-border" minWidth="340" prefWidth="340" prefHeight="100"
+              VBox.vgrow="ALWAYS">
           <StackPane fx:id="personListPanelPlaceholder" VBox.vgrow="ALWAYS"/>
         </VBox>
 
