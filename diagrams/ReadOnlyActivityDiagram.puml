@@ -1,0 +1,15 @@
+@startuml
+skin rose
+skinparam ActivityFontSize 15
+skinparam ArrowFontSize 12
+start
+:Command is parsed;
+
+if () then ([read-only mode is on
+and command changes data])
+    :Reject with read-only error;
+else ([else])
+    :Execute the command;
+endif
+stop
+@enduml
