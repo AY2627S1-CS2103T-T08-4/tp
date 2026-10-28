@@ -24,11 +24,14 @@ import seedu.address.testutil.PersonBuilder;
 public class PersonCardTest {
 
     private static final String LONG_EMAIL = "a".repeat(110) + "@example.com";
+    /** 50 characters, the longest name allowed. */
+    private static final String LONG_NAME = "Muhammad Hafiz bin Abdul Rahman Ismail (NHHS Sec4)";
 
     private Stage stage;
     private PersonCard taggedCard;
     private PersonCard untaggedCard;
     private PersonCard longEmailCard;
+    private PersonCard longNameCard;
 
     @Start
     public void start(Stage stage) {
@@ -36,7 +39,12 @@ public class PersonCardTest {
         taggedCard = new PersonCard(new PersonBuilder().withTags("math", "Sec4", "english", "Zoology").build(), 1);
         untaggedCard = new PersonCard(new PersonBuilder().withTags().build(), 2);
         longEmailCard = new PersonCard(new PersonBuilder().withEmail(LONG_EMAIL).build(), 3);
-        stage.setScene(new Scene(new VBox(taggedCard.getRoot(), untaggedCard.getRoot(), longEmailCard.getRoot())));
+        longNameCard = new PersonCard(new PersonBuilder().withName(LONG_NAME).build(), 4);
+        Scene scene = new Scene(new VBox(taggedCard.getRoot(), untaggedCard.getRoot(), longEmailCard.getRoot(),
+                longNameCard.getRoot()));
+        // The app's fonts, so that the text takes as much room as it does in the app
+        scene.getStylesheets().add("view/LightTheme.css");
+        stage.setScene(scene);
         stage.show();
     }
 
@@ -76,6 +84,23 @@ public class PersonCardTest {
             assertTrue(phoneRightEdge <= stage.getScene().getWidth(), "phone cut off at width " + width);
             // A label that runs out of room shows a shortened copy of its text, ending in "..."
             assertEquals(LONG_EMAIL, ((Text) email.lookup(".text")).getText(), "email shortened at width " + width);
+        }
+    }
+
+    @Test
+    public void constructor_longName_phoneAndFullNameShown(FxRobot robot) {
+        Label phone = (Label) longNameCard.getRoot().lookup("#phone");
+        Label name = (Label) longNameCard.getRoot().lookup("#name");
+        for (double width : new double[] {450, 800}) {
+            robot.interact(() -> stage.setWidth(width));
+            robot.interact(() -> stage.setHeight(1000));
+
+            double phoneRightEdge = phone.localToScene(phone.getBoundsInLocal()).getMaxX();
+            assertTrue(phoneRightEdge <= stage.getScene().getWidth(), "phone cut off at width " + width);
+            double nameRightEdge = name.localToScene(name.getBoundsInLocal()).getMaxX();
+            double phoneLeftEdge = phone.localToScene(phone.getBoundsInLocal()).getMinX();
+            assertTrue(nameRightEdge <= phoneLeftEdge, "name overlaps phone at width " + width);
+            assertEquals(LONG_NAME, ((Text) name.lookup(".text")).getText(), "name shortened at width " + width);
         }
     }
 
