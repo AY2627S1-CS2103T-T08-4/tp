@@ -5,6 +5,7 @@ import java.util.logging.Logger;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextInputControl;
 import javafx.scene.input.KeyCombination;
@@ -25,12 +26,17 @@ import seedu.address.logic.parser.exceptions.ParseException;
 public class MainWindow extends UiPart<Stage> {
 
     private static final String FXML = "MainWindow.fxml";
+    private static final String DARK_THEME_STYLESHEET = MainWindow.class
+            .getResource("/view/DarkTheme.css").toExternalForm();
+    private static final String DARK_THEME_BUTTON_TEXT = "Dark theme";
+    private static final String LIGHT_THEME_BUTTON_TEXT = "Light theme";
 
     private final Logger logger = LogsCenter.getLogger(getClass());
 
     private Stage primaryStage;
     private Logic logic;
     private Path dataFilePath;
+    private boolean isDarkTheme;
 
     // Independent Ui parts residing in this Ui container
     private PersonListPanel personListPanel;
@@ -51,6 +57,9 @@ public class MainWindow extends UiPart<Stage> {
 
     @FXML
     private StackPane statusbarPlaceholder;
+
+    @FXML
+    private Button themeToggleButton;
 
     /**
      * Creates a {@code MainWindow} with the given {@code Stage}, {@code Logic},
@@ -122,7 +131,7 @@ public class MainWindow extends UiPart<Stage> {
         StatusBarFooter statusBarFooter = new StatusBarFooter(dataFilePath);
         statusbarPlaceholder.getChildren().add(statusBarFooter.getRoot());
 
-        CommandBox commandBox = new CommandBox(this::executeCommand);
+        CommandBox commandBox = new CommandBox(this::executeCommand, resultDisplay::scrollPage);
         commandBoxPlaceholder.getChildren().add(commandBox.getRoot());
     }
 
@@ -148,6 +157,22 @@ public class MainWindow extends UiPart<Stage> {
         } else {
             helpWindow.focus();
         }
+    }
+
+    /**
+     * Switches the application between its light and dark themes.
+     */
+    @FXML
+    private void handleToggleTheme() {
+        isDarkTheme = !isDarkTheme;
+        if (isDarkTheme) {
+            primaryStage.getScene().getStylesheets().add(DARK_THEME_STYLESHEET);
+            themeToggleButton.setText(LIGHT_THEME_BUTTON_TEXT);
+        } else {
+            primaryStage.getScene().getStylesheets().remove(DARK_THEME_STYLESHEET);
+            themeToggleButton.setText(DARK_THEME_BUTTON_TEXT);
+        }
+        helpWindow.setDarkTheme(isDarkTheme);
     }
 
     void show() {

@@ -37,6 +37,8 @@ public class HelpWindow extends UiPart<Stage> {
 
     private static final Logger logger = LogsCenter.getLogger(HelpWindow.class);
     private static final String FXML = "HelpWindow.fxml";
+    private static final String DARK_THEME_STYLESHEET = HelpWindow.class
+            .getResource("/view/DarkTheme.css").toExternalForm();
 
     @FXML
     private Button copyButton;
@@ -109,6 +111,17 @@ public class HelpWindow extends UiPart<Stage> {
     public void focus() {
         getRoot().setIconified(false);
         getRoot().requestFocus();
+    }
+
+    /**
+     * Applies the selected theme to this window.
+     */
+    public void setDarkTheme(boolean isDarkTheme) {
+        if (isDarkTheme && !getRoot().getScene().getStylesheets().contains(DARK_THEME_STYLESHEET)) {
+            getRoot().getScene().getStylesheets().add(DARK_THEME_STYLESHEET);
+        } else if (!isDarkTheme) {
+            getRoot().getScene().getStylesheets().remove(DARK_THEME_STYLESHEET);
+        }
     }
 
     /**

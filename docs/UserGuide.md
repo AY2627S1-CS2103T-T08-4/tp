@@ -61,6 +61,9 @@ Sieve is a **desktop app that helps self-employed private tuition teachers keep 
 * Parameters can be in any order.<br>
   For example, if the command specifies `n/NAME p/PHONE_NUMBER`, `p/PHONE_NUMBER n/NAME` is also acceptable.
 
+* In `add` and `edit`, a word that looks like a prefix but is not one, such as `z/` in `a/Blk 1 z/x`, is rejected as an unknown prefix, so that a mistyped prefix is not saved as part of a detail.<br>
+  This applies to every parameter except the note, so a note such as `nt/Meet w/ parent` is fine. In an address, write `c/o` as `care of`.
+
 * Extraneous parameters for commands that take no parameters, such as `help`, `list`, `exit`, `clear`, `undo` and `redo`, are ignored.<br>
   For example, `help 123` is interpreted as `help`.
 
@@ -93,12 +96,29 @@ Format: `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [nt/NOTE] [fee/FEE] [due/DU
 
 <box type="info" seamless>
 
+**Names:**
+* A name must start with a letter, and can only contain letters, digits, spaces, hyphens (`-`), apostrophes (`'`), full stops (`.`) and parentheses (`()`), up to 50 characters.
+* For example, `John Tan (NHHS)` and `Nur-Aisyah O'Brien` are accepted, but `Ravi s/o Kumar` is not, because of the `/`.
+* Letters means `A` to `Z`, so names with accented letters (e.g. `José`) or Chinese characters are not supported.
+* Write such names without the `/` or accents, e.g. `Ravi s.o. Kumar` or `Jose`.
+</box>
+
+<box type="info" seamless>
+
 **Duplicate clients:**
 * Sieve does not allow two clients with the same name. Names are compared ignoring case, so `John Tan` and `john tan` count as the same name.
 * If the phone number also matches, Sieve tells you that the client already exists.
 * If the phone number is different, Sieve asks you to check the name and phone number. If it really is a different client, add a detail to the name to tell them apart, e.g. `John Tan (NHHS)`.
 * Different clients may share a phone number (e.g. siblings using a parent's number), as long as their names are different.
 * The same rules apply when you change a client's name with `edit`.
+</box>
+
+<box type="info" seamless>
+
+**Phone numbers and email addresses:**
+* A phone number must be an 8-digit Singapore number starting with `3`, `6`, `8` or `9`, e.g. `91234567`. Spaces, hyphens and parentheses are ignored, so `9123 4567` is also accepted.
+* An email address must have a full stop in the part after the `@`, e.g. `amirah@gmail.com`. An address such as `amirah@localhost` is not accepted.
+* If your data file is from an earlier version of Sieve and contains a phone number or email address that breaks these rules, Sieve opens in read-only mode. Correct it in the [data file](#editing-the-data-file) to continue.
 </box>
 
 Examples:
@@ -122,6 +142,7 @@ Format: `edit INDEX [n/NAME] [p/PHONE] [e/EMAIL] [a/ADDRESS] [nt/NOTE] [fee/FEE]
 * Edits the client at the specified `INDEX`. The index refers to the index number shown in the displayed client list. The index **must be a positive integer** 1, 2, 3, ...
 * At least one of the optional fields must be provided.
 * Existing values will be updated to the input values.
+* A new name must follow the same [rules as in `add`](#adding-a-client-add).
 * When editing tags, all of the client's existing tags are removed; adding tags is not cumulative.
 * To remove all of a client's tags, enter `t/` without a tag after it.
 * Editing the note replaces the whole note; it does not add to the existing one. To remove a client's note, enter `nt/` without any text after it.
@@ -175,7 +196,7 @@ Shows only the clients who match the specified phone numbers and tags.
 Format: `filter [p/PHONE]... [t/TAG]...`
 
 * At least one phone number or tag must be given.
-* `p/PHONE` must be a complete 8-digit phone number. Spaces, hyphens and parentheses are ignored.
+* `p/PHONE` must be a complete phone number, following the same [rules as in `add`](#adding-a-client-add). Spaces, hyphens and parentheses are ignored.
 * If several phone numbers are supplied, clients matching any of them are returned.
 * Tag matching is case-insensitive; for example, `t/physics` matches `Physics`.
 * Tag order does not matter.
@@ -263,6 +284,7 @@ Format: `undo`
 * Only commands that change your client list can be undone: `add`, `edit`, `delete`, `tag`, `untag` and `clear`.
 * Commands that do not change anything, such as `list`, `find` and `help`, are skipped. Commands that fail are also skipped.
 * An `edit`, `tag`, or `untag` that leaves the client exactly as before is also skipped. For example, this happens when the edited value is unchanged, every requested tag already exists, or none of the requested tags exist. An `undo` after it reverts the preceding change instead.
+* An `edit` that only changes the letter case of a tag, e.g. from `Math` to `MATH`, counts as a change and can be undone.
 * After an undo, the full client list is shown, so that the restored client is not hidden by an earlier `find`.
 * The undone change is saved to the data file straight away, like any other change.
 * If there is nothing left to undo, the following error is shown: `Error: There is nothing to undo.`
@@ -309,6 +331,14 @@ Brings back commands you entered earlier, so you can run them again or fix a typ
 Examples:
 * `edit 1 p/9123 456` fails because the phone number has only 7 digits. Press Up, add the missing digit, and press Enter.
 * After `find Amirah`, `delete 1` and `list`, press Up three times to bring back `find Amirah`.
+
+### Scrolling a long result: Page Up and Page Down keys
+
+When the result of a command is too long to show in full, such as after deleting many clients, it gets a scroll bar.
+
+* Press **Page Down** in the command box to see the next lines of the result, and **Page Up** to go back.
+* Whatever you have typed in the command box is kept, so you can keep typing.
+* You can also scroll the result with the mouse.
 
 ### Exiting the program: `exit`
 

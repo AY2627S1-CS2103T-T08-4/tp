@@ -12,9 +12,12 @@ import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 
 import javafx.css.PseudoClass;
+import javafx.geometry.VerticalDirection;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.Region;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 @ExtendWith(ApplicationExtension.class)
@@ -25,17 +28,28 @@ public class ResultDisplayTest {
     private static final String SUCCESS_MESSAGE = "Listed all clients.";
     private static final String ERROR_MESSAGE = "Invalid command format!";
     private static final String EMPTY_SEARCH_MESSAGE = "No clients found.";
+    private static final String LONG_MESSAGE = "Deleted clients:" + "\nClient; Phone: 91234567".repeat(18);
+    private static final double PIXEL_TOLERANCE = 0.5;
+    /** More pages than {@code LONG_MESSAGE} has, so that a scrolling loop always ends. */
+    private static final int MAX_PAGES = 20;
 
+    private Stage stage;
     private ResultDisplay resultDisplay;
     private Region root;
+    private ScrollPane resultScrollPane;
     private Label resultMessage;
 
     @Start
     public void start(Stage stage) {
+        this.stage = stage;
         resultDisplay = new ResultDisplay();
         root = resultDisplay.getRoot();
-        resultMessage = (Label) root.lookup("#resultMessage");
-        stage.setScene(new Scene(root));
+        resultScrollPane = (ScrollPane) root.lookup("#resultScrollPane");
+        resultMessage = (Label) resultScrollPane.getContent();
+        Scene scene = new Scene(root);
+        // The same font as in the main window, as the height of a line depends on it
+        scene.getStylesheets().add("view/LightTheme.css");
+        stage.setScene(scene);
         stage.show();
     }
 
@@ -93,10 +107,121 @@ public class ResultDisplayTest {
     }
 
     @Test
+    public void setFeedbackToUser_longMessage_scrollsWithinMaxHeight(FxRobot robot) {
+        showLongMessage(robot);
+
+        assertEquals(resultScrollPane.getMaxHeight(), resultScrollPane.getHeight());
+        // Every line can be scrolled to, as the label is tall enough for the whole message
+        assertEquals(LONG_MESSAGE, getShownText());
+        assertTrue(resultMessage.getHeight() > resultScrollPane.getHeight());
+    }
+
+    @Test
+    public void setFeedbackToUser_afterScrolling_startsAtFirstLine(FxRobot robot) {
+        robot.interact(() -> resultDisplay.setFeedbackToUser(LONG_MESSAGE));
+        robot.interact(() -> resultScrollPane.setVvalue(resultScrollPane.getVmax()));
+        robot.interact(() -> resultDisplay.setFeedbackToUser(LONG_MESSAGE));
+
+        assertEquals(resultScrollPane.getVmin(), resultScrollPane.getVvalue());
+    }
+
+    @Test
+    public void maxHeight_wholeNumberOfLines(FxRobot robot) {
+        robot.interact(() -> resultDisplay.setFeedbackToUser(SUCCESS_MESSAGE));
+        robot.interact(() -> root.layout());
+
+        // Otherwise, the last line in view is cut in half
+        double lineHeight = resultMessage.getHeight();
+        assertEquals(0, resultScrollPane.getMaxHeight() % lineHeight);
+    }
+
+    @Test
+    public void scrollPage_downThroughLongMessage_movesOnePageAtATimeUntilLastLine(FxRobot robot) {
+        showLongMessage(robot);
+        double pageHeight = resultScrollPane.getViewportBounds().getHeight();
+
+        robot.interact(() -> resultDisplay.scrollPage(VerticalDirection.DOWN));
+        assertEquals(pageHeight, getScrolledHeight(), PIXEL_TOLERANCE);
+
+        for (int i = 0; i < MAX_PAGES && resultScrollPane.getVvalue() < resultScrollPane.getVmax(); i++) {
+            robot.interact(() -> resultDisplay.scrollPage(VerticalDirection.DOWN));
+        }
+        assertEquals(resultScrollPane.getVmax(), resultScrollPane.getVvalue());
+
+        // Stays at the last line
+        robot.interact(() -> resultDisplay.scrollPage(VerticalDirection.DOWN));
+        assertEquals(resultScrollPane.getVmax(), resultScrollPane.getVvalue());
+    }
+
+    @Test
+    public void scrollPage_upFromLastLine_movesOnePageUpUntilFirstLine(FxRobot robot) {
+        showLongMessage(robot);
+        double pageHeight = resultScrollPane.getViewportBounds().getHeight();
+        double hiddenHeight = resultMessage.getHeight() - pageHeight;
+        robot.interact(() -> resultScrollPane.setVvalue(resultScrollPane.getVmax()));
+
+        robot.interact(() -> resultDisplay.scrollPage(VerticalDirection.UP));
+        assertEquals(hiddenHeight - pageHeight, getScrolledHeight(), PIXEL_TOLERANCE);
+
+        for (int i = 0; i < MAX_PAGES && resultScrollPane.getVvalue() > resultScrollPane.getVmin(); i++) {
+            robot.interact(() -> resultDisplay.scrollPage(VerticalDirection.UP));
+        }
+        assertEquals(resultScrollPane.getVmin(), resultScrollPane.getVvalue());
+
+        // Stays at the first line
+        robot.interact(() -> resultDisplay.scrollPage(VerticalDirection.UP));
+        assertEquals(resultScrollPane.getVmin(), resultScrollPane.getVvalue());
+    }
+
+    @Test
+    public void scrollPage_shortMessage_doesNotScroll(FxRobot robot) {
+        robot.interact(() -> resultDisplay.setFeedbackToUser(SUCCESS_MESSAGE));
+        robot.interact(() -> root.layout());
+
+        robot.interact(() -> resultDisplay.scrollPage(VerticalDirection.DOWN));
+        assertEquals(resultScrollPane.getVmin(), resultScrollPane.getVvalue());
+    }
+
+    @Test
+    public void scrollPage_beforeFirstMessage_doesNotScroll(FxRobot robot) {
+        robot.interact(() -> resultDisplay.scrollPage(VerticalDirection.DOWN));
+
+        assertEquals(resultScrollPane.getVmin(), resultScrollPane.getVvalue());
+    }
+
+    @Test
     public void setMessage_null_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> resultDisplay.setFeedbackToUser(null));
         assertThrows(NullPointerException.class, () -> resultDisplay.setEmptySearchToUser(null));
         assertThrows(NullPointerException.class, () -> resultDisplay.setErrorToUser(null));
+        assertThrows(NullPointerException.class, () -> resultDisplay.scrollPage(null));
+    }
+
+    /**
+     * Shows {@code LONG_MESSAGE}, which is too long to show in full, and lays it out.
+     */
+    private void showLongMessage(FxRobot robot) {
+        robot.interact(() -> resultDisplay.setFeedbackToUser(LONG_MESSAGE));
+        robot.interact(() -> {
+            stage.sizeToScene();
+            root.layout();
+        });
+    }
+
+    /**
+     * Returns how many pixels of the message are scrolled above the top of the scroll pane.
+     */
+    private double getScrolledHeight() {
+        double hiddenHeight = resultMessage.getHeight() - resultScrollPane.getViewportBounds().getHeight();
+        double vmin = resultScrollPane.getVmin();
+        return (resultScrollPane.getVvalue() - vmin) / (resultScrollPane.getVmax() - vmin) * hiddenHeight;
+    }
+
+    /**
+     * Returns the text the label shows, which ends in "..." if the label is too small for the whole message.
+     */
+    private String getShownText() {
+        return ((Text) resultMessage.lookup(".text")).getText();
     }
 
     private boolean isShownAsError() {

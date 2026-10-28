@@ -217,6 +217,18 @@ public class EditCommandParserTest {
     }
 
     @Test
+    public void parse_unknownPrefix_failure() {
+        assertParseFailure(parser, "1 a/Blk 1 z/x", Messages.getErrorMessageForUnknownPrefix("z/"));
+    }
+
+    @Test
+    public void parse_noteWithSlash_success() {
+        // notes are free text, where "w/" (with) is normal
+        EditPersonDescriptor descriptor = new EditPersonDescriptorBuilder().withNote("Meet w/ parent").build();
+        assertParseSuccess(parser, "1 nt/Meet w/ parent", new EditCommand(INDEX_FIRST_PERSON, descriptor));
+    }
+
+    @Test
     public void parse_emptyNote_clearsNote() {
         Index targetIndex = INDEX_FIRST_PERSON;
 

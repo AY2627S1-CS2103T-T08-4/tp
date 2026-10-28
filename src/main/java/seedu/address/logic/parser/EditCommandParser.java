@@ -49,6 +49,9 @@ public class EditCommandParser implements Parser<EditCommand> {
 
         argMultimap.verifyNoDuplicatePrefixesFor(PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL, PREFIX_ADDRESS, PREFIX_NOTE,
             PREFIX_FEE, PREFIX_DUE_DATE);
+        // Notes are free text, where words such as "w/" (with) are normal
+        argMultimap.verifyNoUnknownPrefixesIn(PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL, PREFIX_ADDRESS, PREFIX_FEE,
+            PREFIX_DUE_DATE, PREFIX_TAG);
 
         EditPersonDescriptor editPersonDescriptor = new EditPersonDescriptor();
 

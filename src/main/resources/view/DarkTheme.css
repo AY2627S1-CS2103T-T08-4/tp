@@ -1,0 +1,34 @@
+/*
+ * Loaded after LightTheme.css when dark mode is enabled. The shared UI rules use
+ * these looked-up colours, so changing the palette updates the entire scene.
+ */
+.root {
+    -sieve-window: #171a21;
+    -sieve-surface: #222630;
+    -sieve-list: #1c2028;
+    -sieve-border: #353b48;
+    -sieve-text: #f2f4f8;
+    -sieve-text-muted: #aab1bf;
+    -sieve-accent: #8da2ff;
+    -sieve-selected: #30384f;
+    -sieve-error: #ff8174;
+    -sieve-success: #67d98b;
+}
+
+#commandTextField.error {
+    -fx-background-color: #42272a;
+}
+
+/* Darker tag fills retain each tag's colour while avoiding bright pills. */
+#tags .tag-color-0 { -fx-background-color: #29375f; -fx-text-fill: #b8c5ff; }
+#tags .tag-color-1 { -fx-background-color: #234332; -fx-text-fill: #8de0a8; }
+#tags .tag-color-2 { -fx-background-color: #493b22; -fx-text-fill: #f5cb73; }
+#tags .tag-color-3 { -fx-background-color: #3b2e53; -fx-text-fill: #c7a9f4; }
+#tags .tag-color-4 { -fx-background-color: #4c292e; -fx-text-fill: #f4a0a8; }
+#tags .tag-color-5 { -fx-background-color: #204249; -fx-text-fill: #82d9df; }
+#tags .tag-color-6 { -fx-background-color: #4a293d; -fx-text-fill: #efa2ca; }
+#tags .tag-color-7 { -fx-background-color: #4d3423; -fx-text-fill: #f4b47f; }
+#tags .tag-color-8 { -fx-background-color: #354321; -fx-text-fill: #bfdc78; }
+#tags .tag-color-9 { -fx-background-color: #213e51; -fx-text-fill: #8bcdef; }
+#tags .tag-color-10 { -fx-background-color: #43352c; -fx-text-fill: #d7b49a; }
+#tags .tag-color-11 { -fx-background-color: #333944; -fx-text-fill: #c1c9d6; }

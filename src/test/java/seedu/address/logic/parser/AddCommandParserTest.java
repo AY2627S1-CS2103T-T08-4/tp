@@ -85,6 +85,30 @@ public class AddCommandParserTest {
     }
 
     @Test
+    public void parse_unknownPrefix_failure() {
+        // in the address, which would otherwise be saved as "Blk 1 z/x"
+        assertParseFailure(parser, NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB + " a/Blk 1 z/x",
+                Messages.getErrorMessageForUnknownPrefix("z/"));
+
+        // in another field, reported instead of that field's own error
+        assertParseFailure(parser, NAME_DESC_BOB + " p/98765432 x/1" + EMAIL_DESC_BOB + ADDRESS_DESC_BOB,
+                Messages.getErrorMessageForUnknownPrefix("x/"));
+    }
+
+    @Test
+    public void parse_slashNotAfterLettersOrInNote_success() {
+        // "12/3" is a unit number, not a prefix
+        Person expectedPerson = new PersonBuilder(BOB).withTags().withAddress("Blk 12/3 Ang Mo Kio").build();
+        assertParseSuccess(parser, NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB + " a/Blk 12/3 Ang Mo Kio",
+                new AddCommand(expectedPerson));
+
+        // notes are free text, where "w/" (with) is normal
+        expectedPerson = new PersonBuilder(BOB).withTags().withNote("Meet w/ parent").build();
+        assertParseSuccess(parser, NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB + ADDRESS_DESC_BOB
+                + " nt/Meet w/ parent", new AddCommand(expectedPerson));
+    }
+
+    @Test
     public void parse_feeAndDueDateSpecified_success() {
         Person expectedPerson = new PersonBuilder(BOB).withTags(VALID_TAG_FRIEND)
             .withFee(VALID_FEE).withDueDate(VALID_DUE_DATE).build();
