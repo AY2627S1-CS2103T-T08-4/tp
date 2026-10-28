@@ -14,6 +14,8 @@ public class UndoCommand extends Command {
     public static final String COMMAND_WORD = "undo";
     public static final String MESSAGE_SUCCESS = "Undid the last change. Showing all clients.";
     public static final String MESSAGE_NOTHING_TO_UNDO = "Error: There is nothing to undo.";
+    public static final String MESSAGE_NO_PARAMETERS =
+            "undo takes no parameters. Run undo again to undo more changes.";
 
     /**
      * Reverts the last change to the client list and shows the full list,

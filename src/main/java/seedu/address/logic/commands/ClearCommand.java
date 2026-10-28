@@ -12,6 +12,8 @@ public class ClearCommand extends Command {
 
     public static final String COMMAND_WORD = "clear";
     public static final String MESSAGE_SUCCESS = "All client data has been cleared.";
+    public static final String MESSAGE_NO_PARAMETERS =
+            "clear takes no parameters, as it deletes every client. To delete some clients, use delete INDEX.";
 
     /**
      * Executes the clear command by resetting the internal data to an empty state.

@@ -1315,6 +1315,18 @@ The data file is `data/sieve.json` inside that folder.
     1. Test case: `undo`<br>
        Expected: The client list is unchanged. The status message shows `Error: There is nothing to undo.`
 
+1. Undoing with a parameter
+
+    1. Test case: `delete 1`, then `undo 3`<br>
+       Expected: The status message shows `undo takes no parameters. Run undo again to undo more changes.` The client stays deleted until a plain `undo`.
+
+1. An edit that changes nothing adds nothing to undo
+
+    1. Prerequisites: Use the `list` command. The first client is `Amirah Tan`.
+
+    1. Test case: `delete 2`, then `edit 1 n/Amirah Tan`, then `undo`<br>
+       Expected: `edit` shows `No change: Amirah Tan already has these details.` `undo` brings back the client deleted by `delete 2`.
+
 ### Redoing changes
 
 1. Redoing an undone change
