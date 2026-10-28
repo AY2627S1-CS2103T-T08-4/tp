@@ -28,14 +28,20 @@ public class ParserUtil {
     /**
      * Parses {@code oneBasedIndex} into an {@code Index} and returns it. Leading and trailing whitespaces will be
      * trimmed.
+     * A positive number too large for an {@code int} is parsed as {@code Integer.MAX_VALUE}, which is past the end
+     * of any list, so that the command reports it as out of bounds.
      * @throws ParseException if the specified index is invalid (not a non-zero unsigned integer).
      */
     public static Index parseIndex(String oneBasedIndex) throws ParseException {
         String trimmedIndex = oneBasedIndex.trim();
-        if (!StringUtil.isNonZeroUnsignedInteger(trimmedIndex)) {
-            throw new ParseException(MESSAGE_INVALID_INDEX);
+        if (StringUtil.isNonZeroUnsignedInteger(trimmedIndex)) {
+            return Index.fromOneBased(Integer.parseInt(trimmedIndex));
         }
-        return Index.fromOneBased(Integer.parseInt(trimmedIndex));
+        // Only digits, not all zeros, yet not a valid int, so the number overflowed
+        if (trimmedIndex.matches("[0-9]+") && !trimmedIndex.matches("0+")) {
+            return Index.fromOneBased(Integer.MAX_VALUE);
+        }
+        throw new ParseException(MESSAGE_INVALID_INDEX);
     }
 
     /**
@@ -63,6 +69,9 @@ public class ParserUtil {
     public static Phone parsePhone(String phone) throws ParseException {
         requireNonNull(phone);
         String strippedPhone = Phone.stripPhone(phone);
+        if (Phone.hasCountryCode(strippedPhone)) {
+            throw new ParseException(Phone.MESSAGE_COUNTRY_CODE);
+        }
         if (!Phone.isValidPhone(strippedPhone)) {
             throw new ParseException(Phone.MESSAGE_CONSTRAINTS);
         }

@@ -7,7 +7,7 @@
 
 <StackPane styleClass="stack-pane" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
   <TextField fx:id="commandTextField" onAction="#handleCommandEntered"
-             promptText="Type a command, e.g. find Amirah, or type help"/>
+             promptText="Type a command, or type help"/>
   <!--
     The ">" drawn on top of the text field, at its left edge. The text field's left padding leaves room for it.
     mouseTransparent lets clicks on it go through to the text field underneath.

@@ -531,36 +531,37 @@ The history is kept in memory only, so it is lost when the app is closed. In rea
 
 The command history lets users bring back earlier commands with the Up and Down keys. It is handled entirely by the `UI` component: `CommandBox` owns a `CommandHistory`, which stores the commands. `Logic` and `Model` are not involved.
 
-`CommandHistory` has no JavaFX code, so it can be unit tested on its own. It keeps two fields:
+`CommandHistory` has no JavaFX code, so it can be unit tested on its own. It keeps three fields:
 
 * `commands`: every command entered in this session, oldest first.
-* `current`: the position of the command shown in the command box. It equals `commands.size()` when no command is being recalled.
+* `currentIndex`: the position of the command shown in the command box. It equals `commands.size()` when no command is being recalled.
+* `draft`: the text that was in the command box when the user last pressed Up while no command was being recalled. This is usually a command the user has not finished typing.
 
 It has the following operations:
 
-* `CommandHistory#add(command)`: adds the command to the end of `commands` and sets `current` to `commands.size()`, so the next Up starts from the newest command.
-* `CommandHistory#getPreviousCommand()`: moves `current` back one and returns that command. Returns an empty `Optional` if `current` is already 0.
-* `CommandHistory#getNextCommand()`: moves `current` forward one and returns that command. Returns an empty string when moving past the most recent command, so the command box is cleared, and an empty `Optional` if no command is being recalled.
+* `CommandHistory#add(command)`: adds the command to the end of `commands` and sets `currentIndex` to `commands.size()`, so the next Up starts from the newest command.
+* `CommandHistory#getPreviousCommand(currentText)`: moves `currentIndex` back one and returns that command. If no command was being recalled, it first saves `currentText`, the text in the command box, as `draft`. Returns an empty `Optional` if `currentIndex` is already 0.
+* `CommandHistory#getNextCommand()`: moves `currentIndex` forward one and returns that command. Returns `draft` when moving past the most recent command, so a half-typed command comes back, and an empty `Optional` if no command is being recalled.
 
 `CommandBox` uses it in two places:
 
 * `CommandBox#handleCommandEntered()` adds every non-blank command to the history before executing it. This way, a command that fails is kept and can be recalled to fix it.
-* `CommandBox#handleKeyPressed()` handles Up and Down. If the history returns a command, it is put in the text field with the cursor at the end. The key event is then consumed, so the text field does not also move the cursor. It also passes Page Up and Page Down to the `ResultScroller` it was created with, which scrolls the command result (see [UI component](#ui-component)). Other keys are left to the text field, so the cursor can still be moved within a recalled command.
+* `CommandBox#handleKeyPressed()` handles Up and Down. If the history returns a command, it is put in the text field with the cursor at the end. The key event is then consumed, so the text field does not also move the cursor. It also passes Page Up and Page Down to the `ResultScroller` it was created with, which scrolls the command result (see [UI component](#ui-component)). Other keys are left to the text field, so the cursor can still be moved within a recalled command. Up and Down with Shift, Ctrl, Alt or Meta held are left to the text field too, so that Shift+Up still selects text.
 
 The following sequence diagram shows what happens when the user presses Up:
 
 <puml src="diagrams/CommandHistorySequenceDiagram.puml" alt="CommandHistorySequenceDiagram" />
 
-The table below shows how `current` changes after the user enters `list` and then `find Amirah`, so `commands` is `[list, find Amirah]` and `current` is 2.
+The table below shows how `currentIndex` and `draft` change after the user enters `list` and then `find Amirah`, and then types `del` without pressing Enter. At the start, `commands` is `[list, find Amirah]`, `currentIndex` is 2 and `draft` is empty.
 
-Key pressed | `current` after | Command box shows
-------------|-----------------|------------------
-Up          | 1               | `find Amirah`
-Up          | 0               | `list`
-Up          | 0               | `list` (unchanged, as there is no earlier command)
-Down        | 1               | `find Amirah`
-Down        | 2               | nothing (cleared)
-Down        | 2               | unchanged, so any text the user has typed is kept
+Key pressed | `currentIndex` after | `draft` after | Command box shows
+------------|----------------------|---------------|------------------
+Up          | 1                    | `del`         | `find Amirah`
+Up          | 0                    | `del`         | `list`
+Up          | 0                    | `del`         | `list` (unchanged, as there is no earlier command)
+Down        | 1                    | `del`         | `find Amirah`
+Down        | 2                    | `del`         | `del` (the draft)
+Down        | 2                    | `del`         | unchanged, so any text the user has typed is kept
 
 #### Design considerations:
 
@@ -583,6 +584,16 @@ Down        | 2               | unchanged, so any text the user has typed is kep
 * **Alternative 2:** Only commands that succeed.
   * Pros: The history is shorter.
   * Cons: A failed command cannot be recalled, so the user must retype it to fix a typo.
+
+**Aspect: What Down shows after the newest command:**
+
+* **Alternative 1 (current choice):** The text that was in the command box before the user pressed Up, as in bash.
+  * Pros: A half-typed command is not lost when the user looks back at an earlier command.
+  * Cons: `CommandHistory` must keep one more field, and `CommandBox` must pass it the current text.
+
+* **Alternative 2:** An empty command box.
+  * Pros: Simpler, as `CommandHistory` only needs to know the commands entered.
+  * Cons: Pressing Up while typing loses the half-typed command for good.
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -1314,6 +1325,18 @@ The data file is `data/sieve.json` inside that folder.
 
     1. Test case: `undo`<br>
        Expected: The client list is unchanged. The status message shows `Error: There is nothing to undo.`
+
+1. Undoing with a parameter
+
+    1. Test case: `delete 1`, then `undo 3`<br>
+       Expected: The status message shows `undo takes no parameters. Run undo again to undo more changes.` The client stays deleted until a plain `undo`.
+
+1. An edit that changes nothing adds nothing to undo
+
+    1. Prerequisites: Use the `list` command. The first client is `Amirah Tan`.
+
+    1. Test case: `delete 2`, then `edit 1 n/Amirah Tan`, then `undo`<br>
+       Expected: `edit` shows `No change: Amirah Tan already has these details.` `undo` brings back the client deleted by `delete 2`.
 
 ### Redoing changes
 

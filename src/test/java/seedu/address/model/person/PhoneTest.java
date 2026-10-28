@@ -66,6 +66,22 @@ public class PhoneTest {
     }
 
     @Test
+    public void hasCountryCode() {
+        // with a country code
+        assertTrue(Phone.hasCountryCode("+6591234567")); // Singapore
+        assertTrue(Phone.hasCountryCode("+14155552671")); // another country
+        assertTrue(Phone.hasCountryCode("+")); // '+' alone
+        assertTrue(Phone.hasCountryCode("6591234567")); // Singapore without '+'
+
+        // without a country code
+        assertFalse(Phone.hasCountryCode("91234567")); // Singapore number
+        assertFalse(Phone.hasCountryCode("65123456")); // landline starting with 65
+        assertFalse(Phone.hasCountryCode("659123456")); // 65 followed by 7 digits
+        assertFalse(Phone.hasCountryCode("65912345678")); // 65 followed by 9 digits
+        assertFalse(Phone.hasCountryCode("9123+6545")); // '+' not at the start
+    }
+
+    @Test
     public void equals() {
         Phone phone = new Phone("99999999");
 

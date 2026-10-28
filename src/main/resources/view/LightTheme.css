@@ -20,19 +20,17 @@
     -sieve-border: #e2e5ec;
     -sieve-text: #1f2430;
     -sieve-text-muted: #6b7280;
-    -sieve-accent: #2f4fd8;     /* the blue in the mockup */
+    -sieve-accent: #2f4fd8;     /* command box border, selected client and default button */
+    -sieve-on-accent: white;    /* text on an accent background */
     -sieve-selected: #eef2ff;   /* selected client row */
     -sieve-error: #c0392b;
+    -sieve-error-background: #fdecec;
     -sieve-success: #1e8e3e;
 }
 
 .label {
     -fx-font-size: 11pt;
     -fx-text-fill: -sieve-text;
-}
-
-.text-field {
-    -fx-font-size: 12pt;
 }
 
 .list-view {
@@ -62,8 +60,7 @@
     -fx-padding: 0 0 0 0;
 }
 
-.list-cell:filled:even,
-.list-cell:filled:odd {
+.list-cell:filled {
     -fx-background-color: -sieve-list;
     /* top right bottom left: a thin line under each client instead of stripes */
     -fx-border-color: transparent transparent -sieve-border transparent;
@@ -74,7 +71,7 @@
 }
 
 .list-cell:filled:selected #cardPane {
-    /* blue bar on the left of the selected client, as in the mockup */
+    /* a bar on the left of the selected client */
     -fx-border-color: -sieve-accent;
 }
 
@@ -112,13 +109,13 @@
 }
 
 .stack-pane {
-     -fx-background-color: -sieve-window;
+    -fx-background-color: -sieve-window;
 }
 
 .pane-with-border {
-     -fx-background-color: -sieve-window;
-     -fx-border-color: -sieve-border;
-     -fx-border-top-width: 1px;
+    -fx-background-color: -sieve-window;
+    -fx-border-color: -sieve-border;
+    -fx-border-top-width: 1px;
 }
 
 .status-bar {
@@ -140,7 +137,7 @@
 
 /*
  * The icon is an empty Region given a shape: -fx-shape takes an SVG path, and the
- * background colour fills that shape. The shape is scaled to the region's size.
+ * background color fills that shape. The shape is scaled to the region's size.
  */
 .result-icon {
     -fx-min-width: 16;
@@ -219,10 +216,6 @@
     -fx-text-fill: -sieve-text;
 }
 
-.menu .left-container {
-    -fx-background-color: transparent;
-}
-
 .button {
     -fx-padding: 5 18 5 18;
     -fx-background-color: -sieve-surface;
@@ -245,7 +238,7 @@
 .button:default {
     -fx-background-color: -sieve-accent;
     -fx-border-color: -sieve-accent;
-    -fx-text-fill: white;
+    -fx-text-fill: -sieve-on-accent;
 }
 
 .button:default:hover {
@@ -337,7 +330,7 @@
 /* A command that failed. CommandBox removes the error class as soon as the user edits the text. */
 #commandTextField.error {
     -fx-border-color: -sieve-error;
-    -fx-background-color: #fdecec;
+    -fx-background-color: -sieve-error-background;
 }
 
 #tags {
@@ -353,7 +346,7 @@
 }
 
 /*
- * One background and text colour pair for each palette entry, chosen in TagColor.java.
+ * One background and text color pair for each palette entry, chosen in TagColor.java.
  * Keep the number of rules equal to TagColor.PALETTE_SIZE.
  * #tags is an id, which outranks any number of classes, so these beat .list-cell .label.
  */

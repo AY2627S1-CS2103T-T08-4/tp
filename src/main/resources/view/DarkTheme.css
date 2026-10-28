@@ -12,11 +12,8 @@
     -sieve-accent: #8da2ff;
     -sieve-selected: #30384f;
     -sieve-error: #ff8174;
+    -sieve-error-background: #42272a;
     -sieve-success: #67d98b;
-}
-
-#commandTextField.error {
-    -fx-background-color: #42272a;
 }
 
 /* Darker tag fills retain each tag's colour while avoiding bright pills. */

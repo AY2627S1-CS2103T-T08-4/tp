@@ -64,8 +64,10 @@ Sieve is a **desktop app that helps self-employed private tuition teachers keep 
 * In `add` and `edit`, a word that looks like a prefix but is not one, such as `z/` in `a/Blk 1 z/x`, is rejected as an unknown prefix, so that a mistyped prefix is not saved as part of a detail.<br>
   This applies to every parameter except the note, so a note such as `nt/Meet w/ parent` is fine. In an address, write `c/o` as `care of`.
 
-* Extraneous parameters for commands that take no parameters, such as `help`, `list`, `exit`, `clear`, `undo` and `redo`, are ignored.<br>
+* Extraneous parameters for `help`, `list` and `exit` are ignored.<br>
   For example, `help 123` is interpreted as `help`.
+
+* `clear`, `undo` and `redo` take no parameters, and show an error if you add any. This stops `undo 3` from undoing only one change, and `clear 3` from deleting every client.
 
 * If you are using a PDF version of this document, be careful when copying and pasting commands that span multiple lines as space characters surrounding line-breaks may be omitted when copied over to the application.
 </box>
@@ -81,7 +83,7 @@ Format: `help`
 
 ### Adding a client: `add`
 
-Adds a client to Sieve.
+Adds a client to Sieve, then shows the full client list, so that the new client is not hidden by an earlier `find` or `filter`.
 
 Format: `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [nt/NOTE] [fee/FEE] [due/DUE_DATE] [t/TAG]... `
 
@@ -117,7 +119,8 @@ Format: `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [nt/NOTE] [fee/FEE] [due/DU
 
 **Phone numbers and email addresses:**
 * A phone number must be an 8-digit Singapore number starting with `3`, `6`, `8` or `9`, e.g. `91234567`. Spaces, hyphens and parentheses are ignored, so `9123 4567` is also accepted.
-* An email address must have a full stop in the part after the `@`, e.g. `amirah@gmail.com`. An address such as `amirah@localhost` is not accepted.
+* Leave out the country code. Sieve is made for tutors in Singapore and only stores Singapore numbers, so every number would start with `+65`, which adds nothing. If you copy a number such as `+65 9123 4567`, enter it as `91234567`. Sieve shows a reminder if you include a country code. Numbers from other countries are not supported.
+* An email address can be up to 254 characters long. Before the `@`, it can contain letters, digits and `+`, `_`, `.` or `-`, but these symbols cannot come first, last or two in a row. After the `@`, it must be a domain name with a full stop, e.g. `amirah@gmail.com`. Addresses such as `amirah@localhost`, `o'brien@gmail.com` and `a__b@gmail.com` are not supported.
 * If your data file is from an earlier version of Sieve and contains a phone number or email address that breaks these rules, Sieve opens in read-only mode. Correct it in the [data file](#editing-the-data-file) to continue.
 </box>
 
@@ -148,6 +151,8 @@ Format: `edit INDEX [n/NAME] [p/PHONE] [e/EMAIL] [a/ADDRESS] [nt/NOTE] [fee/FEE]
 * Editing the note replaces the whole note; it does not add to the existing one. To remove a client's note, enter `nt/` without any text after it.
 * Editing the fee or due date replaces the existing value. To remove a client's fee, enter `fee/` without a value after it. To remove a client's due date, enter `due/` without a value after it.
 * A note cannot contain text that looks like another field, such as ` t/` or ` p/`, because Sieve reads it as the start of that field.
+* After an edit, the full client list is shown, so that the edited client is not hidden by an earlier `find` or `filter`.
+* If the new values are the same as the client's current ones, Sieve shows `No change: NAME already has these details.` and keeps the displayed list as it is.
 
 Examples:
 *  `edit 1 p/81112222 e/amirah.tan01@gmail.com` Edits the phone number and email address of the 1st client to be `81112222` and `amirah.tan01@gmail.com` respectively.
@@ -274,16 +279,18 @@ Deletes all clients from Sieve.
 
 Format: `clear`
 
+* `clear` takes no parameters, so `clear 3` shows an error instead of deleting every client. To delete some clients, use [`delete`](#deleting-clients-delete).
+
 ### Undoing a change: `undo`
 
 Reverts the last change to your client list.
 
 Format: `undo`
 
-* Changes can be undone one at a time, back to how your client list was when you opened Sieve.
+* Changes can be undone one at a time, back to how your client list was when you opened Sieve. To undo several changes, run `undo` once for each; `undo 3` shows an error.
 * Only commands that change your client list can be undone: `add`, `edit`, `delete`, `tag`, `untag` and `clear`.
 * Commands that do not change anything, such as `list`, `find` and `help`, are skipped. Commands that fail are also skipped.
-* An `edit`, `tag`, or `untag` that leaves the client exactly as before is also skipped. For example, this happens when the edited value is unchanged, every requested tag already exists, or none of the requested tags exist. An `undo` after it reverts the preceding change instead.
+* An `edit`, `tag`, or `untag` that leaves the client exactly as before is also skipped, and its result says that nothing changed. For example, this happens when the edited value is unchanged, every requested tag already exists, or none of the requested tags exist. An `undo` after it reverts the preceding change instead.
 * An `edit` that only changes the letter case of a tag, e.g. from `Math` to `MATH`, counts as a change and can be undone.
 * After an undo, the full client list is shown, so that the restored client is not hidden by an earlier `find`.
 * The undone change is saved to the data file straight away, like any other change.
@@ -306,7 +313,7 @@ Reapplies the last change you reverted with `undo`.
 
 Format: `redo`
 
-* Undone changes can be redone one at a time, starting from the most recently undone.
+* Undone changes can be redone one at a time, starting from the most recently undone. To redo several changes, run `redo` once for each; `redo 3` shows an error.
 * Once you make a new change after an `undo`, such as `add` or `delete`, the undone changes can no longer be redone.
 * Commands that do not change anything, such as `list`, `find` and `help`, are skipped and do not affect what can be redone.
 * After a redo, the full client list is shown.
@@ -322,14 +329,16 @@ Examples:
 Brings back commands you entered earlier, so you can run them again or fix a typo without retyping the whole command.
 
 * Press **Up** in the command box to show your previous command. Press it again to go further back. It stops at your oldest command.
-* Press **Down** to go forward again. Going past your newest command clears the command box.
+* Press **Down** to go forward again. Going past your newest command brings back what you were typing before you pressed Up, or an empty command box if you were not typing anything.
 * Every command you enter is remembered, including commands that failed and repeats of the same command.
 * A recalled command only runs when you press Enter, so you can edit it first. The cursor is placed at the end of the command.
-* Pressing Down while typing a new command keeps what you typed. Pressing Up replaces it with your previous command.
+* Pressing Down while typing a new command keeps what you typed.
+* Up and Down only recall commands when pressed on their own. With Shift, Ctrl, Alt or Cmd held, they work as usual in a text box; for example, Shift+Up selects text.
 * Your command history is cleared when you close Sieve.
 
 Examples:
 * `edit 1 p/9123 456` fails because the phone number has only 7 digits. Press Up, add the missing digit, and press Enter.
+* You are halfway through typing `add n/Amirah Tan p/91234567` and want to check your last command. Press Up to see it, then press Down to get back what you were typing.
 * After `find Amirah`, `delete 1` and `list`, press Up three times to bring back `find Amirah`.
 
 ### Scrolling a long result: Page Up and Page Down keys

@@ -81,6 +81,11 @@ public class LogicManagerTest {
     }
 
     @Test
+    public void execute_indexTooLargeForInt_showsOutOfBounds() {
+        assertCommandException("edit 2147483648 n/Amy", Messages.getIndexOutOfBoundsMessage(0));
+    }
+
+    @Test
     public void execute_validCommand_success() throws Exception {
         String listCommand = ListCommand.COMMAND_WORD;
         assertCommandSuccess(listCommand, ListCommand.MESSAGE_SUCCESS, model);

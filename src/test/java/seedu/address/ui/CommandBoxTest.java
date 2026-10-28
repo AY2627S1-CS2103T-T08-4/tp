@@ -3,6 +3,7 @@ package seedu.address.ui;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static seedu.address.testutil.Assert.assertThrows;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,6 +54,12 @@ public class CommandBoxTest {
         commandTextField = (TextField) commandBox.getRoot().lookup("#commandTextField");
         stage.setScene(new Scene(commandBox.getRoot()));
         stage.show();
+    }
+
+    @Test
+    public void constructor_null_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> new CommandBox(null, scrolledDirections::add));
+        assertThrows(NullPointerException.class, () -> new CommandBox(commandText -> null, null));
     }
 
     @Test
@@ -146,6 +153,39 @@ public class CommandBoxTest {
 
         pressKey(robot, KeyCode.DOWN);
         assertEquals("del", commandTextField.getText());
+    }
+
+    @Test
+    public void handleKeyPressed_upThenDownWhileTyping_restoresTypedText(FxRobot robot) {
+        enterCommand(robot, VALID_COMMAND);
+        robot.interact(() -> commandTextField.setText("add n/Half typed"));
+
+        pressKey(robot, KeyCode.UP);
+        assertEquals(VALID_COMMAND, commandTextField.getText());
+
+        pressKey(robot, KeyCode.DOWN);
+        assertEquals("add n/Half typed", commandTextField.getText());
+    }
+
+    @Test
+    public void handleKeyPressed_upOrDownWithModifier_leavesTextUnchanged(FxRobot robot) {
+        enterCommand(robot, VALID_COMMAND);
+        enterCommand(robot, OTHER_VALID_COMMAND);
+        robot.interact(() -> commandTextField.setText("del"));
+
+        for (KeyCode key : new KeyCode[] {KeyCode.UP, KeyCode.DOWN}) {
+            // Shift, Ctrl, Alt and Meta, one at a time
+            for (int modifier = 0; modifier < 4; modifier++) {
+                KeyEvent event = new KeyEvent(KeyEvent.KEY_PRESSED, "", "", key,
+                        modifier == 0, modifier == 1, modifier == 2, modifier == 3);
+                robot.interact(() -> commandTextField.fireEvent(event));
+                assertEquals("del", commandTextField.getText());
+            }
+        }
+
+        // The history has not moved, so a plain Up still shows the newest command
+        pressKey(robot, KeyCode.UP);
+        assertEquals(OTHER_VALID_COMMAND, commandTextField.getText());
     }
 
     @Test
