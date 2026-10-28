@@ -207,6 +207,7 @@ Format: `filter [p/PHONE]... [t/TAG]...`
 * Tag order does not matter.
 * A client must have every specified tag.
 * When phone numbers and tags are combined, a client must match both fields.
+* If no client matches, Sieve shows `0 clients found` with tips for filtering again. Use `list` to see all clients again.
 
 Examples:
 * `filter p/9123 4567` returns the client with phone number `91234567`.
