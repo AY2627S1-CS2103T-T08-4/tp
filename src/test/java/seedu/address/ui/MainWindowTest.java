@@ -51,7 +51,7 @@ public class MainWindowTest {
         Path addressBookFilePath = temporaryFolder.resolve("addressBook.json");
         StorageManager storage = new StorageManager(new JsonAddressBookStorage(addressBookFilePath),
                 new JsonUserPrefsStorage(temporaryFolder.resolve("userPrefs.json")));
-        MainWindow mainWindow = new MainWindow(stage, new LogicManager(new ModelManager(), storage),
+        MainWindow mainWindow = new MainWindow(stage, new LogicManager(new ModelManager(), storage, false),
                 addressBookFilePath);
         mainWindow.fillInnerParts();
         stage.show();

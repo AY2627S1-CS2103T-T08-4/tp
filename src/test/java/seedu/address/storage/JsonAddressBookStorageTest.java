@@ -2,6 +2,7 @@ package seedu.address.storage;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalPersons.ALICE;
 import static seedu.address.testutil.TypicalPersons.HOON;
@@ -16,6 +17,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import seedu.address.commons.exceptions.DataLoadingException;
+import seedu.address.commons.exceptions.IllegalValueException;
+import seedu.address.commons.util.JsonUtil;
 import seedu.address.model.AddressBook;
 import seedu.address.model.ReadOnlyAddressBook;
 
@@ -24,6 +27,27 @@ public class JsonAddressBookStorageTest {
 
     @TempDir
     public Path testFolder;
+
+    @Test
+    public void toModelType_invalidPhone_messageNamesClient() throws Exception {
+        JsonSerializableAddressBook data = JsonUtil
+            .readJsonFile(
+            TEST_DATA_FOLDER.resolve("invalidPhonePersonAddressBook.json"),
+            JsonSerializableAddressBook.class).get();
+        IllegalValueException e = org.junit.jupiter.api.Assertions.assertThrows(
+            IllegalValueException.class, data::toModelType);
+        assertTrue(e.getMessage().startsWith("Client 'Amirah Tan': "));
+    }
+
+    @Test
+    public void toModelType_blankName_messageUsesPosition() throws Exception {
+        JsonSerializableAddressBook data = JsonUtil.readJsonFile(
+            TEST_DATA_FOLDER.resolve("blankNamePersonAddressBook.json"),
+            JsonSerializableAddressBook.class).get();
+        IllegalValueException e = org.junit.jupiter.api.Assertions.assertThrows(
+            IllegalValueException.class, data::toModelType);
+        assertTrue(e.getMessage().startsWith("Client '#2': "));
+    }
 
     @Test
     public void readAddressBook_nullFilePath_throwsNullPointerException() {

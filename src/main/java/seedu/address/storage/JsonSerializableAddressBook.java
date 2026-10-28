@@ -47,12 +47,18 @@ class JsonSerializableAddressBook {
      */
     public AddressBook toModelType() throws IllegalValueException {
         AddressBook addressBook = new AddressBook();
-        for (JsonAdaptedPerson jsonAdaptedPerson : persons) {
-            Person person = jsonAdaptedPerson.toModelType();
-            if (addressBook.hasPerson(person)) {
-                throw new IllegalValueException(MESSAGE_DUPLICATE_PERSON);
+        for (int i = 0; i < persons.size(); i++) {
+            JsonAdaptedPerson jsonAdaptedPerson = persons.get(i);
+            try {
+                Person person = jsonAdaptedPerson.toModelType();
+                if (addressBook.hasPerson(person)) {
+                    throw new IllegalValueException(MESSAGE_DUPLICATE_PERSON);
+                }
+                addressBook.addPerson(person);
+            } catch (IllegalValueException e) {
+                throw new IllegalValueException(
+                    String.format("Client '%s': %s", jsonAdaptedPerson.getDisplayName(i), e.getMessage()), e);
             }
-            addressBook.addPerson(person);
         }
         return addressBook;
     }

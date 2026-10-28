@@ -47,6 +47,17 @@ public class UiManagerTest {
     }
 
     @Test
+    public void verifyStorageStateAndAlert_customReason_showsReasonInContent() {
+        String reason = "Client 'Amirah Tan': Invalid Phone Number!";
+        UiManager uiManager = createUiManager(createLogic(true, reason));
+
+        uiManager.verifyStorageStateAndAlert();
+
+        assertEquals(reason + " Displaying empty list. Please fix or delete the data file at "
+            + dataFilePath.toAbsolutePath() + " and restart.", shownContent);
+    }
+
+    @Test
     public void verifyStorageStateAndAlert_readOnlyMode_showsCorruptionWarning() {
         UiManager uiManager = createUiManager(createLogic(true));
 
@@ -56,7 +67,8 @@ public class UiManagerTest {
         assertEquals(AlertType.WARNING, shownType);
         assertEquals("Data File Corruption Error", shownTitle);
         assertEquals("Local data file is corrupted.", shownHeader);
-        assertEquals("Displaying empty list. Please fix or delete the data file at "
+        assertEquals(DataLoadingException.MESSAGE_UNKNOWN_REASON
+            + " Displaying empty list. Please fix or delete the data file at "
             + dataFilePath.toAbsolutePath() + " and restart.", shownContent);
     }
 
@@ -80,10 +92,14 @@ public class UiManagerTest {
         assertEquals(AlertType.ERROR, shownType);
     }
 
+    private Logic createLogic(boolean isDataCorrupted) {
+        return createLogic(isDataCorrupted, DataLoadingException.MESSAGE_UNKNOWN_REASON);
+    }
+
     /**
      * Returns a {@code Logic} whose storage either throws on read (corrupted) or has no data file (healthy).
      */
-    private Logic createLogic(boolean isDataCorrupted) {
+    private Logic createLogic(boolean isDataCorrupted, String reason) {
         JsonAddressBookStorage addressBookStorage = new JsonAddressBookStorage(dataFilePath) {
             @Override
             public Optional<ReadOnlyAddressBook> readAddressBook() throws DataLoadingException {
@@ -95,7 +111,7 @@ public class UiManagerTest {
         };
         JsonUserPrefsStorage userPrefsStorage = new JsonUserPrefsStorage(temporaryFolder.resolve("userPrefs.json"));
         StorageManager storage = new StorageManager(addressBookStorage, userPrefsStorage);
-        return new LogicManager(new ModelManager(), storage, isDataCorrupted);
+        return new LogicManager(new ModelManager(), storage, isDataCorrupted, reason);
     }
 
     /**

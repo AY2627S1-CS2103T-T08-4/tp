@@ -65,7 +65,7 @@ public class LogicManagerTest {
             new JsonAddressBookStorage(temporaryFolder.resolve("addressBook.json"));
         JsonUserPrefsStorage userPrefsStorage = new JsonUserPrefsStorage(temporaryFolder.resolve("userPrefs.json"));
         storage = new StorageManager(addressBookStorage, userPrefsStorage);
-        logic = new LogicManager(model, storage);
+        logic = new LogicManager(model, storage, false);
     }
 
     @Test
@@ -177,12 +177,21 @@ public class LogicManagerTest {
     }
 
     @Test
+    public void getDataCorruptionReason_readOnly_returnsGivenReason() {
+        LogicManager lm = new LogicManager(model, storage, true,
+            "Client 'Amy': Invalid Phone Number!");
+        assertEquals("Client 'Amy': Invalid Phone Number!", lm.getDataCorruptionReason());
+        assertEquals("", new LogicManager(model, storage,
+            false, "ignored").getDataCorruptionReason());
+    }
+
+    @Test
     public void execute_mutatingCommandInReadOnlyMode_throwsCommandException() {
         StorageManager storage = createCorruptStorageHelper("corruptedAddressBook.json", "corruptPrefs.json");
         Logic logicInReadOnly = new LogicManager(model, storage, true);
-        String expectedError = "Error: Local data file is corrupted at "
-            + temporaryFolder.resolve("corruptedAddressBook.json")
-            + ". Displaying empty list. Please fix or delete the data file and restart.";
+        String expectedError = String.format(LogicManager.READ_ONLY_ERROR_FORMAT,
+            temporaryFolder.resolve("corruptedAddressBook.json"),
+            DataLoadingException.MESSAGE_UNKNOWN_REASON);
 
         assertThrows(CommandException.class, expectedError, () -> logicInReadOnly.execute(
             "add n/Amirah Tan p/91234567 e/amirah@gmail.com a/Blk 123 Yishun"));
@@ -354,7 +363,7 @@ public class LogicManagerTest {
             new JsonUserPrefsStorage(temporaryFolder.resolve("ExceptionUserPrefs.json"));
         StorageManager storage = new StorageManager(addressBookStorage, userPrefsStorage);
 
-        logic = new LogicManager(model, storage);
+        logic = new LogicManager(model, storage, false);
 
         // Triggers the saveAddressBook method by executing an add command
         String addCommand = AddCommand.COMMAND_WORD + NAME_DESC_AMY + PHONE_DESC_AMY

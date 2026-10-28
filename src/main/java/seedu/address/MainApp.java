@@ -45,6 +45,7 @@ public class MainApp extends Application {
     protected boolean isInitialDataCorrupted = false;
     protected Path userPrefsFilePath = USER_PREFS_FILE_PATH;
     protected Path addressBookFilePath = ADDRESS_BOOK_FILE_PATH;
+    protected String initialDataCorruptionReason = "";
 
     @Override
     public void init() throws Exception {
@@ -58,7 +59,7 @@ public class MainApp extends Application {
 
         model = initModelManager(storage, userPrefs);
 
-        logic = new LogicManager(model, storage, isInitialDataCorrupted);
+        logic = new LogicManager(model, storage, isInitialDataCorrupted, initialDataCorruptionReason);
 
         ui = new UiManager(logic, storage.getAddressBookFilePath());
     }
@@ -81,10 +82,11 @@ public class MainApp extends Application {
             }
             initialData = addressBookOptional.orElseGet(SampleDataUtil::getSampleAddressBook);
         } catch (DataLoadingException e) {
-            logger.warning("Data file at " + storage.getAddressBookFilePath() + " could not be loaded."
-                + " Will be starting with an empty client list.");
+            logger.warning("Data file at " + storage.getAddressBookFilePath() + " could not be loaded: "
+                + e.getReason() + " Will be starting with an empty client list.");
             initialData = new AddressBook();
             isInitialDataCorrupted = true;
+            initialDataCorruptionReason = e.getReason();
         }
 
         return new ModelManager(initialData, userPrefs);

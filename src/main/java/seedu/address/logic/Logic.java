@@ -12,6 +12,13 @@ import seedu.address.model.person.Person;
  */
 public interface Logic {
     /**
+     * Returns the reason the data file could not be loaded, or an empty string if it loaded fine.
+     */
+    default String getDataCorruptionReason() {
+        return "";
+    }
+
+    /**
      * Executes the command and returns the result.
      *
      * @param commandText The command as entered by the user.
