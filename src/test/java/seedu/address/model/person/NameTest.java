@@ -38,6 +38,9 @@ public class NameTest {
         assertFalse(Name.isValidName("Siti a/l Rahman")); // '/' is the prefix delimiter
         assertFalse(Name.isValidName("(NHHS) John Tan")); // starts with a parenthesis
         assertFalse(Name.isValidName("Rajesh s\\o Kumar")); // backslash
+        assertFalse(Name.isValidName("John\tTan")); // whitespace other than a space, which normalizeName replaces
+        assertFalse(Name.isValidName("José Tan")); // accented letter, not supported (see the UG)
+        assertFalse(Name.isValidName("陈伟明")); // starts with a Chinese character, not supported (see the UG)
         assertFalse(Name.isValidName("a".repeat(Name.MAX_LENGTH + 1))); // one character over the limit
 
         // valid name

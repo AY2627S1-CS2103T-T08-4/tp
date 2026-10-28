@@ -54,7 +54,7 @@ public class ResultDisplayTest {
     }
 
     @Test
-    public void constructor_hiddenUntilFirstMessage() {
+    public void constructor_noMessageYet_hidden() {
         assertFalse(root.isVisible());
         assertFalse(root.isManaged());
     }
@@ -63,19 +63,14 @@ public class ResultDisplayTest {
     public void setFeedbackToUser_message_shownAsSuccess(FxRobot robot) {
         robot.interact(() -> resultDisplay.setFeedbackToUser(SUCCESS_MESSAGE));
 
-        assertEquals(SUCCESS_MESSAGE, resultMessage.getText());
-        assertTrue(root.isVisible());
-        assertTrue(root.isManaged());
-        assertFalse(isShownAsError());
+        assertShown(SUCCESS_MESSAGE, false, false);
     }
 
     @Test
     public void setErrorToUser_message_shownAsError(FxRobot robot) {
         robot.interact(() -> resultDisplay.setErrorToUser(ERROR_MESSAGE));
 
-        assertEquals(ERROR_MESSAGE, resultMessage.getText());
-        assertTrue(root.isVisible());
-        assertTrue(isShownAsError());
+        assertShown(ERROR_MESSAGE, true, false);
     }
 
     @Test
@@ -83,19 +78,15 @@ public class ResultDisplayTest {
         robot.interact(() -> resultDisplay.setErrorToUser(ERROR_MESSAGE));
         robot.interact(() -> resultDisplay.setFeedbackToUser(SUCCESS_MESSAGE));
 
-        assertEquals(SUCCESS_MESSAGE, resultMessage.getText());
-        assertFalse(isShownAsError());
+        assertShown(SUCCESS_MESSAGE, false, false);
     }
 
     @Test
-    public void setEmptySearchToUser_message_shownAsEmptySearch(FxRobot robot) {
+    public void setEmptySearchToUser_afterError_shownAsEmptySearchOnly(FxRobot robot) {
         robot.interact(() -> resultDisplay.setErrorToUser(ERROR_MESSAGE));
         robot.interact(() -> resultDisplay.setEmptySearchToUser(EMPTY_SEARCH_MESSAGE));
 
-        assertEquals(EMPTY_SEARCH_MESSAGE, resultMessage.getText());
-        assertTrue(root.isVisible());
-        assertTrue(isShownAsEmptySearch());
-        assertFalse(isShownAsError());
+        assertShown(EMPTY_SEARCH_MESSAGE, false, true);
     }
 
     @Test
@@ -103,12 +94,20 @@ public class ResultDisplayTest {
         robot.interact(() -> resultDisplay.setEmptySearchToUser(EMPTY_SEARCH_MESSAGE));
         robot.interact(() -> resultDisplay.setFeedbackToUser(SUCCESS_MESSAGE));
 
-        assertFalse(isShownAsEmptySearch());
+        assertShown(SUCCESS_MESSAGE, false, false);
+    }
+
+    @Test
+    public void setErrorToUser_afterEmptySearch_shownAsErrorOnly(FxRobot robot) {
+        robot.interact(() -> resultDisplay.setEmptySearchToUser(EMPTY_SEARCH_MESSAGE));
+        robot.interact(() -> resultDisplay.setErrorToUser(ERROR_MESSAGE));
+
+        assertShown(ERROR_MESSAGE, true, false);
     }
 
     @Test
     public void setFeedbackToUser_longMessage_scrollsWithinMaxHeight(FxRobot robot) {
-        showLongMessage(robot);
+        showAndLayOut(robot, LONG_MESSAGE);
 
         assertEquals(resultScrollPane.getMaxHeight(), resultScrollPane.getHeight());
         // Every line can be scrolled to, as the label is tall enough for the whole message
@@ -126,9 +125,8 @@ public class ResultDisplayTest {
     }
 
     @Test
-    public void maxHeight_wholeNumberOfLines(FxRobot robot) {
-        robot.interact(() -> resultDisplay.setFeedbackToUser(SUCCESS_MESSAGE));
-        robot.interact(() -> root.layout());
+    public void maxHeight_lightTheme_wholeNumberOfLines(FxRobot robot) {
+        showAndLayOut(robot, SUCCESS_MESSAGE);
 
         // Otherwise, the last line in view is cut in half
         double lineHeight = resultMessage.getHeight();
@@ -137,7 +135,7 @@ public class ResultDisplayTest {
 
     @Test
     public void scrollPage_downThroughLongMessage_movesOnePageAtATimeUntilLastLine(FxRobot robot) {
-        showLongMessage(robot);
+        showAndLayOut(robot, LONG_MESSAGE);
         double pageHeight = resultScrollPane.getViewportBounds().getHeight();
 
         robot.interact(() -> resultDisplay.scrollPage(VerticalDirection.DOWN));
@@ -155,7 +153,7 @@ public class ResultDisplayTest {
 
     @Test
     public void scrollPage_upFromLastLine_movesOnePageUpUntilFirstLine(FxRobot robot) {
-        showLongMessage(robot);
+        showAndLayOut(robot, LONG_MESSAGE);
         double pageHeight = resultScrollPane.getViewportBounds().getHeight();
         double hiddenHeight = resultMessage.getHeight() - pageHeight;
         robot.interact(() -> resultScrollPane.setVvalue(resultScrollPane.getVmax()));
@@ -175,8 +173,7 @@ public class ResultDisplayTest {
 
     @Test
     public void scrollPage_shortMessage_doesNotScroll(FxRobot robot) {
-        robot.interact(() -> resultDisplay.setFeedbackToUser(SUCCESS_MESSAGE));
-        robot.interact(() -> root.layout());
+        showAndLayOut(robot, SUCCESS_MESSAGE);
 
         robot.interact(() -> resultDisplay.scrollPage(VerticalDirection.DOWN));
         assertEquals(resultScrollPane.getVmin(), resultScrollPane.getVvalue());
@@ -198,10 +195,22 @@ public class ResultDisplayTest {
     }
 
     /**
-     * Shows {@code LONG_MESSAGE}, which is too long to show in full, and lays it out.
+     * Asserts that {@code message} is shown, and whether it is styled as an error and as an empty search.
      */
-    private void showLongMessage(FxRobot robot) {
-        robot.interact(() -> resultDisplay.setFeedbackToUser(LONG_MESSAGE));
+    private void assertShown(String message, boolean isError, boolean isEmptySearch) {
+        assertEquals(message, resultMessage.getText());
+        assertTrue(root.isVisible());
+        assertTrue(root.isManaged());
+        assertEquals(isError, isShownAsError());
+        assertEquals(isEmptySearch, isShownAsEmptySearch());
+    }
+
+    /**
+     * Shows {@code message} and lays it out in a window sized to fit it.
+     * The window is reused from the previous test, which may have left it too small for even one line.
+     */
+    private void showAndLayOut(FxRobot robot, String message) {
+        robot.interact(() -> resultDisplay.setFeedbackToUser(message));
         robot.interact(() -> {
             stage.sizeToScene();
             root.layout();

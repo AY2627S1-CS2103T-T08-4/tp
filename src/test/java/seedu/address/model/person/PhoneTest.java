@@ -37,6 +37,7 @@ public class PhoneTest {
         assertFalse(Phone.isValidPhone("00000000")); // not a Singapore number
         assertFalse(Phone.isValidPhone("21234567")); // starts with 2, just below 3
         assertFalse(Phone.isValidPhone("41234567")); // starts with 4, between 3 and 6
+        assertFalse(Phone.isValidPhone("51234567")); // starts with 5, just below 6
         assertFalse(Phone.isValidPhone("71234567")); // starts with 7, between 6 and 8
 
         // valid phone numbers: 8 digits starting with 3, 6, 8 or 9
