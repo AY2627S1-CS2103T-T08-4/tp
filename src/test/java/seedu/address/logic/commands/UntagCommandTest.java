@@ -55,12 +55,13 @@ public class UntagCommandTest {
     }
 
     @Test
-    public void execute_existingAndMissingTags_messageListsOnlyRemovedTags() {
+    public void execute_existingAndMissingTags_reportsRemovedAndNotFoundTags() {
         Person personToUntag = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
         UntagCommand untagCommand = new UntagCommand(INDEX_FIRST_PERSON, List.of(FRIENDS, PHYSICS));
 
         String expectedMessage = String.format(UntagCommand.MESSAGE_UNTAG_PERSON_SUCCESS,
-                personToUntag.getName(), FRIENDS.tagName);
+                personToUntag.getName(), FRIENDS.tagName)
+                + String.format(UntagCommand.MESSAGE_TAGS_NOT_FOUND, PHYSICS.tagName);
         Model expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
         expectedModel.setPerson(personToUntag, withoutTags(personToUntag, Set.of(FRIENDS)));
 
@@ -69,13 +70,13 @@ public class UntagCommandTest {
     }
 
     @Test
-    public void execute_existingTagWithDifferentCase_removesTag() {
+    public void execute_existingTagWithDifferentCase_reportsStoredTagName() {
         Person personToUntag = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
         Tag differentlyCasedTag = new Tag(FRIENDS.tagName.toUpperCase(Locale.ROOT));
         UntagCommand untagCommand = new UntagCommand(INDEX_FIRST_PERSON, List.of(differentlyCasedTag));
 
         String expectedMessage = String.format(UntagCommand.MESSAGE_UNTAG_PERSON_SUCCESS,
-                personToUntag.getName(), differentlyCasedTag.tagName);
+                personToUntag.getName(), FRIENDS.tagName);
         Model expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
         expectedModel.setPerson(personToUntag, withoutTags(personToUntag, Set.of(FRIENDS)));
 
@@ -83,11 +84,12 @@ public class UntagCommandTest {
     }
 
     @Test
-    public void execute_missingTag_returnsNotTaggedMessageWithoutChangingPerson() {
+    public void execute_missingTag_reportsNotFoundTagWithoutChangingPerson() {
         Person personToUntag = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
         UntagCommand untagCommand = new UntagCommand(INDEX_FIRST_PERSON, List.of(PHYSICS));
 
-        String expectedMessage = String.format(UntagCommand.MESSAGE_PERSON_NOT_TAGGED, personToUntag.getName());
+        String expectedMessage = String.format(UntagCommand.MESSAGE_PERSON_NOT_TAGGED,
+                personToUntag.getName(), PHYSICS.tagName);
         Model expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
 
         assertCommandSuccess(untagCommand, model, expectedMessage, expectedModel);

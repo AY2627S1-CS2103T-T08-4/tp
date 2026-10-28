@@ -29,7 +29,9 @@ public class TagCommand extends Command {
         + " INDEX t/TAG [t/MORE_TAGS]...";
 
     public static final String MESSAGE_TAG_PERSON_SUCCESS = "Tagged %1$s with: %2$s.";
-    public static final String MESSAGE_PERSON_ALREADY_TAGGED = "%1$s has all of the tag(s).";
+    public static final String MESSAGE_TAGS_ALREADY_PRESENT = "\nAlready present (ignored): %s.";
+    public static final String MESSAGE_PERSON_ALREADY_TAGGED =
+            "No tags added to %1$s. Already present (ignored): %2$s.";
 
     private final Index targetIndex;
     private final List<Tag> tagsToAdd;
@@ -57,9 +59,11 @@ public class TagCommand extends Command {
 
         Person personToTag = lastShownList.get(targetIndex.getZeroBased());
         List<Tag> newTagsToAdd = getNewTags(personToTag);
+        List<Tag> existingTags = getExistingTags(personToTag);
 
         if (newTagsToAdd.isEmpty()) {
-            return new CommandResult(String.format(MESSAGE_PERSON_ALREADY_TAGGED, personToTag.getName()));
+            return new CommandResult(String.format(MESSAGE_PERSON_ALREADY_TAGGED,
+                    personToTag.getName(), getTagNames(existingTags)));
         }
 
         Person taggedPerson = createTaggedPerson(personToTag, newTagsToAdd);
@@ -67,11 +71,12 @@ public class TagCommand extends Command {
         model.setPerson(personToTag, taggedPerson);
         updateDisplayedPersons(model, displayedPersons, personToTag, taggedPerson);
 
-        String tagNames = newTagsToAdd.stream()
-                .map(tag -> tag.tagName)
-                .collect(Collectors.joining(", "));
+        String message = String.format(MESSAGE_TAG_PERSON_SUCCESS, personToTag.getName(), getTagNames(newTagsToAdd));
+        if (!existingTags.isEmpty()) {
+            message += String.format(MESSAGE_TAGS_ALREADY_PRESENT, getTagNames(existingTags));
+        }
 
-        return new CommandResult(String.format(MESSAGE_TAG_PERSON_SUCCESS, personToTag.getName(), tagNames));
+        return new CommandResult(message);
     }
 
     @Override
@@ -87,6 +92,24 @@ public class TagCommand extends Command {
                 .stream()
                 .filter(tag -> !person.getTags().contains(tag))
                 .toList();
+    }
+
+    /**
+     * Returns the requested tags that {@code person} already has, using their stored names.
+     */
+    private List<Tag> getExistingTags(Person person) {
+        return tagsToAdd.stream()
+                .flatMap(requestedTag -> person.getTags().stream().filter(requestedTag::equals))
+                .toList();
+    }
+
+    /**
+     * Returns the tag names as a comma-separated string.
+     */
+    private String getTagNames(List<Tag> tags) {
+        return tags.stream()
+                .map(tag -> tag.tagName)
+                .collect(Collectors.joining(", "));
     }
 
     /**

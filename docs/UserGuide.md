@@ -226,7 +226,7 @@ Format: `tag INDEX t/TAG [t/MORE_TAGS]...`
 * Repeated spaces within a tag are collapsed; for example, `Sec  4` is stored as `Sec 4`.
 * New tags are added alongside the client's existing tags.
 * Adding a tag the client already has does not create a duplicate.
-* The success message lists only newly added tags. If the client already has every specified tag, Sieve reports that the client "has all of the tag(s)" and leaves the client unchanged.
+* The result lists newly added tags and any tags already attached to the client. If every requested tag is already attached, Sieve reports that no tags were added and lists the ignored tags.
 * After a tag is added, the same clients remain displayed with the updated tag.
 
 Examples:
@@ -243,7 +243,7 @@ Format: `untag INDEX t/TAG [t/MORE_TAGS]...`
 * Tag matching is case-insensitive; for example, `t/math` removes an existing `Math` tag.
 * Tags not currently attached to the client are ignored.
 * Other tags remain unchanged.
-* The success message lists only tags that were actually removed. If none of the specified tags exist, Sieve reports that the client does not have any of them and leaves the client unchanged.
+* The result lists removed tags and any tags not attached to the client. If none of the specified tags exist, Sieve reports that no tags were removed and lists the ignored tags. Removed tags use the spelling stored on the client card.
 * After a tag is removed, the same clients remain displayed with the updated tag.
 
 Examples:

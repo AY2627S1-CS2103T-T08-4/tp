@@ -296,9 +296,9 @@ If no client matches, `FindCommand` returns `FindCommand.MESSAGE_NO_CLIENTS_FOUN
 
 ### Tag and untag features
 
-`TagCommandParser` and `UntagCommandParser` parse the displayed client index and one or more `t/` values using `ParserUtil.parseIndex` and `ParserUtil.parseTag`. Their command constructors remove duplicate requested tags while preserving input order.
+`TagCommandParser` and `UntagCommandParser` parse the displayed client index and one or more `t/` values using `ParserUtil.parseIndex` and `ParserUtil.parseTag`. They reject unknown prefixes before parsing tag values. Their command constructors remove duplicate requested tags while preserving input order.
 
-Both commands replace the selected immutable `Person` with a copy containing an updated tag set. `TagCommand` adds only tags the client does not already have, while `UntagCommand` removes only tags the client currently has. Tag names are normalized by trimming and collapsing repeated whitespace, and equality is case-insensitive. After a successful change, both commands preserve the currently displayed clients, replacing the updated client in that list even if it no longer matches an earlier filter. Confirmation messages list only tags that were actually added or removed; when no change is needed, the commands leave the model unchanged and return a specific no-change message.
+Both commands replace the selected immutable `Person` with a copy containing an updated tag set. `TagCommand` adds only tags the client does not already have, while `UntagCommand` removes only tags the client currently has. Tag names are normalized by trimming and collapsing repeated whitespace, and equality is case-insensitive. After a successful change, both commands preserve the currently displayed clients, replacing the updated client in that list even if it no longer matches an earlier filter. Confirmation messages report both the tags changed and the requested tags ignored; `untag` uses each stored tag name in its confirmation. When no change is needed, the commands leave the model unchanged and report the ignored tags.
 
 ### Notes feature
 
@@ -826,7 +826,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 * 4a. The client has none of the specified tags.
 
-    * 4a1. Sieve reports that the client does not have any specified tags and leaves the client unchanged.
+    * 4a1. Sieve reports that no tags were removed, lists the tags not found, and leaves the client unchanged.
 
 **Use case: UC4 - Delete one or more clients who no longer need tuition**
 
@@ -1096,7 +1096,10 @@ The data file is `data/sieve.json` inside that folder.
        Expected: `Physics` is added while `Math` is not duplicated. The success message lists only `Physics`.
 
     1. Test case: `tag 1 t/Math`<br>
-       Expected: The client is unchanged and Sieve shows `Amirah Tan has all of the tag(s).`
+       Expected: The client is unchanged and Sieve reports that no tags were added, listing `Math` as already present.
+
+    1. Test case: `tag 1 t/Math z/x`<br>
+       Expected: The client is unchanged and Sieve reports `z/` as an unknown prefix.
 
 ### Removing tags from clients
 
@@ -1105,7 +1108,7 @@ The data file is `data/sieve.json` inside that folder.
     1. Prerequisites: Start with the sample data, where `Amirah Tan` has the `Math`, `Sec4`, and `Urgent` tags.
 
     1. Test case: `untag 1 t/Math t/Physics`<br>
-       Expected: `Math` is removed while `Sec4` and `Urgent` remain. The success message lists only `Math`.
+       Expected: `Math` is removed while `Sec4` and `Urgent` remain. The result lists `Math` as removed and `Physics` as not found.
 
     1. Test case: `untag 1 t/SEC4`<br>
        Expected: `Sec4` is removed despite the different letter case.
@@ -1116,7 +1119,10 @@ The data file is `data/sieve.json` inside that folder.
        Expected: `Physics` is removed from `Brandon Sim`, and `Brandon Sim` remains visible in the filtered list.
 
     1. Test case: `untag 1 t/Biology`<br>
-       Expected: The client is unchanged and Sieve reports that the client does not have any specified tags.
+       Expected: The client is unchanged and Sieve reports that no tags were removed, listing `Biology` as not found.
+
+    1. Test case: `untag 1 t/Math z/x`<br>
+       Expected: The client is unchanged and Sieve reports `z/` as an unknown prefix.
 
     1. Test case: `untag 1 t/`<br>
        Expected: The client is unchanged and an error message about the tag format is shown.
