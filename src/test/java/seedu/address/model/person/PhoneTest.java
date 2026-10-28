@@ -72,6 +72,7 @@ public class PhoneTest {
         assertTrue(Phone.hasCountryCode("+14155552671")); // another country
         assertTrue(Phone.hasCountryCode("+")); // '+' alone
         assertTrue(Phone.hasCountryCode("6591234567")); // Singapore without '+'
+        assertTrue(Phone.hasCountryCode("006591234567")); // Singapore with '00' in place of '+'
 
         // without a country code
         assertFalse(Phone.hasCountryCode("91234567")); // Singapore number
@@ -79,6 +80,7 @@ public class PhoneTest {
         assertFalse(Phone.hasCountryCode("659123456")); // 65 followed by 7 digits
         assertFalse(Phone.hasCountryCode("65912345678")); // 65 followed by 9 digits
         assertFalse(Phone.hasCountryCode("9123+6545")); // '+' not at the start
+        assertFalse(Phone.hasCountryCode("00912345")); // 00 followed by 6 digits, an invalid 8-digit number
     }
 
     @Test

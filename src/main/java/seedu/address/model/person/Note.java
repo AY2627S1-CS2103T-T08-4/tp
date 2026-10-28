@@ -3,6 +3,8 @@ package seedu.address.model.person;
 import static java.util.Objects.requireNonNull;
 import static seedu.address.commons.util.AppUtil.checkArgument;
 
+import seedu.address.commons.util.StringUtil;
+
 /**
  * Represents a Person's free-text note in the address book.
  * An empty note means the client has no note.
@@ -36,8 +38,7 @@ public class Note {
      * @param note A note as typed by the user.
      */
     public static String normalizeNote(String note) {
-        requireNonNull(note);
-        return note.trim().replaceAll("\\s+", " ");
+        return StringUtil.normalizeWhitespace(note);
     }
 
     /**

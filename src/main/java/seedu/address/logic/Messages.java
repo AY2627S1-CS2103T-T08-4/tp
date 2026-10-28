@@ -16,6 +16,7 @@ public class Messages {
     public static final String MESSAGE_INVALID_COMMAND_FORMAT = "Invalid command format!\n%1$s";
     public static final String MESSAGE_DUPLICATE_FIELDS =
                 "Multiple values specified for the following single-valued field(s): ";
+    public static final String MESSAGE_SHOWING_ALL_CLIENTS = "Showing all clients.";
 
     private static final String MESSAGE_UNKNOWN_PREFIX =
             "Unknown prefix %1$s. Check it for a typo, or type help to see the prefixes each command accepts.";
@@ -72,6 +73,19 @@ public class Messages {
      */
     public static String getNameAlreadyUsedMessage(Person existing) {
         return String.format(MESSAGE_NAME_ALREADY_USED, existing.getName(), existing.getPhone());
+    }
+
+    /**
+     * Returns the error message for {@code person} having the same name as the {@code existing} client.
+     * If their phone numbers also match, the client was most likely added before.
+     * Otherwise, they may be a different client who happens to have the same name.
+     */
+    public static String getDuplicateMessage(Person existing, Person person) {
+        // Add and edit only call this with the client that Model#findPersonWithSameName returned
+        assert existing.hasSameName(person) : "Only clients with the same name are duplicates";
+        return existing.hasSamePhone(person)
+                ? getClientAlreadyExistsMessage(existing)
+                : getNameAlreadyUsedMessage(existing);
     }
 
     /**

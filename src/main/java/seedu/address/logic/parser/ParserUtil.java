@@ -38,7 +38,7 @@ public class ParserUtil {
             return Index.fromOneBased(Integer.parseInt(trimmedIndex));
         }
         // Only digits, not all zeros, yet not a valid int, so the number overflowed
-        if (trimmedIndex.matches("[0-9]+") && !trimmedIndex.matches("0+")) {
+        if (trimmedIndex.matches("\\d+") && !trimmedIndex.matches("0+")) {
             return Index.fromOneBased(Integer.MAX_VALUE);
         }
         throw new ParseException(MESSAGE_INVALID_INDEX);

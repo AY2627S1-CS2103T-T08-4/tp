@@ -21,7 +21,7 @@ public class CommandHistory {
 
     /**
      * Saves {@code command} as the newest command and moves back to the end of the history,
-     * so that {@link #getPreviousCommand()} returns {@code command} next.
+     * so that {@link #getPreviousCommand(String)} returns {@code command} next.
      */
     public void add(String command) {
         requireNonNull(command);

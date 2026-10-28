@@ -55,6 +55,7 @@ public class AddressTest {
         assertTrue(Address.isValidAddress("\u65B0\u52A0\u5761")); // letters of another language (Chinese)
         assertTrue(Address.isValidAddress("123")); // digits only
         assertTrue(Address.isValidAddress("#04-12")); // symbols and digits only
+        assertTrue(Address.isValidAddress("Online")); // the placeholder that MESSAGE_CONSTRAINTS suggests
         assertTrue(Address.isValidAddress("Leng Inc; 1234 Market St; San Francisco CA 2349879; USA")); // long address
         assertTrue(Address.isValidAddress("a".repeat(MAX_LENGTH))); // exactly at the limit
     }
