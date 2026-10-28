@@ -37,8 +37,12 @@ public class FilterCommand extends Command {
     public CommandResult execute(Model model) {
         requireNonNull(model);
         model.updateFilteredPersonList(predicate);
-        return new CommandResult(
-                Messages.getPersonsListedOverviewMessage(model.getFilteredPersonList().size()));
+        int matchCount = model.getFilteredPersonList().size();
+        String message = Messages.getPersonsListedOverviewMessage(matchCount);
+        if (matchCount == 0) {
+            return CommandResult.forEmptySearch(message);
+        }
+        return new CommandResult(message);
     }
 
     @Override

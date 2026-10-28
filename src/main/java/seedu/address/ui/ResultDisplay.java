@@ -11,12 +11,15 @@ import javafx.scene.layout.Region;
 
 /**
  * A UI component that displays the result of a command execution.
- * A success message is shown with a tick, and an error message with a cross.
+ * A success message is shown with a tick, an error message with a cross,
+ * and the message for a search that matched no clients with a grey "i".
  */
 public class ResultDisplay extends UiPart<Region> {
 
     /** Matched by {@code .result-display:error} in the CSS while an error message is shown. */
     private static final PseudoClass ERROR_PSEUDO_CLASS = PseudoClass.getPseudoClass("error");
+    /** Matched by {@code .result-display:empty-search} in the CSS while an empty search message is shown. */
+    private static final PseudoClass EMPTY_SEARCH_PSEUDO_CLASS = PseudoClass.getPseudoClass("empty-search");
     private static final String FXML = "ResultDisplay.fxml";
 
     @FXML
@@ -41,6 +44,15 @@ public class ResultDisplay extends UiPart<Region> {
     public void setFeedbackToUser(String feedbackToUser) {
         requireNonNull(feedbackToUser);
         showMessage(feedbackToUser, false);
+    }
+
+    /**
+     * Shows {@code message} as the result of a search that matched no clients.
+     */
+    public void setEmptySearchToUser(String message) {
+        requireNonNull(message);
+        showMessage(message, false);
+        getRoot().pseudoClassStateChanged(EMPTY_SEARCH_PSEUDO_CLASS, true);
     }
 
     /**
@@ -76,6 +88,7 @@ public class ResultDisplay extends UiPart<Region> {
         resultMessage.setText(message);
         resultScrollPane.setVvalue(0); // start each new message from its first line
         getRoot().pseudoClassStateChanged(ERROR_PSEUDO_CLASS, isError);
+        getRoot().pseudoClassStateChanged(EMPTY_SEARCH_PSEUDO_CLASS, false);
         getRoot().setVisible(true);
         getRoot().setManaged(true);
     }

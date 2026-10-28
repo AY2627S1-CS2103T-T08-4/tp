@@ -25,6 +25,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import seedu.address.logic.LogicManager;
+import seedu.address.logic.commands.FindCommand;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.model.ModelManager;
 import seedu.address.model.person.Phone;
@@ -36,6 +37,7 @@ import seedu.address.storage.StorageManager;
 public class MainWindowTest {
 
     private static final PseudoClass ERROR_PSEUDO_CLASS = PseudoClass.getPseudoClass("error");
+    private static final PseudoClass EMPTY_SEARCH_PSEUDO_CLASS = PseudoClass.getPseudoClass("empty-search");
 
     @TempDir
     public Path temporaryFolder;
@@ -60,6 +62,14 @@ public class MainWindowTest {
 
         assertTrue(getResultMessage().getText().startsWith(ListCommand.MESSAGE_SUCCESS));
         assertFalse(getResultDisplay().getPseudoClassStates().contains(ERROR_PSEUDO_CLASS));
+    }
+
+    @Test
+    public void executeCommand_searchWithNoMatches_showsEmptySearch(FxRobot robot) {
+        enterCommand(robot, FindCommand.COMMAND_WORD + " Amirah");
+
+        assertTrue(getResultMessage().getText().startsWith(FindCommand.MESSAGE_NO_CLIENTS_FOUND));
+        assertTrue(getResultDisplay().getPseudoClassStates().contains(EMPTY_SEARCH_PSEUDO_CLASS));
     }
 
     @Test

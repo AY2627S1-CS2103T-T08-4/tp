@@ -166,6 +166,13 @@
     -fx-text-fill: -sieve-error;
 }
 
+/* :empty-search is set by ResultDisplay when find or filter matches no clients */
+.result-display:empty-search .result-icon {
+    -fx-background-color: -sieve-text-muted;
+    /* a circle with an "i" cut out: the "i" is drawn in the opposite direction, which leaves it unfilled */
+    -fx-shape: "M8 0.5 A7.5 7.5 0 1 1 7.99 0.5 Z M7 3.5 L7 5.5 L9 5.5 L9 3.5 Z M7 7 L7 12.5 L9 12.5 L9 7 Z";
+}
+
 .status-bar .label {
     -fx-text-fill: -sieve-text-muted;
     -fx-padding: 4px;

@@ -19,13 +19,21 @@ public class CommandResult {
     /** The application should exit. */
     private final boolean exit;
 
+    /** A search ran but matched no clients. */
+    private final boolean emptySearch;
+
     /**
      * Constructs a {@code CommandResult} with the specified fields.
      */
     public CommandResult(String feedbackToUser, boolean showHelp, boolean exit) {
+        this(feedbackToUser, showHelp, exit, false);
+    }
+
+    private CommandResult(String feedbackToUser, boolean showHelp, boolean exit, boolean emptySearch) {
         this.feedbackToUser = requireNonNull(feedbackToUser);
         this.showHelp = showHelp;
         this.exit = exit;
+        this.emptySearch = emptySearch;
     }
 
     /**
@@ -34,6 +42,13 @@ public class CommandResult {
      */
     public CommandResult(String feedbackToUser) {
         this(feedbackToUser, false, false);
+    }
+
+    /**
+     * Returns a {@code CommandResult} for a search that matched no clients.
+     */
+    public static CommandResult forEmptySearch(String feedbackToUser) {
+        return new CommandResult(feedbackToUser, false, false, true);
     }
 
     public String getFeedbackToUser() {
@@ -46,6 +61,10 @@ public class CommandResult {
 
     public boolean isExit() {
         return exit;
+    }
+
+    public boolean isEmptySearch() {
+        return emptySearch;
     }
 
     @Override
@@ -61,12 +80,13 @@ public class CommandResult {
 
         return feedbackToUser.equals(otherCommandResult.feedbackToUser)
                 && showHelp == otherCommandResult.showHelp
-                && exit == otherCommandResult.exit;
+                && exit == otherCommandResult.exit
+                && emptySearch == otherCommandResult.emptySearch;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(feedbackToUser, showHelp, exit);
+        return Objects.hash(feedbackToUser, showHelp, exit, emptySearch);
     }
 
     @Override
@@ -75,6 +95,7 @@ public class CommandResult {
                 .add("feedbackToUser", feedbackToUser)
                 .add("showHelp", showHelp)
                 .add("exit", exit)
+                .add("emptySearch", emptySearch)
                 .toString();
     }
 

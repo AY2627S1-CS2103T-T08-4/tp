@@ -91,6 +91,17 @@ public class FilterCommandTest {
     }
 
     @Test
+    public void execute_noMatchingTag_returnsEmptySearchResult() {
+        PersonMatchesSearchPredicate predicate = predicateWith("unknownTag");
+        FilterCommand command = new FilterCommand(predicate);
+        expectedModel.updateFilteredPersonList(predicate);
+
+        CommandResult expectedResult = CommandResult.forEmptySearch("0 clients found matching your search term(s).");
+        assertCommandSuccess(command, model, expectedResult, expectedModel);
+        assertEquals(List.of(), model.getFilteredPersonList());
+    }
+
+    @Test
     public void isMutating_filterCommand_returnsFalse() {
         assertFalse(commandWith("friends").isMutating());
     }
