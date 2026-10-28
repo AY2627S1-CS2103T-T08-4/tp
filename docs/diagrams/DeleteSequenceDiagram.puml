@@ -32,10 +32,6 @@ deactivate DeleteCommandParser
 AddressBookParser -> DeleteCommandParser : parse("1, 3")
 activate DeleteCommandParser
 
-create DeleteCommand
-DeleteCommandParser -> DeleteCommand
-activate DeleteCommand
-
 DeleteCommandParser -> IndexListParser : parse("1, 3", MESSAGE_USAGE)
 activate IndexListParser
 
@@ -49,7 +45,11 @@ end
 IndexListParser --> DeleteCommandParser : targetIndexes
 deactivate IndexListParser
 
-DeleteCommand --> DeleteCommandParser :
+create DeleteCommand
+DeleteCommandParser -> DeleteCommand : targetIndexes
+activate DeleteCommand
+
+DeleteCommand --> DeleteCommandParser
 deactivate DeleteCommand
 
 DeleteCommandParser --> AddressBookParser : d
