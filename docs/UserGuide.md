@@ -223,6 +223,7 @@ Format: `tag INDEX t/TAG [t/MORE_TAGS]...`
 
 * The index refers to the index number shown in the displayed client list and must be a positive integer.
 * Tags must be 1-20 characters long and contain only letters, numbers, and spaces.
+* Extra spaces inside a tag are treated as one, so `t/Sec  4` is the same tag as `t/Sec 4`.
 * New tags are added alongside the client's existing tags.
 * Adding a tag the client already has does not create a duplicate.
 * The success message lists only newly added tags. If the client already has every specified tag, Sieve reports that the client "has all of the tag(s)" and leaves the client unchanged.

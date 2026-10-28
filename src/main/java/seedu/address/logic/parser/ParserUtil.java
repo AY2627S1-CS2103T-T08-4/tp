@@ -162,11 +162,11 @@ public class ParserUtil {
      */
     public static Tag parseTag(String tag) throws ParseException {
         requireNonNull(tag);
-        String trimmedTag = tag.trim();
-        if (!Tag.isValidTagName(trimmedTag)) {
+        String normalizedTag = Tag.normalizeTagName(tag);
+        if (!Tag.isValidTagName(normalizedTag)) {
             throw new ParseException(Tag.MESSAGE_CONSTRAINTS);
         }
-        return new Tag(trimmedTag);
+        return new Tag(normalizedTag);
     }
 
     /**
