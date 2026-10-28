@@ -137,6 +137,24 @@ public class ArgumentTokenizerTest {
     }
 
     @Test
+    public void hasPrefixAfter() {
+        Prefix noteSlash = new Prefix("nt/");
+
+        // prefix absent
+        assertFalse(ArgumentTokenizer.hasPrefixAfter(" p/123 -t abc", noteSlash, pSlash, dashT));
+
+        // other prefixes only before the prefix
+        assertFalse(ArgumentTokenizer.hasPrefixAfter(" p/123 -t abc nt/a note", noteSlash, pSlash, dashT));
+
+        // prefix-like text not preceded by whitespace is not a prefix
+        assertFalse(ArgumentTokenizer.hasPrefixAfter(" nt/top/up", noteSlash, pSlash));
+
+        // another prefix after the prefix
+        assertTrue(ArgumentTokenizer.hasPrefixAfter(" nt/a note -t abc", noteSlash, pSlash, dashT));
+        assertTrue(ArgumentTokenizer.hasPrefixAfter(" p/1 nt/a note p/2", noteSlash, pSlash));
+    }
+
+    @Test
     public void equalsMethod() {
         Prefix aaa = new Prefix("aaa");
 

@@ -243,6 +243,24 @@ public class EditCommandParserTest {
     }
 
     @Test
+    public void parse_noteAfterOtherFields_success() {
+        EditPersonDescriptor descriptor = new EditPersonDescriptorBuilder().withTags(VALID_TAG_FRIEND)
+                .withNote("Exam soon").build();
+        assertParseSuccess(parser, "1" + TAG_DESC_FRIEND + " nt/Exam soon",
+                new EditCommand(INDEX_FIRST_PERSON, descriptor));
+    }
+
+    @Test
+    public void parse_prefixAfterNote_failure() {
+        // a note containing a prefix, which would otherwise be cut short and replace all the tags
+        assertParseFailure(parser, "1 nt/Note with t/tag inside", Note.MESSAGE_NOT_LAST);
+
+        // an empty note before another prefix
+        assertParseFailure(parser, "1 nt/" + TAG_DESC_FRIEND, Note.MESSAGE_NOT_LAST);
+        assertParseFailure(parser, "1 nt/Exam soon" + PHONE_DESC_BOB, Note.MESSAGE_NOT_LAST);
+    }
+
+    @Test
     public void parse_feeAndDueDateSpecified_success() {
         Index targetIndex = INDEX_FIRST_PERSON;
 

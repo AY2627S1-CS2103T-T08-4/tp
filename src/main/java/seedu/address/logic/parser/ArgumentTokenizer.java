@@ -58,6 +58,23 @@ public class ArgumentTokenizer {
     }
 
     /**
+     * Returns true if any of {@code laterPrefixes} appears after the first occurrence of {@code prefix} in
+     * {@code argsString}. Returns false if {@code prefix} does not appear.
+     *
+     * @param argsString    Arguments string of the form: {@code preamble <prefix>value <prefix>value ...}
+     * @param prefix        Prefix that must come after all of {@code laterPrefixes}
+     * @param laterPrefixes Prefixes to look for after {@code prefix}
+     */
+    public static boolean hasPrefixAfter(String argsString, Prefix prefix, Prefix... laterPrefixes) {
+        int prefixPosition = findPrefixPosition(argsString, prefix.getPrefix(), 0);
+        if (prefixPosition == -1) {
+            return false;
+        }
+        return Arrays.stream(laterPrefixes)
+                .anyMatch(laterPrefix -> findPrefixPosition(argsString, laterPrefix.getPrefix(), prefixPosition) != -1);
+    }
+
+    /**
      * Returns the index of the first occurrence of {@code prefix} in
      * {@code argsString} starting from index {@code fromIndex}. An occurrence
      * is valid if there is a whitespace before {@code prefix}. Returns -1 if no

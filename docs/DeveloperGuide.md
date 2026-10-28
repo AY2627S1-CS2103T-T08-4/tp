@@ -311,6 +311,7 @@ Both commands replace the selected immutable `Person` with a copy containing an 
 * `AddCommandParser` uses `Note.EMPTY` when `nt/` is missing.
 * `EditCommandParser` sets the note in the `EditPersonDescriptor` only when `nt/` is present. A bare `nt/` sets `Note.EMPTY`, which clears the note, while a missing prefix leaves the note unchanged.
 * Repeating `nt/` is rejected with `verifyNoDuplicatePrefixesFor`.
+* `nt/` must be the last prefix. `ArgumentTokenizer` starts a new value at every known prefix, so in `edit 1 nt/Revise t/tests` the note would be cut short and `tests` would replace all the client's tags. Both parsers therefore call `ArgumentTokenizer#hasPrefixAfter` and reject the command with `Note.MESSAGE_NOT_LAST` if any known prefix follows `nt/`. Unknown prefix-like words, such as `w/`, are still allowed in a note.
 
 **Storage.** `JsonAdaptedPerson` stores the note as a string. `toModelType()` treats a missing (`null`) note as empty, so data files saved before notes existed still load and do not trigger the read-only fallback mode. A note that is present but longer than 200 characters throws an `IllegalValueException`.
 

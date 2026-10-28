@@ -64,12 +64,12 @@ public class AddCommandParserTest {
     public void parse_noteSpecified_success() {
         Person expectedPerson = new PersonBuilder(BOB).withTags(VALID_TAG_FRIEND).withNote("Weak at algebra").build();
         assertParseSuccess(parser, NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB + ADDRESS_DESC_BOB
-                + " nt/Weak at algebra" + TAG_DESC_FRIEND, new AddCommand(expectedPerson));
+                + TAG_DESC_FRIEND + " nt/Weak at algebra", new AddCommand(expectedPerson));
 
         // empty note is the same as no note
         Person expectedPersonNoNote = new PersonBuilder(BOB).withTags(VALID_TAG_FRIEND).build();
         assertParseSuccess(parser, NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB + ADDRESS_DESC_BOB
-                + " nt/" + TAG_DESC_FRIEND, new AddCommand(expectedPersonNoNote));
+                + TAG_DESC_FRIEND + " nt/", new AddCommand(expectedPersonNoNote));
     }
 
     @Test
@@ -82,6 +82,21 @@ public class AddCommandParserTest {
         // multiple notes
         assertParseFailure(parser, validPrefix + " nt/one nt/two",
                 Messages.getErrorMessageForDuplicatePrefixes(PREFIX_NOTE));
+    }
+
+    @Test
+    public void parse_prefixAfterNote_failure() {
+        String validPrefix = NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB + ADDRESS_DESC_BOB;
+
+        // a note containing a prefix, which would otherwise be cut short and add the tag "tag inside"
+        assertParseFailure(parser, validPrefix + " nt/Note with t/tag inside", Note.MESSAGE_NOT_LAST);
+
+        // an empty note before another prefix
+        assertParseFailure(parser, validPrefix + " nt/" + TAG_DESC_FRIEND, Note.MESSAGE_NOT_LAST);
+
+        // a required field after the note
+        assertParseFailure(parser, NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB + " nt/Exam soon"
+                + ADDRESS_DESC_BOB, Note.MESSAGE_NOT_LAST);
     }
 
     @Test
