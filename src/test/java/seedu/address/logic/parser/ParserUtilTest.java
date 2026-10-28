@@ -325,6 +325,11 @@ public class ParserUtilTest {
     }
 
     @Test
+    public void parseTag_validValueWithRepeatedWhitespace_returnsNormalizedTag() throws Exception {
+        assertEquals(new Tag("Secondary 4"), ParserUtil.parseTag(" Secondary  4 "));
+    }
+
+    @Test
     public void parseTags_null_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> ParserUtil.parseTags(null));
     }

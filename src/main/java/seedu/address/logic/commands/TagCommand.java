@@ -63,7 +63,9 @@ public class TagCommand extends Command {
         }
 
         Person taggedPerson = createTaggedPerson(personToTag, newTagsToAdd);
+        Set<Person> displayedPersons = new HashSet<>(lastShownList);
         model.setPerson(personToTag, taggedPerson);
+        updateDisplayedPersons(model, displayedPersons, personToTag, taggedPerson);
 
         String tagNames = newTagsToAdd.stream()
                 .map(tag -> tag.tagName)
@@ -96,6 +98,16 @@ public class TagCommand extends Command {
         return new Person(personToTag.getName(), personToTag.getPhone(), personToTag.getEmail(),
             personToTag.getAddress(), personToTag.getNote(), personToTag.getFee(), personToTag.getDueDate(),
             updatedTags);
+    }
+
+    /**
+     * Keeps the same clients displayed after replacing one of them with its updated version.
+     */
+    private void updateDisplayedPersons(Model model, Set<Person> displayedPersons, Person originalPerson,
+                                        Person updatedPerson) {
+        displayedPersons.remove(originalPerson);
+        displayedPersons.add(updatedPerson);
+        model.updateFilteredPersonList(displayedPersons::contains);
     }
 
     @Override

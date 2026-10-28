@@ -298,7 +298,7 @@ If no client matches, `FindCommand` returns `FindCommand.MESSAGE_NO_CLIENTS_FOUN
 
 `TagCommandParser` and `UntagCommandParser` parse the displayed client index and one or more `t/` values using `ParserUtil.parseIndex` and `ParserUtil.parseTag`. Their command constructors remove duplicate requested tags while preserving input order.
 
-Both commands replace the selected immutable `Person` with a copy containing an updated tag set. `TagCommand` adds only tags the client does not already have, while `UntagCommand` removes only tags the client currently has. Tag equality is case-insensitive. Confirmation messages list only tags that were actually added or removed; when no change is needed, the commands leave the model unchanged and return a specific no-change message.
+Both commands replace the selected immutable `Person` with a copy containing an updated tag set. `TagCommand` adds only tags the client does not already have, while `UntagCommand` removes only tags the client currently has. Tag names are normalized by trimming and collapsing repeated whitespace, and equality is case-insensitive. After a successful change, both commands preserve the currently displayed clients, replacing the updated client in that list even if it no longer matches an earlier filter. Confirmation messages list only tags that were actually added or removed; when no change is needed, the commands leave the model unchanged and return a specific no-change message.
 
 ### Notes feature
 
@@ -1109,6 +1109,11 @@ The data file is `data/sieve.json` inside that folder.
 
     1. Test case: `untag 1 t/SEC4`<br>
        Expected: `Sec4` is removed despite the different letter case.
+
+    1. Prerequisites: Start with the sample data and enter `filter t/Physics`, which shows only `Brandon Sim`.
+
+    1. Test case: `untag 1 t/Physics`<br>
+       Expected: `Physics` is removed from `Brandon Sim`, and `Brandon Sim` remains visible in the filtered list.
 
     1. Test case: `untag 1 t/Biology`<br>
        Expected: The client is unchanged and Sieve reports that the client does not have any specified tags.

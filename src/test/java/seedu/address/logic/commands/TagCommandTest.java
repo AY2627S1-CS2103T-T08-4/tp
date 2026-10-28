@@ -111,6 +111,25 @@ public class TagCommandTest {
     }
 
     @Test
+    public void execute_filteredList_preservesDisplayedClients() {
+        model.updateFilteredPersonList(person -> person.getTags().contains(FRIENDS));
+        Person personToTag = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
+        TagCommand tagCommand = new TagCommand(INDEX_FIRST_PERSON, List.of(PHYSICS));
+
+        String expectedMessage = String.format(TagCommand.MESSAGE_TAG_PERSON_SUCCESS,
+                personToTag.getName(), PHYSICS.tagName);
+        Person taggedPerson = withAdditionalTags(personToTag, Set.of(PHYSICS));
+        Set<Person> expectedDisplayedPersons = new HashSet<>(model.getFilteredPersonList());
+        expectedDisplayedPersons.remove(personToTag);
+        expectedDisplayedPersons.add(taggedPerson);
+        Model expectedModel = new ModelManager(getTypicalAddressBook(), new UserPrefs());
+        expectedModel.setPerson(personToTag, taggedPerson);
+        expectedModel.updateFilteredPersonList(expectedDisplayedPersons::contains);
+
+        assertCommandSuccess(tagCommand, model, expectedMessage, expectedModel);
+    }
+
+    @Test
     public void execute_invalidIndex_throwsCommandException() {
         int listSize = model.getFilteredPersonList().size();
         Index outOfBoundIndex = Index.fromOneBased(listSize + 1);

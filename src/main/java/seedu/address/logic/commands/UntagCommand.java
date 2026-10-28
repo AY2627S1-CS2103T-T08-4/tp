@@ -63,7 +63,9 @@ public class UntagCommand extends Command {
         }
 
         Person untaggedPerson = createUntaggedPerson(personToUntag, existingTagsToRemove);
+        Set<Person> displayedPersons = new HashSet<>(lastShownList);
         model.setPerson(personToUntag, untaggedPerson);
+        updateDisplayedPersons(model, displayedPersons, personToUntag, untaggedPerson);
 
         String tagNames = existingTagsToRemove.stream()
                 .map(tag -> tag.tagName)
@@ -91,6 +93,16 @@ public class UntagCommand extends Command {
         return new Person(personToUntag.getName(), personToUntag.getPhone(), personToUntag.getEmail(),
                 personToUntag.getAddress(), personToUntag.getNote(), personToUntag.getFee(),
                 personToUntag.getDueDate(), updatedTags);
+    }
+
+    /**
+     * Keeps the same clients displayed after replacing one of them with its updated version.
+     */
+    private void updateDisplayedPersons(Model model, Set<Person> displayedPersons, Person originalPerson,
+                                        Person updatedPerson) {
+        displayedPersons.remove(originalPerson);
+        displayedPersons.add(updatedPerson);
+        model.updateFilteredPersonList(displayedPersons::contains);
     }
 
     @Override

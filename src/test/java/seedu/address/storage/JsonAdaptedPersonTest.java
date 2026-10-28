@@ -7,6 +7,7 @@ import static seedu.address.testutil.TypicalPersons.BENSON;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
@@ -20,6 +21,7 @@ import seedu.address.model.person.Name;
 import seedu.address.model.person.Note;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.Phone;
+import seedu.address.model.tag.Tag;
 import seedu.address.testutil.PersonBuilder;
 
 public class JsonAdaptedPersonTest {
@@ -242,6 +244,15 @@ public class JsonAdaptedPersonTest {
                 new JsonAdaptedPerson(VALID_NAME, VALID_PHONE, VALID_EMAIL, VALID_ADDRESS, VALID_NOTE,
                     VALID_FEE, VALID_DUE_DATE, invalidTags);
         assertThrows(IllegalValueException.class, person::toModelType);
+    }
+
+    @Test
+    public void toModelType_tagWithRepeatedWhitespace_returnsPersonWithNormalizedTag() throws Exception {
+        List<JsonAdaptedTag> tagsWithRepeatedWhitespace = List.of(new JsonAdaptedTag(" Sec  4 "));
+        JsonAdaptedPerson person = new JsonAdaptedPerson(VALID_NAME, VALID_PHONE, VALID_EMAIL, VALID_ADDRESS,
+                VALID_NOTE, VALID_FEE, VALID_DUE_DATE, tagsWithRepeatedWhitespace);
+
+        assertEquals(Set.of(new Tag("Sec 4")), person.toModelType().getTags());
     }
 
 }

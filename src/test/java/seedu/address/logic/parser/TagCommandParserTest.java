@@ -23,6 +23,12 @@ public class TagCommandParserTest {
     }
 
     @Test
+    public void parse_repeatedWhitespaceInTag_returnsNormalizedTagCommand() {
+        assertParseSuccess(parser, "1 t/Secondary  4",
+                new TagCommand(INDEX_FIRST_PERSON, List.of(new Tag("Secondary 4"))));
+    }
+
+    @Test
     public void parse_duplicateTags_returnsTagCommandWithOneCopy() {
         assertParseSuccess(parser, "1 t/physics t/physics",
                 new TagCommand(INDEX_FIRST_PERSON, List.of(new Tag("physics"))));

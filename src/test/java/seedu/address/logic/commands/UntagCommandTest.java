@@ -111,6 +111,26 @@ public class UntagCommandTest {
     }
 
     @Test
+    public void execute_filteredByRemovedTag_preservesDisplayedClientsAndKeepsModifiedClientVisible() {
+        model.updateFilteredPersonList(person -> person.getTags().contains(FRIENDS));
+        Person personToUntag = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
+        UntagCommand untagCommand = new UntagCommand(INDEX_FIRST_PERSON, List.of(FRIENDS));
+
+        String expectedMessage = String.format(UntagCommand.MESSAGE_UNTAG_PERSON_SUCCESS,
+                personToUntag.getName(), FRIENDS.tagName);
+        Person untaggedPerson = withoutTags(personToUntag, Set.of(FRIENDS));
+        Set<Person> expectedDisplayedPersons = new HashSet<>(model.getFilteredPersonList());
+        expectedDisplayedPersons.remove(personToUntag);
+        expectedDisplayedPersons.add(untaggedPerson);
+        Model expectedModel = new ModelManager(getTypicalAddressBook(), new UserPrefs());
+        expectedModel.setPerson(personToUntag, untaggedPerson);
+        expectedModel.updateFilteredPersonList(expectedDisplayedPersons::contains);
+
+        assertCommandSuccess(untagCommand, model, expectedMessage, expectedModel);
+        assertTrue(model.getFilteredPersonList().contains(untaggedPerson));
+    }
+
+    @Test
     public void execute_invalidIndex_throwsCommandException() {
         int listSize = model.getFilteredPersonList().size();
         Index outOfBoundIndex = Index.fromOneBased(listSize + 1);
