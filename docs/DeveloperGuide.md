@@ -292,7 +292,7 @@ If no client matches, `FindCommand` returns `FindCommand.MESSAGE_NO_CLIENTS_FOUN
 
 `filter` narrows the displayed client list by exact phone numbers and tags. `FilterCommandParser` tokenizes the arguments on `p/` and `t/`, rejects unprefixed text, and requires at least one phone number or tag. It uses `ParserUtil.parsePhone` and `ParserUtil.parseTag`, giving `filter` the same validation and whitespace normalization as `find` and `add`.
 
-`FilterCommandParser` builds a `PersonMatchesSearchPredicate` without name keywords. Any supplied phone number may match, all supplied tags must match, and supplying both fields requires both conditions to match.
+`FilterCommandParser` builds a `PersonMatchesSearchPredicate` from the phone numbers and tags. Any supplied phone number may match, all supplied tags must match, and supplying both fields requires both conditions to match.
 
 ### Tag and untag features
 
