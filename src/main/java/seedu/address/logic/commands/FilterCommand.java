@@ -23,6 +23,10 @@ public class FilterCommand extends Command {
             + "Parameters: [" + PREFIX_PHONE + "PHONE]... [" + PREFIX_TAG + "TAG]...\n"
             + "Example: " + COMMAND_WORD + " " + PREFIX_PHONE + "91234567 " + PREFIX_TAG + "Physics";
 
+    public static final String MESSAGE_NO_CLIENTS_FOUND = Messages.getPersonsListedOverviewMessage(0)
+            + " A client must have every tag given, and phone numbers must be complete. "
+            + "Check the spelling, or use list to see all clients.";
+
     private final PersonMatchesSearchPredicate predicate;
 
     /**
@@ -38,11 +42,10 @@ public class FilterCommand extends Command {
         requireNonNull(model);
         model.updateFilteredPersonList(predicate);
         int matchCount = model.getFilteredPersonList().size();
-        String message = Messages.getPersonsListedOverviewMessage(matchCount);
         if (matchCount == 0) {
-            return CommandResult.forEmptySearch(message);
+            return CommandResult.forEmptySearch(MESSAGE_NO_CLIENTS_FOUND);
         }
-        return new CommandResult(message);
+        return new CommandResult(Messages.getPersonsListedOverviewMessage(matchCount));
     }
 
     @Override

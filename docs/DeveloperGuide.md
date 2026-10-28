@@ -1080,6 +1080,9 @@ The data file is `data/sieve.json` inside that folder.
     1. Test case: `filter p/92345678 t/Sec4`<br>
        Expected: Only `Brandon Sim` is listed because both the phone and tag filters match.
 
+    1. Test case: `filter t/Nothing`<br>
+       Expected: No clients are listed. The status message shows `0 clients found matching your search term(s).`, followed by tips for filtering again.
+
     1. Test case: `filter p/9123`<br>
        Expected: The displayed list does not change. An error message about the phone number format is shown.
 
