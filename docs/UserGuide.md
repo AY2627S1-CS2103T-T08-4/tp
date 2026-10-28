@@ -113,6 +113,14 @@ Format: `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [nt/NOTE] [fee/FEE] [due/DU
 * The same rules apply when you change a client's name with `edit`.
 </box>
 
+<box type="info" seamless>
+
+**Phone numbers and email addresses:**
+* A phone number must be an 8-digit Singapore number starting with `3`, `6`, `8` or `9`, e.g. `91234567`. Spaces, hyphens and parentheses are ignored, so `9123 4567` is also accepted.
+* An email address must have a full stop in the part after the `@`, e.g. `amirah@gmail.com`. An address such as `amirah@localhost` is not accepted.
+* If your data file is from an earlier version of Sieve and contains a phone number or email address that breaks these rules, Sieve opens in read-only mode. Correct it in the [data file](#editing-the-data-file) to continue.
+</box>
+
 Examples:
 * `add n/Jason Quek p/91234567 e/jasonquek@gmail.com a/Blk 123 Yishun Ave 5 #04-12`
 * `add n/Brandon Sim p/92345678 e/brandonsim@sample.com a/10 Queenstown Rd nt/Parent prefers WhatsApp after 6pm` adds a client with a note.
@@ -188,7 +196,7 @@ Shows only the clients who match the specified phone numbers and tags.
 Format: `filter [p/PHONE]... [t/TAG]...`
 
 * At least one phone number or tag must be given.
-* `p/PHONE` must be a complete 8-digit phone number. Spaces, hyphens and parentheses are ignored.
+* `p/PHONE` must be a complete phone number, following the same [rules as in `add`](#adding-a-client-add). Spaces, hyphens and parentheses are ignored.
 * If several phone numbers are supplied, clients matching any of them are returned.
 * Tag matching is case-insensitive; for example, `t/physics` matches `Physics`.
 * Tag order does not matter.

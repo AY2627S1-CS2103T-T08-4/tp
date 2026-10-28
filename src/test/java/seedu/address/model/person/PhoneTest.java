@@ -34,9 +34,16 @@ public class PhoneTest {
         assertFalse(Phone.isValidPhone("9011p041")); // alphabets within digits
         assertFalse(Phone.isValidPhone("9312 1534")); // formatting characters are not stripped by isValidPhone
         assertFalse(Phone.isValidPhone("+6591234567")); // country code
+        assertFalse(Phone.isValidPhone("00000000")); // not a Singapore number
+        assertFalse(Phone.isValidPhone("21234567")); // starts with 2, just below 3
+        assertFalse(Phone.isValidPhone("41234567")); // starts with 4, between 3 and 6
+        assertFalse(Phone.isValidPhone("71234567")); // starts with 7, between 6 and 8
 
-        // valid phone numbers
-        assertTrue(Phone.isValidPhone("93121534")); // exactly 8 digits
+        // valid phone numbers: 8 digits starting with 3, 6, 8 or 9
+        assertTrue(Phone.isValidPhone("31234567")); // VoIP
+        assertTrue(Phone.isValidPhone("61234567")); // landline
+        assertTrue(Phone.isValidPhone("81234567")); // mobile
+        assertTrue(Phone.isValidPhone("93121534")); // mobile
     }
 
     @Test
