@@ -58,17 +58,9 @@ public class NameTest {
     }
 
     @Test
-    public void normalizeName() {
-        // null name
-        assertThrows(NullPointerException.class, () -> Name.normalizeName(null));
-
-        // whitespace trimmed and collapsed
-        assertEquals("Liam O'Brien", Name.normalizeName("  Liam   O'Brien ")); // leading, trailing and internal
-        assertEquals("Liam O'Brien", Name.normalizeName("Liam\tO'Brien")); // tab
-        assertEquals("", Name.normalizeName(" \t ")); // whitespace only
-
-        // already normalized -> unchanged
-        assertEquals("Nur-Aisyah Tan", Name.normalizeName("Nur-Aisyah Tan"));
+    public void normalizeName_extraWhitespace_collapsed() {
+        // normalizeName only calls StringUtil.normalizeWhitespace, whose partitions StringUtilTest covers
+        assertEquals("Liam O'Brien", Name.normalizeName("  Liam \t O'Brien "));
     }
 
     @Test

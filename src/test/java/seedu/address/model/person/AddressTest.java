@@ -22,18 +22,9 @@ public class AddressTest {
     }
 
     @Test
-    public void normalizeAddress() {
-        // null address
-        assertThrows(NullPointerException.class, () -> Address.normalizeAddress(null));
-
-        // whitespace trimmed and collapsed
-        assertEquals("Blk 123 Yishun Ave", Address.normalizeAddress("Blk 123   Yishun\tAve")); // spaces and tab
-        assertEquals("Blk 123 Yishun Ave", Address.normalizeAddress("  Blk 123 Yishun Ave \n")); // leading/trailing
-        assertEquals("Blk 123 Yishun Ave", Address.normalizeAddress("Blk 123\nYishun Ave")); // line break
-        assertEquals("", Address.normalizeAddress("  \t ")); // whitespace only
-
-        // already normalized -> unchanged
-        assertEquals("Blk 456, Den Road, #01-355", Address.normalizeAddress("Blk 456, Den Road, #01-355"));
+    public void normalizeAddress_extraWhitespace_collapsed() {
+        // normalizeAddress only calls StringUtil.normalizeWhitespace, whose partitions StringUtilTest covers
+        assertEquals("Blk 123 Yishun Ave", Address.normalizeAddress("  Blk 123\tYishun \n Ave "));
     }
 
     @Test
@@ -44,6 +35,7 @@ public class AddressTest {
         // invalid addresses
         assertFalse(Address.isValidAddress("")); // empty string
         assertFalse(Address.isValidAddress(" ")); // spaces only
+        assertFalse(Address.isValidAddress(" Blk 1")); // starts with a space
         assertFalse(Address.isValidAddress("-")); // no letter or digit
         assertFalse(Address.isValidAddress("\u00A0")); // non-breaking space only, which looks blank
         assertFalse(Address.isValidAddress("\u200B")); // zero-width space only, which looks blank
@@ -52,6 +44,7 @@ public class AddressTest {
         // valid addresses
         assertTrue(Address.isValidAddress("Blk 456, Den Road, #01-355"));
         assertTrue(Address.isValidAddress("1")); // one character
+        assertTrue(Address.isValidAddress("\u00A0Blk 1")); // leading non-breaking space, which is kept
         assertTrue(Address.isValidAddress("\u65B0\u52A0\u5761")); // letters of another language (Chinese)
         assertTrue(Address.isValidAddress("123")); // digits only
         assertTrue(Address.isValidAddress("#04-12")); // symbols and digits only

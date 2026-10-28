@@ -81,6 +81,8 @@ public class PhoneTest {
         assertFalse(Phone.hasCountryCode("65912345678")); // 65 followed by 9 digits
         assertFalse(Phone.hasCountryCode("9123+6545")); // '+' not at the start
         assertFalse(Phone.hasCountryCode("00912345")); // 00 followed by 6 digits, an invalid 8-digit number
+        assertFalse(Phone.hasCountryCode("00659123456")); // 0065 followed by 7 digits
+        assertFalse(Phone.hasCountryCode("06591234567")); // one 0 instead of 00
     }
 
     @Test
