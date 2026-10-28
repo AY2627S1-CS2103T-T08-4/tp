@@ -130,6 +130,14 @@
     -fx-text-fill: -sieve-text;
 }
 
+/* The scroll pane around a long message blends into the result line */
+.result-display .scroll-pane,
+.result-display .scroll-pane > .viewport {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+
 /*
  * The icon is an empty Region given a shape: -fx-shape takes an SVG path, and the
  * background colour fills that shape. The shape is scaled to the region's size.

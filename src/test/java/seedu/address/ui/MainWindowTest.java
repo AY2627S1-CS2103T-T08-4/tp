@@ -1,5 +1,6 @@
 package seedu.address.ui;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -17,11 +18,16 @@ import javafx.event.ActionEvent;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import seedu.address.logic.LogicManager;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.model.ModelManager;
+import seedu.address.model.person.Phone;
 import seedu.address.storage.JsonAddressBookStorage;
 import seedu.address.storage.JsonUserPrefsStorage;
 import seedu.address.storage.StorageManager;
@@ -54,6 +60,32 @@ public class MainWindowTest {
 
         assertTrue(getResultMessage().getText().startsWith(ListCommand.MESSAGE_SUCCESS));
         assertFalse(getResultDisplay().getPseudoClassStates().contains(ERROR_PSEUDO_CLASS));
+    }
+
+    @Test
+    public void executeCommand_errorWrapsAtMinimumWidth_shownInFullWithoutScrolling(FxRobot robot) {
+        robot.interact(() -> stage.setWidth(stage.getMinWidth()));
+        enterCommand(robot, "edit 1 p/123");
+
+        Label resultMessage = getResultMessage();
+        Node resultScrollPane = stage.getScene().lookup("#resultScrollPane");
+        assertEquals(Phone.MESSAGE_CONSTRAINTS, ((Text) resultMessage.lookup(".text")).getText());
+        assertEquals(resultMessage.getHeight(), resultScrollPane.getLayoutBounds().getHeight(), 0.5);
+    }
+
+    @Test
+    public void pageDownInCommandBox_longResult_scrollsResult(FxRobot robot) {
+        robot.interact(() -> stage.setWidth(stage.getMinWidth()));
+        // Too long to show in full at the minimum width
+        enterCommand(robot, "add n/Amirah Tan p/91234567 e/amirah@example.com a/" + "Blk 123 Yishun Ave 5 ".repeat(7)
+                + "nt/" + "Weak at algebra ".repeat(12));
+
+        ScrollPane resultScrollPane = (ScrollPane) stage.getScene().lookup("#resultScrollPane");
+        TextField commandTextField = (TextField) stage.getScene().lookup("#commandTextField");
+        robot.interact(() -> commandTextField.fireEvent(
+                new KeyEvent(KeyEvent.KEY_PRESSED, "", "", KeyCode.PAGE_DOWN, false, false, false, false)));
+
+        assertTrue(resultScrollPane.getVvalue() > resultScrollPane.getVmin());
     }
 
     @Test

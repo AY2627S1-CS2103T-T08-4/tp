@@ -332,6 +332,14 @@ Examples:
 * `edit 1 p/9123 456` fails because the phone number has only 7 digits. Press Up, add the missing digit, and press Enter.
 * After `find Amirah`, `delete 1` and `list`, press Up three times to bring back `find Amirah`.
 
+### Scrolling a long result: Page Up and Page Down keys
+
+When the result of a command is too long to show in full, such as after deleting many clients, it gets a scroll bar.
+
+* Press **Page Down** in the command box to see the next lines of the result, and **Page Up** to go back.
+* Whatever you have typed in the command box is kept, so you can keep typing.
+* You can also scroll the result with the mouse.
+
 ### Exiting the program: `exit`
 
 Exits the program.

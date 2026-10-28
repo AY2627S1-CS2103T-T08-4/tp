@@ -14,6 +14,7 @@ import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 
 import javafx.event.ActionEvent;
+import javafx.geometry.VerticalDirection;
 import javafx.scene.Scene;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
@@ -30,6 +31,7 @@ public class CommandBoxTest {
     private static final String INVALID_COMMAND = "edit 1 p/123";
 
     private final List<String> executedCommands = new ArrayList<>();
+    private final List<VerticalDirection> scrolledDirections = new ArrayList<>();
     private TextField commandTextField;
 
     @Start
@@ -40,7 +42,7 @@ public class CommandBoxTest {
                 throw new CommandException("Invalid command");
             }
             return new CommandResult("Command executed");
-        });
+        }, scrolledDirections::add);
         commandTextField = (TextField) commandBox.getRoot().lookup("#commandTextField");
         stage.setScene(new Scene(commandBox.getRoot()));
         stage.show();
@@ -137,6 +139,31 @@ public class CommandBoxTest {
 
         pressKey(robot, KeyCode.LEFT);
         assertEquals("del", commandTextField.getText());
+        assertTrue(scrolledDirections.isEmpty());
+    }
+
+    @Test
+    public void handleKeyPressed_pageUpAndPageDown_scrollResultAndKeepTypedText(FxRobot robot) {
+        enterCommand(robot, VALID_COMMAND);
+        robot.interact(() -> commandTextField.setText("del"));
+
+        pressKey(robot, KeyCode.PAGE_DOWN);
+        pressKey(robot, KeyCode.PAGE_UP);
+
+        assertEquals(List.of(VerticalDirection.DOWN, VerticalDirection.UP), scrolledDirections);
+        assertEquals("del", commandTextField.getText());
+        assertEquals(List.of(VALID_COMMAND), executedCommands);
+    }
+
+    @Test
+    public void handleKeyPressed_pageDown_doesNotChangeCommandHistory(FxRobot robot) {
+        enterCommand(robot, VALID_COMMAND);
+        enterCommand(robot, OTHER_VALID_COMMAND);
+
+        pressKey(robot, KeyCode.PAGE_DOWN);
+        pressKey(robot, KeyCode.UP);
+
+        assertEquals(OTHER_VALID_COMMAND, commandTextField.getText());
     }
 
     /**

@@ -115,6 +115,14 @@ A few parts of the main window are worth knowing about when changing them:
   with `ResultDisplay#setErrorToUser(String)` if the command failed. `ResultDisplay` turns its `:error` pseudo-class on
   or off to match, and `LightTheme.css` uses it to show a green tick or a red cross and red text. The icons are empty
   `Region`s shaped with `-fx-shape`, so no image files are needed. The result line is hidden until the first command.
+  The message sits in a `WrappingScrollPane`, so a long message (e.g. after deleting many clients) scrolls once it
+  reaches the pane's `maxHeight`, instead of squeezing the client list. A plain `ScrollPane` would not work here: its
+  parent asks for its height before the message is wrapped, so a message that wraps onto a second line would need to
+  be scrolled. `WrappingScrollPane` reports that its height depends on its width, as a wrapping `Label` does, and
+  fits its content to its width, without which that would not be true. Its `maxHeight` is a whole number of lines,
+  so that no line is cut in half.
+  The result never takes keyboard focus, so `CommandBox` scrolls it a page at a time with Page Up and Page Down,
+  through `ResultDisplay#scrollPage(VerticalDirection)`, while the user keeps typing.
 
 * **Tag colours.** `PersonCard` gives each tag a style class from `TagColor`, from `tag-color-0` to `tag-color-11`.
   `TagColor` picks it from the tag's name, ignoring case, so a tag has the same colour on every client and every
@@ -534,7 +542,7 @@ It has the following operations:
 `CommandBox` uses it in two places:
 
 * `CommandBox#handleCommandEntered()` adds every non-blank command to the history before executing it. This way, a command that fails is kept and can be recalled to fix it.
-* `CommandBox#handleKeyPressed()` handles Up and Down. If the history returns a command, it is put in the text field with the cursor at the end. The key event is then consumed, so the text field does not also move the cursor. Other keys are left to the text field, so the cursor can still be moved within a recalled command.
+* `CommandBox#handleKeyPressed()` handles Up and Down. If the history returns a command, it is put in the text field with the cursor at the end. The key event is then consumed, so the text field does not also move the cursor. It also passes Page Up and Page Down to the `ResultScroller` it was created with, which scrolls the command result (see [UI component](#ui-component)). Other keys are left to the text field, so the cursor can still be moved within a recalled command.
 
 The following sequence diagram shows what happens when the user presses Up:
 
@@ -1359,3 +1367,17 @@ The data file is `data/sieve.json` inside that folder.
 
     1. Test case: enter a few commands, close Sieve, reopen it, then press Up<br>
        Expected: The command box stays empty.
+
+### Scrolling a long result
+
+1. Scrolling with the keyboard
+
+    1. Prerequisites: Start with the sample data, and make the window as small as it goes.
+
+    1. Test case: `delete 1, 2, 3, 4, 5`, then type `list` without pressing Enter, then press Page Down twice and Page Up once<br>
+       Expected: The result stops growing at 7 lines and gets a scroll bar, and the client list keeps the rest of the
+       window. Page Down shows the next lines of the result, stopping at the last deleted client, and Page Up goes
+       back. The command box still shows `list`.
+
+    1. Test case: `undo`, then press Page Down<br>
+       Expected: The short result does not move.
