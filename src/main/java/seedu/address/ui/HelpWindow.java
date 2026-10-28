@@ -30,8 +30,8 @@ public class HelpWindow extends UiPart<Stage> {
         list
         redo
         tag INDEX t/TAG [t/MORE_TAGS]...
-        untag INDEX t/TAG [t/MORE_TAGS]...
         undo
+        untag INDEX t/TAG [t/MORE_TAGS]...
         """;
     public static final String HELP_URL_MESSAGE = "Refer to the user guide: " + USERGUIDE_URL;
 

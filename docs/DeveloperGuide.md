@@ -134,6 +134,9 @@ A few parts of the main window are worth knowing about when changing them:
 * **Client count.** `PersonListPanel` binds the text of the count above the list to the displayed client list, which
   is the `Model`'s filtered list. The count therefore updates after any command that changes or narrows down the
   list, such as `delete` or `find`, without the commands having to update it.
+* **Empty list.** When no client is shown, the list's placeholder suggests `add` if Sieve has no clients at all, or
+  `list` if a search or filter hides them. `PersonListPanel` binds the placeholder to `Logic#getAllPersonList()`, the
+  unfiltered list, to tell the two apart.
 
 The `UI` component,
 
