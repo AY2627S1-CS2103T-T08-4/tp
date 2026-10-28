@@ -361,8 +361,7 @@ Sieve automatically saves data after every command. You do not need to save manu
 
 ### Editing the data file
 
-Sieve data is saved automatically as a JSON file `[JAR file location]/data/sieve.json`. Advanced users are welcome to update data directly by editing that data file.
-
+Sieve data is saved automatically as a JSON file `data/sieve.json`, inside the folder you launch Sieve from. This is not always the folder that contains the JAR file, so we recommend running `cd` to the JAR file's folder before you launch Sieve, to keep your data in one place.
 <box type="warning" seamless>
 
 **Caution:**
@@ -375,7 +374,7 @@ Furthermore, certain edits can cause Sieve to behave in unexpected ways (e.g., i
 ## FAQ
 
 **Q**: How do I transfer my data to another computer?<br>
-**A**: Install the app on the other computer and overwrite the data file it creates with the data file from your previous Sieve home folder.
+**A**: Install the app on the other computer, and launch it once from the folder where you want to keep your data (we recommend the JAR file's folder). Then overwrite the `data/sieve.json` file it creates in that folder with the data file from your previous Sieve home folder.
 
 --------------------------------------------------------------------------------------------------------------------
 
