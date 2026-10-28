@@ -12,7 +12,7 @@ import javafx.scene.layout.Region;
 /**
  * A UI component that displays the result of a command execution.
  * A success message is shown with a tick, an error message with a cross,
- * and the message for a search that matched no clients with a grey "i".
+ * and the message for a search that matched no clients with a gray "i".
  */
 public class ResultDisplay extends UiPart<Region> {
 
@@ -34,8 +34,7 @@ public class ResultDisplay extends UiPart<Region> {
      */
     public ResultDisplay() {
         super(FXML);
-        getRoot().setVisible(false);
-        getRoot().setManaged(false);
+        setShown(getRoot(), false);
     }
 
     /**
@@ -43,7 +42,7 @@ public class ResultDisplay extends UiPart<Region> {
      */
     public void setFeedbackToUser(String feedbackToUser) {
         requireNonNull(feedbackToUser);
-        showMessage(feedbackToUser, false);
+        showMessage(feedbackToUser, false, false);
     }
 
     /**
@@ -51,8 +50,7 @@ public class ResultDisplay extends UiPart<Region> {
      */
     public void setEmptySearchToUser(String message) {
         requireNonNull(message);
-        showMessage(message, false);
-        getRoot().pseudoClassStateChanged(EMPTY_SEARCH_PSEUDO_CLASS, true);
+        showMessage(message, false, true);
     }
 
     /**
@@ -60,7 +58,7 @@ public class ResultDisplay extends UiPart<Region> {
      */
     public void setErrorToUser(String errorMessage) {
         requireNonNull(errorMessage);
-        showMessage(errorMessage, true);
+        showMessage(errorMessage, true, false);
     }
 
     /**
@@ -84,12 +82,11 @@ public class ResultDisplay extends UiPart<Region> {
         resultScrollPane.setVvalue(Math.clamp(resultScrollPane.getVvalue() + step, vmin, vmax));
     }
 
-    private void showMessage(String message, boolean isError) {
+    private void showMessage(String message, boolean isError, boolean isEmptySearch) {
         resultMessage.setText(message);
         resultScrollPane.setVvalue(0); // start each new message from its first line
         getRoot().pseudoClassStateChanged(ERROR_PSEUDO_CLASS, isError);
-        getRoot().pseudoClassStateChanged(EMPTY_SEARCH_PSEUDO_CLASS, false);
-        getRoot().setVisible(true);
-        getRoot().setManaged(true);
+        getRoot().pseudoClassStateChanged(EMPTY_SEARCH_PSEUDO_CLASS, isEmptySearch);
+        setShown(getRoot(), true);
     }
 }

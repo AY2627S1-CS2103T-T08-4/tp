@@ -14,6 +14,8 @@ public class RedoCommand extends Command {
     public static final String COMMAND_WORD = "redo";
     public static final String MESSAGE_SUCCESS = "Redid the last undone change. Showing all clients.";
     public static final String MESSAGE_NOTHING_TO_REDO = "Error: There is nothing to redo.";
+    public static final String MESSAGE_NO_PARAMETERS =
+            "redo takes no parameters. Run redo again to redo more changes.";
 
     /**
      * Reapplies the last undone change to the client list and shows the full list,

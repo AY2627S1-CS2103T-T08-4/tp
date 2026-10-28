@@ -20,7 +20,7 @@ public class CommandResult {
     private final boolean exit;
 
     /** A search ran but matched no clients. */
-    private final boolean emptySearch;
+    private final boolean isEmptySearch;
 
     /**
      * Constructs a {@code CommandResult} with the specified fields.
@@ -29,11 +29,11 @@ public class CommandResult {
         this(feedbackToUser, showHelp, exit, false);
     }
 
-    private CommandResult(String feedbackToUser, boolean showHelp, boolean exit, boolean emptySearch) {
+    private CommandResult(String feedbackToUser, boolean showHelp, boolean exit, boolean isEmptySearch) {
         this.feedbackToUser = requireNonNull(feedbackToUser);
         this.showHelp = showHelp;
         this.exit = exit;
-        this.emptySearch = emptySearch;
+        this.isEmptySearch = isEmptySearch;
     }
 
     /**
@@ -64,7 +64,7 @@ public class CommandResult {
     }
 
     public boolean isEmptySearch() {
-        return emptySearch;
+        return isEmptySearch;
     }
 
     @Override
@@ -81,12 +81,12 @@ public class CommandResult {
         return feedbackToUser.equals(otherCommandResult.feedbackToUser)
                 && showHelp == otherCommandResult.showHelp
                 && exit == otherCommandResult.exit
-                && emptySearch == otherCommandResult.emptySearch;
+                && isEmptySearch == otherCommandResult.isEmptySearch;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(feedbackToUser, showHelp, exit, emptySearch);
+        return Objects.hash(feedbackToUser, showHelp, exit, isEmptySearch);
     }
 
     @Override
@@ -95,7 +95,7 @@ public class CommandResult {
                 .add("feedbackToUser", feedbackToUser)
                 .add("showHelp", showHelp)
                 .add("exit", exit)
-                .add("emptySearch", emptySearch)
+                .add("isEmptySearch", isEmptySearch)
                 .toString();
     }
 

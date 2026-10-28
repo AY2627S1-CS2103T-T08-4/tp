@@ -43,7 +43,7 @@ public class AddCommand extends Command {
             + PREFIX_TAG + "Math "
             + PREFIX_TAG + "Sec4";
 
-    public static final String MESSAGE_SUCCESS = "New client added: %1$s";
+    public static final String MESSAGE_SUCCESS = "New client added: %1$s\nShowing all clients.";
 
     private final Person toAdd;
 

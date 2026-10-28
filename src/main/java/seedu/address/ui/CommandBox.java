@@ -1,5 +1,7 @@
 package seedu.address.ui;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.Optional;
 
 import javafx.collections.ObservableList;
@@ -34,9 +36,9 @@ public class CommandBox extends UiPart<Region> {
      */
     public CommandBox(CommandExecutor commandExecutor, ResultScroller resultScroller) {
         super(FXML);
-        this.commandExecutor = commandExecutor;
-        this.resultScroller = resultScroller;
-        // calls #setStyleToDefault() whenever there is a change to the text of the command box.
+        this.commandExecutor = requireNonNull(commandExecutor);
+        this.resultScroller = requireNonNull(resultScroller);
+        // A failed command stays red only until the user edits it
         commandTextField.textProperty().addListener((unused1, unused2, unused3) -> setStyleToDefault());
         commandTextField.setOnKeyPressed(this::handleKeyPressed);
     }
@@ -47,31 +49,39 @@ public class CommandBox extends UiPart<Region> {
      * The focus stays in the command box, so the user can keep typing.
      */
     private void handleKeyPressed(KeyEvent event) {
-        if (event.getCode() == KeyCode.PAGE_UP) {
-            resultScroller.scrollPage(VerticalDirection.UP);
-            event.consume();
-            return;
-        }
-        if (event.getCode() == KeyCode.PAGE_DOWN) {
-            resultScroller.scrollPage(VerticalDirection.DOWN);
-            event.consume();
+        KeyCode key = event.getCode();
+        // Up and Down with a modifier are left to the text field, e.g. Shift+Up selects text
+        if ((key == KeyCode.UP || key == KeyCode.DOWN) && hasModifierDown(event)) {
             return;
         }
 
-        Optional<String> recalledCommand;
-        if (event.getCode() == KeyCode.UP) {
-            recalledCommand = commandHistory.getPreviousCommand();
-        } else if (event.getCode() == KeyCode.DOWN) {
-            recalledCommand = commandHistory.getNextCommand();
-        } else {
-            return;
+        switch (key) {
+            case PAGE_UP -> resultScroller.scrollPage(VerticalDirection.UP);
+            case PAGE_DOWN -> resultScroller.scrollPage(VerticalDirection.DOWN);
+            case UP -> showRecalledCommand(commandHistory.getPreviousCommand(commandTextField.getText()));
+            case DOWN -> showRecalledCommand(commandHistory.getNextCommand());
+            default -> {
+                return;
+            }
         }
+        event.consume();
+    }
 
+    /**
+     * Returns true if Shift, Ctrl, Alt or Meta is held down during {@code event}.
+     */
+    private static boolean hasModifierDown(KeyEvent event) {
+        return event.isShiftDown() || event.isControlDown() || event.isAltDown() || event.isMetaDown();
+    }
+
+    /**
+     * Shows {@code recalledCommand} in the command box with the cursor at the end, if there is one.
+     */
+    private void showRecalledCommand(Optional<String> recalledCommand) {
         recalledCommand.ifPresent(command -> {
             commandTextField.setText(command);
             commandTextField.end();
         });
-        event.consume();
     }
 
     /**

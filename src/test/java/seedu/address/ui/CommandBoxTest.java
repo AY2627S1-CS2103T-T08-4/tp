@@ -3,6 +3,7 @@ package seedu.address.ui;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static seedu.address.testutil.Assert.assertThrows;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,13 +23,17 @@ import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.exceptions.CommandException;
+import seedu.address.logic.parser.exceptions.ParseException;
 
 @ExtendWith(ApplicationExtension.class)
 public class CommandBoxTest {
 
     private static final String VALID_COMMAND = "list";
     private static final String OTHER_VALID_COMMAND = "find Amirah";
-    private static final String INVALID_COMMAND = "edit 1 p/123";
+    /** Parses, but fails when run, e.g. because the client list has no such index. */
+    private static final String INVALID_COMMAND = "delete 99";
+    /** Fails to parse, e.g. because of a typo in the command word. */
+    private static final String UNPARSABLE_COMMAND = "lsit";
 
     private final List<String> executedCommands = new ArrayList<>();
     private final List<VerticalDirection> scrolledDirections = new ArrayList<>();
@@ -41,11 +46,20 @@ public class CommandBoxTest {
             if (commandText.equals(INVALID_COMMAND)) {
                 throw new CommandException("Invalid command");
             }
+            if (commandText.equals(UNPARSABLE_COMMAND)) {
+                throw new ParseException("Unknown command");
+            }
             return new CommandResult("Command executed");
         }, scrolledDirections::add);
         commandTextField = (TextField) commandBox.getRoot().lookup("#commandTextField");
         stage.setScene(new Scene(commandBox.getRoot()));
         stage.show();
+    }
+
+    @Test
+    public void constructor_null_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> new CommandBox(null, scrolledDirections::add));
+        assertThrows(NullPointerException.class, () -> new CommandBox(commandText -> null, null));
     }
 
     @Test
@@ -71,9 +85,18 @@ public class CommandBoxTest {
     }
 
     @Test
-    public void handleCommandEntered_editAfterError_removesErrorStyle(FxRobot robot) {
+    public void handleCommandEntered_unparsableCommand_keepsTextAndShowsError(FxRobot robot) {
+        enterCommand(robot, UNPARSABLE_COMMAND);
+
+        assertEquals(List.of(UNPARSABLE_COMMAND), executedCommands);
+        assertEquals(UNPARSABLE_COMMAND, commandTextField.getText());
+        assertTrue(hasErrorStyle());
+    }
+
+    @Test
+    public void commandTextField_editedAfterError_removesErrorStyle(FxRobot robot) {
         enterCommand(robot, INVALID_COMMAND);
-        robot.interact(() -> commandTextField.setText("edit 1 p/91234567"));
+        robot.interact(() -> commandTextField.setText("delete 9"));
 
         assertFalse(hasErrorStyle());
     }
@@ -130,6 +153,39 @@ public class CommandBoxTest {
 
         pressKey(robot, KeyCode.DOWN);
         assertEquals("del", commandTextField.getText());
+    }
+
+    @Test
+    public void handleKeyPressed_upThenDownWhileTyping_restoresTypedText(FxRobot robot) {
+        enterCommand(robot, VALID_COMMAND);
+        robot.interact(() -> commandTextField.setText("add n/Half typed"));
+
+        pressKey(robot, KeyCode.UP);
+        assertEquals(VALID_COMMAND, commandTextField.getText());
+
+        pressKey(robot, KeyCode.DOWN);
+        assertEquals("add n/Half typed", commandTextField.getText());
+    }
+
+    @Test
+    public void handleKeyPressed_upOrDownWithModifier_leavesTextUnchanged(FxRobot robot) {
+        enterCommand(robot, VALID_COMMAND);
+        enterCommand(robot, OTHER_VALID_COMMAND);
+        robot.interact(() -> commandTextField.setText("del"));
+
+        for (KeyCode key : new KeyCode[] {KeyCode.UP, KeyCode.DOWN}) {
+            // Shift, Ctrl, Alt and Meta, one at a time
+            for (int modifier = 0; modifier < 4; modifier++) {
+                KeyEvent event = new KeyEvent(KeyEvent.KEY_PRESSED, "", "", key,
+                        modifier == 0, modifier == 1, modifier == 2, modifier == 3);
+                robot.interact(() -> commandTextField.fireEvent(event));
+                assertEquals("del", commandTextField.getText());
+            }
+        }
+
+        // The history has not moved, so a plain Up still shows the newest command
+        pressKey(robot, KeyCode.UP);
+        assertEquals(OTHER_VALID_COMMAND, commandTextField.getText());
     }
 
     @Test

@@ -6,6 +6,7 @@ import javafx.scene.control.ScrollPane;
 /**
  * A {@code ScrollPane} for wrapping text, which asks for enough height to show all of the wrapped lines.
  * Its maximum height still applies, after which the text scrolls.
+ * Keep {@code fitToWidth} on, as {@link #getContentBias()} is only correct while the content fits the width.
  */
 public class WrappingScrollPane extends ScrollPane {
 
@@ -14,7 +15,7 @@ public class WrappingScrollPane extends ScrollPane {
      * instead of scrolling sideways.
      */
     public WrappingScrollPane() {
-        // getContentBias() is only true when the content is as wide as the pane
+        // A horizontal content bias only holds when the content is as wide as the pane
         setFitToWidth(true);
         setHbarPolicy(ScrollBarPolicy.NEVER);
     }

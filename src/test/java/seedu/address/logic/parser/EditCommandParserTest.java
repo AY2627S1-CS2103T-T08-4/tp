@@ -64,12 +64,18 @@ public class EditCommandParserTest {
     private static final String MESSAGE_INVALID_FORMAT =
             String.format(MESSAGE_INVALID_COMMAND_FORMAT, EditCommand.MESSAGE_USAGE);
 
+    private static final String MESSAGE_INVALID_INDEX_FORMAT =
+            String.format(MESSAGE_INVALID_COMMAND_FORMAT, ParserUtil.MESSAGE_INVALID_INDEX);
+
     private EditCommandParser parser = new EditCommandParser();
 
     @Test
     public void parse_missingParts_failure() {
         // no index specified
-        assertParseFailure(parser, VALID_NAME_AMY, MESSAGE_INVALID_FORMAT);
+        assertParseFailure(parser, NAME_DESC_AMY, MESSAGE_INVALID_FORMAT);
+
+        // a name typed instead of the index
+        assertParseFailure(parser, VALID_NAME_AMY, MESSAGE_INVALID_INDEX_FORMAT);
 
         // no field specified
         assertParseFailure(parser, "1", EditCommand.MESSAGE_NOT_EDITED);
@@ -81,16 +87,26 @@ public class EditCommandParserTest {
     @Test
     public void parse_invalidPreamble_failure() {
         // negative index
-        assertParseFailure(parser, "-5" + NAME_DESC_AMY, MESSAGE_INVALID_FORMAT);
+        assertParseFailure(parser, "-5" + NAME_DESC_AMY, MESSAGE_INVALID_INDEX_FORMAT);
 
         // zero index
-        assertParseFailure(parser, "0" + NAME_DESC_AMY, MESSAGE_INVALID_FORMAT);
+        assertParseFailure(parser, "0" + NAME_DESC_AMY, MESSAGE_INVALID_INDEX_FORMAT);
 
         // invalid arguments being parsed as preamble
-        assertParseFailure(parser, "1 some random string", MESSAGE_INVALID_FORMAT);
+        assertParseFailure(parser, "1 some random string", MESSAGE_INVALID_INDEX_FORMAT);
 
-        // invalid prefix being parsed as preamble
-        assertParseFailure(parser, "1 i/ string", MESSAGE_INVALID_FORMAT);
+        // unknown prefix being parsed as preamble, before or instead of a known prefix
+        assertParseFailure(parser, "1 i/ string", Messages.getErrorMessageForUnknownPrefix("i/"));
+        assertParseFailure(parser, "1 z/x" + NAME_DESC_AMY, Messages.getErrorMessageForUnknownPrefix("z/"));
+        assertParseFailure(parser, "1 N/Amy", Messages.getErrorMessageForUnknownPrefix("N/"));
+    }
+
+    @Test
+    public void parse_indexTooLargeForInt_parsedAsMaxIndex() {
+        // EditCommand then reports it as out of bounds, with the size of the list
+        EditPersonDescriptor descriptor = new EditPersonDescriptorBuilder().withName(VALID_NAME_AMY).build();
+        assertParseSuccess(parser, "2147483648" + NAME_DESC_AMY,
+                new EditCommand(Index.fromOneBased(Integer.MAX_VALUE), descriptor));
     }
 
     @Test

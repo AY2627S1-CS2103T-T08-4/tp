@@ -108,6 +108,14 @@ public class AddCommandParserTest {
         // in another field, reported instead of that field's own error
         assertParseFailure(parser, NAME_DESC_BOB + " p/98765432 x/1" + EMAIL_DESC_BOB + ADDRESS_DESC_BOB,
                 Messages.getErrorMessageForUnknownPrefix("x/"));
+
+        // in place of a required prefix, reported instead of the missing field
+        assertParseFailure(parser, NAME_DESC_BOB + " P/98765432" + EMAIL_DESC_BOB + ADDRESS_DESC_BOB,
+                Messages.getErrorMessageForUnknownPrefix("P/"));
+
+        // in the preamble, before every known prefix
+        assertParseFailure(parser, " N/Bob" + PHONE_DESC_BOB + EMAIL_DESC_BOB + ADDRESS_DESC_BOB,
+                Messages.getErrorMessageForUnknownPrefix("N/"));
     }
 
     @Test

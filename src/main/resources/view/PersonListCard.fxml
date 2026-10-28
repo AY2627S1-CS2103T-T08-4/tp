@@ -17,7 +17,12 @@
     <Label fx:id="id" styleClass="cell_index_label" minWidth="28"/>
     <VBox spacing="4" HBox.hgrow="ALWAYS">
         <HBox alignment="CENTER_LEFT">
-            <Label fx:id="name" text="\$first" styleClass="cell_big_label"/>
+            <Label fx:id="name" text="\$first" styleClass="cell_big_label" wrapText="true">
+                <minHeight>
+                    <!-- Gives a long name the height of all its lines, so it wraps instead of being cut off -->
+                    <Region fx:constant="USE_PREF_SIZE"/>
+                </minHeight>
+            </Label>
             <!-- An empty region that grows to fill the gap, pushing the phone number to the right -->
             <Region HBox.hgrow="ALWAYS"/>
             <Label fx:id="phone" styleClass="cell_phone_label" text="\$phone">

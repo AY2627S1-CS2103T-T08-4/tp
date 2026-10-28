@@ -85,6 +85,14 @@ public class ArgumentMultimap {
     }
 
     /**
+     * Throws a {@code ParseException} if the preamble contains a word that looks like a prefix,
+     * e.g. {@code z/} in {@code 1 z/x n/Amy}, where the unknown prefix comes before every known one.
+     */
+    public void verifyNoUnknownPrefixInPreamble() throws ParseException {
+        verifyNoUnknownPrefixesIn(new Prefix(""));
+    }
+
+    /**
      * Throws a {@code ParseException} if a value of any of {@code prefixes} contains a word that looks like a prefix,
      * e.g. {@code z/} in {@code a/Blk 1 z/x}.
      * The tokenizer has already split off every prefix it was given, so such a word is an unknown prefix,
