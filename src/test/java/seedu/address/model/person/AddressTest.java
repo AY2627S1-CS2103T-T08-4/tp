@@ -44,11 +44,15 @@ public class AddressTest {
         // invalid addresses
         assertFalse(Address.isValidAddress("")); // empty string
         assertFalse(Address.isValidAddress(" ")); // spaces only
+        assertFalse(Address.isValidAddress("-")); // no letter or digit
+        assertFalse(Address.isValidAddress("\u00A0")); // non-breaking space only, which looks blank
+        assertFalse(Address.isValidAddress("\u200B")); // zero-width space only, which looks blank
         assertFalse(Address.isValidAddress("a".repeat(MAX_LENGTH + 1))); // one character over the limit
 
         // valid addresses
         assertTrue(Address.isValidAddress("Blk 456, Den Road, #01-355"));
-        assertTrue(Address.isValidAddress("-")); // one character
+        assertTrue(Address.isValidAddress("1")); // one character
+        assertTrue(Address.isValidAddress("\u65B0\u52A0\u5761")); // letters of another language (Chinese)
         assertTrue(Address.isValidAddress("123")); // digits only
         assertTrue(Address.isValidAddress("#04-12")); // symbols and digits only
         assertTrue(Address.isValidAddress("Leng Inc; 1234 Market St; San Francisco CA 2349879; USA")); // long address
