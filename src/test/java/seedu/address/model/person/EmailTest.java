@@ -34,7 +34,7 @@ public class EmailTest {
         assertFalse(Email.isValidEmail("peterjack@")); // missing domain name
 
         // invalid parts
-        assertFalse(Email.isValidEmail("peterjack@-")); // invalid domain name
+        assertFalse(Email.isValidEmail("peterjack@-.com")); // domain label that is only a hyphen
         assertFalse(Email.isValidEmail("peterjack@exam_ple.com")); // underscore in domain name
         assertFalse(Email.isValidEmail("peter jack@example.com")); // spaces in local part
         assertFalse(Email.isValidEmail("peterjack@exam ple.com")); // spaces in domain name

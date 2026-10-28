@@ -38,7 +38,7 @@ public class PersonListPanelTest {
     }
 
     @Test
-    public void constructor_showsNumberOfClients() {
+    public void constructor_threeClients_showsCount() {
         assertEquals("3 clients", clientCount.getText());
     }
 

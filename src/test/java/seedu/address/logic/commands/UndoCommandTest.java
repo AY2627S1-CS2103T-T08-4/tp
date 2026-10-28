@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.logic.commands.CommandTestUtil.assertCommandFailure;
 import static seedu.address.logic.commands.CommandTestUtil.assertCommandSuccess;
 import static seedu.address.logic.commands.CommandTestUtil.showPersonAtIndex;
+import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalIndexes.INDEX_FIRST_PERSON;
 import static seedu.address.testutil.TypicalIndexes.INDEX_SECOND_PERSON;
 import static seedu.address.testutil.TypicalPersons.ALICE;
@@ -31,9 +32,13 @@ public class UndoCommandTest {
     }
 
     @Test
+    public void execute_nullModel_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> new UndoCommand().execute(null));
+    }
+
+    @Test
     public void execute_afterChange_restoresPreviousState() {
-        model.deletePerson(ALICE);
-        model.commitAddressBook();
+        deleteAliceAndCommit();
 
         assertCommandSuccess(new UndoCommand(), model, UndoCommand.MESSAGE_SUCCESS, expectedModel);
     }
@@ -48,8 +53,7 @@ public class UndoCommandTest {
 
     @Test
     public void execute_filteredList_showsAllClients() {
-        model.deletePerson(ALICE);
-        model.commitAddressBook();
+        deleteAliceAndCommit();
         showPersonAtIndex(model, INDEX_SECOND_PERSON);
 
         // expectedModel shows the full list, so this also checks that the find filter is cleared
@@ -58,8 +62,7 @@ public class UndoCommandTest {
 
     @Test
     public void execute_allChangesUndone_throwsCommandException() {
-        model.deletePerson(ALICE);
-        model.commitAddressBook();
+        deleteAliceAndCommit();
 
         assertCommandSuccess(new UndoCommand(), model, UndoCommand.MESSAGE_SUCCESS, expectedModel);
         assertCommandFailure(new UndoCommand(), model, UndoCommand.MESSAGE_NOTHING_TO_UNDO);
@@ -86,5 +89,13 @@ public class UndoCommandTest {
     @Test
     public void isMutating_undoCommand_returnsTrue() {
         assertTrue(new UndoCommand().isMutating());
+    }
+
+    /**
+     * Deletes Alice from {@code model} and commits the change, so that it can be undone.
+     */
+    private void deleteAliceAndCommit() {
+        model.deletePerson(ALICE);
+        model.commitAddressBook();
     }
 }

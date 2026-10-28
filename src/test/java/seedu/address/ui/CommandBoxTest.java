@@ -23,13 +23,17 @@ import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.exceptions.CommandException;
+import seedu.address.logic.parser.exceptions.ParseException;
 
 @ExtendWith(ApplicationExtension.class)
 public class CommandBoxTest {
 
     private static final String VALID_COMMAND = "list";
     private static final String OTHER_VALID_COMMAND = "find Amirah";
-    private static final String INVALID_COMMAND = "edit 1 p/123";
+    /** Parses, but fails when run, e.g. because the client list has no such index. */
+    private static final String INVALID_COMMAND = "delete 99";
+    /** Fails to parse, e.g. because of a typo in the command word. */
+    private static final String UNPARSABLE_COMMAND = "lsit";
 
     private final List<String> executedCommands = new ArrayList<>();
     private final List<VerticalDirection> scrolledDirections = new ArrayList<>();
@@ -41,6 +45,9 @@ public class CommandBoxTest {
             executedCommands.add(commandText);
             if (commandText.equals(INVALID_COMMAND)) {
                 throw new CommandException("Invalid command");
+            }
+            if (commandText.equals(UNPARSABLE_COMMAND)) {
+                throw new ParseException("Unknown command");
             }
             return new CommandResult("Command executed");
         }, scrolledDirections::add);
@@ -78,9 +85,18 @@ public class CommandBoxTest {
     }
 
     @Test
-    public void handleCommandEntered_editAfterError_removesErrorStyle(FxRobot robot) {
+    public void handleCommandEntered_unparsableCommand_keepsTextAndShowsError(FxRobot robot) {
+        enterCommand(robot, UNPARSABLE_COMMAND);
+
+        assertEquals(List.of(UNPARSABLE_COMMAND), executedCommands);
+        assertEquals(UNPARSABLE_COMMAND, commandTextField.getText());
+        assertTrue(hasErrorStyle());
+    }
+
+    @Test
+    public void commandTextField_editedAfterError_removesErrorStyle(FxRobot robot) {
         enterCommand(robot, INVALID_COMMAND);
-        robot.interact(() -> commandTextField.setText("edit 1 p/91234567"));
+        robot.interact(() -> commandTextField.setText("delete 9"));
 
         assertFalse(hasErrorStyle());
     }

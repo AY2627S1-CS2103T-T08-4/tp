@@ -12,6 +12,7 @@ import org.testfx.api.FxRobot;
 import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.layout.FlowPane;
@@ -69,6 +70,14 @@ public class PersonCardTest {
         FlowPane tags = getTags(untaggedCard);
         assertFalse(tags.isVisible());
         assertFalse(tags.isManaged());
+    }
+
+    @Test
+    public void constructor_withTags_eachTagColoredByName() {
+        for (Node node : getTags(taggedCard).getChildren()) {
+            Label tag = (Label) node;
+            assertTrue(tag.getStyleClass().contains(TagColor.getStyleClass(tag.getText())), tag.getText());
+        }
     }
 
     @Test
