@@ -143,10 +143,10 @@ public class ParserUtilTest {
 
     @Test
     public void parsePhone_countryCode_throwsParseExceptionWithCountryCodeMessage() {
-        assertThrows(ParseException.class, Phone.MESSAGE_COUNTRY_CODE, () -> ParserUtil.parsePhone("+65 9123 4567"));
-        assertThrows(ParseException.class, Phone.MESSAGE_COUNTRY_CODE, () -> ParserUtil.parsePhone("(+65) 811878"));
-        assertThrows(ParseException.class, Phone.MESSAGE_COUNTRY_CODE, () -> ParserUtil.parsePhone("65 9123 4567"));
-        assertThrows(ParseException.class, Phone.MESSAGE_COUNTRY_CODE, () -> ParserUtil.parsePhone("+1 415 555 2671"));
+        // PhoneTest#hasCountryCode covers which numbers have a country code
+        assertThrows(ParseException.class, Phone.MESSAGE_COUNTRY_CODE, () -> ParserUtil.parsePhone("+6591234567"));
+        // checked after the formatting characters are removed
+        assertThrows(ParseException.class, Phone.MESSAGE_COUNTRY_CODE, () -> ParserUtil.parsePhone("(+65) 9123-4567"));
     }
 
     @Test

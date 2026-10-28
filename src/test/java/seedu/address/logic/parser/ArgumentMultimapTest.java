@@ -78,6 +78,19 @@ public class ArgumentMultimapTest {
         assertUnknownPrefix("x/", PREFIX_ADDRESS, "Blk 1 x/1 y/2");
     }
 
+    @Test
+    public void verifyNoUnknownPrefixesInPreamble_indexOnly_doesNotThrow() throws Exception {
+        // z/ is in the name's value, which verifyNoUnknownPrefixesIn checks instead
+        ArgumentTokenizer.tokenize(" 1 n/Amy z/x", PREFIX_NAME).verifyNoUnknownPrefixesInPreamble();
+    }
+
+    @Test
+    public void verifyNoUnknownPrefixesInPreamble_prefixLikeWordBeforeKnownPrefix_throwsParseException() {
+        ArgumentMultimap tokenized = ArgumentTokenizer.tokenize(" 1 z/x n/Amy", PREFIX_NAME);
+        assertThrows(ParseException.class, Messages.getErrorMessageForUnknownPrefix("z/"),
+                tokenized::verifyNoUnknownPrefixesInPreamble);
+    }
+
     /**
      * Gives {@code prefix} the value {@code value}, and asserts that checking {@code prefix} rejects
      * {@code unknownPrefix} as an unknown prefix.
