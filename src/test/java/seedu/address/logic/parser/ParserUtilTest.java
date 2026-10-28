@@ -11,6 +11,7 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
+import seedu.address.commons.core.index.Index;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.person.Address;
 import seedu.address.model.person.DueDate;
@@ -43,9 +44,18 @@ public class ParserUtilTest {
     }
 
     @Test
-    public void parseIndex_outOfRangeInput_throwsParseException() {
+    public void parseIndex_zerosOrNegativeOutOfRange_throwsParseException() {
+        assertThrows(ParseException.class, MESSAGE_INVALID_INDEX, () -> ParserUtil.parseIndex("000"));
         assertThrows(ParseException.class, MESSAGE_INVALID_INDEX, ()
-            -> ParserUtil.parseIndex(Long.toString(Integer.MAX_VALUE + 1)));
+            -> ParserUtil.parseIndex(Long.toString(Integer.MIN_VALUE - 1L)));
+    }
+
+    @Test
+    public void parseIndex_positiveOutOfRange_returnsMaxIndex() throws Exception {
+        // too large for an int, but still a positive number, so the command reports it as out of bounds
+        Index maxIndex = Index.fromOneBased(Integer.MAX_VALUE);
+        assertEquals(maxIndex, ParserUtil.parseIndex(Long.toString(Integer.MAX_VALUE + 1L)));
+        assertEquals(maxIndex, ParserUtil.parseIndex("  99999999999999999999  "));
     }
 
     @Test
