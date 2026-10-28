@@ -63,6 +63,9 @@ public class ParserUtil {
     public static Phone parsePhone(String phone) throws ParseException {
         requireNonNull(phone);
         String strippedPhone = Phone.stripPhone(phone);
+        if (Phone.hasCountryCode(strippedPhone)) {
+            throw new ParseException(Phone.MESSAGE_COUNTRY_CODE);
+        }
         if (!Phone.isValidPhone(strippedPhone)) {
             throw new ParseException(Phone.MESSAGE_CONSTRAINTS);
         }

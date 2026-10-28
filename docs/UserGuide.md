@@ -117,7 +117,8 @@ Format: `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [nt/NOTE] [fee/FEE] [due/DU
 
 **Phone numbers and email addresses:**
 * A phone number must be an 8-digit Singapore number starting with `3`, `6`, `8` or `9`, e.g. `91234567`. Spaces, hyphens and parentheses are ignored, so `9123 4567` is also accepted.
-* An email address must have a full stop in the part after the `@`, e.g. `amirah@gmail.com`. An address such as `amirah@localhost` is not accepted.
+* Leave out the country code. Sieve is made for tutors in Singapore and only stores Singapore numbers, so every number would start with `+65`, which adds nothing. If you copy a number such as `+65 9123 4567`, enter it as `91234567`. Sieve shows a reminder if you include a country code. Numbers from other countries are not supported.
+* An email address can be up to 254 characters long. Before the `@`, it can contain letters, digits and `+`, `_`, `.` or `-`, but these symbols cannot come first, last or two in a row. After the `@`, it must be a domain name with a full stop, e.g. `amirah@gmail.com`. Addresses such as `amirah@localhost`, `o'brien@gmail.com` and `a__b@gmail.com` are not supported.
 * If your data file is from an earlier version of Sieve and contains a phone number or email address that breaks these rules, Sieve opens in read-only mode. Correct it in the [data file](#editing-the-data-file) to continue.
 </box>
 

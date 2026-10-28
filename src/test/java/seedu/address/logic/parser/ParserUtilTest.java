@@ -132,6 +132,14 @@ public class ParserUtilTest {
     }
 
     @Test
+    public void parsePhone_countryCode_throwsParseExceptionWithCountryCodeMessage() {
+        assertThrows(ParseException.class, Phone.MESSAGE_COUNTRY_CODE, () -> ParserUtil.parsePhone("+65 9123 4567"));
+        assertThrows(ParseException.class, Phone.MESSAGE_COUNTRY_CODE, () -> ParserUtil.parsePhone("(+65) 811878"));
+        assertThrows(ParseException.class, Phone.MESSAGE_COUNTRY_CODE, () -> ParserUtil.parsePhone("65 9123 4567"));
+        assertThrows(ParseException.class, Phone.MESSAGE_COUNTRY_CODE, () -> ParserUtil.parsePhone("+1 415 555 2671"));
+    }
+
+    @Test
     public void parsePhone_wrongDigitCount_throwsParseException() {
         assertThrows(ParseException.class, () -> ParserUtil.parsePhone("9123 456")); // 7 digits
         assertThrows(ParseException.class, () -> ParserUtil.parsePhone("9123 45678")); // 9 digits
@@ -140,9 +148,6 @@ public class ParserUtilTest {
 
     @Test
     public void parsePhone_disallowedCharacters_throwsParseException() {
-        // '+' is not stripped, so a country code cannot shrink into a valid 8-digit number
-        assertThrows(ParseException.class, () -> ParserUtil.parsePhone("+65 811878"));
-        assertThrows(ParseException.class, () -> ParserUtil.parsePhone("+65 9123 4567"));
         assertThrows(ParseException.class, () -> ParserUtil.parsePhone("9123.4567"));
         assertThrows(ParseException.class, () -> ParserUtil.parsePhone("9123a4567"));
     }
