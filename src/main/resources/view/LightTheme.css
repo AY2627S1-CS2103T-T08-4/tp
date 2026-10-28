@@ -21,6 +21,7 @@
     -sieve-text: #1f2430;
     -sieve-text-muted: #6b7280;
     -sieve-accent: #2f4fd8;     /* command box border, selected client and default button */
+    /* Only the startup alerts use this, and they are always light, so DarkTheme.css leaves it out */
     -sieve-on-accent: white;    /* text on an accent background */
     -sieve-selected: #eef2ff;   /* selected client row */
     -sieve-error: #c0392b;

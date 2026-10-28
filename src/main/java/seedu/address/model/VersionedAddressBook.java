@@ -58,8 +58,8 @@ public class VersionedAddressBook extends AddressBook {
         // UndoCommand checks canUndoAddressBook() first and shows an error, so this only fails on a bug
         assert canUndoAddressBook() : "No state to undo to";
         redoHistory.push(current);
-        this.current = undoHistory.pop();
-        this.resetData(this.current);
+        current = undoHistory.pop();
+        resetData(current);
     }
 
     /**
@@ -70,7 +70,7 @@ public class VersionedAddressBook extends AddressBook {
         // RedoCommand checks canRedoAddressBook() first and shows an error, so this only fails on a bug
         assert canRedoAddressBook() : "No state to redo to";
         undoHistory.push(current);
-        this.current = redoHistory.pop();
-        this.resetData(this.current);
+        current = redoHistory.pop();
+        resetData(current);
     }
 }
