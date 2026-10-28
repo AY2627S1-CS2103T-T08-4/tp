@@ -21,7 +21,10 @@ import seedu.address.logic.parser.exceptions.ParseException;
  */
 public class ArgumentMultimap {
 
-    /** A word that looks like a prefix, e.g. {@code z/} in {@code Blk 1 z/x}: letters then "/", after a space. */
+    /**
+     * A word that looks like a prefix: letters then "/", at the start of a value or after a space,
+     * e.g. {@code z/} in {@code Blk 1 z/x} or in {@code z/x}.
+     */
     private static final Pattern PREFIX_LIKE_WORD = Pattern.compile("(?<!\\S)[A-Za-z]+/");
 
     /** Prefixes mapped to their respective arguments */

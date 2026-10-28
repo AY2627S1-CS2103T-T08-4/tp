@@ -83,7 +83,7 @@ public class PersonCard extends UiPart<Region> {
     }
 
     /**
-     * Returns a pill-shaped label for the tag called {@code tagName}, coloured by {@link TagColor}.
+     * Returns a pill-shaped label for the tag called {@code tagName}, colored by {@link TagColor}.
      */
     private static Label createTagLabel(String tagName) {
         Label tagLabel = new Label(tagName);

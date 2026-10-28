@@ -17,7 +17,7 @@ public class RedoCommand extends Command {
 
     /**
      * Reapplies the last undone change to the client list and shows the full list,
-     * so that a changed client is not hidden by an earlier {@code find}.
+     * so that a changed client is not hidden by an earlier {@code find} or {@code filter}.
      *
      * @param model The current state of the application model data. Must not be null.
      * @return The result message indicating the undone change was reapplied.
