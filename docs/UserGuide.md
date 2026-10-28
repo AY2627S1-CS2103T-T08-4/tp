@@ -93,7 +93,7 @@ Format: `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [nt/NOTE] [fee/FEE] [due/DU
 
 * A note is free text of up to 200 characters, for anything you want to remember about the client, e.g. `nt/Weak at algebra, prelims in March`. Leave it out if you have nothing to record.
 * A fee is the amount you charge the client, e.g. `fee/250` or `fee/180.50`. It is a number that is up to 7 digits and up to 2 decimal places, with no currency symbol. Sieve shows it with 2 decimal places (`250.00`).
-* A due date is the date the next payment is due, in the format `DD-MM-YYYY`, e.g. `due/01-11-2026`. It must be a real date, and dates in the past are allowed. Sieve only stores these two values and shows them on the client's card. It does not track payments or send reminders. Leave them out if you do not need them.
+* A due date is the date the next payment is due, in the format `DD-MM-YYYY`, e.g. `due/01-11-2026`. It must be a real date including today or later. Once a due date has passed, it stays on the client until you change or clear it. Sieve only stores these two values and shows them on the client's card. It does not track payments or send reminders. Leave them out if you do not need them.
 </box>
 
 <box type="info" seamless>
@@ -128,7 +128,7 @@ Examples:
 * `add n/Jason Quek p/91234567 e/jasonquek@gmail.com a/Blk 123 Yishun Ave 5 #04-12`
 * `add n/Brandon Sim p/92345678 e/brandonsim@sample.com a/10 Queenstown Rd nt/Parent prefers WhatsApp after 6pm` adds a client with a note.
 * `add n/Matthias Tan t/Physics e/matthias.tan@gmail.com a/10 Queenstown Rd p/8123 4567 t/Sec4` adds a client with two tags. Fields can be given in any order, and spaces in the phone number are ignored.
-* `add n/Lena Ong p/91230000 e/lena@example.com a/Blk 3 Clementi Rd fee/250 due/01-11-2026` adds a client with a fee and a due date.
+* `add n/Lena Ong p/91230000 e/lena@example.com a/Blk 3 Clementi Rd fee/250 due/01-11-2030` adds a client with a fee and a due date.
 
 ### Listing all clients: `list`
 
@@ -150,6 +150,7 @@ Format: `edit INDEX [n/NAME] [p/PHONE] [e/EMAIL] [a/ADDRESS] [nt/NOTE] [fee/FEE]
 * To remove all of a client's tags, enter `t/` without a tag after it.
 * Editing the note replaces the whole note; it does not add to the existing one. To remove a client's note, enter `nt/` without any text after it.
 * Editing the fee or due date replaces the existing value. To remove a client's fee, enter `fee/` without a value after it. To remove a client's due date, enter `due/` without a value after it.
+* A new due date must follow the same rules as in `add`. Editing other fields of a client whose due date has passed leaves that due date as it is, and `due/` with no value clears it.
 * A note cannot contain text that looks like another field, such as ` t/` or ` p/`, because Sieve reads it as the start of that field.
 * After an edit, the full client list is shown, so that the edited client is not hidden by an earlier `find` or `filter`.
 * If the new values are the same as the client's current ones, Sieve shows `No change: NAME already has these details.` and keeps the displayed list as it is.
@@ -159,7 +160,7 @@ Examples:
 *  `edit 2 n/Brandon Tan t/` Edits the name of the 2nd client to be `Brandon Tan` and clears all existing tags.
 *  `edit 3 nt/Exam in March` Sets the note of the 3rd client to `Exam in March`.
 *  `edit 3 nt/` Clears the note of the 3rd client.
-*  `edit 1 fee/300 due/01-12-2026` Sets the fee of the 1st client to `300.00` and their due date to `01-12-2026`.
+*  `edit 1 fee/300 due/01-12-2030` Sets the fee of the 1st client to `300.00` and their due date to `01-12-2026`.
 *  `edit 1 fee/ due/` Clears the fee and due date of the 1st client.
 
 ### Locating clients by name: `find`
@@ -367,7 +368,7 @@ Sieve data is saved automatically as a JSON file `[JAR file location]/data/sieve
 
 **Caution:**
 If your changes make the data file invalid, Sieve launches in a read-only fallback mode, displaying an empty list and showing a warning popup message at startup. Sieve will completely block any subsequent command that attempts to mutate data, ensuring your original corrupted file is left completely untouched on disk so you can fix it safely. Still, we recommend backing up the file before editing it.<br>
-Furthermore, certain edits can cause Sieve to behave in unexpected ways (e.g., if a value entered is outside of the acceptable range). Therefore, edit the data file only if you are confident that you can update it correctly.
+Furthermore, certain edits can cause Sieve to behave in unexpected ways (e.g., An edit to due date of a client in the file that is not a real date, such as 01-01-0000, also makes the file invalid. A due date that has already passed is fine.) Therefore, edit the data file only if you are confident that you can update it correctly.
 </box>
 
 --------------------------------------------------------------------------------------------------------------------

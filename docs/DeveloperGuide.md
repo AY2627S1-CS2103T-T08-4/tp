@@ -337,11 +337,12 @@ No command was added, so nothing new needs `isMutating()`. `add` and `edit` alre
 **Model.** `Person` holds a `Fee` and a `DueDate` next to its `Note`. An empty value (`Fee.EMPTY` or `DueDate.EMPTY`) means "not set", so `Person` never holds `null`.
 
 * `Fee` accepts 1 to 7 digits with an optional fractional part of 1 or 2 digits. It stores the value with exactly two decimal places (using `BigDecimal#setScale`), so `250`, `250.0` and `250.00` are the same fee.
-* `DueDate` accepts a real calendar date in the format `DD-MM-YYYY`. It is checked with a `DateTimeFormatter` in `ResolverStyle.STRICT` mode, so dates such as `30-02-2026` are rejected. Dates in the past are allowed, so that overdue payments can be recorded.
+* `DueDate` accepts a real calendar date in the format `DD-MM-YYYY`, checked in `ResolverStyle.STRICT` mode, with a year from `MIN_YEAR` (2000) to `MAX_YEAR` (9999). The pattern uses `uuuu` rather than `yyyy`, which allows year 0, so the range check is what rejects `01-01-0000`. `DueDate` itself accepts past dates, because the data file must still load after a due date passes.
 * Both classes keep their value as a `String`, like `Note`, and provide a `normalize...` method (trim only) that the parser and storage call before validating.
 
 **Parsing.** `CliSyntax` defines the prefixes `fee/` and `due/`. `ParserUtil#parseFee` and `ParserUtil#parseDueDate` trim and validate the input, and an empty input gives the empty value.
 
+* `ParserUtil#parseDueDate` rejects a date before today (`DueDate#isTodayOrLater`), so only `add` and `edit` enforce it. The rule is not in `DueDate`, because that would make stored due dates invalid as time passes and send Sieve into read-only mode.
 * `AddCommandParser` uses the empty value when a prefix is missing, so both fields are optional.
 * `EditCommandParser` sets a field in the `EditPersonDescriptor` only when its prefix is present. A present prefix with no value sets the empty value, which clears the field, while a missing prefix leaves the field unchanged.
 * Repeating a prefix is rejected with `verifyNoDuplicatePrefixesFor`.
@@ -393,6 +394,16 @@ No command was added, so nothing new needs `isMutating()`. `add` and `edit` alre
 * **Alternative 2:** `YYYY-MM-DD`.
     * Pros: Sorts in date order, and is unambiguous.
     * Cons: Less natural to type for most tutors.
+
+**Aspect: Where the valid due date rule is enforced**
+
+* **Alternative 1 (current choice):** In `ParserUtil`, so only newly typed dates are checked.
+  * Pros: A due date that passes later does not invalidate the data file, and an unrelated `edit` of an overdue client still works.
+  * Cons: An already-overdue payment cannot be recorded by typing a past date.
+
+* **Alternative 2:** In `DueDate`.
+  * Pros: One place enforces the rule.
+  * Cons: The data file becomes invalid as soon as any stored due date passes.
   
 ### Undo/redo feature
 
@@ -1127,8 +1138,8 @@ The data file is `data/sieve.json` inside that folder.
 
 1. Adding a client with a fee and due date
 
-    1. Test case: `add n/Lena Ong p/91230000 e/lena@example.com a/Blk 3 Clementi Rd fee/250 due/01-11-2026`<br>
-       Expected: The new client's card shows `Fee: 250.00` and `Due: 01-11-2026`.
+    1. Test case: `add n/Lena Ong p/91230000 e/lena@example.com a/Blk 3 Clementi Rd fee/250 due/01-11-2030`<br>
+       Expected: The new client's card shows `Fee: 250.00` and `Due: 01-11-2030`.
 
     1. Test case: `add n/Kai Lim p/91230001 e/kai@example.com a/Blk 4 Clementi Rd fee/180.5`<br>
        Expected: The card shows `Fee: 180.50` and no due date.
@@ -1137,8 +1148,8 @@ The data file is `data/sieve.json` inside that folder.
 
     1. Prerequisites: Use the `list` command, and note the index of `Lena Ong`.
 
-    1. Test case: `edit INDEX fee/300 due/15-11-2026`<br>
-       Expected: The card shows `Fee: 300.00` and `Due: 15-11-2026`. The other details are unchanged.
+    1. Test case: `edit INDEX fee/300 due/15-11-2030`<br>
+       Expected: The card shows `Fee: 300.00` and `Due: 15-11-2030`. The other details are unchanged.
 
     1. Test case: `edit INDEX fee/`<br>
        Expected: The fee line disappears. The due date is unchanged.
@@ -1151,11 +1162,17 @@ The data file is `data/sieve.json` inside that folder.
     1. Test cases: `edit INDEX fee/-5`, `edit INDEX fee/abc`, `edit INDEX fee/250.555`<br>
        Expected: The client is unchanged. The status message shows the fee constraints.
 
-    1. Test cases: `edit INDEX due/30-02-2026`, `edit INDEX due/2026-11-01`, `edit INDEX due/1-1-2026`<br>
-       Expected: The client is unchanged. The status message shows the due date constraints.
+    1. Test cases: `edit INDEX due/30-02-2026`, `edit INDEX due/2026-11-01`, `edit INDEX due/1-1-2026`, `edit INDEX due/01-01-0000`, `edit INDEX due/31-12-1999`<br>
+   Expected: The client is unchanged. The status message shows the due date constraints.
 
+    1. Test case: `edit INDEX due/` followed by yesterday's date in `DD-MM-YYYY`<br>
+    Expected: The client is unchanged. The status message says due dates cannot be in the past.
+
+    1. Test cases: `edit INDEX due/` followed by today's date, then `edit INDEX due/29-02-2028`<br>
+    Expected: The due date is accepted and shown on the card.
+   
     1. Test case: `edit INDEX fee/1 fee/2`<br>
-       Expected: The client is unchanged. The status message reports the repeated `fee/` prefix.
+    Expected: The client is unchanged. The status message reports the repeated `fee/` prefix.
 
 1. Billing details survive other commands
 
@@ -1175,6 +1192,12 @@ The data file is `data/sieve.json` inside that folder.
     1. Test case: Set a client's `"fee"` to `"-5"` in the file and relaunch.<br>
        Expected: The warning popup appears and the app starts in read-only mode with an empty list.
 
+    1. Test case: Set a client's `"dueDate"` to `"01-01-2020"` in the file and relaunch.<br>
+         Expected: The app opens normally and the card shows `Due: 01-01-2020`. Then enter `edit INDEX nt/test`. The due date is unchanged.
+
+    1. Test case: Set a client's `"dueDate"` to `"01-01-0000"` in the file and relaunch.<br>
+      Expected: The warning popup appears and the app starts in read-only mode with an empty list.
+   
 ### Deleting clients
 
 1. Deleting a client from the displayed list

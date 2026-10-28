@@ -282,7 +282,7 @@ public class EditCommandParserTest {
         assertParseFailure(parser, "1" + INVALID_FEE_DESC, Fee.MESSAGE_CONSTRAINTS);
         assertParseFailure(parser, "1" + INVALID_DUE_DATE_DESC, DueDate.MESSAGE_CONSTRAINTS);
         assertParseFailure(parser, "1 fee/1 fee/2", Messages.getErrorMessageForDuplicatePrefixes(PREFIX_FEE));
-        assertParseFailure(parser, "1 due/01-11-2026 due/02-11-2026",
+        assertParseFailure(parser, "1 due/01-11-2099 due/02-11-2099",
             Messages.getErrorMessageForDuplicatePrefixes(PREFIX_DUE_DATE));
     }
 

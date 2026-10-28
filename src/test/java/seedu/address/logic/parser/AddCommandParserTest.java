@@ -144,7 +144,7 @@ public class AddCommandParserTest {
             Messages.getErrorMessageForDuplicatePrefixes(PREFIX_FEE));
 
         // multiple due dates
-        assertParseFailure(parser, validPrefix + " due/01-11-2026 due/02-11-2026",
+        assertParseFailure(parser, validPrefix + " due/01-11-2099 due/02-11-2099",
             Messages.getErrorMessageForDuplicatePrefixes(PREFIX_DUE_DATE));
     }
 
