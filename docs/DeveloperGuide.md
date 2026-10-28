@@ -1019,6 +1019,145 @@ The data file is `data/sieve.json` inside that folder.
        Expected: The app opens without a popup and shows its clients. Commands that change data work again, and
        the change is saved to `data/sieve.json`.
 
+### Adding clients
+
+1. Adding a client with valid details
+
+    1. Prerequisites: Start with the sample data (delete `data/sieve.json` if it exists, or use a fresh folder).
+
+    1. Test case: `add n/Liam Tan p/93334444 e/liam@example.com a/Blk 5 Clementi Rd`<br>
+       Expected: `Liam Tan` is added at the end of the list. The status message starts with `New client added: Liam Tan`.
+
+    1. Test case: `add t/Math n/Mia Lee e/mia@example.com a/Blk 6 Clementi Rd p/9333 5555 t/Sec3`<br>
+       Expected: `Mia Lee` is added with the phone number `93335555` and the tags `Math` and `Sec3`. Parameters can be in
+       any order, and spaces in the phone number are ignored.
+
+1. Adding a client with missing or invalid details
+
+    1. Test case: `add n/Noah Lim p/93336666 e/noah@example.com`<br>
+       Expected: No client is added. An invalid command format error is shown, because the address is missing.
+
+    1. Test case: `add n/Noah Lim p/1234 e/noah@example.com a/Blk 7 Clementi Rd`<br>
+       Expected: No client is added. The status message shows the phone number constraints.
+
+    1. Test case: `add n/Noah Lim p/93336666 e/noah@localhost a/Blk 7 Clementi Rd`<br>
+       Expected: No client is added. The status message shows the email constraints.
+
+    1. Test case: `add n/Ravi s/o Kumar p/93336666 e/ravi@example.com a/Blk 7 Clementi Rd`<br>
+       Expected: No client is added. The status message reports the unknown prefix `s/`.
+
+### Editing clients
+
+1. Editing a client's details
+
+    1. Prerequisites: Start with the sample data.
+
+    1. Test case: `edit 2 p/93337777`<br>
+       Expected: `Brandon Sim`'s phone number becomes `93337777`. The other details are unchanged.
+
+    1. Test case: `edit 2 t/`<br>
+       Expected: All of `Brandon Sim`'s tags are removed.
+
+    1. Test case: `edit 1 p/91234567` (`Amirah Tan`'s current phone number)<br>
+       Expected: The client is unchanged. The status message shows `No change: Amirah Tan already has these details.`
+
+1. Editing after a search
+
+    1. Test case: `find Brandon`, then `edit 1 e/brandon.sim@example.com`<br>
+       Expected: The email is updated, and the full client list is shown again.
+
+1. Editing with invalid input
+
+    1. Test case: `edit 2`<br>
+       Expected: The status message shows `At least one field to edit must be provided.`
+
+    1. Test case: `edit 0 p/93337777`<br>
+       Expected: An invalid command format error is shown, saying that the index must be a positive integer.
+
+    1. Test case: `edit 99 p/93337777`<br>
+       Expected: An error says the index is out of bounds and gives the number of clients in the list.
+
+### Recording notes
+
+1. Notes in the sample data
+
+    1. Prerequisites: Start with the sample data.
+
+    1. Test case: Look at the cards for `Amirah Tan` and `Brandon Sim`.<br>
+       Expected: `Amirah Tan` shows the note `Weak at algebra, prelims in March`. `Brandon Sim` shows no note line.
+
+1. Adding, changing and clearing a note
+
+    1. Test case: `add n/Olivia Ng p/93338888 e/olivia@example.com a/Blk 8 Clementi Rd nt/Parent prefers WhatsApp after 6pm`<br>
+       Expected: `Olivia Ng` is added, and the card shows the note.
+
+    1. Prerequisites for the following cases: Note the index of `Olivia Ng` in the list.
+
+    1. Test case: `edit INDEX nt/Exam in March`<br>
+       Expected: The note is replaced with `Exam in March`, not added to.
+
+    1. Test case: `edit INDEX nt/Meet w/ parent`<br>
+       Expected: The note becomes `Meet w/ parent`. `w/` is not a prefix, so it is allowed in a note.
+
+    1. Test case: `edit INDEX nt/`<br>
+       Expected: The note is cleared, and the note line disappears from the card.
+
+1. The note must be the last parameter
+
+    1. Test case: `edit 1 nt/Revise t/tests`<br>
+       Expected: `Amirah Tan` is unchanged, and her tags are kept. The status message says that the note must be the last
+       parameter.
+
+    1. Test case: `edit 1 t/Math nt/Exam soon`<br>
+       Expected: `Amirah Tan`'s tags are replaced with `Math`, and her note becomes `Exam soon`.
+
+1. Invalid notes
+
+    1. Test case: `edit 1 nt/` followed by 201 characters (e.g. paste 201 copies of `a`)<br>
+       Expected: The client is unchanged. The status message says that notes cannot be more than 200 characters.
+
+    1. Test case: `edit 1 nt/one nt/two`<br>
+       Expected: The client is unchanged. The status message reports the repeated `nt/` prefix.
+
+1. Data files saved before notes existed
+
+    1. Prerequisites: Close the app. In `data/sieve.json`, delete the `"note"` line of one client (and the comma before
+       it if needed).
+
+    1. Test case: Relaunch the app.<br>
+       Expected: The app opens normally with no warning popup. The client shows no note.
+
+### Handling duplicate names
+
+1. Adding a client whose name is already used
+
+    1. Prerequisites: Start with the sample data.
+
+    1. Test case: `add n/Amirah Tan p/91234567 e/amirah2@example.com a/Blk 9 Clementi Rd`<br>
+       Expected: No client is added. The status message says that this client already exists, with the phone number
+       `91234567`.
+
+    1. Test case: `add n/amirah tan p/91234567 e/amirah2@example.com a/Blk 9 Clementi Rd`<br>
+       Expected: Same as previous, because names are compared ignoring case.
+
+    1. Test case: `add n/Amirah Tan p/98887777 e/amirah2@example.com a/Blk 9 Clementi Rd`<br>
+       Expected: No client is added. The status message says that a client named `Amirah Tan` already exists with a
+       different phone number, and suggests adding a detail to the name, e.g. `Amirah Tan (NHHS)`.
+
+    1. Test case: `add n/Amirah Tan (NHHS) p/98887777 e/amirah2@example.com a/Blk 9 Clementi Rd`<br>
+       Expected: `Amirah Tan (NHHS)` is added.
+
+1. Different clients sharing a phone number
+
+    1. Test case: `add n/Kelly Sim p/92345678 e/kelly@example.com a/10 Queenstown Rd`<br>
+       Expected: `Kelly Sim` is added, even though `Brandon Sim` has the same phone number.
+
+1. Renaming a client to a name that is already used
+
+    1. Test case: `edit 2 n/Amirah Tan`, then `edit 2 n/amirah TAN`<br>
+       Expected: `Brandon Sim` is not renamed in either case. The status message says that a client named
+       `Amirah Tan` already exists.
+
 ### Finding clients
 
 1. Finding clients by part of a name
@@ -1124,7 +1263,7 @@ The data file is `data/sieve.json` inside that folder.
     1. Prerequisites: Start with the sample data (delete `data/sieve.json` if it exists, or use a fresh folder).
 
     1. Test case: Look at the cards for `Amirah Tan` and `Charlotte Oliveiro`.<br>
-       Expected: `Amirah Tan` shows `Fee: 250.00` and `Due: 01-11-2026`. `Charlotte Oliveiro` shows neither line.
+       Expected: `Amirah Tan` shows `Fee: 250.00` and `Due: 01-11-2026`. `Devi Ramasamy` shows neither line.
 
 1. Adding a client with a fee and due date
 
