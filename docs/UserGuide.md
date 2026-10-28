@@ -322,14 +322,16 @@ Examples:
 Brings back commands you entered earlier, so you can run them again or fix a typo without retyping the whole command.
 
 * Press **Up** in the command box to show your previous command. Press it again to go further back. It stops at your oldest command.
-* Press **Down** to go forward again. Going past your newest command clears the command box.
+* Press **Down** to go forward again. Going past your newest command brings back what you were typing before you pressed Up, or an empty command box if you were not typing anything.
 * Every command you enter is remembered, including commands that failed and repeats of the same command.
 * A recalled command only runs when you press Enter, so you can edit it first. The cursor is placed at the end of the command.
-* Pressing Down while typing a new command keeps what you typed. Pressing Up replaces it with your previous command.
+* Pressing Down while typing a new command keeps what you typed.
+* Up and Down only recall commands when pressed on their own. With Shift, Ctrl, Alt or Cmd held, they work as usual in a text box; for example, Shift+Up selects text.
 * Your command history is cleared when you close Sieve.
 
 Examples:
 * `edit 1 p/9123 456` fails because the phone number has only 7 digits. Press Up, add the missing digit, and press Enter.
+* You are halfway through typing `add n/Amirah Tan p/91234567` and want to check your last command. Press Up to see it, then press Down to get back what you were typing.
 * After `find Amirah`, `delete 1` and `list`, press Up three times to bring back `find Amirah`.
 
 ### Scrolling a long result: Page Up and Page Down keys
