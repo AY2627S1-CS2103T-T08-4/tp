@@ -108,6 +108,60 @@
     -fx-text-fill: -sieve-accent;
 }
 
+/* Client details shown beside the list after a client is selected. */
+.person-detail-container {
+    -fx-background-color: -sieve-surface;
+    -fx-border-color: transparent transparent transparent -sieve-border;
+}
+
+#personDetailPanel,
+#personDetailPanel > .viewport,
+.person-detail-panel {
+    -fx-background-color: -sieve-surface;
+}
+
+.person-detail-name {
+    -fx-font-family: "Inter SemiBold";
+    -fx-font-size: 27px;
+}
+
+.button.detail-close-button {
+    -fx-padding: 0;
+    -fx-min-width: 30;
+    -fx-pref-width: 30;
+    -fx-min-height: 30;
+    -fx-pref-height: 30;
+    -fx-background-color: transparent;
+    -fx-border-color: black;
+    -fx-font-size: 21px;
+    -fx-text-fill: -sieve-text-muted;
+}
+
+.button.detail-close-button:hover {
+    -fx-background-color: -sieve-selected;
+}
+
+.person-detail-fields {
+    -fx-border-color: -sieve-border transparent transparent transparent;
+}
+
+.person-detail-row {
+    -fx-padding: 16 0 16 0;
+    -fx-border-color: transparent transparent -sieve-border transparent;
+}
+
+.person-detail-label {
+    -fx-min-width: 110;
+    -fx-pref-width: 110;
+    -fx-max-width: 110;
+    -fx-text-fill: -sieve-text-muted;
+}
+
+.person-detail-value {
+    -fx-font-size: 15px;
+    -fx-text-fill: -sieve-text;
+}
+
 .stack-pane {
     -fx-background-color: -sieve-window;
 }

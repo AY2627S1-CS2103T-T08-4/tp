@@ -33,6 +33,7 @@ public class PersonCardTest {
     private PersonCard untaggedCard;
     private PersonCard longEmailCard;
     private PersonCard longNameCard;
+    private PersonCard compactCard;
 
     @Start
     public void start(Stage stage) {
@@ -41,8 +42,10 @@ public class PersonCardTest {
         untaggedCard = new PersonCard(new PersonBuilder().withTags().build(), 2);
         longEmailCard = new PersonCard(new PersonBuilder().withEmail(LONG_EMAIL).build(), 3);
         longNameCard = new PersonCard(new PersonBuilder().withName(LONG_NAME).build(), 4);
+        compactCard = new PersonCard(new PersonBuilder().withNote("Prefers evenings")
+                .withFee("250").withDueDate("01-11-2026").build(), 5, true);
         Scene scene = new Scene(new VBox(taggedCard.getRoot(), untaggedCard.getRoot(), longEmailCard.getRoot(),
-                longNameCard.getRoot()));
+                longNameCard.getRoot(), compactCard.getRoot()));
         // The app's fonts, so that the text takes as much room as it does in the app
         scene.getStylesheets().add("view/LightTheme.css");
         stage.setScene(scene);
@@ -78,6 +81,16 @@ public class PersonCardTest {
             Label tag = (Label) node;
             assertTrue(tag.getStyleClass().contains(TagColor.getStyleClass(tag.getText())), tag.getText());
         }
+    }
+
+    @Test
+    public void constructor_compact_hidesDetailsButKeepsSummary() {
+        assertTrue(compactCard.getRoot().lookup("#name").isVisible());
+        assertTrue(compactCard.getRoot().lookup("#phone").isVisible());
+        assertFalse(compactCard.getRoot().lookup("#email").isVisible());
+        assertFalse(compactCard.getRoot().lookup("#address").isVisible());
+        assertFalse(compactCard.getRoot().lookup("#billing").isVisible());
+        assertFalse(compactCard.getRoot().lookup("#note").isVisible());
     }
 
     @Test

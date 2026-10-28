@@ -3,21 +3,30 @@ package seedu.address.ui;
 import java.nio.file.Path;
 import java.util.logging.Logger;
 
+import javafx.animation.Interpolator;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextInputControl;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.core.LogsCenter;
 import seedu.address.logic.Logic;
 import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.model.person.Person;
 
 /**
  * The Main Window. Provides the basic application layout containing
@@ -30,6 +39,10 @@ public class MainWindow extends UiPart<Stage> {
             .getResource("/view/DarkTheme.css").toExternalForm();
     private static final String DARK_THEME_BUTTON_TEXT = "Dark theme";
     private static final String LIGHT_THEME_BUTTON_TEXT = "Light theme";
+    private static final Duration DETAIL_ANIMATION_DURATION = Duration.millis(200);
+    private static final double DETAIL_WIDTH_RATIO = 0.55;
+    private static final double MIN_DETAIL_WIDTH = 300;
+    private static final double MAX_DETAIL_WIDTH = 520;
 
     private final Logger logger = LogsCenter.getLogger(getClass());
 
@@ -40,8 +53,14 @@ public class MainWindow extends UiPart<Stage> {
 
     // Independent Ui parts residing in this Ui container
     private PersonListPanel personListPanel;
+    private PersonDetailPanel personDetailPanel;
     private ResultDisplay resultDisplay;
     private HelpWindow helpWindow;
+    private Timeline detailAnimation;
+    private boolean isDetailOpen;
+
+    @FXML
+    private BorderPane clientContent;
 
     @FXML
     private StackPane commandBoxPlaceholder;
@@ -51,6 +70,9 @@ public class MainWindow extends UiPart<Stage> {
 
     @FXML
     private StackPane personListPanelPlaceholder;
+
+    @FXML
+    private StackPane personDetailPanelPlaceholder;
 
     @FXML
     private StackPane resultDisplayPlaceholder;
@@ -125,6 +147,17 @@ public class MainWindow extends UiPart<Stage> {
         personListPanel = new PersonListPanel(logic.getFilteredPersonList());
         personListPanelPlaceholder.getChildren().add(personListPanel.getRoot());
 
+        personDetailPanel = new PersonDetailPanel(personListPanel::clearSelection);
+        personDetailPanelPlaceholder.getChildren().add(personDetailPanel.getRoot());
+        clipDetailPanelDuringAnimation();
+        personListPanel.selectedPersonProperty().addListener((observable, oldPerson, selectedPerson) -> {
+            if (selectedPerson == null) {
+                hidePersonDetail();
+            } else {
+                showPersonDetail(selectedPerson);
+            }
+        });
+
         resultDisplay = new ResultDisplay();
         resultDisplayPlaceholder.getChildren().add(resultDisplay.getRoot());
 
@@ -133,6 +166,62 @@ public class MainWindow extends UiPart<Stage> {
 
         CommandBox commandBox = new CommandBox(this::executeCommand, resultDisplay::scrollPage);
         commandBoxPlaceholder.getChildren().add(commandBox.getRoot());
+
+        getRoot().addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+            if (isDetailOpen && event.getCode() == KeyCode.ESCAPE) {
+                personListPanel.clearSelection();
+                event.consume();
+            }
+        });
+    }
+
+    private void clipDetailPanelDuringAnimation() {
+        Rectangle clip = new Rectangle();
+        clip.widthProperty().bind(personDetailPanelPlaceholder.widthProperty());
+        clip.heightProperty().bind(personDetailPanelPlaceholder.heightProperty());
+        personDetailPanelPlaceholder.setClip(clip);
+    }
+
+    private void showPersonDetail(Person person) {
+        personDetailPanel.setPerson(person);
+        if (isDetailOpen) {
+            return;
+        }
+
+        isDetailOpen = true;
+        personListPanel.setCompact(true);
+        personDetailPanelPlaceholder.setManaged(true);
+        personDetailPanelPlaceholder.setVisible(true);
+
+        double contentWidth = clientContent.getWidth() > 0 ? clientContent.getWidth() : primaryStage.getWidth();
+        double targetWidth = Math.clamp(contentWidth * DETAIL_WIDTH_RATIO, MIN_DETAIL_WIDTH, MAX_DETAIL_WIDTH);
+        animatePersonDetail(targetWidth, 1, null);
+    }
+
+    private void hidePersonDetail() {
+        if (!isDetailOpen) {
+            return;
+        }
+
+        isDetailOpen = false;
+        animatePersonDetail(0, 0, () -> {
+            personDetailPanelPlaceholder.setVisible(false);
+            personDetailPanelPlaceholder.setManaged(false);
+            personListPanel.setCompact(false);
+        });
+    }
+
+    private void animatePersonDetail(double targetWidth, double targetOpacity, Runnable onFinished) {
+        if (detailAnimation != null) {
+            detailAnimation.stop();
+        }
+        detailAnimation = new Timeline(new KeyFrame(DETAIL_ANIMATION_DURATION,
+                new KeyValue(personDetailPanelPlaceholder.prefWidthProperty(), targetWidth, Interpolator.EASE_BOTH),
+                new KeyValue(personDetailPanelPlaceholder.opacityProperty(), targetOpacity, Interpolator.EASE_BOTH)));
+        if (onFinished != null) {
+            detailAnimation.setOnFinished(event -> onFinished.run());
+        }
+        detailAnimation.play();
     }
 
     /**

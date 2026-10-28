@@ -55,6 +55,13 @@ public class PersonCard extends UiPart<Region> {
      * Creates a {@code PersonCard} with the given {@code Person} and index to display.
      */
     public PersonCard(Person person, int displayedIndex) {
+        this(person, displayedIndex, false);
+    }
+
+    /**
+     * Creates a {@code PersonCard}, optionally showing only the summary fields.
+     */
+    public PersonCard(Person person, int displayedIndex, boolean isCompact) {
         super(FXML);
         this.person = person;
         id.setText(String.valueOf(displayedIndex));
@@ -72,8 +79,10 @@ public class PersonCard extends UiPart<Region> {
         boolean hasDueDate = !person.getDueDate().isEmpty();
         setShown(fee, hasFee);
         setShown(dueDate, hasDueDate);
-        setShown(billing, hasFee || hasDueDate);
-        setShown(note, !person.getNote().isEmpty());
+        setShown(email, !isCompact);
+        setShown(address, !isCompact);
+        setShown(billing, !isCompact && (hasFee || hasDueDate));
+        setShown(note, !isCompact && !person.getNote().isEmpty());
         setShown(tags, !person.getTags().isEmpty());
     }
 
@@ -90,7 +99,7 @@ public class PersonCard extends UiPart<Region> {
     /**
      * Returns a pill-shaped label for the tag called {@code tagName}, colored by {@link TagColor}.
      */
-    private static Label createTagLabel(String tagName) {
+    static Label createTagLabel(String tagName) {
         Label tagLabel = new Label(tagName);
         tagLabel.getStyleClass().add(TagColor.getStyleClass(tagName));
         return tagLabel;

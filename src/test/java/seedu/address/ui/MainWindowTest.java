@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Path;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,6 +14,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.testfx.api.FxRobot;
 import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
+import org.testfx.util.WaitForAsyncUtils;
 
 import javafx.css.PseudoClass;
 import javafx.event.ActionEvent;
@@ -19,6 +22,7 @@ import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
@@ -29,6 +33,7 @@ import seedu.address.logic.LogicManager;
 import seedu.address.logic.commands.FindCommand;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.model.ModelManager;
+import seedu.address.model.person.Person;
 import seedu.address.model.person.Phone;
 import seedu.address.storage.JsonAddressBookStorage;
 import seedu.address.storage.JsonUserPrefsStorage;
@@ -140,6 +145,50 @@ public class MainWindowTest {
         assertTrue(themeToggleButton.getText().equals("Dark theme"));
     }
 
+    @Test
+    public void selectClients_thenClose_detailPanelUpdatesAndListSelectionClears(FxRobot robot)
+            throws TimeoutException {
+        enterCommand(robot, "add n/Ravi Kumar p/87654321 e/ravi.k@edu.sg a/10 Queenstown Rd t/physics");
+        enterCommand(robot, "add n/Amirah Tan p/91234567 e/amirah@edu.sg a/20 Tampines Rd t/english");
+        ListView<Person> personListView = getPersonListView();
+
+        robot.interact(() -> personListView.getSelectionModel().select(0));
+        assertEquals("Ravi Kumar", getDetailLabel("#name").getText());
+        assertTrue(stage.getScene().lookup("#personDetailPanelPlaceholder").isVisible());
+
+        robot.interact(() -> personListView.getSelectionModel().select(1));
+        assertEquals("Amirah Tan", getDetailLabel("#name").getText());
+
+        Button closeButton = (Button) stage.getScene().lookup("#closeDetailButton");
+        robot.interact(closeButton::fire);
+        assertTrue(personListView.getSelectionModel().isEmpty());
+        waitForDetailPanelToClose();
+    }
+
+    @Test
+    public void deleteSelectedClient_closesDetailPanel(FxRobot robot) throws TimeoutException {
+        enterCommand(robot, "add n/Ravi Kumar p/87654321 e/ravi.k@edu.sg a/10 Queenstown Rd");
+        ListView<Person> personListView = getPersonListView();
+        robot.interact(() -> personListView.getSelectionModel().select(0));
+
+        enterCommand(robot, "delete 1");
+
+        assertTrue(personListView.getSelectionModel().isEmpty());
+        waitForDetailPanelToClose();
+    }
+
+    @Test
+    public void editSelectedClient_updatesOpenDetailPanel(FxRobot robot) {
+        enterCommand(robot, "add n/Ravi Kumar p/87654321 e/ravi.k@edu.sg a/10 Queenstown Rd");
+        ListView<Person> personListView = getPersonListView();
+        robot.interact(() -> personListView.getSelectionModel().select(0));
+
+        enterCommand(robot, "edit 1 p/81234567");
+
+        assertEquals(0, personListView.getSelectionModel().getSelectedIndex());
+        assertEquals("81234567", getDetailLabel("#phone").getText());
+    }
+
     /**
      * Types {@code command} into the command box and presses Enter.
      */
@@ -157,5 +206,20 @@ public class MainWindowTest {
 
     private Node getResultDisplay() {
         return stage.getScene().lookup(".result-display");
+    }
+
+    @SuppressWarnings("unchecked")
+    private ListView<Person> getPersonListView() {
+        return (ListView<Person>) stage.getScene().lookup("#personListView");
+    }
+
+    private Label getDetailLabel(String selector) {
+        Node detailPanel = stage.getScene().lookup("#personDetailPanel");
+        return (Label) detailPanel.lookup(selector);
+    }
+
+    private void waitForDetailPanelToClose() throws TimeoutException {
+        WaitForAsyncUtils.waitFor(1, TimeUnit.SECONDS, () ->
+                !stage.getScene().lookup("#personDetailPanelPlaceholder").isVisible());
     }
 }
