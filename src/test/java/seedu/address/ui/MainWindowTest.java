@@ -15,6 +15,7 @@ import org.testfx.framework.junit5.Start;
 
 import javafx.css.PseudoClass;
 import javafx.event.ActionEvent;
+import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -96,6 +97,18 @@ public class MainWindowTest {
                 new KeyEvent(KeyEvent.KEY_PRESSED, "", "", KeyCode.PAGE_DOWN, false, false, false, false)));
 
         assertTrue(resultScrollPane.getVvalue() > resultScrollPane.getVmin());
+    }
+
+    @Test
+    public void commandBox_minimumWidth_promptTextFits(FxRobot robot) {
+        robot.interact(() -> stage.setWidth(stage.getMinWidth()));
+        TextField commandTextField = (TextField) stage.getScene().lookup("#commandTextField");
+
+        Text promptText = new Text(commandTextField.getPromptText());
+        promptText.setFont(commandTextField.getFont());
+        Insets insets = commandTextField.getInsets();
+        double textWidth = commandTextField.getWidth() - insets.getLeft() - insets.getRight();
+        assertTrue(promptText.getLayoutBounds().getWidth() <= textWidth);
     }
 
     @Test
