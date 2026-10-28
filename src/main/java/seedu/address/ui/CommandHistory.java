@@ -7,17 +7,18 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Keeps track of all past commands the user has inputted during the session.
- * Every non-empty command entered is remembered, whether it succeeded or failed.
- * Consecutively repeated commands are also saved.
+ * Keeps track of the commands entered during the session, so that Up and Down can show them again.
+ * Every command added is kept, whether it succeeded or failed, including consecutive repeats.
  */
 public class CommandHistory {
 
     private final List<String> commands = new ArrayList<>();
-    private int current = 0; // position of the command shown in the command box
+    /** Index of the command recalled with Up or Down, or {@code commands.size()} when past the newest one. */
+    private int current = 0;
 
     /**
-     * Saves {@code command} into commands.
+     * Saves {@code command} as the newest command and moves back to the end of the history,
+     * so that {@link #getPreviousCommand()} returns {@code command} next.
      */
     public void add(String command) {
         requireNonNull(command);

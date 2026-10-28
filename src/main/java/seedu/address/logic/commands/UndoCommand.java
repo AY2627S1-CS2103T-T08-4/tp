@@ -17,7 +17,7 @@ public class UndoCommand extends Command {
 
     /**
      * Reverts the last change to the client list and shows the full list,
-     * so that a restored client is not hidden by an earlier {@code find}.
+     * so that a restored client is not hidden by an earlier {@code find} or {@code filter}.
      *
      * @param model The current state of the application model data. Must not be null.
      * @return The result message indicating the last change was undone.

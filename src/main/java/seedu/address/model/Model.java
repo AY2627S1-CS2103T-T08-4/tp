@@ -50,7 +50,7 @@ public interface Model {
     boolean canUndoAddressBook();
 
     /**
-     * Reverts to the state before the last {@link #commitAddressBook()}.
+     * Reverts to the state before the last change recorded by {@link #commitAddressBook()}.
      * Check {@link #canUndoAddressBook()} before calling this.
      */
     void undoAddressBook();
