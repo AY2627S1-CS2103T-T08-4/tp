@@ -46,6 +46,10 @@ import seedu.address.storage.StorageManager;
 @ExtendWith(ApplicationExtension.class)
 public class MainWindowTest {
 
+    private static final String RAVI_NAME = "Ravi Kumar";
+    private static final String ADD_RAVI_COMMAND =
+            "add n/Ravi Kumar p/87654321 e/ravi.k@edu.sg a/10 Queenstown Rd t/Math";
+
     @TempDir
     public Path temporaryFolder;
 
@@ -232,6 +236,129 @@ public class MainWindowTest {
     }
 
     @Test
+    public void clickClient_thenType_textGoesToCommandBox(FxRobot robot) {
+        addAndClickClient(robot);
+
+        robot.write(ListCommand.COMMAND_WORD);
+
+        assertEquals(RAVI_NAME, getDetailLabel("#name").getText());
+        assertEquals(ListCommand.COMMAND_WORD, getCommandTextField().getText());
+    }
+
+    @Test
+    public void clickClient_thenPressUp_recallsLastCommand(FxRobot robot) {
+        addAndClickClient(robot);
+
+        robot.type(KeyCode.UP);
+
+        assertEquals(ADD_RAVI_COMMAND, getCommandTextField().getText());
+    }
+
+    @Test
+    public void clickCloseButton_focusStaysInCommandBox(FxRobot robot) throws TimeoutException {
+        addAndClickClient(robot);
+
+        robot.clickOn("#closeDetailButton");
+
+        waitForDetailPanelToClose();
+        assertTrue(getCommandTextField().isFocused());
+    }
+
+    @Test
+    public void clickClient_thenPressEscape_closesDetailPanel(FxRobot robot) throws TimeoutException {
+        addAndClickClient(robot);
+
+        robot.type(KeyCode.ESCAPE);
+
+        assertTrue(getPersonListView().getSelectionModel().isEmpty());
+        waitForDetailPanelToClose();
+    }
+
+    @Test
+    public void undo_selectedClientMovesRow_staysSelected(FxRobot robot) {
+        addThreeClients(robot);
+        selectClient(robot, 2);
+
+        enterCommand(robot, "delete 1");
+        enterCommand(robot, "undo");
+
+        assertSelectedClientShown("Charlotte Lee");
+    }
+
+    @Test
+    public void edit_selectedClientInFilteredList_staysSelectedWithNewDetails(FxRobot robot) {
+        addThreeClients(robot);
+        enterCommand(robot, "filter t/Math");
+        selectClient(robot, 1);
+
+        // edit also shows all clients again, so Charlotte moves from row 2 to row 3
+        enterCommand(robot, "edit 2 p/99997777");
+
+        assertSelectedClientShown("Charlotte Lee");
+        assertEquals("99997777", getDetailLabel("#phone").getText());
+    }
+
+    @Test
+    public void edit_selectedClientLeavesFilter_staysSelected(FxRobot robot) {
+        addThreeClients(robot);
+        enterCommand(robot, "filter t/Math");
+        selectClient(robot, 1);
+
+        // Charlotte no longer matches the filter, but edit shows all clients again
+        enterCommand(robot, "edit 2 t/Physics");
+
+        assertSelectedClientShown("Charlotte Lee");
+    }
+
+    @Test
+    public void edit_renameSelectedClient_staysSelected(FxRobot robot) {
+        addThreeClients(robot);
+        selectClient(robot, 2);
+
+        enterCommand(robot, "edit 3 n/Charlotte Lim");
+
+        assertSelectedClientShown("Charlotte Lim");
+    }
+
+    @Test
+    public void find_selectedClientNotFound_closesDetailPanel(FxRobot robot) throws TimeoutException {
+        addThreeClients(robot);
+        enterCommand(robot, "find Charlotte");
+        selectClient(robot, 0);
+
+        // One client replaces another, as in an edit, but Charlotte is only hidden, not renamed
+        enterCommand(robot, "find Ravi");
+
+        assertTrue(getPersonListView().getSelectionModel().isEmpty());
+        waitForDetailPanelToClose();
+    }
+
+    @Test
+    public void delete_selectedClientWithOthersLeft_closesDetailPanel(FxRobot robot) throws TimeoutException {
+        addThreeClients(robot);
+        selectClient(robot, 1);
+
+        enterCommand(robot, "delete 2");
+
+        assertTrue(getPersonListView().getSelectionModel().isEmpty());
+        waitForDetailPanelToClose();
+    }
+
+    @Test
+    public void selectClient_minimumWidth_detailPanelFitsInWindow(FxRobot robot) {
+        robot.interact(() -> stage.setWidth(stage.getMinWidth()));
+        enterCommand(robot, ADD_RAVI_COMMAND);
+        selectClient(robot, 0);
+        waitForDetailPanelToOpen();
+
+        double windowWidth = stage.getScene().getWidth();
+        for (String id : new String[] {"#closeDetailButton", "#phone", "#email", "#address"}) {
+            Node node = stage.getScene().lookup("#personDetailPanel").lookup(id);
+            assertTrue(node.localToScene(node.getBoundsInLocal()).getMaxX() <= windowWidth, id + " cut off");
+        }
+    }
+
+    @Test
     public void hidePersonDetail_detailAlreadyClosed_keepsDetailPanelHidden(FxRobot robot) {
         Node detailPlaceholder = stage.getScene().lookup("#personDetailPanelPlaceholder");
 
@@ -268,6 +395,50 @@ public class MainWindowTest {
     private Label getDetailLabel(String selector) {
         Node detailPanel = stage.getScene().lookup("#personDetailPanel");
         return (Label) detailPanel.lookup(selector);
+    }
+
+    private TextField getCommandTextField() {
+        return (TextField) stage.getScene().lookup("#commandTextField");
+    }
+
+    /**
+     * Adds a client, then clicks the command box and the client's card, as a user would, and waits for the detail
+     * panel to open.
+     */
+    private void addAndClickClient(FxRobot robot) {
+        enterCommand(robot, ADD_RAVI_COMMAND);
+        robot.clickOn("#commandTextField");
+        robot.clickOn(getPersonListView().lookup("#cardPane"));
+        waitForDetailPanelToOpen();
+    }
+
+    /**
+     * Adds Ravi, Amirah and Charlotte in that order. Ravi and Charlotte are tagged Math.
+     */
+    private void addThreeClients(FxRobot robot) {
+        enterCommand(robot, ADD_RAVI_COMMAND);
+        enterCommand(robot, "add n/Amirah Tan p/91234567 e/amirah@edu.sg a/20 Tampines Rd t/English");
+        enterCommand(robot, "add n/Charlotte Lee p/98765432 e/charlotte@edu.sg a/30 Bishan St t/Math");
+    }
+
+    private void selectClient(FxRobot robot, int zeroBasedIndex) {
+        robot.interact(() -> getPersonListView().getSelectionModel().select(zeroBasedIndex));
+    }
+
+    /**
+     * Asserts that the client called {@code name} is selected in the list and shown in the detail panel.
+     */
+    private void assertSelectedClientShown(String name) {
+        assertEquals(name, getPersonListView().getSelectionModel().getSelectedItem().getName().fullName);
+        assertEquals(name, getDetailLabel("#name").getText());
+    }
+
+    /**
+     * Waits for the detail panel's opening animation to finish, so that it is at its full width.
+     */
+    private void waitForDetailPanelToOpen() {
+        WaitForAsyncUtils.sleep(500, TimeUnit.MILLISECONDS);
+        WaitForAsyncUtils.waitForFxEvents();
     }
 
     private void waitForDetailPanelToClose() throws TimeoutException {

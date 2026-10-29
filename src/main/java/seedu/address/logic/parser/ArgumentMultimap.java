@@ -41,9 +41,7 @@ public class ArgumentMultimap {
      * @param argValue Argument value to be associated with the specified prefix key
      */
     public void put(Prefix prefix, String argValue) {
-        List<String> argValues = getAllValues(prefix);
-        argValues.add(argValue);
-        argMultimap.put(prefix, argValues);
+        argMultimap.computeIfAbsent(prefix, k -> new ArrayList<>()).add(argValue);
     }
 
     /**

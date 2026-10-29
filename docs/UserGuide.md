@@ -314,6 +314,7 @@ Deletes all clients from Sieve.
 Format: `clear`
 
 * `clear` takes no parameters, so `clear 3` shows an error instead of deleting every client. To delete some clients, use [`delete`](#deleting-clients-delete).
+* If you have no clients, `clear` shows `There are no clients to clear.` and changes nothing. An `undo` after it reverts your previous change instead.
 
 ### Undoing a change: `undo`
 

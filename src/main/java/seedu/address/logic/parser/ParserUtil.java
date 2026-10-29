@@ -63,7 +63,7 @@ public class ParserUtil {
     /**
      * Parses a {@code String name} into a {@code Name}.
      * Leading and trailing whitespaces will be trimmed, and consecutive whitespaces collapsed.
-     * Consecutive whitespaces will be collapsed into a single space.
+     * Apostrophe-like characters will be normalized, as in {@link Name#normalizeApostrophes(String)}.
      *
      * @throws ParseException if the given {@code name} is invalid.
      */

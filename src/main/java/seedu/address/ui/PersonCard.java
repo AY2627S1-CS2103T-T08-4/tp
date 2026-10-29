@@ -1,6 +1,7 @@
 package seedu.address.ui;
 
 import java.util.Comparator;
+import java.util.List;
 import java.util.Set;
 
 import javafx.fxml.FXML;
@@ -90,16 +91,24 @@ public class PersonCard extends UiPart<Region> {
      * Adds a pill for each tag in {@code personTags} to the row of tags.
      */
     private void addTags(Set<Tag> personTags) {
+        tags.getChildren().addAll(createTagLabels(personTags));
+    }
+
+    /**
+     * Returns a pill for each tag in {@code personTags}, sorted by tag name.
+     */
+    static List<Label> createTagLabels(Set<Tag> personTags) {
         // Tags are case-insensitive, so they are sorted that way too (Math, physics, Sec4)
-        personTags.stream()
+        return personTags.stream()
                 .sorted(Comparator.comparing(tag -> tag.tagName, String.CASE_INSENSITIVE_ORDER))
-                .forEach(tag -> tags.getChildren().add(createTagLabel(tag.tagName)));
+                .map(tag -> createTagLabel(tag.tagName))
+                .toList();
     }
 
     /**
      * Returns a pill-shaped label for the tag called {@code tagName}, colored by {@link TagColor}.
      */
-    static Label createTagLabel(String tagName) {
+    private static Label createTagLabel(String tagName) {
         Label tagLabel = new Label(tagName);
         tagLabel.getStyleClass().add(TagColor.getStyleClass(tagName));
         return tagLabel;

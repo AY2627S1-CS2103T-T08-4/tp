@@ -5,6 +5,8 @@ import static seedu.address.commons.util.AppUtil.checkArgument;
 
 import java.util.Locale;
 
+import seedu.address.commons.util.StringUtil;
+
 /**
  * Represents a Tag in the address book.
  * Guarantees: immutable; name is valid as declared in {@link #isValidTagName(String)}
@@ -38,8 +40,7 @@ public class Tag {
      * @param tagName A tag name as typed by the user or read from the data file.
      */
     public static String normalizeTagName(String tagName) {
-        requireNonNull(tagName);
-        return tagName.trim().replaceAll("\\s+", " ");
+        return StringUtil.normalizeWhitespace(tagName);
     }
 
     /**

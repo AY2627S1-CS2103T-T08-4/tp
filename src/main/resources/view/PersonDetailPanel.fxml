@@ -23,7 +23,7 @@
           <FlowPane fx:id="tags" />
         </VBox>
         <Button fx:id="closeDetailButton" onAction="#handleClose" styleClass="detail-close-button"
-                mnemonicParsing="false" text="X" accessibleText="Close client details" />
+                focusTraversable="false" mnemonicParsing="false" text="X" accessibleText="Close client details" />
       </HBox>
 
       <VBox styleClass="person-detail-fields">
