@@ -17,6 +17,9 @@ public class Messages {
     public static final String MESSAGE_DUPLICATE_FIELDS =
                 "Multiple values specified for the following single-valued field(s): ";
     public static final String MESSAGE_SHOWING_ALL_CLIENTS = "Showing all clients.";
+    public static final String MESSAGE_NOTE_NOT_LAST = "A note cannot contain n/, p/, e/, a/, t/, fee/ or due/, "
+            + "as everything after nt/ is part of the note. Put nt/NOTE last, and write such text another way, "
+            + "e.g. N/A instead of n/a.";
 
     private static final String MESSAGE_UNKNOWN_PREFIX =
             "Unknown prefix %1$s. Check it for a typo, or type help to see the prefixes each command accepts.";

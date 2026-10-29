@@ -15,9 +15,6 @@ public class Note {
     public static final int MAX_LENGTH = 200;
     public static final String MESSAGE_CONSTRAINTS = String.format(
             "Invalid Note! Notes cannot be more than %d characters.", MAX_LENGTH);
-    public static final String MESSAGE_NOT_LAST = "The note must be the last parameter, so it cannot contain "
-            + "prefixes such as t/ or p/. Move nt/NOTE to the end of the command.";
-
     public static final Note EMPTY = new Note("");
 
     public final String value;

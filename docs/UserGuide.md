@@ -59,7 +59,7 @@ Sieve is a **desktop app that helps self-employed private tuition teachers keep 
   For example, `[t/TAG]... ` may be omitted, or written as `t/Math` or `t/Math t/Sec4`.
 
 * Parameters can be in any order, except the note (`nt/NOTE`), which must come last.<br>
-  For example, if the command specifies `n/NAME p/PHONE_NUMBER`, `p/PHONE_NUMBER n/NAME` is also acceptable.
+  For example, if the command specifies `n/NAME p/PHONE`, `p/PHONE n/NAME` is also acceptable.
 
 * In `add` and `edit`, a word that looks like a prefix but is not one, such as `z/` in `a/Blk 1 z/x`, is rejected as an unknown prefix, so that a mistyped prefix is not saved as part of a detail.<br>
   This applies to every parameter except the note, so a note such as `nt/Meet w/ parent` is fine. In an address, write `c/o` as `care of`.
@@ -85,16 +85,23 @@ Format: `help`
 
 Adds a client to Sieve, then shows the full client list, so that the new client is not hidden by an earlier `find` or `filter`.
 
-Format: `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [fee/FEE] [due/DUE_DATE] [t/TAG]... [nt/NOTE]`
+Format: `add n/NAME p/PHONE e/EMAIL a/ADDRESS [fee/FEE] [due/DUE_DATE] [t/TAG]... [nt/NOTE]`
 
 <box type="tip" seamless>
 
 **Tip:** A client can have any number of tags, including zero.
 
 * A note is free text of up to 200 characters, for anything you want to remember about the client, e.g. `nt/Weak at algebra, prelims in March`. Leave it out if you have nothing to record.
-* The note must be the last parameter, because everything after `nt/` is part of the note. A note cannot contain a prefix such as ` t/` or ` p/`, so `nt/Revise t/tests` is rejected. Other text with a slash, such as `nt/Meet w/ parent`, is fine.
 * A fee is the amount you charge the client, e.g. `fee/250` or `fee/180.50`. It is a number that is up to 7 digits and up to 2 decimal places, with no currency symbol. Sieve shows it with 2 decimal places (`250.00`).
 * A due date is the date the next payment is due, in the format `DD-MM-YYYY`, e.g. `due/01-11-2026`. It must be a real date, and dates in the past are allowed. Sieve only stores these two values and shows them on the client's card. It does not track payments or send reminders. Leave them out if you do not need them.
+</box>
+
+<box type="warning" seamless>
+
+**Caution:** The note must be the last parameter. Sieve reads each detail up to the next prefix, so a prefix after `nt/` would cut the note short and quietly change another detail. For example, `nt/Revise t/tests` would save the note `Revise` and give the client the tag `tests`. To stop this, Sieve rejects the command instead.
+
+* A note cannot contain ` n/`, ` p/`, ` e/`, ` a/`, ` t/`, ` fee/` or ` due/`, so `nt/Revise t/tests` and `nt/Allergies n/a` are rejected. Write such text another way, e.g. `N/A` instead of `n/a`.
+* Other text with a slash, such as `nt/Meet w/ parent`, is fine.
 </box>
 
 <box type="info" seamless>
@@ -151,7 +158,7 @@ Format: `edit INDEX [n/NAME] [p/PHONE] [e/EMAIL] [a/ADDRESS] [fee/FEE] [due/DUE_
 * To remove all of a client's tags, enter `t/` without a tag after it.
 * Editing the note replaces the whole note; it does not add to the existing one. To remove a client's note, enter `nt/` without any text after it.
 * Editing the fee or due date replaces the existing value. To remove a client's fee, enter `fee/` without a value after it. To remove a client's due date, enter `due/` without a value after it.
-* The note must be the last parameter, and cannot contain a prefix such as ` t/` or ` p/`, as in [`add`](#adding-a-client-add). For example, `edit 1 nt/Revise t/tests` is rejected instead of replacing the client's tags.
+* The note must be the last parameter, and cannot contain any of the prefixes listed in [`add`](#adding-a-client-add). For example, `edit 1 nt/Revise t/tests` is rejected instead of replacing the client's tags.
 * After an edit, the full client list is shown, so that the edited client is not hidden by an earlier `find` or `filter`.
 * If the new values are the same as the client's current ones, Sieve shows `No change: NAME already has these details.` and keeps the displayed list as it is.
 
@@ -394,10 +401,10 @@ Furthermore, certain edits can cause Sieve to behave in unexpected ways (e.g., i
 
 Action     | Format, Examples
 -----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------
-**Add**    | `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [fee/FEE] [due/DUE_DATE] [t/TAG]... [nt/NOTE]` <br> e.g., `add n/Immanuel Lim p/98765432 e/immanuel.lim@gmail.com a/Blk 456 Bishan St 21 #11-22 t/Chemistry t/JC1`
+**Add**    | `add n/NAME p/PHONE e/EMAIL a/ADDRESS [fee/FEE] [due/DUE_DATE] [t/TAG]... [nt/NOTE]` <br> e.g., `add n/Immanuel Lim p/98765432 e/immanuel.lim@gmail.com a/Blk 456 Bishan St 21 #11-22 t/Chemistry t/JC1`
 **Clear**  | `clear`
 **Delete** | `delete INDEX [, INDEX]...`<br> e.g., `delete 3`, `delete 1, 3, 5`
-**Edit**   | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [fee/FEE] [due/DUE_DATE] [t/TAG]... [nt/NOTE]`<br> e.g., `edit 1 p/81112222 e/amirah.tan01@gmail.com`, `edit 2 nt/Exam in March`
+**Edit**   | `edit INDEX [n/NAME] [p/PHONE] [e/EMAIL] [a/ADDRESS] [fee/FEE] [due/DUE_DATE] [t/TAG]... [nt/NOTE]`<br> e.g., `edit 1 p/81112222 e/amirah.tan01@gmail.com`, `edit 2 nt/Exam in March`
 **Exit**   | `exit`
 **Filter** | `filter [p/PHONE]... [t/TAG]...`<br> e.g., `filter t/physics t/sec4`, `filter p/91234567`
 **Find**   | `find KEYWORD [MORE_KEYWORDS]...`<br> e.g., `find Amirah`, `find Amirah O'Brien`
