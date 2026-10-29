@@ -1105,8 +1105,14 @@ The data file is `data/sieve.json` inside that folder.
 1. The note must be the last parameter
 
     1. Test case: `edit 1 nt/Revise t/tests`<br>
-       Expected: `Amirah Tan` is unchanged, and her tags are kept. The status message says that the note must be the last
-       parameter.
+       Expected: `Amirah Tan` is unchanged, and her tags are kept. The status message says that a note cannot contain
+       prefixes such as `t/`, and that `nt/NOTE` must be last.
+
+    1. Test case: `edit 1 nt/Allergies n/a`<br>
+       Expected: `Amirah Tan` is unchanged. The same status message is shown, suggesting `N/A` instead of `n/a`.
+
+    1. Test case: `edit 1 nt/Allergies N/A`<br>
+       Expected: The note becomes `Allergies N/A`. `N/` is not a prefix, so it is allowed in a note.
 
     1. Test case: `edit 1 t/Math nt/Exam soon`<br>
        Expected: `Amirah Tan`'s tags are replaced with `Math`, and her note becomes `Exam soon`.
