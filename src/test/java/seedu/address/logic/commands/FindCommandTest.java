@@ -16,6 +16,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import seedu.address.logic.Messages;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
@@ -73,6 +74,16 @@ public class FindCommandTest {
         expectedModel.updateFilteredPersonList(predicate);
         assertCommandSuccess(command, model, CommandResult.forEmptySearch(expectedMessage), expectedModel);
         assertEquals(List.of(), model.getFilteredPersonList());
+    }
+
+    @Test
+    public void execute_emptyAddressBook_noClientsToSearch() {
+        Model emptyModel = new ModelManager();
+        NameContainsKeywordsPredicate predicate = preparePredicate("amirah");
+        Model expectedEmptyModel = new ModelManager();
+        expectedEmptyModel.updateFilteredPersonList(predicate);
+        assertCommandSuccess(new FindCommand(predicate), emptyModel,
+                CommandResult.forEmptySearch(Messages.MESSAGE_NO_CLIENTS_TO_SEARCH), expectedEmptyModel);
     }
 
     @Test

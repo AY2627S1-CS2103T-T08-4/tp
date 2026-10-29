@@ -17,6 +17,8 @@ public class Messages {
     public static final String MESSAGE_DUPLICATE_FIELDS =
                 "Multiple values specified for the following single-valued field(s): ";
     public static final String MESSAGE_SHOWING_ALL_CLIENTS = "Showing all clients.";
+    public static final String MESSAGE_NO_CLIENTS_TO_SEARCH =
+            "There are no clients in Sieve yet, so there is nothing to search. Use add to add one.";
 
     private static final String MESSAGE_UNKNOWN_PREFIX =
             "Unknown prefix %1$s. Check it for a typo, or type help to see the prefixes each command accepts.";

@@ -13,6 +13,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import seedu.address.logic.Messages;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
@@ -99,6 +100,17 @@ public class FilterCommandTest {
         CommandResult expectedResult = CommandResult.forEmptySearch(FilterCommand.MESSAGE_NO_CLIENTS_FOUND);
         assertCommandSuccess(command, model, expectedResult, expectedModel);
         assertEquals(List.of(), model.getFilteredPersonList());
+    }
+
+    @Test
+    public void execute_emptyAddressBook_noClientsToSearch() {
+        PersonMatchesSearchPredicate predicate = predicateWith("Physics");
+        Model emptyModel = new ModelManager();
+        Model expectedEmptyModel = new ModelManager();
+        expectedEmptyModel.updateFilteredPersonList(predicate);
+
+        CommandResult expectedResult = CommandResult.forEmptySearch(Messages.MESSAGE_NO_CLIENTS_TO_SEARCH);
+        assertCommandSuccess(new FilterCommand(predicate), emptyModel, expectedResult, expectedEmptyModel);
     }
 
     @Test
