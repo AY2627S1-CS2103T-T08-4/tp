@@ -7,6 +7,7 @@ participant ":LogicManager" as LogicManager LOGIC_COLOR
 participant ":AddressBookParser" as AddressBookParser LOGIC_COLOR
 participant ":UntagCommandParser" as UntagCommandParser LOGIC_COLOR
 participant "ArgumentTokenizer" as ArgumentTokenizer LOGIC_COLOR
+participant "argMultimap:ArgumentMultimap" as ArgumentMultimap LOGIC_COLOR
 participant "ParserUtil" as ParserUtil LOGIC_COLOR
 participant "u:UntagCommand" as UntagCommand LOGIC_COLOR
 participant "r:CommandResult" as CommandResult LOGIC_COLOR
@@ -32,8 +33,29 @@ AddressBookParser -> UntagCommandParser : parse("1 t/Physics")
 activate UntagCommandParser
 UntagCommandParser -> ArgumentTokenizer : tokenize(args, PREFIX_TAG)
 activate ArgumentTokenizer
-ArgumentTokenizer --> UntagCommandParser : index and tag values
+ArgumentTokenizer --> UntagCommandParser : argMultimap
 deactivate ArgumentTokenizer
+
+UntagCommandParser -> ArgumentMultimap : verifyNoUnknownPrefixesInPreamble()
+activate ArgumentMultimap
+ArgumentMultimap --> UntagCommandParser
+deactivate ArgumentMultimap
+
+UntagCommandParser -> ArgumentMultimap : verifyNoUnknownPrefixesIn(PREFIX_TAG)
+activate ArgumentMultimap
+ArgumentMultimap --> UntagCommandParser
+deactivate ArgumentMultimap
+
+UntagCommandParser -> ArgumentMultimap : getAllValues(PREFIX_TAG)
+activate ArgumentMultimap
+ArgumentMultimap --> UntagCommandParser : tagValues
+deactivate ArgumentMultimap
+
+UntagCommandParser -> ArgumentMultimap : getPreamble()
+activate ArgumentMultimap
+ArgumentMultimap --> UntagCommandParser : preamble
+deactivate ArgumentMultimap
+
 UntagCommandParser -> ParserUtil : parseIndex(preamble)
 activate ParserUtil
 ParserUtil --> UntagCommandParser : index
@@ -49,6 +71,8 @@ end
 create UntagCommand
 UntagCommandParser -> UntagCommand : create(index, tags)
 activate UntagCommand
+UntagCommand --> UntagCommandParser
+deactivate UntagCommand
 UntagCommandParser --> AddressBookParser : u
 deactivate UntagCommandParser
 AddressBookParser --> LogicManager : u
@@ -60,12 +84,26 @@ UntagCommand -> Model : getFilteredPersonList()
 activate Model
 Model --> UntagCommand : displayed clients
 deactivate Model
-UntagCommand -> UntagCommand : find requested tags that exist
+UntagCommand -> UntagCommand : getExistingTags(personToUntag)
+UntagCommand --> UntagCommand : existingTagsToRemove
+UntagCommand -> UntagCommand : getMissingTags(personToUntag)
+UntagCommand --> UntagCommand : missingTags
 alt at least one existing tag
+    UntagCommand -> UntagCommand : createUntaggedPerson(personToUntag, existingTagsToRemove)
+    UntagCommand --> UntagCommand : untaggedPerson
     UntagCommand -> Model : setPerson(personToUntag, untaggedPerson)
     activate Model
     Model --> UntagCommand
     deactivate Model
+
+    UntagCommand -> UntagCommand : updateDisplayedPersons(...)
+    activate UntagCommand
+    UntagCommand -> Model : updateFilteredPersonList(displayedPersons::contains)
+    activate Model
+    Model --> UntagCommand
+    deactivate Model
+    UntagCommand --> UntagCommand
+    deactivate UntagCommand
 else none of the requested tags exist
     note right of UntagCommand: Leave the model unchanged
 end

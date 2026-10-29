@@ -7,6 +7,7 @@ participant ":LogicManager" as LogicManager LOGIC_COLOR
 participant ":AddressBookParser" as AddressBookParser LOGIC_COLOR
 participant ":FilterCommandParser" as FilterCommandParser LOGIC_COLOR
 participant "ArgumentTokenizer" as ArgumentTokenizer LOGIC_COLOR
+participant "argMultimap:ArgumentMultimap" as ArgumentMultimap LOGIC_COLOR
 participant "ParserUtil" as ParserUtil LOGIC_COLOR
 participant "f:FilterCommand" as FilterCommand LOGIC_COLOR
 participant "p:PersonMatchesSearchPredicate" as Predicate LOGIC_COLOR
@@ -31,10 +32,42 @@ deactivate FilterCommandParser
 
 AddressBookParser -> FilterCommandParser : parse("p/92345678 t/Sec4")
 activate FilterCommandParser
-FilterCommandParser -> ArgumentTokenizer : tokenize(args, PREFIX_PHONE, PREFIX_TAG)
+FilterCommandParser -> ArgumentTokenizer : tokenize(args, PREFIX_PHONE, PREFIX_TAG,\nother add/edit prefixes)
 activate ArgumentTokenizer
-ArgumentTokenizer --> FilterCommandParser : phone and tag values
+ArgumentTokenizer --> FilterCommandParser : argMultimap
 deactivate ArgumentTokenizer
+
+loop for each unsupported add/edit prefix
+    FilterCommandParser -> ArgumentMultimap : getValue(otherPrefix)
+    activate ArgumentMultimap
+    ArgumentMultimap --> FilterCommandParser : value
+    deactivate ArgumentMultimap
+end
+
+FilterCommandParser -> ArgumentMultimap : verifyNoUnknownPrefixesInPreamble()
+activate ArgumentMultimap
+ArgumentMultimap --> FilterCommandParser
+deactivate ArgumentMultimap
+
+FilterCommandParser -> ArgumentMultimap : verifyNoUnknownPrefixesIn(PREFIX_PHONE, PREFIX_TAG)
+activate ArgumentMultimap
+ArgumentMultimap --> FilterCommandParser
+deactivate ArgumentMultimap
+
+FilterCommandParser -> ArgumentMultimap : getAllValues(PREFIX_PHONE)
+activate ArgumentMultimap
+ArgumentMultimap --> FilterCommandParser : phoneValues
+deactivate ArgumentMultimap
+
+FilterCommandParser -> ArgumentMultimap : getAllValues(PREFIX_TAG)
+activate ArgumentMultimap
+ArgumentMultimap --> FilterCommandParser : tagValues
+deactivate ArgumentMultimap
+
+FilterCommandParser -> ArgumentMultimap : getPreamble()
+activate ArgumentMultimap
+ArgumentMultimap --> FilterCommandParser : preamble
+deactivate ArgumentMultimap
 
 loop for each phone value
     FilterCommandParser -> ParserUtil : parsePhone(phoneValue)
@@ -51,7 +84,7 @@ loop for each tag value
 end
 
 create Predicate
-FilterCommandParser -> Predicate : create(nameKeywords, phones, tags)
+FilterCommandParser -> Predicate : create(phones, tags)
 activate Predicate
 Predicate --> FilterCommandParser
 deactivate Predicate
@@ -59,6 +92,8 @@ deactivate Predicate
 create FilterCommand
 FilterCommandParser -> FilterCommand : create(predicate)
 activate FilterCommand
+FilterCommand --> FilterCommandParser
+deactivate FilterCommand
 FilterCommandParser --> AddressBookParser : f
 deactivate FilterCommandParser
 AddressBookParser --> LogicManager : f
