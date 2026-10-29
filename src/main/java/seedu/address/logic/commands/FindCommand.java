@@ -29,6 +29,9 @@ public class FindCommand extends Command {
             "Search keywords can only contain letters, digits, hyphens <->, apostrophes <'>, full stops <.> "
                     + "and parentheses <()>, and must include at least one letter or digit.";
 
+    public static final String MESSAGE_PREFIX_IN_KEYWORDS = "find only searches names, so keywords do not need "
+            + "a prefix such as n/, e.g. find Amy. To search by phone or tag, use filter, e.g. filter t/Math.";
+
     public static final String MESSAGE_NO_CLIENTS_FOUND = Messages.getPersonsListedOverviewMessage(0)
             + " Keywords must match the start of a name part (e.g. Bri, not rien). "
             + "Check the spelling, or use list to see all clients.";
@@ -52,7 +55,10 @@ public class FindCommand extends Command {
         int matchCount = model.getFilteredPersonList().size();
         logger.fine("Find matched " + matchCount + " client(s) for " + predicate);
         if (matchCount == 0) {
-            return CommandResult.forEmptySearch(MESSAGE_NO_CLIENTS_FOUND);
+            // With no clients at all, the tips to check the spelling or use list cannot help
+            boolean isAddressBookEmpty = model.getAddressBook().getPersonList().isEmpty();
+            return CommandResult.forEmptySearch(isAddressBookEmpty
+                    ? Messages.MESSAGE_NO_CLIENTS_TO_SEARCH : MESSAGE_NO_CLIENTS_FOUND);
         }
         return new CommandResult(Messages.getPersonsListedOverviewMessage(matchCount));
     }

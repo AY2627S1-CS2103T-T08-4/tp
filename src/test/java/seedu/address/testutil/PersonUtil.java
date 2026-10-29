@@ -38,11 +38,6 @@ public class PersonUtil {
         sb.append(PREFIX_EMAIL + person.getEmail().value + " ");
         sb.append(PREFIX_ADDRESS + person.getAddress().value + " ");
         if (!person
-            .getNote()
-            .isEmpty()) {
-            sb.append(PREFIX_NOTE + person.getNote().value + " ");
-        }
-        if (!person
             .getFee()
             .isEmpty()) {
             sb.append(PREFIX_FEE + person.getFee().value + " ");
@@ -58,6 +53,12 @@ public class PersonUtil {
             .forEach(
                 s -> sb.append(PREFIX_TAG + s.tagName + " ")
             );
+        // nt/ must be the last parameter
+        if (!person
+            .getNote()
+            .isEmpty()) {
+            sb.append(PREFIX_NOTE + person.getNote().value + " ");
+        }
         return sb.toString();
     }
 
@@ -91,12 +92,6 @@ public class PersonUtil {
                 .append(address.value)
                 .append(" "));
         descriptor
-            .getNote()
-            .ifPresent(note -> sb
-                .append(PREFIX_NOTE)
-                .append(note.value)
-                .append(" "));
-        descriptor
             .getFee()
             .ifPresent(fee -> sb
                 .append(PREFIX_FEE)
@@ -115,7 +110,7 @@ public class PersonUtil {
                 .getTags()
                 .get();
             if (tags.isEmpty()) {
-                sb.append(PREFIX_TAG);
+                sb.append(PREFIX_TAG).append(" ");
             } else {
                 tags.forEach(s -> sb
                     .append(PREFIX_TAG)
@@ -123,6 +118,13 @@ public class PersonUtil {
                     .append(" "));
             }
         }
+        // nt/ must be the last parameter
+        descriptor
+            .getNote()
+            .ifPresent(note -> sb
+                .append(PREFIX_NOTE)
+                .append(note.value)
+                .append(" "));
         return sb.toString();
     }
 }

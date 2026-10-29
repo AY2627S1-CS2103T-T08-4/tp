@@ -33,6 +33,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import seedu.address.logic.LogicManager;
+import seedu.address.logic.Messages;
 import seedu.address.logic.commands.FindCommand;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.model.ModelManager;
@@ -73,9 +74,10 @@ public class MainWindowTest {
 
     @Test
     public void executeCommand_searchWithNoMatches_showsEmptySearch(FxRobot robot) {
+        // The address book is empty, so find says there is nothing to search
         enterCommand(robot, FindCommand.COMMAND_WORD + " Amirah");
 
-        assertTrue(getResultMessage().getText().startsWith(FindCommand.MESSAGE_NO_CLIENTS_FOUND));
+        assertEquals(Messages.MESSAGE_NO_CLIENTS_TO_SEARCH, getResultMessage().getText());
         assertTrue(ResultDisplayTest.isShownAsEmptySearch(getResultDisplay()));
     }
 

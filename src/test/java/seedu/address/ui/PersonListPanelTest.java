@@ -35,7 +35,7 @@ public class PersonListPanelTest {
     @Start
     @SuppressWarnings("unchecked")
     public void start(Stage stage) {
-        personListPanel = new PersonListPanel(displayedPersons);
+        PersonListPanel personListPanel = new PersonListPanel(displayedPersons, persons);
         clientCount = (Label) personListPanel.getRoot().lookup("#clientCount");
         personListView = (ListView<Person>) personListPanel.getRoot().lookup("#personListView");
         stage.setScene(new Scene(personListPanel.getRoot()));
@@ -60,13 +60,22 @@ public class PersonListPanelTest {
     }
 
     @Test
-    public void personListView_noClients_showsPlaceholder(FxRobot robot) {
+    public void personListView_noClients_suggestsAddOnly(FxRobot robot) {
         robot.interact(persons::clear);
+        assertPlaceholderShown(robot, PersonListPanel.MESSAGE_NO_CLIENTS);
+    }
 
-        ListView<?> personListView = robot.lookup("#personListView").queryAs(ListView.class);
-        Label placeholder = (Label) personListView.getPlaceholder();
-        assertTrue(placeholder.isVisible());
-        assertTrue(placeholder.getText().startsWith("No clients to show."));
+    @Test
+    public void personListView_allClientsHidden_suggestsList(FxRobot robot) {
+        robot.interact(() -> displayedPersons.setPredicate(person -> false));
+        assertPlaceholderShown(robot, PersonListPanel.MESSAGE_ALL_CLIENTS_HIDDEN);
+    }
+
+    @Test
+    public void personListView_lastHiddenClientDeleted_switchesToSuggestAdd(FxRobot robot) {
+        robot.interact(() -> displayedPersons.setPredicate(person -> false));
+        robot.interact(persons::clear);
+        assertPlaceholderShown(robot, PersonListPanel.MESSAGE_NO_CLIENTS);
     }
 
     @Test
@@ -97,5 +106,13 @@ public class PersonListPanelTest {
         });
 
         assertEquals(3, personListView.getItems().size());
+    }
+  
+    @Test
+    private void assertPlaceholderShown(FxRobot robot, String expectedText) {
+        ListView<?> personListView = robot.lookup("#personListView").queryAs(ListView.class);
+        Label placeholder = (Label) personListView.getPlaceholder();
+        assertTrue(placeholder.isVisible());
+        assertEquals(expectedText, placeholder.getText());
     }
 }

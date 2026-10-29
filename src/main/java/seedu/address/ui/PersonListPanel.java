@@ -21,6 +21,9 @@ import seedu.address.model.person.Person;
  * Panel containing the list of persons.
  */
 public class PersonListPanel extends UiPart<Region> {
+    public static final String MESSAGE_NO_CLIENTS = "No clients yet. Use add to add one.";
+    public static final String MESSAGE_ALL_CLIENTS_HIDDEN = "No clients to show. Use list to show all clients.";
+
     private static final String FXML = "PersonListPanel.fxml";
     private final Logger logger = LogsCenter.getLogger(PersonListPanel.class);
 
@@ -31,11 +34,14 @@ public class PersonListPanel extends UiPart<Region> {
     private final ReadOnlyObjectWrapper<Person> selectedPerson = new ReadOnlyObjectWrapper<>();
     private boolean isCompact;
     private boolean isRestoringSelection;
+    @FXML
+    private Label placeholder;
 
     /**
-     * Creates a {@code PersonListPanel} with the given {@code ObservableList}.
+     * Creates a {@code PersonListPanel} that shows {@code personList}, the clients currently displayed.
+     * {@code allPersons} is every client, which decides what the placeholder suggests when none are shown.
      */
-    public PersonListPanel(ObservableList<Person> personList) {
+    public PersonListPanel(ObservableList<Person> personList, ObservableList<Person> allPersons) {
         super(FXML);
         personList.addListener((ListChangeListener<Person>) this::restoreSelectionAfterReplacement);
         personListView.setItems(personList);
@@ -48,6 +54,10 @@ public class PersonListPanel extends UiPart<Region> {
         // Recomputes the count whenever personList changes, e.g. after add, delete, find or filter
         clientCount.textProperty().bind(
                 Bindings.createStringBinding(() -> Messages.formatClientCount(personList.size()), personList));
+        // With no clients at all, list can't help, so only suggest add. Otherwise, a search or filter hides them all
+        placeholder.textProperty().bind(Bindings.when(Bindings.isEmpty(allPersons))
+                .then(MESSAGE_NO_CLIENTS)
+                .otherwise(MESSAGE_ALL_CLIENTS_HIDDEN));
     }
 
     /**
