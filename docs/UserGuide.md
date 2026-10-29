@@ -393,7 +393,9 @@ Format: `exit`
 
 ### Saving the data
 
-Sieve automatically saves data after every command. You do not need to save manually.
+Sieve automatically saves data after every command that changes data. You do not need to save manually.
+
+If the data file is read-only (for example, Read-only is ticked in its Properties on Windows), Sieve rejects every command that would change data, such as `add`, `delete` or `undo`, with a message saying so, and changes nothing. `list`, `find`, `filter` and `help` still work. Make the file writable again to carry on.
 
 ### Editing the data file
 
@@ -401,7 +403,7 @@ Sieve data is saved automatically as a JSON file `data/sieve.json`, inside the f
 <box type="warning" seamless>
 
 **Caution:**
-If your changes make the data file invalid, Sieve launches in a read-only fallback mode, displaying an empty list and showing a warning popup message at startup. Sieve will completely block any subsequent command that attempts to mutate data, ensuring your original corrupted file is left completely untouched on disk so you can fix it safely. Still, we recommend backing up the file before editing it.<br>
+If your changes make the data file invalid, Sieve launches in a read-only fallback mode, displaying an empty list and showing a warning popup message at startup. The warning also says what is wrong with the file, so you can find and fix it. Sieve will completely block any subsequent command that attempts to mutate data, ensuring your original corrupted file is left completely untouched on disk so you can fix it safely. Still, we recommend backing up the file before editing it.<br>
 Files saved as "UTF-8 with BOM", which some Windows editors do, are also accepted.<br>
 Furthermore, certain edits can cause Sieve to behave in unexpected ways (e.g., if a value entered is outside of the acceptable range). Therefore, edit the data file only if you are confident that you can update it correctly.
 </box>
@@ -411,7 +413,7 @@ Furthermore, certain edits can cause Sieve to behave in unexpected ways (e.g., i
 ## FAQ
 
 **Q**: How do I transfer my data to another computer?<br>
-**A**: Install the app on the other computer, and launch it once from the folder where you want to keep your data (we recommend the JAR file's folder). Then overwrite the `data/sieve.json` file it creates in that folder with the data file from your previous Sieve home folder.
+**A**: Copy the JAR file to a folder on the other computer (this becomes Sieve's home folder), create a folder named `data` inside it, and copy `data/sieve.json` from your previous Sieve home folder into that `data` folder. Then launch Sieve from the home folder, as in the [Quick start](#quick-start). Do not wait for Sieve to create the file first: it only creates `data/sieve.json` when you first change something.
 
 **Q**: How do I remove the sample clients and start with my own?<br>
 **A**: Run [`clear`](#clearing-all-clients-clear), which deletes every client, then add your own with [`add`](#adding-a-client-add). If you clear by mistake, run `undo` straight away to bring the clients back.
