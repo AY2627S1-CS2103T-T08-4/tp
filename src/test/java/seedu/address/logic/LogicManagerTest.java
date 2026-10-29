@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static seedu.address.logic.Messages.MESSAGE_UNKNOWN_COMMAND;
 import static seedu.address.logic.commands.CommandTestUtil.ADDRESS_DESC_AMY;
 import static seedu.address.logic.commands.CommandTestUtil.EMAIL_DESC_AMY;
@@ -16,6 +17,7 @@ import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -27,6 +29,7 @@ import seedu.address.logic.commands.AddCommand;
 import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.DeleteCommand;
 import seedu.address.logic.commands.EditCommand;
+import seedu.address.logic.commands.FindCommand;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.RedoCommand;
 import seedu.address.logic.commands.UndoCommand;
@@ -104,6 +107,49 @@ public class LogicManagerTest {
     }
 
     @Test
+    public void execute_nonMutatingCommandWhenSaveFails_success() throws Exception {
+        JsonAddressBookStorage addressBookStorage =
+            new JsonAddressBookStorage(temporaryFolder.resolve("unsavable.json")) {
+                @Override
+                public void saveAddressBook(ReadOnlyAddressBook addressBook) throws IOException {
+                    throw DUMMY_AD_EXCEPTION;
+                }
+            };
+        logic = new LogicManager(model, new StorageManager(addressBookStorage,
+            new JsonUserPrefsStorage(temporaryFolder.resolve("unsavablePrefs.json"))));
+
+        assertEquals(ListCommand.MESSAGE_SUCCESS, logic.execute(ListCommand.COMMAND_WORD).getFeedbackToUser());
+        logic.execute(FindCommand.COMMAND_WORD + " Amy");
+    }
+
+    @Test
+    public void execute_mutatingCommandOnReadOnlyFile_changesNothing() throws Exception {
+        logic.execute(ADD_AMY_COMMAND);
+        Path filePath = storage.getAddressBookFilePath();
+        byte[] savedBytes = Files.readAllBytes(filePath);
+        Model expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
+        String expectedMessage = String.format(LogicManager.READ_ONLY_FILE_ERROR_FORMAT, filePath);
+
+        assertTrue(filePath.toFile().setWritable(false));
+        try {
+            // Running as a user who can write to any file, such as root, cannot test this
+            assumeFalse(Files.isWritable(filePath));
+            assertCommandFailure(DeleteCommand.COMMAND_WORD + " 1", CommandException.class, expectedMessage,
+                expectedModel);
+            assertCommandFailure(UndoCommand.COMMAND_WORD, CommandException.class, expectedMessage, expectedModel);
+            assertTrue(model.canUndoAddressBook());
+            assertArrayEquals(savedBytes, Files.readAllBytes(filePath));
+
+            // Commands that change nothing still work
+            logic.execute(ListCommand.COMMAND_WORD);
+            logic.execute(FindCommand.COMMAND_WORD + " Amy");
+            assertEquals(1, model.getFilteredPersonList().size());
+        } finally {
+            filePath.toFile().setWritable(true);
+        }
+    }
+
+    @Test
     public void execute_successfulMutatingCommand_canUndo() throws Exception {
         logic.execute(ADD_AMY_COMMAND);
         assertTrue(model.canUndoAddressBook());
@@ -160,6 +206,16 @@ public class LogicManagerTest {
     }
 
     @Test
+    public void execute_addAfterFind_saysShowingAllClients() throws Exception {
+        logic.execute(FindCommand.COMMAND_WORD + " Bob");
+        CommandResult result = logic.execute(ADD_AMY_COMMAND);
+
+        // The text the user reads, unlike other tests, which format the same message constant as the command
+        assertTrue(result.getFeedbackToUser().endsWith("\nShowing all clients."));
+        assertEquals(1, model.getFilteredPersonList().size());
+    }
+
+    @Test
     public void execute_redoAfterNewChange_throwsCommandException() throws Exception {
         logic.execute(ADD_AMY_COMMAND);
         logic.execute(UndoCommand.COMMAND_WORD);
@@ -183,6 +239,19 @@ public class LogicManagerTest {
         assertEquals("Client 'Amy': Invalid Phone Number!", lm.getDataCorruptionReason());
         assertEquals("", new LogicManager(model, storage,
             false, "ignored").getDataCorruptionReason());
+    
+    @Test
+    public void getAllPersonList_listFiltered_includesHiddenPersons() throws Exception {
+        logic.execute(ADD_AMY_COMMAND);
+        logic.execute(FindCommand.COMMAND_WORD + " Zzz");
+
+        assertTrue(logic.getFilteredPersonList().isEmpty());
+        assertEquals(List.of(new PersonBuilder(AMY).withTags().build()), logic.getAllPersonList());
+    }
+
+    @Test
+    public void getAllPersonList_modifyList_throwsUnsupportedOperationException() {
+        assertThrows(UnsupportedOperationException.class, () -> logic.getAllPersonList().remove(0));
     }
 
     @Test

@@ -7,9 +7,9 @@
 <VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
   <!-- maxWidth="Infinity" lets the label stretch across the panel, so its background and border do too -->
   <Label fx:id="clientCount" styleClass="client-count" maxWidth="Infinity" />
-  <ListView fx:id="personListView" VBox.vgrow="ALWAYS">
+  <ListView fx:id="personListView" focusTraversable="false" VBox.vgrow="ALWAYS">
     <placeholder>
-      <Label styleClass="list-placeholder" text="No clients to show. Use list to show all clients, or add to add one." />
+      <Label fx:id="placeholder" styleClass="list-placeholder" />
     </placeholder>
   </ListView>
 </VBox>

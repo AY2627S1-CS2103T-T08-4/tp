@@ -1,6 +1,9 @@
 package seedu.address.logic.parser;
 
 import static java.util.Objects.requireNonNull;
+import static seedu.address.logic.Messages.MESSAGE_NOTE_NOT_LAST;
+import static seedu.address.logic.parser.CliSyntax.PREFIXES_EXCEPT_NOTE;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_NOTE;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -26,6 +29,19 @@ public class ParserUtil {
     public static final String MESSAGE_INVALID_INDEX = "Index must be a positive integer.";
 
     /**
+     * Checks that no other add or edit prefix follows {@code nt/} in {@code args}.
+     * Everything after {@code nt/} belongs to the note, so a prefix there would cut the note short.
+     *
+     * @throws ParseException if a prefix in {@code PREFIXES_EXCEPT_NOTE} appears after {@code nt/}.
+     */
+    public static void verifyNoteIsLast(String args) throws ParseException {
+        requireNonNull(args);
+        if (ArgumentTokenizer.hasPrefixAfter(args, PREFIX_NOTE, PREFIXES_EXCEPT_NOTE)) {
+            throw new ParseException(MESSAGE_NOTE_NOT_LAST);
+        }
+    }
+
+    /**
      * Parses {@code oneBasedIndex} into an {@code Index} and returns it. Leading and trailing whitespaces will be
      * trimmed.
      * A positive number too large for an {@code int} is parsed as {@code Integer.MAX_VALUE}, which is past the end
@@ -38,7 +54,7 @@ public class ParserUtil {
             return Index.fromOneBased(Integer.parseInt(trimmedIndex));
         }
         // Only digits, not all zeros, yet not a valid int, so the number overflowed
-        if (trimmedIndex.matches("[0-9]+") && !trimmedIndex.matches("0+")) {
+        if (trimmedIndex.matches("\\d+") && !trimmedIndex.matches("0+")) {
             return Index.fromOneBased(Integer.MAX_VALUE);
         }
         throw new ParseException(MESSAGE_INVALID_INDEX);
@@ -46,8 +62,8 @@ public class ParserUtil {
 
     /**
      * Parses a {@code String name} into a {@code Name}.
-     * Leading and trailing whitespaces will be trimmed.
-     * Consecutive whitespaces will be collapsed into a single space.
+     * Leading and trailing whitespaces will be trimmed, and consecutive whitespaces collapsed.
+     * Apostrophe-like characters will be normalized, as in {@link Name#normalizeApostrophes(String)}.
      *
      * @throws ParseException if the given {@code name} is invalid.
      */
@@ -55,7 +71,7 @@ public class ParserUtil {
         requireNonNull(name);
         String normalizedName = Name.normalizeName(name);
         if (!Name.isValidName(normalizedName)) {
-            throw new ParseException(Name.MESSAGE_CONSTRAINTS);
+            throw new ParseException(Name.getErrorMessage(normalizedName));
         }
         return new Name(normalizedName);
     }
@@ -104,7 +120,7 @@ public class ParserUtil {
         requireNonNull(note);
         String normalizedNote = Note.normalizeNote(note);
         if (!Note.isValidNote(normalizedNote)) {
-            throw new ParseException(Note.MESSAGE_CONSTRAINTS);
+            throw new ParseException(Note.getErrorMessage(normalizedNote));
         }
         return new Note(normalizedNote);
     }
@@ -128,13 +144,16 @@ public class ParserUtil {
      * Parses a {@code String dueDate} into a {@code DueDate}. An empty {@code dueDate} gives an empty
      * {@code DueDate}. Leading and trailing whitespaces will be trimmed.
      *
-     * @throws ParseException if the given {@code dueDate} is invalid.
+     * @throws ParseException if the given dueDate is invalid or in the past.
      */
     public static DueDate parseDueDate(String dueDate) throws ParseException {
         requireNonNull(dueDate);
         String normalizedDueDate = DueDate.normalizeDueDate(dueDate);
         if (!DueDate.isValidDueDate(normalizedDueDate)) {
             throw new ParseException(DueDate.MESSAGE_CONSTRAINTS);
+        }
+        if (!DueDate.isTodayOrLater(normalizedDueDate)) {
+            throw new ParseException(DueDate.MESSAGE_PAST_DATE);
         }
         return new DueDate(normalizedDueDate);
     }
@@ -162,11 +181,11 @@ public class ParserUtil {
      */
     public static Tag parseTag(String tag) throws ParseException {
         requireNonNull(tag);
-        String trimmedTag = tag.trim();
-        if (!Tag.isValidTagName(trimmedTag)) {
+        String normalizedTag = Tag.normalizeTagName(tag);
+        if (!Tag.isValidTagName(normalizedTag)) {
             throw new ParseException(Tag.MESSAGE_CONSTRAINTS);
         }
-        return new Tag(trimmedTag);
+        return new Tag(normalizedTag);
     }
 
     /**

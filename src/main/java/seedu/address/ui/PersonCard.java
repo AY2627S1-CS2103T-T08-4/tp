@@ -55,6 +55,13 @@ public class PersonCard extends UiPart<Region> {
      * Creates a {@code PersonCard} with the given {@code Person} and index to display.
      */
     public PersonCard(Person person, int displayedIndex) {
+        this(person, displayedIndex, false);
+    }
+
+    /**
+     * Creates a {@code PersonCard}, optionally showing only the summary fields.
+     */
+    public PersonCard(Person person, int displayedIndex, boolean isCompact) {
         super(FXML);
         this.person = person;
         id.setText(String.valueOf(displayedIndex));
@@ -65,26 +72,28 @@ public class PersonCard extends UiPart<Region> {
         fee.setText("Fee: " + person.getFee().value);
         dueDate.setText("Due: " + person.getDueDate().value);
         note.setText(person.getNote().value);
-        addTags(person.getTags());
+        addTagLabels(tags, person.getTags());
 
         // Empty optional details take up no space on the card, e.g. a client without tags gets no empty row
         boolean hasFee = !person.getFee().isEmpty();
         boolean hasDueDate = !person.getDueDate().isEmpty();
         setShown(fee, hasFee);
         setShown(dueDate, hasDueDate);
-        setShown(billing, hasFee || hasDueDate);
-        setShown(note, !person.getNote().isEmpty());
+        setShown(email, !isCompact);
+        setShown(address, !isCompact);
+        setShown(billing, !isCompact && (hasFee || hasDueDate));
+        setShown(note, !isCompact && !person.getNote().isEmpty());
         setShown(tags, !person.getTags().isEmpty());
     }
 
     /**
      * Adds a pill for each tag in {@code personTags} to the row of tags.
      */
-    private void addTags(Set<Tag> personTags) {
+    static void addTagLabels(FlowPane tagContainer, Set<Tag> personTags) {
         // Tags are case-insensitive, so they are sorted that way too (Math, physics, Sec4)
         personTags.stream()
                 .sorted(Comparator.comparing(tag -> tag.tagName, String.CASE_INSENSITIVE_ORDER))
-                .forEach(tag -> tags.getChildren().add(createTagLabel(tag.tagName)));
+                .forEach(tag -> tagContainer.getChildren().add(createTagLabel(tag.tagName)));
     }
 
     /**

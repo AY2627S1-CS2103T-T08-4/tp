@@ -7,6 +7,7 @@ import static seedu.address.testutil.TypicalPersons.BENSON;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
@@ -20,6 +21,7 @@ import seedu.address.model.person.Name;
 import seedu.address.model.person.Note;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.Phone;
+import seedu.address.model.tag.Tag;
 import seedu.address.testutil.PersonBuilder;
 
 public class JsonAdaptedPersonTest {
@@ -31,6 +33,9 @@ public class JsonAdaptedPersonTest {
     private static final String INVALID_DUE_DATE = "30-02-2026";
     private static final String INVALID_TAG = "#friend";
 
+    private static final String OUT_OF_RANGE_DUE_DATE = "01-01-0000";
+    private static final String PAST_DUE_DATE = "01-01-2020";
+
     private static final String VALID_NAME = BENSON.getName().toString();
     private static final String VALID_PHONE = BENSON.getPhone().toString();
     private static final String VALID_EMAIL = BENSON.getEmail().toString();
@@ -41,6 +46,20 @@ public class JsonAdaptedPersonTest {
     private static final List<JsonAdaptedTag> VALID_TAGS = BENSON.getTags().stream()
             .map(JsonAdaptedTag::new)
             .collect(Collectors.toList());
+
+    @Test
+    public void toModelType_dueDateYearOutOfRange_throwsIllegalValueException() {
+        JsonAdaptedPerson person = new JsonAdaptedPerson(VALID_NAME, VALID_PHONE, VALID_EMAIL, VALID_ADDRESS,
+            VALID_NOTE, VALID_FEE, OUT_OF_RANGE_DUE_DATE, VALID_TAGS);
+        assertThrows(IllegalValueException.class, DueDate.MESSAGE_CONSTRAINTS, person::toModelType);
+    }
+
+    @Test
+    public void toModelType_pastDueDate_returnsPerson() throws Exception {
+        JsonAdaptedPerson person = new JsonAdaptedPerson(VALID_NAME, VALID_PHONE, VALID_EMAIL, VALID_ADDRESS,
+            VALID_NOTE, VALID_FEE, PAST_DUE_DATE, VALID_TAGS);
+        assertEquals(new DueDate(PAST_DUE_DATE), person.toModelType().getDueDate());
+    }
 
     @Test
     public void toModelType_validPersonDetails_returnsPerson() throws Exception {
@@ -242,6 +261,25 @@ public class JsonAdaptedPersonTest {
                 new JsonAdaptedPerson(VALID_NAME, VALID_PHONE, VALID_EMAIL, VALID_ADDRESS, VALID_NOTE,
                     VALID_FEE, VALID_DUE_DATE, invalidTags);
         assertThrows(IllegalValueException.class, person::toModelType);
+    }
+
+    @Test
+    public void toModelType_nullTag_throwsIllegalValueException() {
+        List<JsonAdaptedTag> tagsWithNull = new ArrayList<>(VALID_TAGS);
+        tagsWithNull.add(null);
+        JsonAdaptedPerson person = new JsonAdaptedPerson(VALID_NAME, VALID_PHONE, VALID_EMAIL, VALID_ADDRESS,
+                VALID_NOTE, VALID_FEE, VALID_DUE_DATE, tagsWithNull);
+
+        assertThrows(IllegalValueException.class, JsonAdaptedPerson.MESSAGE_NULL_TAG, person::toModelType);
+    }
+
+    @Test
+    public void toModelType_tagWithRepeatedWhitespace_returnsPersonWithNormalizedTag() throws Exception {
+        List<JsonAdaptedTag> tagsWithRepeatedWhitespace = List.of(new JsonAdaptedTag(" Sec  4 "));
+        JsonAdaptedPerson person = new JsonAdaptedPerson(VALID_NAME, VALID_PHONE, VALID_EMAIL, VALID_ADDRESS,
+                VALID_NOTE, VALID_FEE, VALID_DUE_DATE, tagsWithRepeatedWhitespace);
+
+        assertEquals(Set.of(new Tag("Sec 4")), person.toModelType().getTags());
     }
 
 }

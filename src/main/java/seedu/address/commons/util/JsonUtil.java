@@ -17,13 +17,19 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 import seedu.address.commons.core.LogsCenter;
 import seedu.address.commons.exceptions.DataLoadingException;
+import seedu.address.commons.exceptions.IllegalValueException;
 
 /**
  * Converts a Java object instance to JSON and vice versa
  */
 public class JsonUtil {
 
+    private static final String MESSAGE_TOP_LEVEL_NULL = "JSON file cannot contain a top-level null value.";
+
     private static final Logger logger = LogsCenter.getLogger(JsonUtil.class);
+
+    /** Added at the start of the file by some editors (e.g. older Notepad) when saving as UTF-8. */
+    private static final String BYTE_ORDER_MARK = "\uFEFF";
 
     private static ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules()
             .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
@@ -37,7 +43,12 @@ public class JsonUtil {
 
     static <T> T deserializeObjectFromJsonFile(Path jsonFile, Class<T> classOfObjectToDeserialize)
             throws IOException {
-        return fromJsonString(FileUtil.readFromFile(jsonFile), classOfObjectToDeserialize);
+        String json = FileUtil.readFromFile(jsonFile);
+        if (json.startsWith(BYTE_ORDER_MARK)) {
+            logger.info("Ignoring the byte order mark at the start of " + jsonFile);
+            json = json.substring(BYTE_ORDER_MARK.length());
+        }
+        return fromJsonString(json, classOfObjectToDeserialize);
     }
 
     /**
@@ -64,6 +75,12 @@ public class JsonUtil {
         } catch (IOException e) {
             logger.warning("Error reading from jsonFile file " + filePath + ": " + e);
             throw new DataLoadingException(e);
+        }
+
+        if (jsonFile == null) {
+            IllegalValueException ive = new IllegalValueException(MESSAGE_TOP_LEVEL_NULL);
+            logger.warning("Illegal value found in JSON file " + filePath + ": " + ive.getMessage());
+            throw new DataLoadingException(ive);
         }
 
         return Optional.of(jsonFile);

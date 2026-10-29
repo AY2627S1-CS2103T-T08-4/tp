@@ -3,6 +3,8 @@ package seedu.address.model.person;
 import static java.util.Objects.requireNonNull;
 import static seedu.address.commons.util.AppUtil.checkArgument;
 
+import seedu.address.commons.util.StringUtil;
+
 /**
  * Represents a Person's name in the address book.
  * Guarantees: immutable; is valid as declared in {@link #isValidName(String)}
@@ -36,6 +38,16 @@ public class Name {
      */
     public static final String VALIDATION_REGEX = "[A-Za-z][" + NAME_CHARACTERS + " ]*";
 
+    private static final String MESSAGE_TOO_LONG =
+            "Invalid Name! Names cannot be more than %1$d characters, but this one has %2$d.";
+
+    /**
+     * Apostrophe-like characters that phones and word processors put in place of {@code '},
+     * e.g. in "O’Brien" copied from a chat. Right and left single quotes, the modifier letter apostrophe
+     * and the prime.
+     */
+    private static final String APOSTROPHE_LIKE_REGEX = "[\u2018\u2019\u02BC\u2032]";
+
     public final String fullName;
 
     /**
@@ -50,14 +62,36 @@ public class Name {
     }
 
     /**
-     * Returns {@code name} trimmed, with consecutive whitespaces collapsed into a single space.
+     * Returns {@code name} trimmed, with consecutive whitespaces collapsed into a single space,
+     * and apostrophe-like characters replaced as in {@link #normalizeApostrophes(String)}.
      * The result may still be an invalid name.
      *
      * @param name A name as typed by the user.
      */
     public static String normalizeName(String name) {
-        requireNonNull(name);
-        return name.trim().replaceAll("\\s+", " ");
+        return normalizeApostrophes(StringUtil.normalizeWhitespace(name));
+    }
+
+    /**
+     * Returns {@code text} with every apostrophe-like character, such as the curly {@code ’},
+     * replaced by a straight apostrophe {@code '}, so that "O’Brien" is read as "O'Brien".
+     */
+    public static String normalizeApostrophes(String text) {
+        requireNonNull(text);
+        return text.replaceAll(APOSTROPHE_LIKE_REGEX, "'");
+    }
+
+    /**
+     * Returns the error message for the invalid name {@code invalidName}. A name that is only too long gets a
+     * message with its length, so that the tutor is not sent to check characters that are all allowed.
+     */
+    public static String getErrorMessage(String invalidName) {
+        requireNonNull(invalidName);
+        assert !isValidName(invalidName) : "only an invalid name has an error message";
+        if (invalidName.matches(VALIDATION_REGEX)) {
+            return String.format(MESSAGE_TOO_LONG, MAX_LENGTH, invalidName.length());
+        }
+        return MESSAGE_CONSTRAINTS;
     }
 
     /**

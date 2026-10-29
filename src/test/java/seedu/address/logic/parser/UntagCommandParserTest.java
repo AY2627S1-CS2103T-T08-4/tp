@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import seedu.address.logic.Messages;
 import seedu.address.logic.commands.UntagCommand;
 import seedu.address.model.tag.Tag;
 
@@ -43,6 +44,12 @@ public class UntagCommandParserTest {
     @Test
     public void parse_invalidTag_throwsParseException() {
         assertParseFailure(parser, "1 t/physics!", Tag.MESSAGE_CONSTRAINTS);
+    }
+
+    @Test
+    public void parse_unknownPrefix_throwsParseException() {
+        assertParseFailure(parser, "1 t/physics z/x", Messages.getErrorMessageForUnknownPrefix("z/"));
+        assertParseFailure(parser, "1 z/x t/physics", Messages.getErrorMessageForUnknownPrefix("z/"));
     }
 
     @Test

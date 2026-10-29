@@ -27,6 +27,9 @@ public class ArgumentMultimap {
      */
     private static final Pattern PREFIX_LIKE_WORD = Pattern.compile("(?<!\\S)[A-Za-z]+/");
 
+    /** The key under which the preamble is stored. */
+    private static final Prefix PREAMBLE = new Prefix("");
+
     /** Prefixes mapped to their respective arguments */
     private final Map<Prefix, List<String>> argMultimap = new HashMap<>();
 
@@ -38,9 +41,7 @@ public class ArgumentMultimap {
      * @param argValue Argument value to be associated with the specified prefix key
      */
     public void put(Prefix prefix, String argValue) {
-        List<String> argValues = getAllValues(prefix);
-        argValues.add(argValue);
-        argMultimap.put(prefix, argValues);
+        argMultimap.computeIfAbsent(prefix, k -> new ArrayList<>()).add(argValue);
     }
 
     /**
@@ -67,7 +68,7 @@ public class ArgumentMultimap {
      * Returns the preamble (text before the first valid prefix). Trims any leading/trailing spaces.
      */
     public String getPreamble() {
-        return getValue(new Prefix("")).orElse("");
+        return getValue(PREAMBLE).orElse("");
     }
 
     /**
@@ -88,8 +89,8 @@ public class ArgumentMultimap {
      * Throws a {@code ParseException} if the preamble contains a word that looks like a prefix,
      * e.g. {@code z/} in {@code 1 z/x n/Amy}, where the unknown prefix comes before every known one.
      */
-    public void verifyNoUnknownPrefixInPreamble() throws ParseException {
-        verifyNoUnknownPrefixesIn(new Prefix(""));
+    public void verifyNoUnknownPrefixesInPreamble() throws ParseException {
+        verifyNoUnknownPrefixesIn(PREAMBLE);
     }
 
     /**

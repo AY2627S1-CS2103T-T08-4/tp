@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane fx:id="personDetailPanel" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER"
+            xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
+  <content>
+    <VBox styleClass="person-detail-panel" spacing="20">
+      <padding>
+        <Insets top="28" right="36" bottom="36" left="36" />
+      </padding>
+
+      <HBox alignment="TOP_LEFT">
+        <VBox spacing="10" HBox.hgrow="ALWAYS">
+          <Label fx:id="name" styleClass="person-detail-name" wrapText="true" />
+          <FlowPane fx:id="tags" />
+        </VBox>
+        <Button fx:id="closeDetailButton" onAction="#handleClose" styleClass="detail-close-button"
+                focusTraversable="false" mnemonicParsing="false" text="X" accessibleText="Close client details" />
+      </HBox>
+
+      <VBox styleClass="person-detail-fields">
+        <HBox styleClass="person-detail-row">
+          <Label styleClass="person-detail-label" text="Phone" />
+          <Label fx:id="phone" styleClass="person-detail-value" wrapText="true" HBox.hgrow="ALWAYS" />
+        </HBox>
+        <HBox styleClass="person-detail-row">
+          <Label styleClass="person-detail-label" text="Email" />
+          <Label fx:id="email" styleClass="person-detail-value" wrapText="true" HBox.hgrow="ALWAYS" />
+        </HBox>
+        <HBox styleClass="person-detail-row">
+          <Label styleClass="person-detail-label" text="Address" />
+          <Label fx:id="address" styleClass="person-detail-value" wrapText="true" HBox.hgrow="ALWAYS" />
+        </HBox>
+        <HBox fx:id="noteRow" styleClass="person-detail-row">
+          <Label styleClass="person-detail-label" text="Notes" />
+          <Label fx:id="note" styleClass="person-detail-value" wrapText="true" HBox.hgrow="ALWAYS" />
+        </HBox>
+        <HBox fx:id="feeRow" styleClass="person-detail-row">
+          <Label styleClass="person-detail-label" text="Fee" />
+          <Label fx:id="fee" styleClass="person-detail-value" wrapText="true" HBox.hgrow="ALWAYS" />
+        </HBox>
+        <HBox fx:id="dueDateRow" styleClass="person-detail-row">
+          <Label styleClass="person-detail-label" text="Due date" />
+          <Label fx:id="dueDate" styleClass="person-detail-value" wrapText="true" HBox.hgrow="ALWAYS" />
+        </HBox>
+      </VBox>
+      <Region VBox.vgrow="ALWAYS" />
+    </VBox>
+  </content>
+</ScrollPane>

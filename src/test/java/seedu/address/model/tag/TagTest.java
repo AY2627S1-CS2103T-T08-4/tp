@@ -38,12 +38,29 @@ public class TagTest {
     }
 
     @Test
+    public void normalizeTagName() {
+        assertThrows(NullPointerException.class, () -> Tag.normalizeTagName(null));
+        assertEquals("Sec 4", Tag.normalizeTagName("Sec  4"));
+        assertEquals("Sec 4", Tag.normalizeTagName("  Sec \t 4  "));
+        assertEquals("Math", Tag.normalizeTagName("Math"));
+    }
+
+    @Test
     public void equals_tagsDifferOnlyInCase_returnsTrue() {
         Tag lowercaseTag = new Tag("physics");
         Tag uppercaseTag = new Tag("PHYSICS");
 
         assertEquals(lowercaseTag, uppercaseTag);
         assertEquals(lowercaseTag.hashCode(), uppercaseTag.hashCode());
+    }
+
+    @Test
+    public void constructor_repeatedWhitespace_normalizesTagName() {
+        Tag tag = new Tag("  Secondary  4  ");
+
+        assertEquals("Secondary 4", tag.tagName);
+        assertEquals(new Tag("Secondary 4"), tag);
+        assertEquals(new Tag("Secondary 4").hashCode(), tag.hashCode());
     }
 
 }

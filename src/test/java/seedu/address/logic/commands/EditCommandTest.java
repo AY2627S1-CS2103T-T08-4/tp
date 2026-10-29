@@ -24,6 +24,7 @@ import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
+import seedu.address.model.person.DueDate;
 import seedu.address.model.person.Person;
 import seedu.address.testutil.EditPersonDescriptorBuilder;
 import seedu.address.testutil.PersonBuilder;
@@ -47,6 +48,19 @@ public class EditCommandTest {
         expectedModel.setPerson(model.getFilteredPersonList().get(0), editedPerson);
 
         assertCommandSuccess(editCommand, model, expectedMessage, expectedModel);
+    }
+
+    @Test
+    public void execute_editOtherFieldOfClientWithPastDueDate_keepsDueDate() throws Exception {
+        Person firstPerson = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
+        Person overdueClient = new PersonBuilder(firstPerson).withDueDate("01-01-2020").build();
+        model.setPerson(firstPerson, overdueClient);
+
+        EditPersonDescriptor descriptor = new EditPersonDescriptorBuilder().withName(VALID_NAME_BOB).build();
+        new EditCommand(INDEX_FIRST_PERSON, descriptor).execute(model);
+
+        Person result = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
+        assertEquals(new DueDate("01-01-2020"), result.getDueDate());
     }
 
     @Test
@@ -151,6 +165,21 @@ public class EditCommandTest {
                 .build();
         EditPersonDescriptor descriptor = new EditPersonDescriptorBuilder().withName(editedPerson.getName().fullName)
                 .build();
+        EditCommand editCommand = new EditCommand(INDEX_FIRST_PERSON, descriptor);
+
+        String expectedMessage = String.format(EditCommand.MESSAGE_EDIT_PERSON_SUCCESS, Messages.format(editedPerson));
+        Model expectedModel = new ModelManager(new AddressBook(model.getAddressBook()), new UserPrefs());
+        expectedModel.setPerson(firstPerson, editedPerson);
+
+        assertCommandSuccess(editCommand, model, expectedMessage, expectedModel);
+    }
+
+    @Test
+    public void execute_tagCaseOnlyChange_editsTags() {
+        // The first person is tagged "friends". Tags ignore case, so this is the same tag, but its new case is kept.
+        Person firstPerson = model.getFilteredPersonList().get(INDEX_FIRST_PERSON.getZeroBased());
+        Person editedPerson = new PersonBuilder(firstPerson).withTags("FRIENDS").build();
+        EditPersonDescriptor descriptor = new EditPersonDescriptorBuilder().withTags("FRIENDS").build();
         EditCommand editCommand = new EditCommand(INDEX_FIRST_PERSON, descriptor);
 
         String expectedMessage = String.format(EditCommand.MESSAGE_EDIT_PERSON_SUCCESS, Messages.format(editedPerson));

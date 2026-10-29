@@ -50,7 +50,7 @@ public class AddressBookParserTest {
 
     @Test
     public void parseCommand_addWithBilling() throws Exception {
-        Person person = new PersonBuilder().withFee("250").withDueDate("01-11-2026").build();
+        Person person = new PersonBuilder().withFee("250").withDueDate("01-11-2030").build();
         AddCommand command = (AddCommand) parser.parseCommand(PersonUtil.getAddCommand(person));
         assertEquals(new AddCommand(person), command);
     }
@@ -137,7 +137,7 @@ public class AddressBookParserTest {
         FilterCommand command = (FilterCommand) parser.parseCommand(
                 FilterCommand.COMMAND_WORD + " t/Physics t/Secondary 4");
 
-        assertEquals(new FilterCommand(new PersonMatchesSearchPredicate(List.of(), List.of(), tags)), command);
+        assertEquals(new FilterCommand(new PersonMatchesSearchPredicate(List.of(), tags)), command);
     }
 
     @Test

@@ -36,8 +36,6 @@ opt recalledCommand is present
     deactivate TextField
 end
 
-CommandBox -> CommandBox : event.consume()
-
 CommandBox --> user
 deactivate CommandBox
 @enduml
