@@ -1,0 +1,6 @@
+{
+  "persons": [
+    { "name": "Valid Person", "phone": "98765432", "email": "valid@example.com", "address": "Blk 1 Bedok" },
+    { "name": "", "phone": "123", "email": "amirah@example.com", "address": "Blk 123 Yishun" }
+  ]
+}

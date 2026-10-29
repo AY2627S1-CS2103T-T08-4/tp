@@ -388,7 +388,7 @@ No command was added, so nothing new needs `isMutating()`. `add` and `edit` alre
     * Pros: Makes "not set" explicit in the type.
     * Cons: Every caller, the storage layer and the UI must unwrap it, for a field that has no behaviour of its own.
 
-### Fee and due date 
+### Fee and due date
 
 `Fee` and `DueDate` record what a client pays and when their next payment is due. They follow the same pattern as `Note`: each is an immutable class in `seedu.address.model.person`, is held by `Person`, is set through the `add` and `edit` commands, and is optional.
 
@@ -462,7 +462,7 @@ No command was added, so nothing new needs `isMutating()`. `add` and `edit` alre
 * **Alternative 2:** In `DueDate`.
   * Pros: One place enforces the rule.
   * Cons: The data file becomes invalid as soon as any stored due date passes.
-  
+
 ### Undo/redo feature
 
 #### Implementation
@@ -1204,8 +1204,8 @@ The data file is `data/sieve.json` inside that folder.
        checksum (for example, `Get-FileHash data\sieve.json` in Windows PowerShell, or `shasum -a 256 data/sieve.json`
        on macOS and Linux). Launch the app.<br>
        Expected: A warning popup titled `Data File Corruption Error` appears. Its header is
-       `Local data file is corrupted.` and its message is `Displaying empty list. Please fix or delete the data file at
-       PATH and restart.`, where `PATH` is the location of the data file. After you click OK, the client list is empty.
+       `Local data file is corrupted.` and its message is `REASON. Displaying empty list. Please fix or delete the data file at
+       PATH and restart.`, where `REASON` is the reason for failure and `PATH` is the location of the data file. After you click OK, the client list is empty.
 
     1. Test case: Enter each of these commands, one at a time:
        `add n/Amirah Tan p/91234567 e/amirah@gmail.com a/Blk 123 Yishun`, `edit 1 n/New Name`, `delete 1`,

@@ -7,6 +7,7 @@ import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
+import javafx.scene.layout.Region;
 import javafx.stage.Stage;
 import seedu.address.MainApp;
 import seedu.address.commons.core.LogsCenter;
@@ -25,7 +26,7 @@ public class UiManager implements Ui {
     private static final String CORRUPTION_ALERT_TITLE = "Data File Corruption Error";
     private static final String CORRUPTION_ALERT_HEADER = "Local data file is corrupted.";
     private static final String CORRUPTION_ALERT_CONTENT_FORMAT =
-        "Displaying empty list. Please fix or delete the data file at %s and restart.";
+        "%s Displaying empty list. Please fix or delete the data file at %s and restart.";
 
     private Logic logic;
     private Path dataFilePath;
@@ -78,7 +79,8 @@ public class UiManager implements Ui {
             alertType,
             CORRUPTION_ALERT_TITLE,
             CORRUPTION_ALERT_HEADER,
-            String.format(CORRUPTION_ALERT_CONTENT_FORMAT, dataFilePath.toAbsolutePath())
+            String.format(CORRUPTION_ALERT_CONTENT_FORMAT, logic.getDataCorruptionReason(),
+                dataFilePath.toAbsolutePath()).strip()
         );
     }
 
@@ -103,6 +105,8 @@ public class UiManager implements Ui {
         alert.setHeaderText(headerText);
         alert.setContentText(contentText);
         alert.getDialogPane().setId(ALERT_DIALOG_PANE_FIELD_ID);
+        alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
+        alert.setResizable(true);
         alert.showAndWait();
     }
 

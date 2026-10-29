@@ -9,6 +9,7 @@ import static seedu.address.testutil.TypicalPersons.getTypicalAddressBook;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import seedu.address.commons.exceptions.DataLoadingException;
+import seedu.address.logic.LogicManager;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
@@ -59,6 +61,7 @@ public class MainAppTest {
 
         assertTrue(mainApp.isInitialDataCorrupted);
         assertEquals(new AddressBook(), model.getAddressBook());
+        assertEquals(DataLoadingException.MESSAGE_UNKNOWN_REASON, mainApp.initialDataCorruptionReason);
     }
 
     @Test
@@ -96,7 +99,27 @@ public class MainAppTest {
         mainApp.init();
 
         assertTrue(mainApp.isInitialDataCorrupted);
-        assertThrows(CommandException.class, () -> mainApp.logic.execute("clear"));
+        assertEquals(DataLoadingException.MESSAGE_BAD_FORMAT, mainApp.initialDataCorruptionReason);
+        assertThrows(CommandException.class,
+            String.format(LogicManager.READ_ONLY_ERROR_FORMAT, dataFile, DataLoadingException.MESSAGE_BAD_FORMAT), () ->
+                mainApp.logic.execute("clear"));
+    }
+
+    @Test
+    public void init_invalidPhoneInDataFile_reasonNamesClient() throws Exception {
+        Path dataFile = temporaryFolder.resolve("badPhoneSieve.json");
+        Files.copy(Paths.get("src", "test", "data", "JsonSerializableAddressBookTest",
+            "invalidPhonePersonAddressBook.json"), dataFile);
+        mainApp.userPrefsFilePath = temporaryFolder.resolve("initPrefs.json");
+        mainApp.addressBookFilePath = dataFile;
+
+        mainApp.init();
+
+        assertTrue(mainApp.isInitialDataCorrupted);
+        assertTrue(mainApp.initialDataCorruptionReason.startsWith("Client 'Amirah Tan': "));
+        assertThrows(CommandException.class,
+            String.format(LogicManager.READ_ONLY_ERROR_FORMAT, dataFile, mainApp.initialDataCorruptionReason), () ->
+                mainApp.logic.execute("clear"));
     }
 
     @Test

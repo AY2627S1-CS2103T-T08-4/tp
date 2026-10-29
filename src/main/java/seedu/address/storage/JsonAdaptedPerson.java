@@ -146,4 +146,8 @@ class JsonAdaptedPerson {
             modelTags);
     }
 
+    String getDisplayName(int index) {
+        return (name == null || name.isBlank()) ? "#" + (index + 1) : name;
+    }
+
 }
