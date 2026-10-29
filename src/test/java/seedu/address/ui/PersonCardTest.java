@@ -34,6 +34,8 @@ public class PersonCardTest {
     private PersonCard longEmailCard;
     private PersonCard longNameCard;
     private PersonCard compactCard;
+    private PersonCard feeCard;
+    private PersonCard dueDateCard;
 
     @Start
     public void start(Stage stage) {
@@ -44,8 +46,10 @@ public class PersonCardTest {
         longNameCard = new PersonCard(new PersonBuilder().withName(LONG_NAME).build(), 4);
         compactCard = new PersonCard(new PersonBuilder().withNote("Prefers evenings")
                 .withFee("250").withDueDate("01-11-2026").build(), 5, true);
+        feeCard = new PersonCard(new PersonBuilder().withFee("250").build(), 6);
+        dueDateCard = new PersonCard(new PersonBuilder().withDueDate("01-11-2026").build(), 7);
         Scene scene = new Scene(new VBox(taggedCard.getRoot(), untaggedCard.getRoot(), longEmailCard.getRoot(),
-                longNameCard.getRoot(), compactCard.getRoot()));
+                longNameCard.getRoot(), compactCard.getRoot(), feeCard.getRoot(), dueDateCard.getRoot()));
         // The app's fonts, so that the text takes as much room as it does in the app
         scene.getStylesheets().add("view/LightTheme.css");
         stage.setScene(scene);
@@ -91,6 +95,14 @@ public class PersonCardTest {
         assertFalse(compactCard.getRoot().lookup("#address").isVisible());
         assertFalse(compactCard.getRoot().lookup("#billing").isVisible());
         assertFalse(compactCard.getRoot().lookup("#note").isVisible());
+    }
+
+    @Test
+    public void constructor_nonCompactWithFeeOrDueDate_showsBillingRow() {
+        assertTrue(feeCard.getRoot().lookup("#billing").isVisible());
+        assertTrue(feeCard.getRoot().lookup("#billing").isManaged());
+        assertTrue(dueDateCard.getRoot().lookup("#billing").isVisible());
+        assertTrue(dueDateCard.getRoot().lookup("#billing").isManaged());
     }
 
     @Test

@@ -4,9 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,6 +30,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.Region;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import seedu.address.logic.LogicManager;
@@ -49,6 +53,7 @@ public class MainWindowTest {
     public Path temporaryFolder;
 
     private Stage stage;
+    private MainWindow mainWindow;
 
     @Start
     public void start(Stage stage) {
@@ -56,7 +61,7 @@ public class MainWindowTest {
         Path addressBookFilePath = temporaryFolder.resolve("addressBook.json");
         StorageManager storage = new StorageManager(new JsonAddressBookStorage(addressBookFilePath),
                 new JsonUserPrefsStorage(temporaryFolder.resolve("userPrefs.json")));
-        MainWindow mainWindow = new MainWindow(stage, new LogicManager(new ModelManager(), storage),
+        mainWindow = new MainWindow(stage, new LogicManager(new ModelManager(), storage),
                 addressBookFilePath);
         mainWindow.fillInnerParts();
         stage.show();
@@ -189,6 +194,55 @@ public class MainWindowTest {
         assertEquals("81234567", getDetailLabel("#phone").getText());
     }
 
+    @Test
+    public void escapeWithDetailOpen_closesDetailPanelAndConsumesEvent(FxRobot robot) throws TimeoutException {
+        enterCommand(robot, "add n/Ravi Kumar p/87654321 e/ravi.k@edu.sg a/10 Queenstown Rd");
+        ListView<Person> personListView = getPersonListView();
+        robot.interact(() -> personListView.getSelectionModel().select(0));
+
+        KeyEvent nonEscapeEvent = createKeyPressedEvent(KeyCode.ENTER);
+        robot.interact(() -> stage.getScene().getRoot().fireEvent(nonEscapeEvent));
+        assertFalse(nonEscapeEvent.isConsumed());
+        assertFalse(personListView.getSelectionModel().isEmpty());
+
+        AtomicBoolean escapeReachedHandler = new AtomicBoolean();
+        stage.getScene().getRoot().addEventHandler(KeyEvent.KEY_PRESSED,
+                event -> escapeReachedHandler.set(true));
+        KeyEvent escapeEvent = createKeyPressedEvent(KeyCode.ESCAPE);
+        robot.interact(() -> stage.getScene().getRoot().fireEvent(escapeEvent));
+        assertFalse(escapeReachedHandler.get());
+        assertTrue(personListView.getSelectionModel().isEmpty());
+        waitForDetailPanelToClose();
+    }
+
+    @Test
+    public void selectClientBeforeContentLayout_usesStageWidthForDetailWidth(FxRobot robot)
+            throws TimeoutException {
+        enterCommand(robot, "add n/Ravi Kumar p/87654321 e/ravi.k@edu.sg a/10 Queenstown Rd");
+        Region clientContent = (Region) stage.getScene().lookup("#clientContent");
+        ListView<Person> personListView = getPersonListView();
+
+        robot.interact(() -> {
+            stage.hide();
+            clientContent.resize(0, clientContent.getHeight());
+            personListView.getSelectionModel().select(0);
+        });
+
+        assertEquals(0, clientContent.getWidth());
+        Node detailPlaceholder = stage.getScene().lookup("#personDetailPanelPlaceholder");
+        WaitForAsyncUtils.waitFor(1, TimeUnit.SECONDS, () -> ((Region) detailPlaceholder).getPrefWidth() > 300);
+    }
+
+    @Test
+    public void hidePersonDetail_detailAlreadyClosed_keepsDetailPanelHidden(FxRobot robot) {
+        Node detailPlaceholder = stage.getScene().lookup("#personDetailPanelPlaceholder");
+
+        robot.interact(this::invokeHidePersonDetail);
+
+        assertFalse(detailPlaceholder.isVisible());
+        assertFalse(detailPlaceholder.isManaged());
+    }
+
     /**
      * Types {@code command} into the command box and presses Enter.
      */
@@ -221,5 +275,19 @@ public class MainWindowTest {
     private void waitForDetailPanelToClose() throws TimeoutException {
         WaitForAsyncUtils.waitFor(1, TimeUnit.SECONDS, () ->
                 !stage.getScene().lookup("#personDetailPanelPlaceholder").isVisible());
+    }
+
+    private KeyEvent createKeyPressedEvent(KeyCode keyCode) {
+        return new KeyEvent(KeyEvent.KEY_PRESSED, "", "", keyCode, false, false, false, false);
+    }
+
+    private void invokeHidePersonDetail() {
+        try {
+            Method hidePersonDetail = MainWindow.class.getDeclaredMethod("hidePersonDetail");
+            hidePersonDetail.setAccessible(true);
+            hidePersonDetail.invoke(mainWindow);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException exception) {
+            throw new AssertionError(exception);
+        }
     }
 }
