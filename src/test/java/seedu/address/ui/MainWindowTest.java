@@ -20,10 +20,14 @@ import org.testfx.util.WaitForAsyncUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.geometry.Point2D;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
@@ -51,6 +55,9 @@ public class MainWindowTest {
     /** The longest name allowed, 50 characters. */
     private static final String LONG_NAME = "Muhammad Hafiz bin Abdul Rahman Ismail Tann (NHHS)";
     private static final String LONG_ADDRESS = "Blk 123 Ang Mo Kio Avenue 3, #12-345, Singapore 560123";
+    /** A command whose result is too long to show in full at the minimum width. */
+    private static final String LONG_RESULT_COMMAND = "add n/Amirah Tan p/91234567 e/amirah@example.com a/"
+            + "Blk 123 Yishun Ave 5 ".repeat(7) + "nt/" + "Weak at algebra ".repeat(12);
 
     @TempDir
     public Path temporaryFolder;
@@ -121,15 +128,78 @@ public class MainWindowTest {
 
     @Test
     public void pageDownInCommandBox_longResult_scrollsResult(FxRobot robot) {
-        robot.interact(() -> stage.setWidth(stage.getMinWidth()));
-        // Too long to show in full at the minimum width
-        enterCommand(robot, "add n/Amirah Tan p/91234567 e/amirah@example.com a/" + "Blk 123 Yishun Ave 5 ".repeat(7)
-                + "nt/" + "Weak at algebra ".repeat(12));
+        ScrollPane resultScrollPane = showLongResult(robot);
 
-        ScrollPane resultScrollPane = (ScrollPane) stage.getScene().lookup("#resultScrollPane");
         robot.interact(() -> getCommandTextField().fireEvent(createKeyPressedEvent(KeyCode.PAGE_DOWN)));
 
         assertTrue(resultScrollPane.getVvalue() > resultScrollPane.getVmin());
+    }
+
+    @Test
+    public void clickResultText_thenType_textGoesToCommandBox(FxRobot robot) {
+        enterCommand(robot, ListCommand.COMMAND_WORD);
+        robot.clickOn("#commandTextField");
+
+        robot.clickOn(getResultMessage());
+
+        assertTypedTextGoesToCommandBox(robot);
+    }
+
+    @Test
+    public void clickLongResultText_thenPageDownAndUp_scrollsResult(FxRobot robot) {
+        ScrollPane resultScrollPane = showLongResult(robot);
+        robot.clickOn("#commandTextField");
+        // The center of the scroll pane is on the text, while the center of the long message is cut off below it
+        robot.clickOn(resultScrollPane);
+
+        robot.type(KeyCode.PAGE_DOWN);
+        assertTrue(resultScrollPane.getVvalue() > resultScrollPane.getVmin());
+
+        robot.type(KeyCode.PAGE_UP);
+        assertEquals(resultScrollPane.getVmin(), resultScrollPane.getVvalue());
+    }
+
+    @Test
+    public void clickClientCount_thenType_textGoesToCommandBox(FxRobot robot) {
+        robot.clickOn("#commandTextField");
+
+        robot.clickOn("#clientCount");
+
+        assertTypedTextGoesToCommandBox(robot);
+    }
+
+    @Test
+    public void clickStatusBar_thenType_textGoesToCommandBox(FxRobot robot) {
+        robot.clickOn("#commandTextField");
+
+        robot.clickOn("#saveLocationStatus");
+
+        assertTypedTextGoesToCommandBox(robot);
+    }
+
+    @Test
+    public void clickBelowLastClient_thenType_textGoesToCommandBox(FxRobot robot) {
+        enterCommand(robot, ADD_RAVI_COMMAND);
+        robot.clickOn("#commandTextField");
+
+        robot.clickOn(robot.point(getPersonListView()).atPosition(Pos.BOTTOM_CENTER).atOffset(new Point2D(0, -10)));
+
+        assertTypedTextGoesToCommandBox(robot);
+        // Nothing is selected, so the click missed Ravi's card
+        assertTrue(getPersonListView().getSelectionModel().isEmpty());
+    }
+
+    @Test
+    public void openThenCloseFileMenu_thenType_textGoesToCommandBox(FxRobot robot) {
+        Menu fileMenu = ((MenuBar) stage.getScene().lookup("#menuBar")).getMenus().get(0);
+        robot.clickOn("#commandTextField");
+
+        robot.clickOn("File");
+        assertTrue(fileMenu.isShowing());
+        robot.clickOn("File");
+        assertFalse(fileMenu.isShowing());
+
+        assertTypedTextGoesToCommandBox(robot);
     }
 
     @Test
@@ -236,10 +306,8 @@ public class MainWindowTest {
     public void clickClient_thenType_textGoesToCommandBox(FxRobot robot) {
         addAndClickClient(robot);
 
-        robot.write(ListCommand.COMMAND_WORD);
-
+        assertTypedTextGoesToCommandBox(robot);
         assertEquals(RAVI_NAME, getDetailLabel("#name").getText());
-        assertEquals(ListCommand.COMMAND_WORD, getCommandTextField().getText());
     }
 
     @Test
@@ -266,9 +334,8 @@ public class MainWindowTest {
         addAndClickClient(robot);
 
         robot.clickOn(getDetailLabel("#phone"));
-        robot.write(ListCommand.COMMAND_WORD);
 
-        assertEquals(ListCommand.COMMAND_WORD, getCommandTextField().getText());
+        assertTypedTextGoesToCommandBox(robot);
     }
 
     @Test
@@ -397,6 +464,23 @@ public class MainWindowTest {
             commandTextField.setText(command);
             commandTextField.fireEvent(new ActionEvent());
         });
+    }
+
+    /**
+     * Shows the result of {@code LONG_RESULT_COMMAND} at the minimum width, and returns the scroll pane it is in.
+     */
+    private ScrollPane showLongResult(FxRobot robot) {
+        robot.interact(() -> stage.setWidth(stage.getMinWidth()));
+        enterCommand(robot, LONG_RESULT_COMMAND);
+        return (ScrollPane) stage.getScene().lookup("#resultScrollPane");
+    }
+
+    /**
+     * Types a command, as a user would, and asserts that it lands in the command box.
+     */
+    private void assertTypedTextGoesToCommandBox(FxRobot robot) {
+        robot.write(ListCommand.COMMAND_WORD);
+        assertEquals(ListCommand.COMMAND_WORD, getCommandTextField().getText());
     }
 
     private Label getResultMessage() {

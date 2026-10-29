@@ -176,6 +176,8 @@ public class MainWindow extends UiPart<Stage> {
         commandBoxPlaceholder.getChildren().add(commandBox.getRoot());
         // The detail panel's ScrollPane takes the focus when clicked, so the command box takes it back
         personDetailPanel.getRoot().addEventFilter(MouseEvent.MOUSE_RELEASED, event -> commandBox.requestFocus());
+        // The result display's ScrollPane does too, although it is not focus traversable
+        resultDisplay.getRoot().addEventFilter(MouseEvent.MOUSE_RELEASED, event -> commandBox.requestFocus());
 
         getRoot().addEventFilter(KeyEvent.KEY_PRESSED, event -> {
             if (isDetailOpen && event.getCode() == KeyCode.ESCAPE) {
