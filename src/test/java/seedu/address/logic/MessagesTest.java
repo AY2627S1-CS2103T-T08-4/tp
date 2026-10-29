@@ -11,6 +11,9 @@ public class MessagesTest {
     private final PersonBuilder johnTan = new PersonBuilder().withName("John Tan").withPhone("91234567")
             .withEmail("john@example.com").withAddress("Blk 1").withTags("sec4");
 
+    private final PersonBuilder johnTanWithoutTags = new PersonBuilder().withName("John Tan").withPhone("91234567")
+            .withEmail("john@example.com").withAddress("Blk 1");
+
     @Test
     public void formatClientCount_zeroOneAndTwo_pluralExceptForOne() {
         assertEquals("0 clients", Messages.formatClientCount(0));
@@ -42,6 +45,12 @@ public class MessagesTest {
     public void format_personWithoutNote_omitsNote() {
         assertEquals("John Tan; Phone: 91234567; Email: john@example.com; Address: Blk 1; Tags: [sec4]",
                 Messages.format(johnTan.withNote("").build()));
+    }
+
+    @Test
+    public void format_personWithoutTags_omitsTags() {
+        assertEquals("John Tan; Phone: 91234567; Email: john@example.com; Address: Blk 1",
+                Messages.format(johnTanWithoutTags.build()));
     }
 
     @Test

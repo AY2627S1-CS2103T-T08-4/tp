@@ -1,7 +1,6 @@
 package seedu.address.ui;
 
 import java.util.Comparator;
-import java.util.List;
 import java.util.Set;
 
 import javafx.fxml.FXML;
@@ -73,7 +72,7 @@ public class PersonCard extends UiPart<Region> {
         fee.setText("Fee: " + person.getFee().value);
         dueDate.setText("Due: " + person.getDueDate().value);
         note.setText(person.getNote().value);
-        addTags(person.getTags());
+        addTagLabels(tags, person.getTags());
 
         // Empty optional details take up no space on the card, e.g. a client without tags gets no empty row
         boolean hasFee = !person.getFee().isEmpty();
@@ -90,19 +89,11 @@ public class PersonCard extends UiPart<Region> {
     /**
      * Adds a pill for each tag in {@code personTags} to the row of tags.
      */
-    private void addTags(Set<Tag> personTags) {
-        tags.getChildren().addAll(createTagLabels(personTags));
-    }
-
-    /**
-     * Returns a pill for each tag in {@code personTags}, sorted by tag name.
-     */
-    static List<Label> createTagLabels(Set<Tag> personTags) {
+    static void addTagLabels(FlowPane tagContainer, Set<Tag> personTags) {
         // Tags are case-insensitive, so they are sorted that way too (Math, physics, Sec4)
-        return personTags.stream()
+        personTags.stream()
                 .sorted(Comparator.comparing(tag -> tag.tagName, String.CASE_INSENSITIVE_ORDER))
-                .map(tag -> createTagLabel(tag.tagName))
-                .toList();
+                .forEach(tag -> tagContainer.getChildren().add(createTagLabel(tag.tagName)));
     }
 
     /**

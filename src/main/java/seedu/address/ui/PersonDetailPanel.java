@@ -57,7 +57,8 @@ public class PersonDetailPanel extends UiPart<Region> {
         fee.setText(person.getFee().value);
         dueDate.setText(person.getDueDate().value);
 
-        tags.getChildren().setAll(PersonCard.createTagLabels(person.getTags()));
+        tags.getChildren().clear();
+        PersonCard.addTagLabels(tags, person.getTags());
         setShown(tags, !person.getTags().isEmpty());
         setShown(noteRow, !person.getNote().isEmpty());
         setShown(feeRow, !person.getFee().isEmpty());
