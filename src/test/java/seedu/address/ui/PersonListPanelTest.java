@@ -35,7 +35,7 @@ public class PersonListPanelTest {
     @Start
     @SuppressWarnings("unchecked")
     public void start(Stage stage) {
-        PersonListPanel personListPanel = new PersonListPanel(displayedPersons, persons);
+        personListPanel = new PersonListPanel(displayedPersons, persons);
         clientCount = (Label) personListPanel.getRoot().lookup("#clientCount");
         personListView = (ListView<Person>) personListPanel.getRoot().lookup("#personListView");
         stage.setScene(new Scene(personListPanel.getRoot()));
@@ -108,8 +108,7 @@ public class PersonListPanelTest {
         assertEquals(3, personListView.getItems().size());
     }
 
-    @Test
-    public void assertPlaceholderShown(FxRobot robot, String expectedText) {
+    private void assertPlaceholderShown(FxRobot robot, String expectedText) {
         ListView<?> personListView = robot.lookup("#personListView").queryAs(ListView.class);
         Label placeholder = (Label) personListView.getPlaceholder();
         assertTrue(placeholder.isVisible());
