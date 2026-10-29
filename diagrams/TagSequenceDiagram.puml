@@ -1,0 +1,121 @@
+@startuml
+!include style.puml
+skinparam ArrowFontStyle plain
+
+box Logic LOGIC_COLOR_T1
+participant ":LogicManager" as LogicManager LOGIC_COLOR
+participant ":AddressBookParser" as AddressBookParser LOGIC_COLOR
+participant ":TagCommandParser" as TagCommandParser LOGIC_COLOR
+participant "ArgumentTokenizer" as ArgumentTokenizer LOGIC_COLOR
+participant "argMultimap:ArgumentMultimap" as ArgumentMultimap LOGIC_COLOR
+participant "ParserUtil" as ParserUtil LOGIC_COLOR
+participant "t:TagCommand" as TagCommand LOGIC_COLOR
+participant "r:CommandResult" as CommandResult LOGIC_COLOR
+end box
+
+box Model MODEL_COLOR_T1
+participant "m:Model" as Model MODEL_COLOR
+end box
+
+[-> LogicManager : execute("tag 1 t/Physics t/Sec4")
+activate LogicManager
+
+LogicManager -> AddressBookParser : parseCommand("tag 1 t/Physics t/Sec4")
+activate AddressBookParser
+
+create TagCommandParser
+AddressBookParser -> TagCommandParser
+activate TagCommandParser
+TagCommandParser --> AddressBookParser
+deactivate TagCommandParser
+
+AddressBookParser -> TagCommandParser : parse("1 t/Physics t/Sec4")
+activate TagCommandParser
+TagCommandParser -> ArgumentTokenizer : tokenize(args, PREFIX_TAG)
+activate ArgumentTokenizer
+ArgumentTokenizer --> TagCommandParser : argMultimap
+deactivate ArgumentTokenizer
+
+TagCommandParser -> ArgumentMultimap : verifyNoUnknownPrefixesInPreamble()
+activate ArgumentMultimap
+ArgumentMultimap --> TagCommandParser
+deactivate ArgumentMultimap
+
+TagCommandParser -> ArgumentMultimap : verifyNoUnknownPrefixesIn(PREFIX_TAG)
+activate ArgumentMultimap
+ArgumentMultimap --> TagCommandParser
+deactivate ArgumentMultimap
+
+TagCommandParser -> ArgumentMultimap : getAllValues(PREFIX_TAG)
+activate ArgumentMultimap
+ArgumentMultimap --> TagCommandParser : tagValues
+deactivate ArgumentMultimap
+
+TagCommandParser -> ArgumentMultimap : getPreamble()
+activate ArgumentMultimap
+ArgumentMultimap --> TagCommandParser : preamble
+deactivate ArgumentMultimap
+
+TagCommandParser -> ParserUtil : parseIndex(preamble)
+activate ParserUtil
+ParserUtil --> TagCommandParser : index
+deactivate ParserUtil
+
+loop for each tag value
+    TagCommandParser -> ParserUtil : parseTag(tagValue)
+    activate ParserUtil
+    ParserUtil --> TagCommandParser : Tag
+    deactivate ParserUtil
+end
+
+create TagCommand
+TagCommandParser -> TagCommand : create(index, tags)
+activate TagCommand
+TagCommand --> TagCommandParser
+deactivate TagCommand
+TagCommandParser --> AddressBookParser : t
+deactivate TagCommandParser
+AddressBookParser --> LogicManager : t
+deactivate AddressBookParser
+
+LogicManager -> TagCommand : execute(m)
+activate TagCommand
+TagCommand -> Model : getFilteredPersonList()
+activate Model
+Model --> TagCommand : displayed clients
+deactivate Model
+TagCommand -> TagCommand : getNewTags(personToTag)
+TagCommand --> TagCommand : newTagsToAdd
+TagCommand -> TagCommand : getExistingTags(personToTag)
+TagCommand --> TagCommand : existingTags
+alt at least one new tag
+    TagCommand -> TagCommand : createTaggedPerson(personToTag, newTagsToAdd)
+    TagCommand --> TagCommand : taggedPerson
+    TagCommand -> Model : setPerson(personToTag, taggedPerson)
+    activate Model
+    Model --> TagCommand
+    deactivate Model
+
+    TagCommand -> TagCommand : updateDisplayedPersons(...)
+    activate TagCommand
+    TagCommand -> Model : updateFilteredPersonList(displayedPersons::contains)
+    activate Model
+    Model --> TagCommand
+    deactivate Model
+    TagCommand --> TagCommand
+    deactivate TagCommand
+else all requested tags already exist
+    note right of TagCommand: Leave the model unchanged
+end
+
+create CommandResult
+TagCommand -> CommandResult : create(success or no-change message)
+activate CommandResult
+CommandResult --> TagCommand
+deactivate CommandResult
+TagCommand --> LogicManager : r
+deactivate TagCommand
+
+[<--LogicManager
+deactivate LogicManager
+@enduml
