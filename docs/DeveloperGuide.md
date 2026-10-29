@@ -388,7 +388,7 @@ No command was added, so nothing new needs `isMutating()`. `add` and `edit` alre
     * Pros: Makes "not set" explicit in the type.
     * Cons: Every caller, the storage layer and the UI must unwrap it, for a field that has no behaviour of its own.
 
-### Fee and due date 
+### Fee and due date
 
 `Fee` and `DueDate` record what a client pays and when their next payment is due. They follow the same pattern as `Note`: each is an immutable class in `seedu.address.model.person`, is held by `Person`, is set through the `add` and `edit` commands, and is optional.
 
@@ -462,7 +462,7 @@ No command was added, so nothing new needs `isMutating()`. `add` and `edit` alre
 * **Alternative 2:** In `DueDate`.
   * Pros: One place enforces the rule.
   * Cons: The data file becomes invalid as soon as any stored due date passes.
-  
+
 ### Undo/redo feature
 
 #### Implementation
