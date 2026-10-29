@@ -41,6 +41,6 @@ public class FilterCommandParser implements Parser<FilterCommand> {
         for (String tagValue : tagValues) {
             tags.add(ParserUtil.parseTag(tagValue));
         }
-        return new FilterCommand(new PersonMatchesSearchPredicate(List.of(), phones, tags));
+        return new FilterCommand(new PersonMatchesSearchPredicate(phones, tags));
     }
 }
