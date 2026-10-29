@@ -31,6 +31,9 @@ public class JsonAdaptedPersonTest {
     private static final String INVALID_DUE_DATE = "30-02-2026";
     private static final String INVALID_TAG = "#friend";
 
+    private static final String OUT_OF_RANGE_DUE_DATE = "01-01-0000";
+    private static final String PAST_DUE_DATE = "01-01-2020";
+
     private static final String VALID_NAME = BENSON.getName().toString();
     private static final String VALID_PHONE = BENSON.getPhone().toString();
     private static final String VALID_EMAIL = BENSON.getEmail().toString();
@@ -41,6 +44,20 @@ public class JsonAdaptedPersonTest {
     private static final List<JsonAdaptedTag> VALID_TAGS = BENSON.getTags().stream()
             .map(JsonAdaptedTag::new)
             .collect(Collectors.toList());
+
+    @Test
+    public void toModelType_dueDateYearOutOfRange_throwsIllegalValueException() {
+        JsonAdaptedPerson person = new JsonAdaptedPerson(VALID_NAME, VALID_PHONE, VALID_EMAIL, VALID_ADDRESS,
+            VALID_NOTE, VALID_FEE, OUT_OF_RANGE_DUE_DATE, VALID_TAGS);
+        assertThrows(IllegalValueException.class, DueDate.MESSAGE_CONSTRAINTS, person::toModelType);
+    }
+
+    @Test
+    public void toModelType_pastDueDate_returnsPerson() throws Exception {
+        JsonAdaptedPerson person = new JsonAdaptedPerson(VALID_NAME, VALID_PHONE, VALID_EMAIL, VALID_ADDRESS,
+            VALID_NOTE, VALID_FEE, PAST_DUE_DATE, VALID_TAGS);
+        assertEquals(new DueDate(PAST_DUE_DATE), person.toModelType().getDueDate());
+    }
 
     @Test
     public void toModelType_validPersonDetails_returnsPerson() throws Exception {
