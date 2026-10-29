@@ -70,10 +70,16 @@ public class NameTest {
 
     @Test
     public void normalizeApostrophes() {
-        // every apostrophe-like character is replaced
-        assertEquals("'a'b'c'", Name.normalizeApostrophes("\u2018a\u2019b\u02BCc\u2032"));
+        // each apostrophe-like character, written as an escape as it looks like ' in most fonts, becomes '
+        assertEquals("O'Brien", Name.normalizeApostrophes("O\u2019Brien")); // right single quote, the usual one
+        assertEquals("O'Brien", Name.normalizeApostrophes("O\u2018Brien")); // left single quote
+        assertEquals("O'Brien", Name.normalizeApostrophes("O\u02BCBrien")); // modifier letter apostrophe
+        assertEquals("O'Brien", Name.normalizeApostrophes("O\u2032Brien")); // prime
 
-        // a straight apostrophe and other text are kept
+        // every one in the text is replaced
+        assertEquals("'a'b'", Name.normalizeApostrophes("\u2018a\u2019b\u2019"));
+
+        // text that already uses the straight ' is unchanged, and double quotes are not apostrophes
         assertEquals("O'Brien \"Jr\"", Name.normalizeApostrophes("O'Brien \"Jr\""));
 
         assertThrows(NullPointerException.class, () -> Name.normalizeApostrophes(null));
