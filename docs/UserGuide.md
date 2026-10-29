@@ -6,7 +6,7 @@
 
 # Sieve User Guide
 
-Sieve is a **desktop app that helps self-employed private tuition teachers keep track of their tutees**. Sieve is Optimised for use through a Command Line Interface (CLI) while still providing you with a Graphical User Interface (GUI) to your results. If you can type fast, Sieve lets you find and update any client's details quicker than hunting through chats, notes apps and spreadsheets, so you spend less time on admin and more time teaching.
+Sieve is a **desktop app that helps self-employed private tuition teachers keep track of their clients**. Sieve is optimised for use through a Command Line Interface (CLI) while still providing you with a Graphical User Interface (GUI) to your results. If you can type fast, Sieve lets you find and update any client's details quicker than hunting through chats, notes apps and spreadsheets, so you spend less time on admin and more time teaching.
 
 <!-- * Table of Contents -->
 <page-nav-print />
@@ -74,7 +74,7 @@ Sieve is a **desktop app that helps self-employed private tuition teachers keep 
 
 ### Viewing help: `help`
 
-Shows a message explaining how to access the help page.
+Opens a help window that lists every command and its format, with a link to this user guide that you can copy with **Copy URL**. You can also open it from the **Help** menu or by pressing **F1**.
 
 ![help message](images/helpMessage.png)
 
@@ -89,7 +89,7 @@ Format: `add n/NAME p/PHONE e/EMAIL a/ADDRESS [fee/FEE] [due/DUE_DATE] [t/TAG]..
 
 <box type="tip" seamless>
 
-**Tip:** A client can have any number of tags, including zero.
+**Tip:** A client can have any number of tags, including zero. Each tag follows the same rules as in [`tag`](#tagging-a-client-tag).
 
 * A note is free text of up to 200 characters, for anything you want to remember about the client, e.g. `nt/Weak at algebra, prelims in March`. Leave it out if you have nothing to record.
 * A fee is the amount you charge the client, e.g. `fee/250` or `fee/180.50`. It is a number that is up to 7 digits and up to 2 decimal places, with no currency symbol. Sieve shows it with 2 decimal places (`250.00`).
@@ -111,7 +111,8 @@ Format: `add n/NAME p/PHONE e/EMAIL a/ADDRESS [fee/FEE] [due/DUE_DATE] [t/TAG]..
 * For example, `John Tan (NHHS)` and `Nur-Aisyah O'Brien` are accepted, but `Ravi s/o Kumar` is not, because of the `/`.
 * A curly apostrophe (`’`), which phones and chat apps often type or paste instead of `'`, is saved as `'`. For example, `O’Brien` is saved as `O'Brien`.
 * Letters means `A` to `Z`, so names with accented letters (e.g. `José`) or Chinese characters are not supported.
-* Write such names without the `/` or accents, e.g. `Ravi s.o. Kumar` or `Jose`.
+* Other symbols are not supported either, such as the `@` in `Tan Ah Kow @ Michael` or the comma in `Tan, Wei Ming`.
+* Write such names without these characters, e.g. `Ravi s.o. Kumar`, `Jose`, `Tan Ah Kow (Michael)` or `Tan Wei Ming`.
 </box>
 
 <box type="info" seamless>
@@ -126,10 +127,11 @@ Format: `add n/NAME p/PHONE e/EMAIL a/ADDRESS [fee/FEE] [due/DUE_DATE] [t/TAG]..
 
 <box type="info" seamless>
 
-**Phone numbers and email addresses:**
+**Phone numbers, emails and addresses:**
 * A phone number must be an 8-digit Singapore number starting with `3`, `6`, `8` or `9`, e.g. `91234567`. Spaces, hyphens and parentheses are ignored, so `9123 4567` is also accepted.
 * Leave out the country code. Sieve is made for tutors in Singapore and only stores Singapore numbers, so every number would start with `+65`, which adds nothing. If you copy a number such as `+65 9123 4567`, enter it as `91234567`. Sieve shows a reminder if you include a country code. Numbers from other countries are not supported.
 * An email address can be up to 254 characters long. Before the `@`, it can contain letters, digits and `+`, `_`, `.` or `-`, but these symbols cannot come first, last or two in a row. After the `@`, it must be a domain name with a full stop, e.g. `amirah@gmail.com`. Addresses such as `amirah@localhost`, `o'brien@gmail.com` and `a__b@gmail.com` are not supported.
+* An address is required. It can be up to 150 characters long and must contain at least one letter or digit. If the client has no address, for example because you teach them online, enter `a/Online` or similar.
 * If your data file is from an earlier version of Sieve and contains a phone number or email address that breaks these rules, Sieve opens in read-only mode. Correct it in the [data file](#editing-the-data-file) to continue.
 </box>
 
@@ -274,15 +276,16 @@ Format: `delete INDEX [, INDEX]...`
 * If any `INDEX` exceeds the size of the displayed client list, no client will be deleted and the following error will be shown:
   `Error: The index provided is out of bounds! Current list only contains X clients.`
   Here, `X` is the number of clients in the displayed list (`1 client` when only one client is displayed).
-* If `INDEX` is not provided, the following error will be shown:
-  `Error: Index not provided!
-   Expected format: delete INDEX`
+* If `INDEX` is not provided, the following error will be shown:<br>
+  `Invalid command format!`<br>
+  `Error: Index not provided!`<br>
+  `Expected format: delete INDEX [, INDEX]...`
 
 Examples:
 * `list` followed by `delete 2` deletes the 2nd client in Sieve.
 * `find Amirah` followed by `delete 1` deletes the 1st client in the results of the `find` command.
 * `list` followed by `delete 1, 3, 5` deletes the 1st, 3rd and 5th clients in Sieve.
-* `filter t/physics` followed by `delete 1,2` deletes the 1st and 2nd clients in the filtered results.
+* `filter t/Sec4` followed by `delete 1,2` deletes the 1st and 2nd clients in the filtered results.
 
 ### Clearing all clients: `clear`
 
@@ -304,6 +307,7 @@ Format: `undo`
 * An `edit`, `tag`, or `untag` that leaves the client exactly as before is also skipped, and its result says that nothing changed. For example, this happens when the edited value is unchanged, every requested tag already exists, or none of the requested tags exist. An `undo` after it reverts the preceding change instead.
 * An `edit` that only changes the letter case of a tag, e.g. from `Math` to `MATH`, counts as a change and can be undone.
 * After an undo, the full client list is shown, so that the restored client is not hidden by an earlier `find`.
+* The result, `Undid the last change.`, does not say which change was undone. Showing what was undone is not supported, so check the client list if you are unsure.
 * The undone change is saved to the data file straight away, like any other change.
 * If there is nothing left to undo, the following error is shown: `Error: There is nothing to undo.`
 * An undo can be reversed with [`redo`](#redoing-an-undone-change-redo).
@@ -328,6 +332,7 @@ Format: `redo`
 * Once you make a new change after an `undo`, such as `add` or `delete`, the undone changes can no longer be redone.
 * Commands that do not change anything, such as `list`, `find` and `help`, are skipped and do not affect what can be redone.
 * After a redo, the full client list is shown.
+* As with `undo`, the result (`Redid the last undone change.`) does not say which change was redone.
 * The redone change is saved to the data file straight away, like any other change.
 * If there is nothing to redo, the following error is shown: `Error: There is nothing to redo.`
 
@@ -348,7 +353,7 @@ Brings back commands you entered earlier, so you can run them again or fix a typ
 * Your command history is cleared when you close Sieve.
 
 Examples:
-* `edit 1 p/9123 456` fails because the phone number has only 7 digits. Press Up, add the missing digit, and press Enter.
+* `edit 1 p/9123 456` fails because the phone number has only 7 digits. The command stays in the command box, so add the missing digit and press Enter. You do not need Up for this.
 * You are halfway through typing `add n/Amirah Tan p/91234567` and want to check your last command. Press Up to see it, then press Down to get back what you were typing.
 * After `find Amirah`, `delete 1` and `list`, press Up three times to bring back `find Amirah`.
 
@@ -393,7 +398,6 @@ Furthermore, certain edits can cause Sieve to behave in unexpected ways (e.g., i
 ## Known issues
 
 1. **When using multiple screens**, if you move the application to a secondary screen, and later switch to using only the primary screen, the GUI will open off-screen. The remedy is to delete the `preferences.json` file created by the application before running the application again.
-2. **If you minimize the Help Window** and then run the `help` command (or use the `Help` menu, or the keyboard shortcut `F1`) again, the original Help Window will remain minimized, and no new Help Window will appear. The remedy is to manually restore the minimized Help Window.
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -408,9 +412,11 @@ Action     | Format, Examples
 **Exit**   | `exit`
 **Filter** | `filter [p/PHONE]... [t/TAG]...`<br> e.g., `filter t/physics t/sec4`, `filter p/91234567`
 **Find**   | `find KEYWORD [MORE_KEYWORDS]...`<br> e.g., `find Amirah`, `find Amirah O'Brien`
-**List**   | `list`
-**Tag**    | `tag INDEX t/TAG [t/MORE_TAGS]...`<br> e.g., `tag 1 t/physics t/sec4`
-**Untag**  | `untag INDEX t/TAG [t/MORE_TAGS]...`<br> e.g., `untag 1 t/physics`
-**Undo**   | `undo`
-**Redo**   | `redo`
 **Help**   | `help`
+**List**   | `list`
+**Redo**   | `redo`
+**Tag**    | `tag INDEX t/TAG [t/MORE_TAGS]...`<br> e.g., `tag 1 t/physics t/sec4`
+**Undo**   | `undo`
+**Untag**  | `untag INDEX t/TAG [t/MORE_TAGS]...`<br> e.g., `untag 1 t/Math`
+**Recall a command** | **Up** and **Down** in the command box
+**Scroll the result** | **Page Up** and **Page Down** in the command box

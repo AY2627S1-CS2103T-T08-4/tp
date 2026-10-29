@@ -1088,14 +1088,14 @@ Given below are instructions to test the app manually.
 
     1. Download the JAR file and copy it into an empty folder.
 
-    1. Double-click the JAR file.<br>
+    1. Open a terminal in that folder and run `java -jar sieve.jar`.<br>
        Expected: The GUI opens with a set of sample clients. The window size may not be optimal.
 
 1. Saving window preferences
 
     1. Resize the window to an optimal size. Move the window to a different location. Close the window.
 
-    1. Relaunch the app by double-clicking the JAR file.<br>
+    1. Relaunch the app with `java -jar sieve.jar` from the same folder.<br>
        Expected: The most recent window size and location are retained.
 
 ### Handling data files
@@ -1502,7 +1502,7 @@ The data file is `data/sieve.json` inside that folder.
        Expected: No client is deleted. The status message shows:<br>
        `Invalid command format!`<br>
        `Error: Index not provided!`<br>
-       `Expected format: delete INDEX`
+       `Expected format: delete INDEX [, INDEX]...`
 
 1. Deleting using an invalid index
 
