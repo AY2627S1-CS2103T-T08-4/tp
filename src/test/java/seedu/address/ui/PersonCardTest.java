@@ -2,6 +2,7 @@ package seedu.address.ui;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_DUE_DATE;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_FEE;
 
@@ -65,7 +66,6 @@ public class PersonCardTest {
 
         Scene scene = new Scene(new VBox(taggedCard.getRoot(), plainCard.getRoot(), longEmailCard.getRoot(),
                 longNameCard.getRoot(), longSingleWordNameCard.getRoot()));
-      
         // The app's fonts, so that the text takes as much room as it does in the app
         scene.getStylesheets().add("view/LightTheme.css");
         stage.setScene(scene);
@@ -77,7 +77,6 @@ public class PersonCardTest {
         List<String> shownTags = getTags(taggedCard).getChildren().stream()
                 .map(node -> ((Label) node).getText())
                 .toList();
-
         assertEquals(List.of("english", "math", "Sec4", "Zoology"), shownTags);
     }
 
@@ -110,14 +109,6 @@ public class PersonCardTest {
     }
 
     @Test
-    public void constructor_longEmail_phoneAndFullEmailShown(FxRobot robot) {
-        Label phone = (Label) longEmailCard.getRoot().lookup("#phone");
-        Label email = (Label) longEmailCard.getRoot().lookup("#email");
-        for (double width : new double[] {450, 800}) {
-            // Tall enough for all the cards, so that none is squeezed, as the client list would scroll instead
-            robot.interact(() -> stage.setWidth(width));
-            robot.interact(() -> stage.setHeight(1000));
-
     public void constructor_feeOnly_showsFeeWithoutDueDate() {
         assertShown(feeOnlyCard, "#billing", true);
         assertShown(feeOnlyCard, "#fee", true);
