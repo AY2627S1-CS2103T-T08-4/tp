@@ -290,7 +290,7 @@ If no client matches, `FindCommand` returns `FindCommand.MESSAGE_NO_CLIENTS_FOUN
 
 ### Filter feature
 
-`filter` narrows the displayed client list by exact phone numbers and tags. `FilterCommandParser` tokenizes the arguments on `p/` and `t/`, rejects unprefixed text, and requires at least one phone number or tag. It uses `ParserUtil.parsePhone` and `ParserUtil.parseTag`, giving `filter` the same validation and whitespace normalization as `find` and `add`.
+`filter` narrows the displayed client list by exact phone numbers and tags. `FilterCommandParser` tokenizes the arguments on `p/` and `t/`, rejects unprefixed text, and requires at least one phone number or tag. It uses `ParserUtil.parsePhone` and `ParserUtil.parseTag`, so phone numbers and tags are validated and normalized consistently with `add`.
 
 `FilterCommandParser` builds a `PersonMatchesSearchPredicate` from the phone numbers and tags. Any supplied phone number may match, all supplied tags must match, and supplying both fields requires both conditions to match.
 
@@ -1080,6 +1080,14 @@ The data file is `data/sieve.json` inside that folder.
     1. Test case: `filter p/92345678 t/Sec4`<br>
        Expected: Only `Brandon Sim` is listed because both the phone and tag filters match.
 
+    1. Prerequisites: Start with the sample data, enter `list`, then `tag 1 t/Sec 4`.
+
+    1. Test case: `filter t/Sec  4`<br>
+       Expected: Only `Amirah Tan` is listed. Repeated spaces are collapsed, so `Sec  4` matches `Sec 4`.
+
+    1. Test case: `filter t/Sec4`<br>
+       Expected: Only `Brandon Sim` is listed. `Sec4` remains distinct from `Sec 4`.
+
     1. Test case: `filter p/9123`<br>
        Expected: The displayed list does not change. An error message about the phone number format is shown.
 
@@ -1093,7 +1101,12 @@ The data file is `data/sieve.json` inside that folder.
     1. Prerequisites: Start with the sample data, where `Amirah Tan` already has the `Math` tag.
 
     1. Test case: `tag 1 t/Math t/Physics`<br>
-       Expected: `Physics` is added while `Math` is not duplicated. The success message lists only `Physics`.
+       Expected: `Physics` is added while `Math` is not duplicated. The result lists `Physics` as added and `Math` as already present.
+
+    1. Prerequisites: Start with the sample data.
+
+    1. Test case: `tag 1 t/Sec  4`<br>
+       Expected: The new tag is stored and displayed as `Sec 4`.
 
     1. Test case: `tag 1 t/Math`<br>
        Expected: The client is unchanged and Sieve reports that no tags were added, listing `Math` as already present.
@@ -1112,6 +1125,11 @@ The data file is `data/sieve.json` inside that folder.
 
     1. Test case: `untag 1 t/SEC4`<br>
        Expected: `Sec4` is removed despite the different letter case.
+
+    1. Prerequisites: Start with the sample data, where `Amirah Tan` has the tag `Math`.
+
+    1. Test case: `untag 1 t/math`<br>
+       Expected: The result reports `Math` as removed, using the stored spelling rather than `math`.
 
     1. Prerequisites: Start with the sample data and enter `filter t/Physics`, which shows only `Brandon Sim`.
 
