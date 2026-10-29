@@ -43,27 +43,6 @@ public class ParserUtilTest {
     private static final String WHITESPACE = " \t\r\n";
 
     @Test
-    public void parseDueDate_outOfRangeYear_throwsParseException() {
-        assertThrows(ParseException.class, DueDate.MESSAGE_CONSTRAINTS, () -> ParserUtil.parseDueDate("01-01-0000"));
-        assertThrows(ParseException.class, DueDate.MESSAGE_CONSTRAINTS, () -> ParserUtil.parseDueDate("31-12-1999"));
-    }
-
-    @Test
-    public void parseDueDate_todayAndTomorrow_returnsDueDate() throws Exception {
-        String today = LocalDate.now().format(DATE_FORMAT);
-        String tomorrow = LocalDate
-            .now().plusDays(1).format(DATE_FORMAT);
-        assertEquals(new DueDate(today), ParserUtil.parseDueDate(today));
-        assertEquals(new DueDate(tomorrow), ParserUtil.parseDueDate(tomorrow));
-    }
-
-    @Test
-    public void parseDueDate_yesterday_throwsParseException() {
-        String yesterday = LocalDate.now().minusDays(1).format(DATE_FORMAT);
-        assertThrows(ParseException.class, DueDate.MESSAGE_PAST_DATE, () -> ParserUtil.parseDueDate(yesterday));
-    }
-
-    @Test
     public void parseIndex_invalidInput_throwsParseException() {
         assertThrows(ParseException.class, () -> ParserUtil.parseIndex("10 a"));
     }
@@ -137,8 +116,9 @@ public class ParserUtilTest {
     @Test
     public void parseName_tooLong_throwsParseException() {
         String tooLongName = "a".repeat(Name.MAX_LENGTH + 1);
-        assertThrows(ParseException.class, Name.getErrorMessage(tooLongName), () -> ParserUtil.parseName(tooLongName));
-        assertTrue(Name.getErrorMessage(tooLongName).contains("this one has " + (Name.MAX_LENGTH + 1)));
+        // The text the user reads. NameTest#getErrorMessage covers which invalid names get this message
+        String expectedMessage = "Invalid Name! Names cannot be more than 50 characters, but this one has 51.";
+        assertThrows(ParseException.class, expectedMessage, () -> ParserUtil.parseName(tooLongName));
     }
 
     @Test
@@ -296,6 +276,26 @@ public class ParserUtilTest {
     public void parseDueDate_invalidValue_throwsParseException() {
         assertThrows(ParseException.class, DueDate.MESSAGE_CONSTRAINTS, () -> ParserUtil.parseDueDate("30-02-2026"));
         assertThrows(ParseException.class, DueDate.MESSAGE_CONSTRAINTS, () -> ParserUtil.parseDueDate("tomorrow"));
+    }
+
+    @Test
+    public void parseDueDate_outOfRangeYear_throwsParseException() {
+        assertThrows(ParseException.class, DueDate.MESSAGE_CONSTRAINTS, () -> ParserUtil.parseDueDate("01-01-0000"));
+        assertThrows(ParseException.class, DueDate.MESSAGE_CONSTRAINTS, () -> ParserUtil.parseDueDate("31-12-1999"));
+    }
+
+    @Test
+    public void parseDueDate_todayAndTomorrow_returnsDueDate() throws Exception {
+        String today = LocalDate.now().format(DATE_FORMAT);
+        String tomorrow = LocalDate.now().plusDays(1).format(DATE_FORMAT);
+        assertEquals(new DueDate(today), ParserUtil.parseDueDate(today));
+        assertEquals(new DueDate(tomorrow), ParserUtil.parseDueDate(tomorrow));
+    }
+
+    @Test
+    public void parseDueDate_yesterday_throwsParseException() {
+        String yesterday = LocalDate.now().minusDays(1).format(DATE_FORMAT);
+        assertThrows(ParseException.class, DueDate.MESSAGE_PAST_DATE, () -> ParserUtil.parseDueDate(yesterday));
     }
 
     @Test

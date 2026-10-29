@@ -6,6 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.testutil.TypicalPersons.ALICE;
 import static seedu.address.testutil.TypicalPersons.BENSON;
 import static seedu.address.testutil.TypicalPersons.CARL;
+import static seedu.address.testutil.TypicalPersons.DANIEL;
+
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,8 +19,10 @@ import org.testfx.framework.junit5.Start;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.stage.Stage;
 import seedu.address.model.person.Person;
@@ -62,20 +67,20 @@ public class PersonListPanelTest {
     @Test
     public void personListView_noClients_suggestsAddOnly(FxRobot robot) {
         robot.interact(persons::clear);
-        assertPlaceholderShown(robot, PersonListPanel.MESSAGE_NO_CLIENTS);
+        assertPlaceholderShown(PersonListPanel.MESSAGE_NO_CLIENTS);
     }
 
     @Test
     public void personListView_allClientsHidden_suggestsList(FxRobot robot) {
         robot.interact(() -> displayedPersons.setPredicate(person -> false));
-        assertPlaceholderShown(robot, PersonListPanel.MESSAGE_ALL_CLIENTS_HIDDEN);
+        assertPlaceholderShown(PersonListPanel.MESSAGE_ALL_CLIENTS_HIDDEN);
     }
 
     @Test
     public void personListView_lastHiddenClientDeleted_switchesToSuggestAdd(FxRobot robot) {
         robot.interact(() -> displayedPersons.setPredicate(person -> false));
         robot.interact(persons::clear);
-        assertPlaceholderShown(robot, PersonListPanel.MESSAGE_NO_CLIENTS);
+        assertPlaceholderShown(PersonListPanel.MESSAGE_NO_CLIENTS);
     }
 
     @Test
@@ -88,28 +93,58 @@ public class PersonListPanelTest {
     }
 
     @Test
-    public void selectedPerson_replacedByShorterList_clearsSelection(FxRobot robot) {
+    public void selectedPerson_clientNoLongerListed_clearsSelection(FxRobot robot) {
         robot.interact(() -> personListView.getSelectionModel().select(CARL));
         assertEquals(CARL, personListPanel.selectedPersonProperty().get());
 
-        robot.interact(() -> persons.setAll(ALICE));
+        // Daniel takes Carl's row, so a selection kept by row would show him
+        robot.interact(() -> persons.setAll(ALICE, BENSON, DANIEL));
 
         assertTrue(personListView.getSelectionModel().isEmpty());
         assertNull(personListPanel.selectedPersonProperty().get());
     }
 
     @Test
-    public void setCompact_sameValueTwice_keepsDisplayedClients(FxRobot robot) {
-        robot.interact(() -> {
-            personListPanel.setCompact(true);
-            personListPanel.setCompact(true);
-        });
+    public void selectedPerson_clientMovesRow_staysSelected(FxRobot robot) {
+        robot.interact(() -> personListView.getSelectionModel().select(CARL));
 
-        assertEquals(3, personListView.getItems().size());
+        // As after undo or find, which replace the whole list. Benson takes Carl's row
+        robot.interact(() -> persons.setAll(CARL, ALICE, BENSON));
+
+        assertEquals(CARL, personListView.getSelectionModel().getSelectedItem());
+        assertEquals(CARL, personListPanel.selectedPersonProperty().get());
     }
 
-    private void assertPlaceholderShown(FxRobot robot, String expectedText) {
-        ListView<?> personListView = robot.lookup("#personListView").queryAs(ListView.class);
+    @Test
+    public void setCompact_trueThenFalse_hidesThenShowsEmail(FxRobot robot) {
+        robot.interact(() -> personListPanel.setCompact(true));
+        // Setting the same value again keeps the cards compact
+        robot.interact(() -> personListPanel.setCompact(true));
+        assertEmailShownOnEveryCard(false);
+
+        robot.interact(() -> personListPanel.setCompact(false));
+        assertEmailShownOnEveryCard(true);
+    }
+
+    /**
+     * Asserts that every client's card shows its email if {@code isShown}, or hides it and leaves no gap otherwise.
+     */
+    private void assertEmailShownOnEveryCard(boolean isShown) {
+        // The ListView keeps spare cells for scrolling, which are hidden or empty
+        List<Node> cards = personListView.lookupAll(".list-cell").stream()
+                .map(cell -> (ListCell<?>) cell)
+                .filter(cell -> cell.isVisible() && cell.getItem() != null)
+                .map(ListCell::getGraphic)
+                .toList();
+        assertEquals(persons.size(), cards.size());
+        for (Node card : cards) {
+            Node email = card.lookup("#email");
+            assertEquals(isShown, email.isVisible());
+            assertEquals(isShown, email.isManaged());
+        }
+    }
+
+    private void assertPlaceholderShown(String expectedText) {
         Label placeholder = (Label) personListView.getPlaceholder();
         assertTrue(placeholder.isVisible());
         assertEquals(expectedText, placeholder.getText());

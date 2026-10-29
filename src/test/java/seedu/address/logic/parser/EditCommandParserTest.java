@@ -29,7 +29,6 @@ import static seedu.address.logic.commands.CommandTestUtil.VALID_PHONE_AMY;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_PHONE_BOB;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_TAG_FRIEND;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_TAG_HUSBAND;
-import static seedu.address.logic.parser.CliSyntax.PREFIXES_EXCEPT_NOTE;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_ADDRESS;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_DUE_DATE;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_EMAIL;
@@ -271,19 +270,9 @@ public class EditCommandParserTest {
 
     @Test
     public void parse_prefixAfterNote_failure() {
-        // every other prefix is rejected after the note
-        for (Prefix prefix : PREFIXES_EXCEPT_NOTE) {
-            assertParseFailure(parser, "1 nt/Exam soon " + prefix + "x", MESSAGE_NOTE_NOT_LAST);
-        }
-
-        // a note containing a prefix, which would otherwise be cut short and replace all the tags
+        // Add uses the same check, and AddCommandParserTest covers each prefix and kind of note after nt/.
+        // Here, a note containing a prefix, which would otherwise be cut short and replace all the tags
         assertParseFailure(parser, "1 nt/Note with t/tag inside", MESSAGE_NOTE_NOT_LAST);
-
-        // an empty note before another prefix
-        assertParseFailure(parser, "1 nt/" + TAG_DESC_FRIEND, MESSAGE_NOTE_NOT_LAST);
-
-        // a prefix the command already has, reported as the note error instead of a repeated p/
-        assertParseFailure(parser, "1" + PHONE_DESC_BOB + " nt/call p/after 6", MESSAGE_NOTE_NOT_LAST);
 
         // an unknown prefix is reported first, as in add
         assertParseFailure(parser, "1 a/Blk 1 z/x nt/hi t/y", Messages.getErrorMessageForUnknownPrefix("z/"));
