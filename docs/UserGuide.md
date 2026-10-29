@@ -160,7 +160,7 @@ Examples:
 *  `edit 2 n/Brandon Tan t/` Edits the name of the 2nd client to be `Brandon Tan` and clears all existing tags.
 *  `edit 3 nt/Exam in March` Sets the note of the 3rd client to `Exam in March`.
 *  `edit 3 nt/` Clears the note of the 3rd client.
-*  `edit 1 fee/300 due/01-12-2030` Sets the fee of the 1st client to `300.00` and their due date to `01-12-2026`.
+*  `edit 1 fee/300 due/01-12-2030` Sets the fee of the 1st client to `300.00` and their due date to `01-12-2030`.
 *  `edit 1 fee/ due/` Clears the fee and due date of the 1st client.
 
 ### Locating clients by name: `find`
