@@ -19,7 +19,7 @@ public class Note {
     public static final Note EMPTY = new Note("");
 
     private static final String MESSAGE_TOO_LONG = MESSAGE_CONSTRAINTS
-            + " This note has %1$d, so shorten it by %2$d.";
+            + " This note has %1$d characters, so shorten it by %2$d.";
 
     public final String value;
 
