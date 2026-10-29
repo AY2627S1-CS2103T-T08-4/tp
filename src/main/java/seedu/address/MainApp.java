@@ -77,8 +77,8 @@ public class MainApp extends Application {
         try {
             addressBookOptional = storage.readAddressBook();
             if (addressBookOptional.isEmpty()) {
-                logger.info("Creating a new data file " + storage.getAddressBookFilePath()
-                    + " populated with sample data.");
+                logger.info("Starting with sample data. The data file " + storage.getAddressBookFilePath()
+                    + " will be created at the first change.");
             }
             initialData = addressBookOptional.orElseGet(SampleDataUtil::getSampleAddressBook);
         } catch (DataLoadingException e) {

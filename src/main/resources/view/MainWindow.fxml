@@ -36,7 +36,7 @@
             </Menu>
           </MenuBar>
           <Button fx:id="themeToggleButton" mnemonicParsing="false" onAction="#handleToggleTheme"
-                  styleClass="button, theme-toggle-button" text="Dark theme" />
+                  styleClass="button, theme-toggle-button" text="Dark theme" focusTraversable="false" />
         </HBox>
 
         <StackPane VBox.vgrow="NEVER" fx:id="commandBoxPlaceholder" styleClass="pane-with-border">

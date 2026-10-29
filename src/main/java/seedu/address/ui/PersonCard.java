@@ -87,7 +87,7 @@ public class PersonCard extends UiPart<Region> {
     }
 
     /**
-     * Adds a pill for each tag in {@code personTags} to the row of tags.
+     * Adds a pill for each tag in {@code personTags} to {@code tagContainer}.
      */
     static void addTagLabels(FlowPane tagContainer, Set<Tag> personTags) {
         // Tags are case-insensitive, so they are sorted that way too (Math, physics, Sec4)
