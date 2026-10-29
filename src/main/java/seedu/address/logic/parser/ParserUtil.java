@@ -55,7 +55,7 @@ public class ParserUtil {
         requireNonNull(name);
         String normalizedName = Name.normalizeName(name);
         if (!Name.isValidName(normalizedName)) {
-            throw new ParseException(Name.MESSAGE_CONSTRAINTS);
+            throw new ParseException(Name.getErrorMessage(normalizedName));
         }
         return new Name(normalizedName);
     }
@@ -104,7 +104,7 @@ public class ParserUtil {
         requireNonNull(note);
         String normalizedNote = Note.normalizeNote(note);
         if (!Note.isValidNote(normalizedNote)) {
-            throw new ParseException(Note.MESSAGE_CONSTRAINTS);
+            throw new ParseException(Note.getErrorMessage(normalizedNote));
         }
         return new Note(normalizedNote);
     }

@@ -77,7 +77,8 @@ public class AddCommandParserTest {
         String validPrefix = NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB + ADDRESS_DESC_BOB;
 
         // note over the length limit
-        assertParseFailure(parser, validPrefix + " nt/" + "a".repeat(Note.MAX_LENGTH + 1), Note.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, validPrefix + " nt/" + "a".repeat(Note.MAX_LENGTH + 1),
+                Note.getErrorMessage("a".repeat(Note.MAX_LENGTH + 1)));
 
         // multiple notes
         assertParseFailure(parser, validPrefix + " nt/one nt/two",

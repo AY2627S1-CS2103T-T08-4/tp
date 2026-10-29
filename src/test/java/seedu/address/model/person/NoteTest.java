@@ -16,6 +16,16 @@ public class NoteTest {
     }
 
     @Test
+    public void getErrorMessage() {
+        assertEquals(Note.MESSAGE_CONSTRAINTS + " This note has 231, so shorten it by 31.",
+                Note.getErrorMessage("a".repeat(231)));
+
+        // one character over the limit
+        assertEquals(Note.MESSAGE_CONSTRAINTS + " This note has 201, so shorten it by 1.",
+                Note.getErrorMessage("a".repeat(Note.MAX_LENGTH + 1)));
+    }
+
+    @Test
     public void constructor_invalidNote_throwsIllegalArgumentException() {
         String tooLongNote = "a".repeat(Note.MAX_LENGTH + 1);
         assertThrows(IllegalArgumentException.class, () -> new Note(tooLongNote));

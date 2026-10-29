@@ -38,6 +38,9 @@ public class Name {
      */
     public static final String VALIDATION_REGEX = "[A-Za-z][" + NAME_CHARACTERS + " ]*";
 
+    private static final String MESSAGE_TOO_LONG =
+            "Invalid Name! Names cannot be more than %1$d characters, but this one has %2$d.";
+
     public final String fullName;
 
     /**
@@ -59,6 +62,19 @@ public class Name {
      */
     public static String normalizeName(String name) {
         return StringUtil.normalizeWhitespace(name);
+    }
+
+    /**
+     * Returns the error message for the invalid name {@code invalidName}. A name that is only too long gets a
+     * message with its length, so that the tutor is not sent to check characters that are all allowed.
+     */
+    public static String getErrorMessage(String invalidName) {
+        requireNonNull(invalidName);
+        assert !isValidName(invalidName) : "only an invalid name has an error message";
+        if (invalidName.matches(VALIDATION_REGEX)) {
+            return String.format(MESSAGE_TOO_LONG, MAX_LENGTH, invalidName.length());
+        }
+        return MESSAGE_CONSTRAINTS;
     }
 
     /**
