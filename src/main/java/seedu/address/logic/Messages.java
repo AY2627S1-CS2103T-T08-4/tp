@@ -115,6 +115,12 @@ public class Messages {
         if (!person.getNote().isEmpty()) {
             builder.append("; Note: ").append(person.getNote());
         }
+        if (!person.getFee().isEmpty()) {
+            builder.append("; Fee: ").append(person.getFee());
+        }
+        if (!person.getDueDate().isEmpty()) {
+            builder.append("; Due: ").append(person.getDueDate());
+        }
         builder.append("; Tags: ");
         person.getTags().forEach(builder::append);
         return builder.toString();
