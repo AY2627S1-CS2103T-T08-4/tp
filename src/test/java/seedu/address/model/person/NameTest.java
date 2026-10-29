@@ -64,6 +64,17 @@ public class NameTest {
     }
 
     @Test
+    public void getErrorMessage() {
+        // only too long: the length is given instead of the character rules
+        assertEquals("Invalid Name! Names cannot be more than 50 characters, but this one has 51.",
+                Name.getErrorMessage("a".repeat(Name.MAX_LENGTH + 1)));
+
+        // a character that is not allowed, whatever the length
+        assertEquals(Name.MESSAGE_CONSTRAINTS, Name.getErrorMessage("Ravi s/o Kumar"));
+        assertEquals(Name.MESSAGE_CONSTRAINTS, Name.getErrorMessage("a".repeat(Name.MAX_LENGTH) + "/"));
+    }
+
+    @Test
     public void normalizeName_curlyApostrophe_replaced() {
         assertEquals("Liam O'Brien", Name.normalizeName("Liam O\u2019Brien"));
     }

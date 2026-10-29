@@ -18,6 +18,9 @@ public class Note {
 
     public static final Note EMPTY = new Note("");
 
+    private static final String MESSAGE_TOO_LONG = MESSAGE_CONSTRAINTS
+            + " This note has %1$d characters, so shorten it by %2$d.";
+
     public final String value;
 
     /**
@@ -39,6 +42,17 @@ public class Note {
      */
     public static String normalizeNote(String note) {
         return StringUtil.normalizeWhitespace(note);
+    }
+
+    /**
+     * Returns the error message for the invalid note {@code invalidNote}, with how much it must be shortened by,
+     * since a long note is hard to count by hand.
+     */
+    public static String getErrorMessage(String invalidNote) {
+        requireNonNull(invalidNote);
+        assert !isValidNote(invalidNote) : "only an invalid note has an error message";
+        int length = invalidNote.length();
+        return String.format(MESSAGE_TOO_LONG, length, length - MAX_LENGTH);
     }
 
     /**

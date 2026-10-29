@@ -254,7 +254,8 @@ public class EditCommandParserTest {
 
     @Test
     public void parse_invalidOrRepeatedNote_failure() {
-        assertParseFailure(parser, "1 nt/" + "a".repeat(Note.MAX_LENGTH + 1), Note.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, "1 nt/" + "a".repeat(Note.MAX_LENGTH + 1),
+                Note.getErrorMessage("a".repeat(Note.MAX_LENGTH + 1)));
         assertParseFailure(parser, "1 nt/one nt/two", Messages.getErrorMessageForDuplicatePrefixes(PREFIX_NOTE));
     }
 

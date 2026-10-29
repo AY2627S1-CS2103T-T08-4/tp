@@ -112,7 +112,8 @@ public class ParserUtilTest {
     @Test
     public void parseName_tooLong_throwsParseException() {
         String tooLongName = "a".repeat(Name.MAX_LENGTH + 1);
-        assertThrows(ParseException.class, Name.MESSAGE_CONSTRAINTS, () -> ParserUtil.parseName(tooLongName));
+        assertThrows(ParseException.class, Name.getErrorMessage(tooLongName), () -> ParserUtil.parseName(tooLongName));
+        assertTrue(Name.getErrorMessage(tooLongName).contains("this one has " + (Name.MAX_LENGTH + 1)));
     }
 
     @Test
@@ -218,7 +219,7 @@ public class ParserUtilTest {
     @Test
     public void parseNote_tooLong_throwsParseException() {
         String tooLongNote = "a".repeat(Note.MAX_LENGTH + 1);
-        assertThrows(ParseException.class, Note.MESSAGE_CONSTRAINTS, () -> ParserUtil.parseNote(tooLongNote));
+        assertThrows(ParseException.class, Note.getErrorMessage(tooLongNote), () -> ParserUtil.parseNote(tooLongNote));
     }
 
     @Test
