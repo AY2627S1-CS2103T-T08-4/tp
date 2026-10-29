@@ -14,6 +14,7 @@ Class ResultDisplay
 Class WrappingScrollPane
 Class PersonListPanel
 Class PersonCard
+Class PersonDetailPanel
 Class TagColor
 Class StatusBarFooter
 Class CommandBox
@@ -38,6 +39,7 @@ CommandBox -down-> "1" CommandHistory
 MainWindow *-down-> "1" ResultDisplay
 ResultDisplay *-down-> "1" WrappingScrollPane
 MainWindow *-down-> "1" PersonListPanel
+MainWindow *-down-> "1" PersonDetailPanel
 MainWindow *-down-> "1" StatusBarFooter
 MainWindow --> "0..1" HelpWindow
 
@@ -50,10 +52,12 @@ ResultDisplay --|> UiPart
 CommandBox --|> UiPart
 PersonListPanel --|> UiPart
 PersonCard --|> UiPart
+PersonDetailPanel --|> UiPart
 StatusBarFooter --|> UiPart
 HelpWindow --|> UiPart
 
 PersonCard ..> Model
+PersonDetailPanel ..> Model
 UiManager -right-> Logic
 MainWindow -left-> Logic
 
