@@ -107,9 +107,9 @@ public class PersonListPanelTest {
 
         assertEquals(3, personListView.getItems().size());
     }
-  
+
     @Test
-    private void assertPlaceholderShown(FxRobot robot, String expectedText) {
+    public void assertPlaceholderShown(FxRobot robot, String expectedText) {
         ListView<?> personListView = robot.lookup("#personListView").queryAs(ListView.class);
         Label placeholder = (Label) personListView.getPlaceholder();
         assertTrue(placeholder.isVisible());
