@@ -1,7 +1,6 @@
 package seedu.address.ui;
 
 import java.util.List;
-import java.util.logging.Logger;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -14,7 +13,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.Region;
-import seedu.address.commons.core.LogsCenter;
 import seedu.address.logic.Messages;
 import seedu.address.model.person.Person;
 
@@ -26,18 +24,18 @@ public class PersonListPanel extends UiPart<Region> {
     public static final String MESSAGE_ALL_CLIENTS_HIDDEN = "No clients to show. Use list to show all clients.";
 
     private static final String FXML = "PersonListPanel.fxml";
-    private final Logger logger = LogsCenter.getLogger(PersonListPanel.class);
 
     @FXML
     private Label clientCount;
     @FXML
     private ListView<Person> personListView;
+    @FXML
+    private Label placeholder;
+
     private final ReadOnlyObjectWrapper<Person> selectedPerson = new ReadOnlyObjectWrapper<>();
     private final ObservableList<Person> allPersons;
     private boolean isCompact;
     private boolean isRestoringSelection;
-    @FXML
-    private Label placeholder;
 
     /**
      * Creates a {@code PersonListPanel} that shows {@code personList}, the clients currently displayed.

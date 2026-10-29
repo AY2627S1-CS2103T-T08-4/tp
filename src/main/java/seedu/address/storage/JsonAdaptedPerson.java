@@ -27,6 +27,7 @@ class JsonAdaptedPerson {
 
     public static final String MISSING_FIELD_MESSAGE_FORMAT = "Client's %s field is missing!";
     public static final String MESSAGE_NULL_TAG = "Client's tag list contains null tag(s).";
+    static final int MAX_DISPLAY_NAME_LENGTH = 30;
 
     private final String name;
     private final String phone;
@@ -147,7 +148,11 @@ class JsonAdaptedPerson {
     }
 
     String getDisplayName(int index) {
-        return (name == null || name.isBlank()) ? "#" + (index + 1) : name;
+        if (name == null || name.isBlank()) {
+            return "#" + (index + 1);
+        }
+        // A hand-edited name can be thousands of characters long, which would make the warning taller than the screen
+        return name.length() > MAX_DISPLAY_NAME_LENGTH ? name.substring(0, MAX_DISPLAY_NAME_LENGTH) + "…" : name;
     }
 
 }

@@ -18,6 +18,7 @@ import javafx.scene.control.TextInputControl;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Rectangle;
@@ -173,6 +174,8 @@ public class MainWindow extends UiPart<Stage> {
 
         CommandBox commandBox = new CommandBox(this::executeCommand, resultDisplay::scrollPage);
         commandBoxPlaceholder.getChildren().add(commandBox.getRoot());
+        // The detail panel's ScrollPane takes the focus when clicked, so the command box takes it back
+        personDetailPanel.getRoot().addEventFilter(MouseEvent.MOUSE_RELEASED, event -> commandBox.requestFocus());
 
         getRoot().addEventFilter(KeyEvent.KEY_PRESSED, event -> {
             if (isDetailOpen && event.getCode() == KeyCode.ESCAPE) {

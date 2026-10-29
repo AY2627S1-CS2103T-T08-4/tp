@@ -48,6 +48,9 @@ public class MainWindowTest {
     private static final String RAVI_NAME = "Ravi Kumar";
     private static final String ADD_RAVI_COMMAND =
             "add n/Ravi Kumar p/87654321 e/ravi.k@edu.sg a/10 Queenstown Rd t/Math";
+    /** The longest name allowed, 50 characters. */
+    private static final String LONG_NAME = "Muhammad Hafiz bin Abdul Rahman Ismail Tann (NHHS)";
+    private static final String LONG_ADDRESS = "Blk 123 Ang Mo Kio Avenue 3, #12-345, Singapore 560123";
 
     @TempDir
     public Path temporaryFolder;
@@ -59,14 +62,23 @@ public class MainWindowTest {
     @Start
     public void start(Stage stage) {
         this.stage = stage;
-        Path addressBookFilePath = temporaryFolder.resolve("addressBook.json");
-        StorageManager storage = new StorageManager(new JsonAddressBookStorage(addressBookFilePath),
-                new JsonUserPrefsStorage(temporaryFolder.resolve("userPrefs.json")));
-        MainWindow mainWindow = new MainWindow(stage, new LogicManager(new ModelManager(), storage),
-                addressBookFilePath);
+        MainWindow mainWindow = createMainWindow();
         mainWindow.fillInnerParts();
         detailPlaceholder = (Region) stage.getScene().lookup("#personDetailPanelPlaceholder");
         stage.show();
+    }
+
+    @Test
+    public void launch_commandBoxHasFocus(FxRobot robot) {
+        // Sets the window up as UiManager does: shown first, then filled
+        robot.interact(() -> {
+            stage.hide();
+            MainWindow launchedWindow = createMainWindow();
+            launchedWindow.show();
+            launchedWindow.fillInnerParts();
+        });
+
+        assertEquals(getCommandTextField(), stage.getScene().getFocusOwner());
     }
 
     @Test
@@ -162,6 +174,17 @@ public class MainWindowTest {
     }
 
     @Test
+    public void clickThemeButton_togglesThemeAndFocusStaysInCommandBox(FxRobot robot) {
+        robot.clickOn("#commandTextField");
+
+        robot.clickOn("#themeToggleButton");
+
+        assertTrue(stage.getScene().getStylesheets().stream()
+                .anyMatch(stylesheet -> stylesheet.endsWith("DarkTheme.css")));
+        assertEquals(getCommandTextField(), stage.getScene().getFocusOwner());
+    }
+
+    @Test
     public void selectClients_thenClose_detailPanelUpdatesAndListSelectionClears(FxRobot robot)
             throws TimeoutException {
         addThreeClients(robot);
@@ -236,6 +259,16 @@ public class MainWindowTest {
 
         waitForDetailPanelToClose();
         assertTrue(getCommandTextField().isFocused());
+    }
+
+    @Test
+    public void clickInsideDetailPanel_thenType_textGoesToCommandBox(FxRobot robot) {
+        addAndClickClient(robot);
+
+        robot.clickOn(getDetailLabel("#phone"));
+        robot.write(ListCommand.COMMAND_WORD);
+
+        assertEquals(ListCommand.COMMAND_WORD, getCommandTextField().getText());
     }
 
     @Test
@@ -318,6 +351,20 @@ public class MainWindowTest {
     }
 
     @Test
+    public void selectClient_minimumWidth_longNameAndAddressShownInFull(FxRobot robot) {
+        robot.interact(() -> stage.setWidth(stage.getMinWidth()));
+        enterCommand(robot, "add n/" + LONG_NAME + " p/98765432 e/hafiz@edu.sg a/" + LONG_ADDRESS);
+        selectClient(robot, 0);
+        waitForDetailPanelToOpen();
+
+        for (String id : new String[] {"#name", "#address"}) {
+            Label label = getDetailLabel(id);
+            // A wrapped label given less than the height of all its lines ends in "..." instead
+            assertTrue(label.getHeight() >= label.prefHeight(label.getWidth()), id + " cut off");
+        }
+    }
+
+    @Test
     public void resizeWindowWithDetailOpen_detailPanelNarrowsToFit(FxRobot robot) throws TimeoutException {
         robot.interact(() -> stage.setWidth(1200));
         addAndSelectClient(robot);
@@ -329,6 +376,16 @@ public class MainWindowTest {
         // Times out if the panel keeps its width. Waits on the laid-out width, so the bounds checked next are current
         WaitForAsyncUtils.waitFor(1, TimeUnit.SECONDS, () -> detailPlaceholder.getWidth() < 519);
         assertDetailPanelFitsInWindow();
+    }
+
+    /**
+     * Creates a main window on {@code stage} for an empty address book, which is saved in {@code temporaryFolder}.
+     */
+    private MainWindow createMainWindow() {
+        Path addressBookFilePath = temporaryFolder.resolve("addressBook.json");
+        StorageManager storage = new StorageManager(new JsonAddressBookStorage(addressBookFilePath),
+                new JsonUserPrefsStorage(temporaryFolder.resolve("userPrefs.json")));
+        return new MainWindow(stage, new LogicManager(new ModelManager(), storage), addressBookFilePath);
     }
 
     /**

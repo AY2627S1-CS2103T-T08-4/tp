@@ -44,6 +44,13 @@ public class CommandBox extends UiPart<Region> {
     }
 
     /**
+     * Moves the keyboard focus to the command box, so that the user can keep typing.
+     */
+    public void requestFocus() {
+        commandTextField.requestFocus();
+    }
+
+    /**
      * Shows the previous or next command in the history when the Up or Down keys are pressed, and scrolls the
      * result of the last command when the Page Up or Page Down keys are pressed.
      * The focus stays in the command box, so the user can keep typing.

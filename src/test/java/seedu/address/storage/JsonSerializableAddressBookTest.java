@@ -14,6 +14,7 @@ import org.junit.jupiter.api.function.Executable;
 import seedu.address.commons.exceptions.IllegalValueException;
 import seedu.address.commons.util.JsonUtil;
 import seedu.address.model.AddressBook;
+import seedu.address.model.person.Name;
 import seedu.address.testutil.TypicalPersons;
 
 public class JsonSerializableAddressBookTest {
@@ -45,6 +46,18 @@ public class JsonSerializableAddressBookTest {
                 JsonSerializableAddressBook.class).get();
         assertThrows(IllegalValueException.class, "Client 'Alice Pauline': "
             + JsonSerializableAddressBook.MESSAGE_DUPLICATE_PERSON, dataFromFile::toModelType);
+    }
+
+    @Test
+    public void toModelType_veryLongInvalidName_reasonStaysShort() throws IllegalValueException {
+        // Note, fee, due date and tags may be missing, as in files from older versions
+        JsonAdaptedPerson longNamePerson = new JsonAdaptedPerson("A".repeat(5000), "91234567", "amy@example.com",
+                "Blk 1 Ang Mo Kio", null, null, null, null);
+        JsonSerializableAddressBook addressBook = new JsonSerializableAddressBook(List.of(longNamePerson));
+
+        String expectedMessage = "Client '" + "A".repeat(JsonAdaptedPerson.MAX_DISPLAY_NAME_LENGTH) + "…': "
+                + Name.MESSAGE_CONSTRAINTS;
+        assertThrows(IllegalValueException.class, expectedMessage, addressBook::toModelType);
     }
 
     @Test

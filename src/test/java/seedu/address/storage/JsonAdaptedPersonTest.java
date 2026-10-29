@@ -282,4 +282,26 @@ public class JsonAdaptedPersonTest {
         assertEquals(Set.of(new Tag("Sec 4")), person.toModelType().getTags());
     }
 
+    @Test
+    public void getDisplayName_nameAtMaxDisplayLength_unchanged() {
+        String name = "A".repeat(JsonAdaptedPerson.MAX_DISPLAY_NAME_LENGTH);
+        assertEquals(name, createPersonNamed(name).getDisplayName(0));
+    }
+
+    @Test
+    public void getDisplayName_longerName_shortenedWithEllipsis() {
+        String name = "A".repeat(JsonAdaptedPerson.MAX_DISPLAY_NAME_LENGTH + 1);
+        String expectedName = "A".repeat(JsonAdaptedPerson.MAX_DISPLAY_NAME_LENGTH) + "…";
+        assertEquals(expectedName, createPersonNamed(name).getDisplayName(0));
+    }
+
+    @Test
+    public void getDisplayName_blankName_returnsPositionInFile() {
+        assertEquals("#3", createPersonNamed(" ").getDisplayName(2));
+    }
+
+    private JsonAdaptedPerson createPersonNamed(String name) {
+        return new JsonAdaptedPerson(name, VALID_PHONE, VALID_EMAIL, VALID_ADDRESS, VALID_NOTE, VALID_FEE,
+                VALID_DUE_DATE, VALID_TAGS);
+    }
 }
