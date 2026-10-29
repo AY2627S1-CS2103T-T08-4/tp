@@ -1,6 +1,9 @@
 package seedu.address.logic.parser;
 
 import static java.util.Objects.requireNonNull;
+import static seedu.address.logic.Messages.MESSAGE_NOTE_NOT_LAST;
+import static seedu.address.logic.parser.CliSyntax.PREFIXES_EXCEPT_NOTE;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_NOTE;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -26,6 +29,19 @@ public class ParserUtil {
     public static final String MESSAGE_INVALID_INDEX = "Index must be a positive integer.";
 
     /**
+     * Checks that no other add or edit prefix follows {@code nt/} in {@code args}.
+     * Everything after {@code nt/} belongs to the note, so a prefix there would cut the note short.
+     *
+     * @throws ParseException if a prefix in {@code PREFIXES_EXCEPT_NOTE} appears after {@code nt/}.
+     */
+    public static void verifyNoteIsLast(String args) throws ParseException {
+        requireNonNull(args);
+        if (ArgumentTokenizer.hasPrefixAfter(args, PREFIX_NOTE, PREFIXES_EXCEPT_NOTE)) {
+            throw new ParseException(MESSAGE_NOTE_NOT_LAST);
+        }
+    }
+
+    /**
      * Parses {@code oneBasedIndex} into an {@code Index} and returns it. Leading and trailing whitespaces will be
      * trimmed.
      * A positive number too large for an {@code int} is parsed as {@code Integer.MAX_VALUE}, which is past the end
@@ -38,7 +54,7 @@ public class ParserUtil {
             return Index.fromOneBased(Integer.parseInt(trimmedIndex));
         }
         // Only digits, not all zeros, yet not a valid int, so the number overflowed
-        if (trimmedIndex.matches("[0-9]+") && !trimmedIndex.matches("0+")) {
+        if (trimmedIndex.matches("\\d+") && !trimmedIndex.matches("0+")) {
             return Index.fromOneBased(Integer.MAX_VALUE);
         }
         throw new ParseException(MESSAGE_INVALID_INDEX);
@@ -162,11 +178,11 @@ public class ParserUtil {
      */
     public static Tag parseTag(String tag) throws ParseException {
         requireNonNull(tag);
-        String trimmedTag = tag.trim();
-        if (!Tag.isValidTagName(trimmedTag)) {
+        String normalizedTag = Tag.normalizeTagName(tag);
+        if (!Tag.isValidTagName(normalizedTag)) {
             throw new ParseException(Tag.MESSAGE_CONSTRAINTS);
         }
-        return new Tag(trimmedTag);
+        return new Tag(normalizedTag);
     }
 
     /**

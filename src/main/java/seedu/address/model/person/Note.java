@@ -3,6 +3,8 @@ package seedu.address.model.person;
 import static java.util.Objects.requireNonNull;
 import static seedu.address.commons.util.AppUtil.checkArgument;
 
+import seedu.address.commons.util.StringUtil;
+
 /**
  * Represents a Person's free-text note in the address book.
  * An empty note means the client has no note.
@@ -13,9 +15,6 @@ public class Note {
     public static final int MAX_LENGTH = 200;
     public static final String MESSAGE_CONSTRAINTS = String.format(
             "Invalid Note! Notes cannot be more than %d characters.", MAX_LENGTH);
-    public static final String MESSAGE_NOT_LAST = "The note must be the last parameter, so it cannot contain "
-            + "prefixes such as t/ or p/. Move nt/NOTE to the end of the command.";
-
     public static final Note EMPTY = new Note("");
 
     public final String value;
@@ -38,8 +37,7 @@ public class Note {
      * @param note A note as typed by the user.
      */
     public static String normalizeNote(String note) {
-        requireNonNull(note);
-        return note.trim().replaceAll("\\s+", " ");
+        return StringUtil.normalizeWhitespace(note);
     }
 
     /**

@@ -58,20 +58,20 @@ public class ArgumentTokenizer {
     }
 
     /**
-     * Returns true if any of {@code laterPrefixes} appears after the first occurrence of {@code prefix} in
+     * Returns true if any of {@code otherPrefixes} appears after the first occurrence of {@code prefix} in
      * {@code argsString}. Returns false if {@code prefix} does not appear.
      *
      * @param argsString    Arguments string of the form: {@code preamble <prefix>value <prefix>value ...}
-     * @param prefix        Prefix that must come after all of {@code laterPrefixes}
-     * @param laterPrefixes Prefixes to look for after {@code prefix}
+     * @param prefix        Prefix whose value runs to the end of {@code argsString}
+     * @param otherPrefixes Prefixes to look for after {@code prefix}
      */
-    public static boolean hasPrefixAfter(String argsString, Prefix prefix, Prefix... laterPrefixes) {
+    public static boolean hasPrefixAfter(String argsString, Prefix prefix, Prefix... otherPrefixes) {
         int prefixPosition = findPrefixPosition(argsString, prefix.getPrefix(), 0);
         if (prefixPosition == -1) {
             return false;
         }
-        return Arrays.stream(laterPrefixes)
-                .anyMatch(laterPrefix -> findPrefixPosition(argsString, laterPrefix.getPrefix(), prefixPosition) != -1);
+        return Arrays.stream(otherPrefixes)
+                .anyMatch(otherPrefix -> findPrefixPosition(argsString, otherPrefix.getPrefix(), prefixPosition) != -1);
     }
 
     /**

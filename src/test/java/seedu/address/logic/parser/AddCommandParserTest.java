@@ -1,6 +1,7 @@
 package seedu.address.logic.parser;
 
 import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
+import static seedu.address.logic.Messages.MESSAGE_NOTE_NOT_LAST;
 import static seedu.address.logic.commands.CommandTestUtil.ADDRESS_DESC_AMY;
 import static seedu.address.logic.commands.CommandTestUtil.ADDRESS_DESC_BOB;
 import static seedu.address.logic.commands.CommandTestUtil.DUE_DATE_DESC;
@@ -30,6 +31,7 @@ import static seedu.address.logic.commands.CommandTestUtil.VALID_NAME_BOB;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_PHONE_BOB;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_TAG_FRIEND;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_TAG_HUSBAND;
+import static seedu.address.logic.parser.CliSyntax.PREFIXES_EXCEPT_NOTE;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_ADDRESS;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_DUE_DATE;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_EMAIL;
@@ -88,15 +90,26 @@ public class AddCommandParserTest {
     public void parse_prefixAfterNote_failure() {
         String validPrefix = NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB + ADDRESS_DESC_BOB;
 
+        // every other prefix is rejected after the note
+        for (Prefix prefix : PREFIXES_EXCEPT_NOTE) {
+            assertParseFailure(parser, validPrefix + " nt/Exam soon " + prefix + "x", MESSAGE_NOTE_NOT_LAST);
+        }
+
         // a note containing a prefix, which would otherwise be cut short and add the tag "tag inside"
-        assertParseFailure(parser, validPrefix + " nt/Note with t/tag inside", Note.MESSAGE_NOT_LAST);
+        assertParseFailure(parser, validPrefix + " nt/Note with t/tag inside", MESSAGE_NOTE_NOT_LAST);
+
+        // a note that is last but has prefix-like text, such as n/a
+        assertParseFailure(parser, validPrefix + " nt/Allergies n/a", MESSAGE_NOTE_NOT_LAST);
 
         // an empty note before another prefix
-        assertParseFailure(parser, validPrefix + " nt/" + TAG_DESC_FRIEND, Note.MESSAGE_NOT_LAST);
+        assertParseFailure(parser, validPrefix + " nt/" + TAG_DESC_FRIEND, MESSAGE_NOTE_NOT_LAST);
 
         // a required field after the note
         assertParseFailure(parser, NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB + " nt/Exam soon"
-                + ADDRESS_DESC_BOB, Note.MESSAGE_NOT_LAST);
+                + ADDRESS_DESC_BOB, MESSAGE_NOTE_NOT_LAST);
+
+        // a prefix the command already has, reported as the note error instead of a repeated e/
+        assertParseFailure(parser, validPrefix + " nt/call before e/visit", MESSAGE_NOTE_NOT_LAST);
     }
 
     @Test
@@ -254,27 +267,32 @@ public class AddCommandParserTest {
 
     @Test
     public void parse_compulsoryFieldMissing_failure() {
-        String expectedMessage = String.format(MESSAGE_INVALID_COMMAND_FORMAT, AddCommand.MESSAGE_USAGE);
-
         // missing name prefix
         assertParseFailure(parser, VALID_NAME_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB + ADDRESS_DESC_BOB,
-                expectedMessage);
+                getMissingFieldsMessage("n/NAME"));
 
         // missing phone prefix
         assertParseFailure(parser, NAME_DESC_BOB + VALID_PHONE_BOB + EMAIL_DESC_BOB + ADDRESS_DESC_BOB,
-                expectedMessage);
+                getMissingFieldsMessage("p/PHONE"));
 
         // missing email prefix
         assertParseFailure(parser, NAME_DESC_BOB + PHONE_DESC_BOB + VALID_EMAIL_BOB + ADDRESS_DESC_BOB,
-                expectedMessage);
+                getMissingFieldsMessage("e/EMAIL"));
 
         // missing address prefix
         assertParseFailure(parser, NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB + VALID_ADDRESS_BOB,
-                expectedMessage);
+                getMissingFieldsMessage("a/ADDRESS"));
+
+        // two prefixes missing, named in the usage's order
+        assertParseFailure(parser, PHONE_DESC_BOB + EMAIL_DESC_BOB, getMissingFieldsMessage("n/NAME a/ADDRESS"));
 
         // all prefixes missing
         assertParseFailure(parser, VALID_NAME_BOB + VALID_PHONE_BOB + VALID_EMAIL_BOB + VALID_ADDRESS_BOB,
-                expectedMessage);
+                getMissingFieldsMessage("n/NAME p/PHONE e/EMAIL a/ADDRESS"));
+    }
+
+    private static String getMissingFieldsMessage(String missingFields) {
+        return String.format(AddCommandParser.MESSAGE_MISSING_FIELDS, missingFields, AddCommand.MESSAGE_USAGE);
     }
 
     @Test

@@ -27,6 +27,7 @@ import seedu.address.logic.commands.AddCommand;
 import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.DeleteCommand;
 import seedu.address.logic.commands.EditCommand;
+import seedu.address.logic.commands.FindCommand;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.RedoCommand;
 import seedu.address.logic.commands.UndoCommand;
@@ -157,6 +158,16 @@ public class LogicManagerTest {
 
         assertCommandSuccess(RedoCommand.COMMAND_WORD, RedoCommand.MESSAGE_SUCCESS, expectedModel);
         assertCommandException(RedoCommand.COMMAND_WORD, RedoCommand.MESSAGE_NOTHING_TO_REDO);
+    }
+
+    @Test
+    public void execute_addAfterFind_saysShowingAllClients() throws Exception {
+        logic.execute(FindCommand.COMMAND_WORD + " Bob");
+        CommandResult result = logic.execute(ADD_AMY_COMMAND);
+
+        // The text the user reads, unlike other tests, which format the same message constant as the command
+        assertTrue(result.getFeedbackToUser().endsWith("\nShowing all clients."));
+        assertEquals(1, model.getFilteredPersonList().size());
     }
 
     @Test
