@@ -72,6 +72,14 @@ Sieve is a **desktop app that helps self-employed private tuition teachers keep 
 * If you are using a PDF version of this document, be careful when copying and pasting commands that span multiple lines as space characters surrounding line-breaks may be omitted when copied over to the application.
 </box>
 
+<box type="info" seamless>
+
+**Reading the result:** after each command, the line below the command box shows the result:
+* Green **✔**: the command ran. It may still say that nothing changed, e.g. `No change: Amirah Tan already has these details.` or `There are no clients to clear.`
+* Red **✖**, with red text: the command could not be completed. The message says why.
+* Grey **ⓘ**: a search (`find` or `filter`) found no clients.
+</box>
+
 ### Viewing a client's details
 
 Click anywhere on a client's row to open their detailed information panel on the right. The client list becomes more
