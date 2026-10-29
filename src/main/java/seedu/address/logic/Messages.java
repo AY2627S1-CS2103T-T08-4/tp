@@ -126,8 +126,10 @@ public class Messages {
         if (!person.getDueDate().isEmpty()) {
             builder.append("; Due: ").append(person.getDueDate());
         }
-        builder.append("; Tags: ");
-        person.getTags().forEach(builder::append);
+        if (!person.getTags().isEmpty()) {
+            builder.append("; Tags: ");
+            person.getTags().forEach(builder::append);
+        }
         return builder.toString();
     }
 

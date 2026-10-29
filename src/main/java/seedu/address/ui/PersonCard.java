@@ -72,7 +72,7 @@ public class PersonCard extends UiPart<Region> {
         fee.setText("Fee: " + person.getFee().value);
         dueDate.setText("Due: " + person.getDueDate().value);
         note.setText(person.getNote().value);
-        addTags(person.getTags());
+        addTagLabels(tags, person.getTags());
 
         // Empty optional details take up no space on the card, e.g. a client without tags gets no empty row
         boolean hasFee = !person.getFee().isEmpty();
@@ -89,17 +89,17 @@ public class PersonCard extends UiPart<Region> {
     /**
      * Adds a pill for each tag in {@code personTags} to the row of tags.
      */
-    private void addTags(Set<Tag> personTags) {
+    static void addTagLabels(FlowPane tagContainer, Set<Tag> personTags) {
         // Tags are case-insensitive, so they are sorted that way too (Math, physics, Sec4)
         personTags.stream()
                 .sorted(Comparator.comparing(tag -> tag.tagName, String.CASE_INSENSITIVE_ORDER))
-                .forEach(tag -> tags.getChildren().add(createTagLabel(tag.tagName)));
+                .forEach(tag -> tagContainer.getChildren().add(createTagLabel(tag.tagName)));
     }
 
     /**
      * Returns a pill-shaped label for the tag called {@code tagName}, colored by {@link TagColor}.
      */
-    static Label createTagLabel(String tagName) {
+    private static Label createTagLabel(String tagName) {
         Label tagLabel = new Label(tagName);
         tagLabel.getStyleClass().add(TagColor.getStyleClass(tagName));
         return tagLabel;
