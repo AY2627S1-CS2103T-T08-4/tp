@@ -1,6 +1,9 @@
 package seedu.address.logic.parser;
 
 import static java.util.Objects.requireNonNull;
+import static seedu.address.logic.Messages.MESSAGE_NOTE_NOT_LAST;
+import static seedu.address.logic.parser.CliSyntax.PREFIXES_EXCEPT_NOTE;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_NOTE;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -24,6 +27,19 @@ import seedu.address.model.tag.Tag;
 public class ParserUtil {
 
     public static final String MESSAGE_INVALID_INDEX = "Index must be a positive integer.";
+
+    /**
+     * Checks that no other add or edit prefix follows {@code nt/} in {@code args}.
+     * Everything after {@code nt/} belongs to the note, so a prefix there would cut the note short.
+     *
+     * @throws ParseException if a prefix in {@code PREFIXES_EXCEPT_NOTE} appears after {@code nt/}.
+     */
+    public static void verifyNoteIsLast(String args) throws ParseException {
+        requireNonNull(args);
+        if (ArgumentTokenizer.hasPrefixAfter(args, PREFIX_NOTE, PREFIXES_EXCEPT_NOTE)) {
+            throw new ParseException(MESSAGE_NOTE_NOT_LAST);
+        }
+    }
 
     /**
      * Parses {@code oneBasedIndex} into an {@code Index} and returns it. Leading and trailing whitespaces will be
@@ -55,7 +71,7 @@ public class ParserUtil {
         requireNonNull(name);
         String normalizedName = Name.normalizeName(name);
         if (!Name.isValidName(normalizedName)) {
-            throw new ParseException(Name.MESSAGE_CONSTRAINTS);
+            throw new ParseException(Name.getErrorMessage(normalizedName));
         }
         return new Name(normalizedName);
     }
@@ -104,7 +120,7 @@ public class ParserUtil {
         requireNonNull(note);
         String normalizedNote = Note.normalizeNote(note);
         if (!Note.isValidNote(normalizedNote)) {
-            throw new ParseException(Note.MESSAGE_CONSTRAINTS);
+            throw new ParseException(Note.getErrorMessage(normalizedNote));
         }
         return new Note(normalizedNote);
     }

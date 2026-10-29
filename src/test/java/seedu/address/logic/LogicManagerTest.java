@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -185,6 +186,20 @@ public class LogicManagerTest {
         assertThrows(UnsupportedOperationException.class, () -> logic
             .getFilteredPersonList()
             .remove(0));
+    }
+
+    @Test
+    public void getAllPersonList_listFiltered_includesHiddenPersons() throws Exception {
+        logic.execute(ADD_AMY_COMMAND);
+        logic.execute(FindCommand.COMMAND_WORD + " Zzz");
+
+        assertTrue(logic.getFilteredPersonList().isEmpty());
+        assertEquals(List.of(new PersonBuilder(AMY).withTags().build()), logic.getAllPersonList());
+    }
+
+    @Test
+    public void getAllPersonList_modifyList_throwsUnsupportedOperationException() {
+        assertThrows(UnsupportedOperationException.class, () -> logic.getAllPersonList().remove(0));
     }
 
     @Test

@@ -1,6 +1,7 @@
 package seedu.address.logic.parser;
 
 import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
+import static seedu.address.logic.Messages.MESSAGE_NOTE_NOT_LAST;
 import static seedu.address.logic.commands.CommandTestUtil.ADDRESS_DESC_AMY;
 import static seedu.address.logic.commands.CommandTestUtil.ADDRESS_DESC_BOB;
 import static seedu.address.logic.commands.CommandTestUtil.DUE_DATE_DESC;
@@ -30,6 +31,7 @@ import static seedu.address.logic.commands.CommandTestUtil.VALID_NAME_BOB;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_PHONE_BOB;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_TAG_FRIEND;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_TAG_HUSBAND;
+import static seedu.address.logic.parser.CliSyntax.PREFIXES_EXCEPT_NOTE;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_ADDRESS;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_DUE_DATE;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_EMAIL;
@@ -64,12 +66,12 @@ public class AddCommandParserTest {
     public void parse_noteSpecified_success() {
         Person expectedPerson = new PersonBuilder(BOB).withTags(VALID_TAG_FRIEND).withNote("Weak at algebra").build();
         assertParseSuccess(parser, NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB + ADDRESS_DESC_BOB
-                + " nt/Weak at algebra" + TAG_DESC_FRIEND, new AddCommand(expectedPerson));
+                + TAG_DESC_FRIEND + " nt/Weak at algebra", new AddCommand(expectedPerson));
 
         // empty note is the same as no note
         Person expectedPersonNoNote = new PersonBuilder(BOB).withTags(VALID_TAG_FRIEND).build();
         assertParseSuccess(parser, NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB + ADDRESS_DESC_BOB
-                + " nt/" + TAG_DESC_FRIEND, new AddCommand(expectedPersonNoNote));
+                + TAG_DESC_FRIEND + " nt/", new AddCommand(expectedPersonNoNote));
     }
 
     @Test
@@ -77,11 +79,38 @@ public class AddCommandParserTest {
         String validPrefix = NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB + ADDRESS_DESC_BOB;
 
         // note over the length limit
-        assertParseFailure(parser, validPrefix + " nt/" + "a".repeat(Note.MAX_LENGTH + 1), Note.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, validPrefix + " nt/" + "a".repeat(Note.MAX_LENGTH + 1),
+                Note.getErrorMessage("a".repeat(Note.MAX_LENGTH + 1)));
 
         // multiple notes
         assertParseFailure(parser, validPrefix + " nt/one nt/two",
                 Messages.getErrorMessageForDuplicatePrefixes(PREFIX_NOTE));
+    }
+
+    @Test
+    public void parse_prefixAfterNote_failure() {
+        String validPrefix = NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB + ADDRESS_DESC_BOB;
+
+        // every other prefix is rejected after the note
+        for (Prefix prefix : PREFIXES_EXCEPT_NOTE) {
+            assertParseFailure(parser, validPrefix + " nt/Exam soon " + prefix + "x", MESSAGE_NOTE_NOT_LAST);
+        }
+
+        // a note containing a prefix, which would otherwise be cut short and add the tag "tag inside"
+        assertParseFailure(parser, validPrefix + " nt/Note with t/tag inside", MESSAGE_NOTE_NOT_LAST);
+
+        // a note that is last but has prefix-like text, such as n/a
+        assertParseFailure(parser, validPrefix + " nt/Allergies n/a", MESSAGE_NOTE_NOT_LAST);
+
+        // an empty note before another prefix
+        assertParseFailure(parser, validPrefix + " nt/" + TAG_DESC_FRIEND, MESSAGE_NOTE_NOT_LAST);
+
+        // a required field after the note
+        assertParseFailure(parser, NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB + " nt/Exam soon"
+                + ADDRESS_DESC_BOB, MESSAGE_NOTE_NOT_LAST);
+
+        // a prefix the command already has, reported as the note error instead of a repeated e/
+        assertParseFailure(parser, validPrefix + " nt/call before e/visit", MESSAGE_NOTE_NOT_LAST);
     }
 
     @Test

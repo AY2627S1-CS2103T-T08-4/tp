@@ -52,7 +52,10 @@ public class FindCommand extends Command {
         int matchCount = model.getFilteredPersonList().size();
         logger.fine("Find matched " + matchCount + " client(s) for " + predicate);
         if (matchCount == 0) {
-            return CommandResult.forEmptySearch(MESSAGE_NO_CLIENTS_FOUND);
+            // With no clients at all, the tips to check the spelling or use list cannot help
+            boolean isAddressBookEmpty = model.getAddressBook().getPersonList().isEmpty();
+            return CommandResult.forEmptySearch(isAddressBookEmpty
+                    ? Messages.MESSAGE_NO_CLIENTS_TO_SEARCH : MESSAGE_NO_CLIENTS_FOUND);
         }
         return new CommandResult(Messages.getPersonsListedOverviewMessage(matchCount));
     }

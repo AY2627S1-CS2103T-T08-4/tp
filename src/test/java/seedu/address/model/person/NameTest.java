@@ -64,6 +64,39 @@ public class NameTest {
     }
 
     @Test
+    public void getErrorMessage() {
+        // only too long: the length is given instead of the character rules
+        assertEquals("Invalid Name! Names cannot be more than 50 characters, but this one has 51.",
+                Name.getErrorMessage("a".repeat(Name.MAX_LENGTH + 1)));
+
+        // a character that is not allowed, whatever the length
+        assertEquals(Name.MESSAGE_CONSTRAINTS, Name.getErrorMessage("Ravi s/o Kumar"));
+        assertEquals(Name.MESSAGE_CONSTRAINTS, Name.getErrorMessage("a".repeat(Name.MAX_LENGTH) + "/"));
+    }
+
+    @Test
+    public void normalizeName_curlyApostrophe_replaced() {
+        assertEquals("Liam O'Brien", Name.normalizeName("Liam O\u2019Brien"));
+    }
+
+    @Test
+    public void normalizeApostrophes() {
+        // each apostrophe-like character, written as an escape as it looks like ' in most fonts, becomes '
+        assertEquals("O'Brien", Name.normalizeApostrophes("O\u2019Brien")); // right single quote, the usual one
+        assertEquals("O'Brien", Name.normalizeApostrophes("O\u2018Brien")); // left single quote
+        assertEquals("O'Brien", Name.normalizeApostrophes("O\u02BCBrien")); // modifier letter apostrophe
+        assertEquals("O'Brien", Name.normalizeApostrophes("O\u2032Brien")); // prime
+
+        // every one in the text is replaced
+        assertEquals("'a'b'", Name.normalizeApostrophes("\u2018a\u2019b\u2019"));
+
+        // text that already uses the straight ' is unchanged, and double quotes are not apostrophes
+        assertEquals("O'Brien \"Jr\"", Name.normalizeApostrophes("O'Brien \"Jr\""));
+
+        assertThrows(NullPointerException.class, () -> Name.normalizeApostrophes(null));
+    }
+
+    @Test
     public void isSameName() {
         Name name = new Name("John Tan");
 
