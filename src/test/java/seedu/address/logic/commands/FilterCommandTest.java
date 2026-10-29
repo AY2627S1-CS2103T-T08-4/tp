@@ -96,7 +96,7 @@ public class FilterCommandTest {
         FilterCommand command = new FilterCommand(predicate);
         expectedModel.updateFilteredPersonList(predicate);
 
-        CommandResult expectedResult = CommandResult.forEmptySearch("0 clients found matching your search term(s).");
+        CommandResult expectedResult = CommandResult.forEmptySearch(FilterCommand.MESSAGE_NO_CLIENTS_FOUND);
         assertCommandSuccess(command, model, expectedResult, expectedModel);
         assertEquals(List.of(), model.getFilteredPersonList());
     }

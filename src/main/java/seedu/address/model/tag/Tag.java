@@ -31,6 +31,17 @@ public class Tag {
     }
 
     /**
+     * Returns {@code tagName} trimmed, with consecutive whitespaces collapsed into a single space,
+     * so that tags such as "Sec 4" and "Sec  4" are the same. The result may still be an invalid tag name.
+     *
+     * @param tagName A tag name as typed by the user or read from the data file.
+     */
+    public static String normalizeTagName(String tagName) {
+        requireNonNull(tagName);
+        return tagName.trim().replaceAll("\\s+", " ");
+    }
+
+    /**
      * Returns true if a given string is a valid tag name.
      */
     public static boolean isValidTagName(String test) {

@@ -13,7 +13,6 @@ import org.testfx.api.FxRobot;
 import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 
-import javafx.css.PseudoClass;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
@@ -37,9 +36,6 @@ import seedu.address.storage.StorageManager;
 @ExtendWith(ApplicationExtension.class)
 public class MainWindowTest {
 
-    private static final PseudoClass ERROR_PSEUDO_CLASS = PseudoClass.getPseudoClass("error");
-    private static final PseudoClass EMPTY_SEARCH_PSEUDO_CLASS = PseudoClass.getPseudoClass("empty-search");
-
     @TempDir
     public Path temporaryFolder;
 
@@ -62,7 +58,7 @@ public class MainWindowTest {
         enterCommand(robot, ListCommand.COMMAND_WORD);
 
         assertTrue(getResultMessage().getText().startsWith(ListCommand.MESSAGE_SUCCESS));
-        assertFalse(getResultDisplay().getPseudoClassStates().contains(ERROR_PSEUDO_CLASS));
+        assertFalse(ResultDisplayTest.isShownAsError(getResultDisplay()));
     }
 
     @Test
@@ -70,7 +66,7 @@ public class MainWindowTest {
         enterCommand(robot, FindCommand.COMMAND_WORD + " Amirah");
 
         assertTrue(getResultMessage().getText().startsWith(FindCommand.MESSAGE_NO_CLIENTS_FOUND));
-        assertTrue(getResultDisplay().getPseudoClassStates().contains(EMPTY_SEARCH_PSEUDO_CLASS));
+        assertTrue(ResultDisplayTest.isShownAsEmptySearch(getResultDisplay()));
     }
 
     @Test
@@ -116,7 +112,7 @@ public class MainWindowTest {
         enterCommand(robot, "delete 0");
 
         assertTrue(getResultMessage().getText().startsWith("Invalid command format!"));
-        assertTrue(getResultDisplay().getPseudoClassStates().contains(ERROR_PSEUDO_CLASS));
+        assertTrue(ResultDisplayTest.isShownAsError(getResultDisplay()));
     }
 
     @Test

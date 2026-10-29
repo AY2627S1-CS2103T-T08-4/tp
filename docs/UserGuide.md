@@ -208,6 +208,7 @@ Format: `filter [p/PHONE]... [t/TAG]...`
 * Tag order does not matter.
 * A client must have every specified tag.
 * When phone numbers and tags are combined, a client must match both fields.
+* If no client matches, Sieve shows `0 clients found` with tips for filtering again. Use `list` to see all clients again.
 
 Examples:
 * `filter p/9123 4567` returns the client with phone number `91234567`.
@@ -224,6 +225,7 @@ Format: `tag INDEX t/TAG [t/MORE_TAGS]...`
 
 * The index refers to the index number shown in the displayed client list and must be a positive integer.
 * Tags must be 1-20 characters long and contain only letters, numbers, and spaces.
+* Extra spaces inside a tag are treated as one, so `t/Sec  4` is the same tag as `t/Sec 4`.
 * New tags are added alongside the client's existing tags.
 * Adding a tag the client already has does not create a duplicate.
 * The success message lists only newly added tags. If the client already has every specified tag, Sieve reports that the client "has all of the tag(s)" and leaves the client unchanged.
@@ -368,6 +370,7 @@ Sieve data is saved automatically as a JSON file `[JAR file location]/data/sieve
 
 **Caution:**
 If your changes make the data file invalid, Sieve launches in a read-only fallback mode, displaying an empty list and showing a warning popup message at startup. Sieve will completely block any subsequent command that attempts to mutate data, ensuring your original corrupted file is left completely untouched on disk so you can fix it safely. Still, we recommend backing up the file before editing it.<br>
+Files saved as "UTF-8 with BOM", which some Windows editors do, are also accepted.<br>
 Furthermore, certain edits can cause Sieve to behave in unexpected ways (e.g., if a value entered is outside of the acceptable range). Therefore, edit the data file only if you are confident that you can update it correctly.
 </box>
 
