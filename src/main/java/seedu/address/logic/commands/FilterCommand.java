@@ -27,6 +27,9 @@ public class FilterCommand extends Command {
             + " A client must have every tag given, and phone numbers must be complete. "
             + "Check the spelling, or use list to see all clients.";
 
+    public static final String MESSAGE_OTHER_PREFIX = "filter only takes phone numbers (p/) and tags (t/). "
+            + "To search by name, use find, e.g. find Amy.";
+
     private final PersonMatchesSearchPredicate predicate;
 
     /**

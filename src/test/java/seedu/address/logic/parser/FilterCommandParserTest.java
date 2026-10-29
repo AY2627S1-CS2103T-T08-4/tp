@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import seedu.address.logic.Messages;
 import seedu.address.logic.commands.FilterCommand;
 import seedu.address.model.person.PersonMatchesSearchPredicate;
 import seedu.address.model.person.Phone;
@@ -54,6 +55,29 @@ public class FilterCommandParserTest {
     public void parse_nonEmptyPreamble_throwsParseException() {
         assertParseFailure(parser, "ignored text t/Physics",
                 String.format(MESSAGE_INVALID_COMMAND_FORMAT, FilterCommand.MESSAGE_USAGE));
+    }
+
+    @Test
+    public void parse_otherPrefix_throwsParseException() {
+        // a name after a tag, which would otherwise be read as part of the tag
+        assertParseFailure(parser, " t/Math n/Amy", FilterCommand.MESSAGE_OTHER_PREFIX);
+
+        // a name alone, which would otherwise be the preamble
+        assertParseFailure(parser, " n/Amy", FilterCommand.MESSAGE_OTHER_PREFIX);
+
+        // each prefix that filter does not take
+        for (String prefix : List.of("n/", "e/", "a/", "nt/", "fee/", "due/")) {
+            assertParseFailure(parser, " p/91234567 " + prefix + "x", FilterCommand.MESSAGE_OTHER_PREFIX);
+        }
+    }
+
+    @Test
+    public void parse_unknownPrefix_throwsParseException() {
+        // in a tag, which would otherwise fail as an invalid tag
+        assertParseFailure(parser, " t/Math x/1", Messages.getErrorMessageForUnknownPrefix("x/"));
+
+        // a mistyped prefix before every known one
+        assertParseFailure(parser, " T/Math p/91234567", Messages.getErrorMessageForUnknownPrefix("T/"));
     }
 
     @Test

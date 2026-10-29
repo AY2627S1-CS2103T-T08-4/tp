@@ -218,6 +218,7 @@ Format: `filter [p/PHONE]... [t/TAG]...`
 * Tag order does not matter.
 * A client must have every specified tag.
 * When phone numbers and tags are combined, a client must match both fields.
+* `filter` only takes `p/` and `t/`. Any other prefix, such as `n/`, is rejected with a reminder to use [`find`](#locating-clients-by-name-find) to search by name.
 * If no client matches, Sieve shows `0 clients found` with tips for filtering again. Use `list` to see all clients again. If you have not added any clients yet, Sieve says there is nothing to search instead.
 
 Examples:
