@@ -99,9 +99,9 @@ The **API** of this component is specified in [
 
 <puml src="diagrams/UiClassDiagram.puml" alt="Structure of the UI Component"/>
 
-The UI consists of a `MainWindow` and its parts, such as `CommandBox`, `ResultDisplay`, `PersonListPanel`, and
-`StatusBarFooter`. All of these, including `MainWindow`, inherit from the abstract `UiPart` class, which captures common
-behavior among classes that represent visible GUI parts.
+The UI consists of a `MainWindow` and its parts, such as `CommandBox`, `ResultDisplay`, `PersonListPanel`,
+`PersonDetailPanel`, and `StatusBarFooter`. All of these, including `MainWindow`, inherit from the abstract `UiPart`
+class, which captures common behavior among classes that represent visible GUI parts.
 
 The `UI` component uses the JavaFX UI framework. The layouts of these UI parts are defined in matching `.fxml` files in
 `src/main/resources/view`. For example, [
@@ -152,6 +152,29 @@ A few parts of the main window are worth knowing about when changing them:
 * **Empty list.** When no client is shown, the list's placeholder suggests `add` if Sieve has no clients at all, or
   `list` if a search or filter hides them. `PersonListPanel` binds the placeholder to `Logic#getAllPersonList()`, the
   unfiltered list, to tell the two apart.
+
+* **Client detail panel.** `PersonListPanel` exposes a read-only `selectedPersonProperty`, which `MainWindow` observes.
+  Selecting a client causes `MainWindow` to pass that `Person` to `PersonDetailPanel#setPerson(Person)`, put the list
+  into compact mode, and reveal the panel on the right. Selecting another client updates the existing panel instead of
+  navigating to another screen or creating another window. The detail view is read-only and does not call `Logic` or
+  mutate `Model` data.
+
+  `MainWindow` reveals and hides the panel with a 200 ms JavaFX `Timeline`. The panel width is 55% of the available
+  client-content width, clamped between 300 and 520 pixels, while its opacity changes at the same time. A bound
+  rectangular clip prevents the panel's contents from overflowing during the width animation. When the close button
+  or Esc clears the selection, the animation is reversed; the panel becomes unmanaged after it finishes, and the list
+  returns to its full layout.
+
+  `Person` is immutable, so commands such as `edit`, `tag` and `untag` replace an item in the observable list rather
+  than modifying it. JavaFX can temporarily clear the `ListView` selection during that replacement. To keep the same
+  client highlighted and refresh the open details, `PersonListPanel` detects a replacement containing the selected
+  person and reselects the corresponding replacement index on the next JavaFX pulse. A deletion or filter removal is
+  not restored, so the resulting null selection closes the panel.
+
+The following sequence diagram shows the UI interactions when a user opens the detail panel, switches clients, and
+then closes it. `Logic` and `Model` are omitted because viewing details does not use either component.
+
+<puml src="diagrams/ClientDetailSequenceDiagram.puml" alt="Opening, updating and closing the client detail panel" />
 
 The `UI` component,
 
@@ -725,6 +748,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 | `* *`    | tutor managing several former clients  | delete multiple clients in one command                                                                | I can clean up my client list without repeating the same command                        |
 | `* * *`  | tutor                                  | tag a client with free-form labels, and add or remove a single tag without retyping the whole client  | I can group clients the way my business actually works and keep small corrections cheap |
 | `* * *`  | tutor                                  | see all my clients as a numbered list                                                                 | I can refer to any of them by index in later commands                                   |
+| `* * *`  | tutor                                  | select a client and view all their details beside the client list                                     | I can review their information without navigating away from the list                    |
 | `* * *`  | careless typist                        | undo my last command                                                                                  | a mistyped delete isn't a disaster                                                      |
 | `* *`    | careless typist                        | redo a change I undid                                                                                 | undoing one step too far is easy to fix                                                 |
 | `* *`    | fast typist                            | bring back a command I entered earlier and edit it                                                    | I can fix a typo or repeat a command without retyping all of it                         |
@@ -847,9 +871,37 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
       Use case resumes at step 3.
 
-* 4c. The new details are the same as the client's current details.
+**Use case: UC2A - View a client's details**
 
-    * 4c1. Sieve reports that nothing changed, and leaves the client and the displayed list as they are.
+**MSS**
+
+1. Tutor displays a list of clients.
+2. Tutor selects a client from the list.
+3. Sieve highlights that client, compacts the list and shows the client's details in a panel beside it.
+
+   Use case ends.
+
+**Extensions**
+
+* 1a. No clients are displayed.
+
+  Use case ends.
+
+* 3a. Tutor selects another displayed client.
+
+    * 3a1. Sieve moves the highlight and updates the open panel with that client's details.
+
+      Use case resumes at step 3.
+
+* 3b. Tutor closes the detail panel.
+
+    * 3b1. Sieve clears the selection and restores the full-width client list.
+
+      Use case ends.
+
+* 3c. The selected client is deleted or removed from the displayed results by a search or filter.
+
+    * 3c1. Sieve closes the detail panel and restores the full-width client list.
 
       Use case ends.
 

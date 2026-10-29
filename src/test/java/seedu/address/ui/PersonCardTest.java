@@ -1,6 +1,7 @@
 package seedu.address.ui;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_DUE_DATE;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_FEE;
@@ -38,6 +39,7 @@ public class PersonCardTest {
     private PersonCard plainCard;
     private PersonCard longEmailCard;
     private PersonCard longNameCard;
+    private PersonCard compactCard;
     private PersonCard longSingleWordNameCard;
     private PersonCard feeOnlyCard;
     private PersonCard dueDateOnlyCard;
@@ -51,6 +53,9 @@ public class PersonCardTest {
         plainCard = new PersonCard(new PersonBuilder().withTags().build(), 2);
         longEmailCard = new PersonCard(new PersonBuilder().withEmail(LONG_EMAIL).build(), 3);
         longNameCard = new PersonCard(new PersonBuilder().withName(LONG_NAME).build(), 4);
+        compactCard = new PersonCard(new PersonBuilder().withNote("Prefers evenings")
+                .withFee("250").withDueDate("01-11-2026").build(), 5, true);
+
         longSingleWordNameCard = new PersonCard(new PersonBuilder().withName(LONG_SINGLE_WORD_NAME).build(), 5);
         // Not shown in the window, as only which of their details are shown is checked
         feeOnlyCard = new PersonCard(new PersonBuilder().withFee(VALID_FEE).build(), 6);
@@ -72,7 +77,6 @@ public class PersonCardTest {
         List<String> shownTags = getTags(taggedCard).getChildren().stream()
                 .map(node -> ((Label) node).getText())
                 .toList();
-
         assertEquals(List.of("english", "math", "Sec4", "Zoology"), shownTags);
     }
 
@@ -92,6 +96,16 @@ public class PersonCardTest {
             Label tag = (Label) node;
             assertTrue(tag.getStyleClass().contains(TagColor.getStyleClass(tag.getText())), tag.getText());
         }
+    }
+
+    @Test
+    public void constructor_compact_hidesDetailsButKeepsSummary() {
+        assertTrue(compactCard.getRoot().lookup("#name").isVisible());
+        assertTrue(compactCard.getRoot().lookup("#phone").isVisible());
+        assertFalse(compactCard.getRoot().lookup("#email").isVisible());
+        assertFalse(compactCard.getRoot().lookup("#address").isVisible());
+        assertFalse(compactCard.getRoot().lookup("#billing").isVisible());
+        assertFalse(compactCard.getRoot().lookup("#note").isVisible());
     }
 
     @Test

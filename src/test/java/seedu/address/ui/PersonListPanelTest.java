@@ -1,6 +1,7 @@
 package seedu.address.ui;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.testutil.TypicalPersons.ALICE;
 import static seedu.address.testutil.TypicalPersons.BENSON;
@@ -28,11 +29,15 @@ public class PersonListPanelTest {
     // The app shows a FilteredList, which find and filter narrow down, so the tests use one too
     private final FilteredList<Person> displayedPersons = new FilteredList<>(persons);
     private Label clientCount;
+    private PersonListPanel personListPanel;
+    private ListView<Person> personListView;
 
     @Start
+    @SuppressWarnings("unchecked")
     public void start(Stage stage) {
-        PersonListPanel personListPanel = new PersonListPanel(displayedPersons, persons);
+        personListPanel = new PersonListPanel(displayedPersons, persons);
         clientCount = (Label) personListPanel.getRoot().lookup("#clientCount");
+        personListView = (ListView<Person>) personListPanel.getRoot().lookup("#personListView");
         stage.setScene(new Scene(personListPanel.getRoot()));
         stage.show();
     }
@@ -80,6 +85,27 @@ public class PersonListPanelTest {
 
         robot.interact(() -> displayedPersons.setPredicate(null));
         assertEquals("3 clients", clientCount.getText());
+    }
+
+    @Test
+    public void selectedPerson_replacedByShorterList_clearsSelection(FxRobot robot) {
+        robot.interact(() -> personListView.getSelectionModel().select(CARL));
+        assertEquals(CARL, personListPanel.selectedPersonProperty().get());
+
+        robot.interact(() -> persons.setAll(ALICE));
+
+        assertTrue(personListView.getSelectionModel().isEmpty());
+        assertNull(personListPanel.selectedPersonProperty().get());
+    }
+
+    @Test
+    public void setCompact_sameValueTwice_keepsDisplayedClients(FxRobot robot) {
+        robot.interact(() -> {
+            personListPanel.setCompact(true);
+            personListPanel.setCompact(true);
+        });
+
+        assertEquals(3, personListView.getItems().size());
     }
 
     private void assertPlaceholderShown(FxRobot robot, String expectedText) {
