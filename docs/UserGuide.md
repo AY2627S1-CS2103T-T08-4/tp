@@ -108,7 +108,7 @@ Format: `add n/NAME p/PHONE e/EMAIL a/ADDRESS [fee/FEE] [due/DUE_DATE] [t/TAG]..
 
 * A note is free text of up to 200 characters, for anything you want to remember about the client, e.g. `nt/Weak at algebra, prelims in March`. Leave it out if you have nothing to record.
 * A fee is the amount you charge the client, e.g. `fee/250` or `fee/180.50`. It is a number that is up to 7 digits and up to 2 decimal places, with no currency symbol. Sieve shows it with 2 decimal places (`250.00`).
-* A due date is the date the next payment is due, in the format `DD-MM-YYYY`, e.g. `due/01-11-2026`. It must be a real date, and cannot be before today. Once a due date has passed, it stays on the client until you change or clear it. Sieve only stores these two values and shows them on the client's card. It does not track payments or send reminders. Leave them out if you do not need them.
+* A due date is the date the next payment is due, in the format `DD-MM-YYYY`, e.g. `due/01-11-2030`. It must be a real date, and cannot be before today. Once a due date has passed, it stays on the client until you change or clear it. Sieve only stores these two values and shows them on the client's card. It does not track payments or send reminders. Leave them out if you do not need them.
 </box>
 
 <box type="warning" seamless>
@@ -122,7 +122,7 @@ Format: `add n/NAME p/PHONE e/EMAIL a/ADDRESS [fee/FEE] [due/DUE_DATE] [t/TAG]..
 <box type="info" seamless>
 
 **Names:**
-* A name must start with a letter, and can only contain letters, digits, spaces, hyphens (`-`), apostrophes (`'`), full stops (`.`) and parentheses (`()`), up to 50 characters.
+* A name must start with a letter, and can only contain letters, digits, spaces, hyphens (`-`), apostrophes (`'`), full stops (`.`) and parentheses (`()`), up to 50 characters. If a name is longer, the error says how many characters it has.
 * For example, `John Tan (NHHS)` and `Nur-Aisyah O'Brien` are accepted, but `Ravi s/o Kumar` is not, because of the `/`.
 * A curly apostrophe (`’`), which phones and chat apps often type or paste instead of `'`, is saved as `'`. For example, `O’Brien` is saved as `O'Brien`.
 * Letters means `A` to `Z`, so names with accented letters (e.g. `José`) or Chinese characters are not supported.
@@ -177,7 +177,6 @@ Format: `edit INDEX [n/NAME] [p/PHONE] [e/EMAIL] [a/ADDRESS] [fee/FEE] [due/DUE_
 * Editing the note replaces the whole note; it does not add to the existing one. To remove a client's note, enter `nt/` without any text after it.
 * Editing the fee or due date replaces the existing value. To remove a client's fee, enter `fee/` without a value after it. To remove a client's due date, enter `due/` without a value after it.
 * A new due date must follow the same rules as in `add`. Editing other fields of a client whose due date has passed leaves that due date as it is, and `due/` with no value clears it.
-* A note cannot contain text that looks like another field, such as ` t/` or ` p/`, because Sieve reads it as the start of that field.
 * The note must be the last parameter, and cannot contain any of the prefixes listed in [`add`](#adding-a-client-add). For example, `edit 1 nt/Revise t/tests` is rejected instead of replacing the client's tags.
 * After an edit, the full client list is shown, so that the edited client is not hidden by an earlier `find` or `filter`.
 * If the new values are the same as the client's current ones, Sieve shows `No change: NAME already has these details.` and keeps the displayed list as it is.
@@ -412,6 +411,12 @@ Furthermore, certain edits can cause Sieve to behave in unexpected ways (e.g., i
 
 **Q**: How do I transfer my data to another computer?<br>
 **A**: Install the app on the other computer, and launch it once from the folder where you want to keep your data (we recommend the JAR file's folder). Then overwrite the `data/sieve.json` file it creates in that folder with the data file from your previous Sieve home folder.
+
+**Q**: How do I remove the sample clients and start with my own?<br>
+**A**: Run [`clear`](#clearing-all-clients-clear), which deletes every client, then add your own with [`add`](#adding-a-client-add). If you clear by mistake, run `undo` straight away to bring the clients back.
+
+**Q**: Can I undo a change after closing and reopening Sieve?<br>
+**A**: No. Sieve only keeps the undo history while it is open, so check your changes before you exit. See [`undo`](#undoing-a-change-undo).
 
 --------------------------------------------------------------------------------------------------------------------
 

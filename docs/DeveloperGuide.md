@@ -151,7 +151,9 @@ A few parts of the main window are worth knowing about when changing them:
   list, such as `delete` or `find`, without the commands having to update it.
 * **Empty list.** When no client is shown, the list's placeholder suggests `add` if Sieve has no clients at all, or
   `list` if a search or filter hides them. `PersonListPanel` binds the placeholder to `Logic#getAllPersonList()`, the
-  unfiltered list, to tell the two apart.
+  unfiltered list, to tell the two apart. The client detail panel (below) does not get in the way: an empty list has
+  no selected client, so when `clear` or a search empties the list, the panel closes and the list, with its
+  placeholder, takes the full width again.
 
 * **Client detail panel.** `PersonListPanel` exposes a read-only `selectedPersonProperty`, which `MainWindow` observes.
   Selecting a client causes `MainWindow` to pass that `Person` to `PersonDetailPanel#setPerson(Person)`, put the list
@@ -666,6 +668,9 @@ Some checks are worth knowing about:
   `ArgumentMultimap#verifyNoUnknownPrefixesIn(PREFIXES_EXCEPT_NOTE)`, which reject any word of letters followed by
   `/`. These run before the other checks, so that `add N/Amy …` names the unknown `N/` instead of reporting that
   `n/NAME` is missing. The note is left out, because it is free text, where words such as `w/` (with) are normal.
+  A *known* prefix in a note is still rejected: `ParserUtil#verifyNoteIsLast(String)` runs next, and uses
+  `ArgumentTokenizer#hasPrefixAfter` to reject any known prefix after `nt/`, which would otherwise cut the note short
+  (see [Notes feature](#notes-feature)).
 * **Phone numbers.** `Phone#stripPhone(String)` first removes spaces, hyphens and parentheses. `ParserUtil#parsePhone`
   then checks `Phone#hasCountryCode(String)` before `Phone#isValidPhone(String)`, so `+65 9123 4567`, `6591234567`
   and `006591234567` get `Phone.MESSAGE_COUNTRY_CODE`, which says to leave the country code out, instead of the
@@ -697,7 +702,8 @@ Some checks are worth knowing about:
   * Pros: A typo such as `P/91234567` is reported, instead of being saved inside another detail where the user may
     not notice it.
   * Cons: A detail that really contains such a word, such as `c/o` in an address, must be written differently (the
-    UG suggests `care of`).
+    UG suggests `care of`). A note may contain unknown prefixes such as `w/`, but not known ones such as ` n/`, which
+    would start a new detail, so `n/a` in a note must be written as `N/A`.
 
 * **Alternative 2:** Keep it as part of the value, as AB3 does.
   * Pros: No detail is rejected for containing a `/`.
@@ -870,6 +876,12 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
     * 4b1. Sieve shows the same duplicate messages as in UC1, extension 2b, and leaves the client unchanged.
 
       Use case resumes at step 3.
+
+* 4c. The new details are the same as the client's current details.
+
+    * 4c1. Sieve reports that nothing changed, and leaves the client and the displayed list as they are.
+
+      Use case ends.
 
 **Use case: UC2A - View a client's details**
 
@@ -1503,7 +1515,7 @@ The data file is `data/sieve.json` inside that folder.
     1. Prerequisites: Start with the sample data (delete `data/sieve.json` if it exists, or use a fresh folder).
 
     1. Test case: Look at the cards for `Amirah Tan` and `Charlotte Oliveiro`.<br>
-       Expected: `Amirah Tan` shows `Fee: 250.00` and `Due: 01-11-2026`. `Devi Ramasamy` shows neither line.
+       Expected: `Amirah Tan` shows `Fee: 250.00` and `Due: 01-11-2030`. `Devi Ramasamy` shows neither line.
 
 1. Adding a client with a fee and due date
 
