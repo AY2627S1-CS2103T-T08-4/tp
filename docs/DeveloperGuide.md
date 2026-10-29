@@ -22,7 +22,8 @@
   `src/main/resources/fonts/Inter-LICENSE.txt`.
 * Sieve uses [JavaFX](https://openjfx.io/) for its graphical user interface.
 * Sieve uses [Jackson](https://github.com/FasterXML/jackson) for JSON data storage.
-* Sieve uses [JUnit 5](https://junit.org/junit5/) for automated testing.
+* Sieve uses [JUnit 5](https://junit.org/junit5/) for automated testing, and [TestFX](https://github.com/TestFX/TestFX)
+  to test its user interface.
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -33,6 +34,15 @@ Refer to the guide [_Setting up and getting started_](SettingUp.md).
 --------------------------------------------------------------------------------------------------------------------
 
 ## **Design**
+
+<box type="info" seamless>
+
+**Note on names in the code:** Sieve is built on AddressBook-Level3 (AB3) and keeps its class and package names. In
+the code, a client is a `Person` and the client list is an `AddressBook`, as in `UniquePersonList`, `AddressBookParser`
+and `JsonAddressBookStorage`, and every class is in the `seedu.address` package. This guide uses these names when it
+refers to code, and *client* and *client list* otherwise. Renaming them would touch almost every file without changing
+any behaviour, so we kept AB3's names.
+</box>
 
 ### Architecture
 
@@ -102,8 +112,13 @@ specifies the layout of [
 The look of the UI is defined in `.css` files in the same folder:
 
 * `LightTheme.css` defines the color palette once, as looked-up colors on `.root` (e.g. `-sieve-accent`), and every
-  other rule refers to these names. To change a color, change it in `.root` only. Each window is a separate JavaFX
-  `Scene` with its own stylesheets, so both `MainWindow.fxml` and `HelpWindow.fxml` load `LightTheme.css`.
+  other rule refers to these names. To change a color, change it in `.root` only (and in `DarkTheme.css`, below). Each
+  window is a separate JavaFX `Scene` with its own stylesheets, so both `MainWindow.fxml` and `HelpWindow.fxml` load
+  `LightTheme.css`.
+* `DarkTheme.css` gives the same looked-up colors, and the tag colors, their dark-theme values. It is not loaded at
+  startup. `MainWindow#handleToggleTheme()` adds it after `LightTheme.css`, so that its values win, or removes it
+  again, and `HelpWindow#setDarkTheme(boolean)` does the same for the help window. A color that differs between the
+  themes is therefore set in both files.
 * `LightTheme.css` also loads the bundled Inter font from `src/main/resources/fonts` with `@font-face`, and sets it on
   `.root`, so all text uses it on every platform. JavaFX registers the SemiBold font as a separate family, so rules
   that need it use `-fx-font-family: "Inter SemiBold"` rather than `-fx-font-weight`.
@@ -129,8 +144,8 @@ A few parts of the main window are worth knowing about when changing them:
 
 * **Tag colors.** `PersonCard` gives each tag a style class from `TagColor`, from `tag-color-0` to `tag-color-11`.
   `TagColor` picks it from the tag's name, ignoring case, so a tag has the same color on every client and every
-  launch. `LightTheme.css` has one `#tags .tag-color-N` rule for each class. To add a color, add a rule and raise
-  `TagColor.PALETTE_SIZE` to match.
+  launch. `LightTheme.css` and `DarkTheme.css` each have one `#tags .tag-color-N` rule for each class. To add a color,
+  add a rule to both files and raise `TagColor.PALETTE_SIZE` to match.
 * **Client count.** `PersonListPanel` binds the text of the count above the list to the displayed client list, which
   is the `Model`'s filtered list. The count therefore updates after any command that changes or narrows down the
   list, such as `delete` or `find`, without the commands having to update it.
@@ -154,10 +169,10 @@ Here's a (partial) class diagram of the `Logic` component:
 
 <puml src="diagrams/LogicClassDiagram.puml" width="550"/>
 
-The sequence diagram below illustrates the interactions within the `Logic` component, taking `execute("delete 1")` API
+The sequence diagram below illustrates the interactions within the `Logic` component, taking `execute("delete 1, 3")` API
 call as an example.
 
-<puml src="diagrams/DeleteSequenceDiagram.puml" alt="Interactions Inside the Logic Component for the `delete 1` Command" />
+<puml src="diagrams/DeleteSequenceDiagram.puml" alt="Interactions Inside the Logic Component for the `delete 1, 3` Command" />
 
 <box type="info" seamless>
 
@@ -209,6 +224,8 @@ How the parsing works:
 The `Model` component,
 
 * stores the address book data i.e., all `Person` objects (which are contained in a `UniquePersonList` object).
+  `ModelManager` keeps it in a `VersionedAddressBook`, an `AddressBook` that also keeps the history for `undo` and
+  `redo` (see [Undo/redo feature](#undo-redo-feature)).
 * stores the `Person` objects selected by the current filter, such as search results, in a separate _filtered_ list. It
   exposes this list as an unmodifiable `ObservableList<Person>` that the UI can observe and bind to, so the UI updates
   when the list changes.
@@ -599,6 +616,60 @@ Down        | 2                    | `del`         | unchanged, so any text the 
   * Pros: Simpler, as `CommandHistory` only needs to know the commands entered.
   * Cons: Pressing Up while typing loses the half-typed command for good.
 
+### Input validation
+
+Every client detail is checked against one rule in two places. `ParserUtil#parseXYZ` checks what the user types, and
+`JsonAdaptedPerson#toModelType()` checks what is loaded from the data file. Both call the model class's
+`isValidXYZ` method (e.g. `Phone#isValidPhone(String)`), and the user sees that class's `MESSAGE_CONSTRAINTS`, so a
+rule only needs to change in one place. A value in the data file that breaks a rule makes Sieve start in read-only
+mode (see [Logic component](#logic-component)).
+
+Some checks are worth knowing about:
+
+* **Unknown prefixes.** `ArgumentTokenizer` only splits the input at the prefixes a command accepts, so a mistyped
+  prefix, such as `z/` in `a/Blk 1 z/x`, would otherwise be saved as part of the address. `AddCommandParser` and
+  `EditCommandParser` therefore call `ArgumentMultimap#verifyNoUnknownPrefixesInPreamble()` and
+  `ArgumentMultimap#verifyNoUnknownPrefixesIn(PREFIXES_EXCEPT_NOTE)`, which reject any word of letters followed by
+  `/`. These run before the other checks, so that `add N/Amy …` names the unknown `N/` instead of reporting that
+  `n/NAME` is missing. The note is left out, because it is free text, where words such as `w/` (with) are normal.
+* **Phone numbers.** `Phone#stripPhone(String)` first removes spaces, hyphens and parentheses. `ParserUtil#parsePhone`
+  then checks `Phone#hasCountryCode(String)` before `Phone#isValidPhone(String)`, so `+65 9123 4567`, `6591234567`
+  and `006591234567` get `Phone.MESSAGE_COUNTRY_CODE`, which says to leave the country code out, instead of the
+  general 8-digit message.
+* **Email addresses.** `Email#isValidEmail(String)` checks the length (`Email.MAX_LENGTH`, 254 characters, the
+  longest address that can be delivered) before the regex, because the regex overflows the stack on inputs that are
+  thousands of characters long.
+* **Addresses.** `Address.VALIDATION_REGEX` requires at least one Unicode letter or digit, so an address of only
+  spaces, punctuation or invisible characters (such as non-breaking spaces) is rejected, while addresses in other
+  scripts still pass.
+
+#### Design considerations:
+
+**Aspect: A phone number with a country code:**
+
+* **Alternative 1 (current choice):** Reject it, with a message that says to leave the country code out.
+  * Pros: Every stored number has the same 8-digit form, so `filter p/` and the duplicate checks compare like with
+    like, and the user learns the rule the first time.
+  * Cons: A number copied from a contacts app must have its `+65` removed by hand.
+
+* **Alternative 2:** Remove a leading `+65` and store the remaining 8 digits.
+  * Pros: Copied numbers work as they are.
+  * Cons: Sieve silently changes what the user typed, and numbers from other countries still need their own error,
+    so there are two rules to explain instead of one.
+
+**Aspect: A word that looks like a prefix but is not one:**
+
+* **Alternative 1 (current choice):** Reject it as an unknown prefix, except in a note.
+  * Pros: A typo such as `P/91234567` is reported, instead of being saved inside another detail where the user may
+    not notice it.
+  * Cons: A detail that really contains such a word, such as `c/o` in an address, must be written differently (the
+    UG suggests `care of`).
+
+* **Alternative 2:** Keep it as part of the value, as AB3 does.
+  * Pros: No detail is rejected for containing a `/`.
+  * Cons: A mistyped prefix ends up in the previous detail without a warning, e.g. `a/Blk 1 z/x` saves the address
+    `Blk 1 z/x`.
+
 --------------------------------------------------------------------------------------------------------------------
 
 ## **Documentation, logging, testing, dev-ops**
@@ -641,10 +712,12 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 | `* * *`  | tutor                                  | find a client by name keyword                                                                         | I can pull up their details immediately when needed                                     |
 | `* * *`  | tutor                                  | delete a client I no longer tutor, e.g. a student who has graduated                                   | I can maintain an updated and clean list                                                |
 | `* *`    | tutor managing several former clients  | delete multiple clients in one command                                                                | I can clean up my client list without repeating the same command                        |
-| `* * *`  | tutor                                  | tag a client with free-form labels, and add or remove a single tag without retyping the whole contact | I can group clients the way my business actually works and keep small corrections cheap |
+| `* * *`  | tutor                                  | tag a client with free-form labels, and add or remove a single tag without retyping the whole client  | I can group clients the way my business actually works and keep small corrections cheap |
 | `* * *`  | tutor                                  | see all my clients as a numbered list                                                                 | I can refer to any of them by index in later commands                                   |
 | `* * *`  | careless typist                        | undo my last command                                                                                  | a mistyped delete isn't a disaster                                                      |
 | `* *`    | careless typist                        | redo a change I undid                                                                                 | undoing one step too far is easy to fix                                                 |
+| `* *`    | fast typist                            | bring back a command I entered earlier and edit it                                                    | I can fix a typo or repeat a command without retyping all of it                         |
+| `* *`    | user who edits the data file by hand   | have Sieve refuse to overwrite a data file it cannot read                                             | I can fix my mistake without losing my client records                                   |
 | `* *`    | new user switching from other tools    | bulk-add multiple clients at once                                                                     | I don't have to re-enter my existing client list one by one                             |
 | `* *`    | tutor                                  | filter clients by one or more phone numbers or tags in a single command                               | I can locate exact contacts or answer questions like "Sec 4 physics on Thursday" in one go |
 | `* *`    | tutor                                  | mark a client as inactive (e.g. paused for exams or a break) instead of deleting them                 | I keep their record and can resume lessons later without re-adding them from scratch    |
@@ -666,6 +739,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 | `*`      | tutor who runs group classes           | record a single session covering multiple students at once                                            | I don't have to repeat the same entry per student                                       |
 | `*`      | tutor who runs group classes           | see which enrolled students are attending a specific session                                          | I know who to expect and who is away                                                    |
 | `*`      | tutor who runs group classes           | bill a group class as a single unit                                                                   | I don't have to track payment separately for each student in it                         |
+| `*`      | tutor who works late at night          | switch the app to a dark theme                                                                        | the screen is easier on my eyes                                                         |
 
 ### Use cases
 
@@ -762,6 +836,12 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
       Use case resumes at step 3.
 
+* 4c. The new details are the same as the client's current details.
+
+    * 4c1. Sieve reports that nothing changed, and leaves the client and the displayed list as they are.
+
+      Use case ends.
+
 **Use case: UC3 - Tag clients to organise them**
 
 **MSS**
@@ -806,7 +886,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
       Use case continues from step 5.
 
-**Use case: UC3A - Remove tags from a client**
+**Use case: UC4 - Remove tags from a client**
 
 **MSS**
 
@@ -824,15 +904,21 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
     * 3a1. Sieve shows an error message and no tags are removed.
 
+      Use case resumes at step 3.
+
 * 3b. A specified tag is invalid.
 
     * 3b1. Sieve shows an error message and no tags are removed.
+
+      Use case resumes at step 3.
 
 * 4a. The client has none of the specified tags.
 
     * 4a1. Sieve reports that the client does not have any specified tags and leaves the client unchanged.
 
-**Use case: UC4 - Delete one or more clients who no longer need tuition**
+      Use case ends.
+
+**Use case: UC5 - Delete one or more clients who no longer need tuition**
 
 **MSS**
 
@@ -880,7 +966,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
       Use case resumes at step 3.
 
-**Use case: UC5 - Start with a clean client list on first use**
+**Use case: UC6 - Start with a clean client list on first use**
 
 **MSS**
 
@@ -897,13 +983,56 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 * 2a. A data file exists but is corrupted.
 
-    * 2a1. Sieve starts with an empty list, shows an error message and leaves the file untouched.
+    * 2a1. Sieve starts in read-only mode with an empty list, shows an error message and leaves the file untouched.
+      Commands that change data are blocked until the tutor fixes or deletes the file and restarts Sieve.
 
-      Use case resumes at step 6.
+      Use case ends.
 
 * 4a. Tutor decides to keep the sample clients.
 
   Use case ends.
+
+**Use case: UC7 - Undo a mistaken change**
+
+**MSS**
+
+1. Tutor changes the client list by mistake, e.g. deletes the wrong client
+2. Tutor requests to undo the last change
+3. Sieve restores the client list to how it was before that change, saves it, and shows all clients
+
+   Use case ends.
+
+**Extensions**
+
+* 2a. There is no change left to undo, e.g. because Sieve has just been started.
+
+    * 2a1. Sieve shows an error message, and the client list stays as it is.
+
+      Use case ends.
+
+* 2b. Tutor gives a parameter, e.g. to undo three changes at once.
+
+    * 2b1. Sieve shows an error message saying that undo takes no parameters, and undoes nothing.
+
+      Use case resumes at step 2.
+
+* 2c. Sieve is in read-only mode because the data file is corrupted.
+
+    * 2c1. Sieve rejects the undo, as it does every command that changes data.
+
+      Use case ends.
+
+* 3a. Tutor wants to undo an earlier change as well.
+
+  Use case resumes at step 2.
+
+* 3b. Tutor decides the undo was a mistake.
+
+    * 3b1. Tutor requests to redo the change.
+
+    * 3b2. Sieve applies the change again, saves it, and shows all clients.
+
+      Use case ends.
 
 ### Non-Functional Requirements
 
@@ -914,25 +1043,32 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 4. Sieve should store client data locally and should not require an Internet connection for its core features.
 5. If the data file is missing or corrupted, Sieve should remain usable and should not overwrite the corrupted file
    before informing the user of the loading error.
-6. Tutor with above-average typing speed for regular English text should be able to perform most client-management tasks
-   faster using commands than using mouse-based interactions.
+6. A tutor with above-average typing speed for regular English text should be able to perform most client-management
+   tasks faster using commands than using mouse-based interactions.
+7. Client data should be stored locally in a human-editable JSON file, `data/sieve.json`. The file is not encrypted, so
+   keeping it private is left to the user's operating system account.
 
 ### Glossary
 
-* **Client**: A person receiving private tuition from the tutor and whose details are managed in Sieve. In the current
-  implementation and some inherited documentation, a client may also be referred to as a *person* or *contact*.
+* **Client**: A person receiving private tuition from the tutor and whose details are managed in Sieve. In the code, a
+  client is a `Person` (see the note at the start of [Design](#design)).
 * **Client record**: The collection of details stored in Sieve for one client, consisting of a name, phone number, email
   address, physical address, an optional note, an optional fee, an optional payment due date, and zero or more tags.
 * **Client list**: The collection of all client records stored in Sieve.
+* **Command box**: The text field at the top of Sieve's window, where the user types commands.
 * **Currently displayed client list**: The numbered list of clients presently shown in the application. It may contain
   all clients or only the clients returned by a search.
 * **Index**: The positive integer shown beside a client in the currently displayed client list. Commands such as `edit`
   and `delete` use this number to identify a client.
 * **Mainstream OS**: A currently supported version of Windows, Linux, or macOS that can run Java `25` or later.
+* **MSS (Main Success Scenario)**: The steps of a use case when everything goes as planned. The extensions after it
+  describe what happens otherwise.
 * **Prefix**: A command marker, such as `n/`, `p/`, `e/`, `a/`, `nt/`, `fee/`, `due/` or `t/`, that identifies the type of client detail
   following it.
-* **Tag**: A user-defined alphanumeric label attached to a client record for categorisation, such as a subject,
-  education level, or lesson day.
+* **Read-only mode**: The mode Sieve starts in when its data file is corrupted. Sieve shows an empty list and blocks
+  every command that would change data, so that the file is not overwritten before the user fixes it.
+* **Tag**: A user-defined label of letters, digits and spaces, attached to a client record for categorisation, such
+  as a subject, education level, or lesson day. Tags that differ only in letter case count as the same tag.
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -1436,6 +1572,48 @@ The data file is `data/sieve.json` inside that folder.
        the status message shows:<br>
        `Undid the last change.`<br>
        `Showing all clients.`
+
+### Clearing all clients
+
+1. Clearing with and without a parameter
+
+    1. Prerequisites: Start with the sample data.
+
+    1. Test case: `clear 3`<br>
+       Expected: No client is deleted. The status message shows
+       `clear takes no parameters, as it deletes every client. To delete some clients, use delete INDEX.`
+
+    1. Test case: `clear`<br>
+       Expected: Every client is deleted, and the count above the list shows `0 clients`.
+
+### Checking phone numbers and email addresses
+
+1. Phone numbers
+
+    1. Prerequisites: Start with the sample data.
+
+    1. Test cases: `edit 1 p/+65 9123 4567`, `edit 1 p/6591234567` and `edit 1 p/0065 9123 4567`<br>
+       Expected: The client is unchanged. The status message says to leave out the country code, e.g. `91234567`,
+       not `+65 9123 4567`.
+
+    1. Test case: `edit 1 p/12345678`<br>
+       Expected: The client is unchanged. The status message says that the number must be an 8-digit Singapore number
+       starting with 3, 6, 8 or 9.
+
+    1. Test case: `edit 1 p/(8123) 4568`<br>
+       Expected: The phone number becomes `81234568`, as spaces and parentheses are ignored.
+
+1. Email addresses
+
+    1. Test case: `edit 1 e/amirah@localhost`<br>
+       Expected: The client is unchanged. The status message lists the rules for email addresses.
+
+    1. Test case: `edit 1 e/` followed by 244 copies of `a` and then `@gmail.com` (254 characters in all)<br>
+       Expected: The email address is changed.
+
+    1. Test case: the same with 245 copies of `a` (255 characters)<br>
+       Expected: The client is unchanged. The status message lists the email rules, including the limit of 254
+       characters.
 
 ### Undoing changes
 
