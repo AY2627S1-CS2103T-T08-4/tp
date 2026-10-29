@@ -43,6 +43,23 @@ Sieve is a **desktop app that helps self-employed private tuition teachers keep 
 
 --------------------------------------------------------------------------------------------------------------------
 
+## Viewing a client's details
+
+Click anywhere on a client's row to open their detailed information panel on the right. The client list becomes more
+compact to make room for the panel, and the selected client remains highlighted.
+
+The panel shows the client's name, tags, phone number, email address and address. It also shows their note, fee and due
+date when those optional details have been recorded.
+
+* Click another client to update the open panel without leaving the current screen.
+* Click the **X** button at the top-right of the panel, or press **Esc**, to close it and restore the full-width list.
+* If the selected client is edited, tagged or untagged, the open panel updates to show the latest details.
+* If the selected client is deleted or no longer appears after a search or filter, the panel closes automatically.
+* Opening and closing the panel does not change or save any client data. Use the [`edit`](#editing-a-client-edit),
+  [`tag`](#tagging-a-client-tag) and [`untag`](#removing-tags-from-a-client-untag) commands to make changes.
+
+--------------------------------------------------------------------------------------------------------------------
+
 ## Features
 
 <box type="info" seamless>
