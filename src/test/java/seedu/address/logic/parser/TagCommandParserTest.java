@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import seedu.address.logic.Messages;
 import seedu.address.logic.commands.TagCommand;
 import seedu.address.model.tag.Tag;
 
@@ -20,6 +21,12 @@ public class TagCommandParserTest {
     public void parse_validArgs_returnsTagCommand() {
         assertParseSuccess(parser, "1 t/physics t/Secondary 4",
                 new TagCommand(INDEX_FIRST_PERSON, List.of(new Tag("physics"), new Tag("Secondary 4"))));
+    }
+
+    @Test
+    public void parse_repeatedWhitespaceInTag_returnsNormalizedTagCommand() {
+        assertParseSuccess(parser, "1 t/Secondary  4",
+                new TagCommand(INDEX_FIRST_PERSON, List.of(new Tag("Secondary 4"))));
     }
 
     @Test
@@ -43,6 +50,12 @@ public class TagCommandParserTest {
     @Test
     public void parse_invalidTag_throwsParseException() {
         assertParseFailure(parser, "1 t/physics!", Tag.MESSAGE_CONSTRAINTS);
+    }
+
+    @Test
+    public void parse_unknownPrefix_throwsParseException() {
+        assertParseFailure(parser, "1 t/physics z/x", Messages.getErrorMessageForUnknownPrefix("z/"));
+        assertParseFailure(parser, "1 z/x t/physics", Messages.getErrorMessageForUnknownPrefix("z/"));
     }
 
     @Test

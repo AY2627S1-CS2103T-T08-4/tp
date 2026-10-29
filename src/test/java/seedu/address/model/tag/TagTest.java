@@ -54,4 +54,13 @@ public class TagTest {
         assertEquals(lowercaseTag.hashCode(), uppercaseTag.hashCode());
     }
 
+    @Test
+    public void constructor_repeatedWhitespace_normalizesTagName() {
+        Tag tag = new Tag("  Secondary  4  ");
+
+        assertEquals("Secondary 4", tag.tagName);
+        assertEquals(new Tag("Secondary 4"), tag);
+        assertEquals(new Tag("Secondary 4").hashCode(), tag.hashCode());
+    }
+
 }

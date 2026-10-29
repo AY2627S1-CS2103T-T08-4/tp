@@ -231,7 +231,7 @@ Format: `filter [p/PHONE]... [t/TAG]...`
 * At least one phone number or tag must be given.
 * `p/PHONE` must be a complete phone number, following the same [rules as in `add`](#adding-a-client-add). Spaces, hyphens and parentheses are ignored.
 * If several phone numbers are supplied, clients matching any of them are returned.
-* Tag matching is case-insensitive; for example, `t/physics` matches `Physics`.
+* Tag matching is case-insensitive and repeated spaces are collapsed; for example, `t/physics` matches `Physics`, and `t/Sec  4` matches `Sec 4`.
 * Tag order does not matter.
 * A client must have every specified tag.
 * When phone numbers and tags are combined, a client must match both fields.
@@ -253,10 +253,11 @@ Format: `tag INDEX t/TAG [t/MORE_TAGS]...`
 
 * The index refers to the index number shown in the displayed client list and must be a positive integer.
 * Tags must be 1-20 characters long and contain only letters, numbers, and spaces.
-* Extra spaces inside a tag are treated as one, so `t/Sec  4` is the same tag as `t/Sec 4`.
+* Extra spaces inside a tag are treated as one, so `t/Sec  4` is stored as and considered the same tag as `t/Sec 4`.
 * New tags are added alongside the client's existing tags.
 * Adding a tag the client already has does not create a duplicate.
-* The success message lists only newly added tags. If the client already has every specified tag, Sieve reports that the client "has all of the tag(s)" and leaves the client unchanged.
+* The result lists newly added tags and any tags already attached to the client. If every requested tag is already attached, Sieve reports that no tags were added and lists the tags already present.
+* After a tag is added, the same clients remain displayed with the updated tag.
 
 Examples:
 * `tag 1 t/physics t/sec4`
@@ -272,7 +273,8 @@ Format: `untag INDEX t/TAG [t/MORE_TAGS]...`
 * Tag matching is case-insensitive; for example, `t/math` removes an existing `Math` tag.
 * Tags not currently attached to the client are ignored.
 * Other tags remain unchanged.
-* The success message lists only tags that were actually removed. If none of the specified tags exist, Sieve reports that the client does not have any of them and leaves the client unchanged.
+* The result lists removed tags and any tags not attached to the client. If none of the specified tags exist, Sieve reports that no tags were removed and lists the tags not found. Tag names in the result use the spelling stored on the client card when a matching tag exists.
+* After a tag is removed, the same clients remain displayed with the updated tag.
 
 Examples:
 * `untag 1 t/Math`

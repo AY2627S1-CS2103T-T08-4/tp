@@ -356,7 +356,8 @@ public class ParserUtilTest {
     }
 
     @Test
-    public void parseTag_repeatedInnerSpaces_returnsTagWithSingleSpaces() throws Exception {
+    public void parseTag_validValueWithRepeatedWhitespace_returnsNormalizedTag() throws Exception {
+        assertEquals(new Tag("Secondary 4"), ParserUtil.parseTag(" Secondary  4 "));
         assertEquals("Sec 4", ParserUtil.parseTag("Sec  4").tagName);
         assertEquals("Sec 4", ParserUtil.parseTag(" Sec \t 4 ").tagName);
     }

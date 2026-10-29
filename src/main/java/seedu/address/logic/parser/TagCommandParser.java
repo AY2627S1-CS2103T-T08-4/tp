@@ -23,6 +23,8 @@ public class TagCommandParser implements Parser<TagCommand> {
      */
     public TagCommand parse(String args) throws ParseException {
         ArgumentMultimap argMultimap = ArgumentTokenizer.tokenize(args, PREFIX_TAG);
+        argMultimap.verifyNoUnknownPrefixesInPreamble();
+        argMultimap.verifyNoUnknownPrefixesIn(PREFIX_TAG);
         List<String> tagValues = argMultimap.getAllValues(PREFIX_TAG);
 
         if (tagValues.isEmpty()) {
