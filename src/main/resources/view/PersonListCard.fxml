@@ -16,7 +16,8 @@
     <!-- A fixed width keeps names lined up when the index goes from 9 to 10 -->
     <Label fx:id="id" styleClass="cell_index_label" minWidth="28"/>
     <VBox spacing="4" HBox.hgrow="ALWAYS">
-        <HBox alignment="CENTER_LEFT">
+        <!-- Lines the phone up with the first line of the name, so it stays on that line when a long name wraps -->
+        <HBox alignment="BASELINE_LEFT">
             <Label fx:id="name" text="\$first" styleClass="cell_big_label" wrapText="true">
                 <minHeight>
                     <!-- Gives a long name the height of all its lines, so it wraps instead of being cut off -->

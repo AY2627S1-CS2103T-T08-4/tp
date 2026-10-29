@@ -143,10 +143,10 @@ public class ParserUtilTest {
 
     @Test
     public void parsePhone_countryCode_throwsParseExceptionWithCountryCodeMessage() {
-        assertThrows(ParseException.class, Phone.MESSAGE_COUNTRY_CODE, () -> ParserUtil.parsePhone("+65 9123 4567"));
-        assertThrows(ParseException.class, Phone.MESSAGE_COUNTRY_CODE, () -> ParserUtil.parsePhone("(+65) 811878"));
-        assertThrows(ParseException.class, Phone.MESSAGE_COUNTRY_CODE, () -> ParserUtil.parsePhone("65 9123 4567"));
-        assertThrows(ParseException.class, Phone.MESSAGE_COUNTRY_CODE, () -> ParserUtil.parsePhone("+1 415 555 2671"));
+        // PhoneTest#hasCountryCode covers which numbers have a country code
+        assertThrows(ParseException.class, Phone.MESSAGE_COUNTRY_CODE, () -> ParserUtil.parsePhone("+6591234567"));
+        // checked after the formatting characters are removed
+        assertThrows(ParseException.class, Phone.MESSAGE_COUNTRY_CODE, () -> ParserUtil.parsePhone("(+65) 9123-4567"));
     }
 
     @Test
@@ -322,6 +322,12 @@ public class ParserUtilTest {
         String tagWithWhitespace = WHITESPACE + VALID_TAG_1 + WHITESPACE;
         Tag expectedTag = new Tag(VALID_TAG_1);
         assertEquals(expectedTag, ParserUtil.parseTag(tagWithWhitespace));
+    }
+
+    @Test
+    public void parseTag_repeatedInnerSpaces_returnsTagWithSingleSpaces() throws Exception {
+        assertEquals("Sec 4", ParserUtil.parseTag("Sec  4").tagName);
+        assertEquals("Sec 4", ParserUtil.parseTag(" Sec \t 4 ").tagName);
     }
 
     @Test

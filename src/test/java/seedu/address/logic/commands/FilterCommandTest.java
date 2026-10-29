@@ -60,7 +60,7 @@ public class FilterCommandTest {
     @Test
     public void execute_phone_returnsMatchingPerson() {
         PersonMatchesSearchPredicate predicate = new PersonMatchesSearchPredicate(
-                List.of(), List.of(new Phone("94351253")), List.of());
+                List.of(new Phone("94351253")), List.of());
         FilterCommand command = new FilterCommand(predicate);
         expectedModel.updateFilteredPersonList(predicate);
 
@@ -70,7 +70,7 @@ public class FilterCommandTest {
 
     @Test
     public void execute_multipleDifferentPhones_returnsMatchingPersons() {
-        PersonMatchesSearchPredicate predicate = new PersonMatchesSearchPredicate(List.of(),
+        PersonMatchesSearchPredicate predicate = new PersonMatchesSearchPredicate(
                 List.of(new Phone("94351253"), new Phone("98765432")), List.of());
         FilterCommand command = new FilterCommand(predicate);
         expectedModel.updateFilteredPersonList(predicate);
@@ -82,7 +82,7 @@ public class FilterCommandTest {
     @Test
     public void execute_phoneAndTag_returnsPersonMatchingBoth() {
         PersonMatchesSearchPredicate predicate = new PersonMatchesSearchPredicate(
-                List.of(), List.of(new Phone("98765432")), List.of(new Tag("friends")));
+                List.of(new Phone("98765432")), List.of(new Tag("friends")));
         FilterCommand command = new FilterCommand(predicate);
         expectedModel.updateFilteredPersonList(predicate);
 
@@ -96,7 +96,7 @@ public class FilterCommandTest {
         FilterCommand command = new FilterCommand(predicate);
         expectedModel.updateFilteredPersonList(predicate);
 
-        CommandResult expectedResult = CommandResult.forEmptySearch("0 clients found matching your search term(s).");
+        CommandResult expectedResult = CommandResult.forEmptySearch(FilterCommand.MESSAGE_NO_CLIENTS_FOUND);
         assertCommandSuccess(command, model, expectedResult, expectedModel);
         assertEquals(List.of(), model.getFilteredPersonList());
     }
@@ -121,6 +121,6 @@ public class FilterCommandTest {
 
     private PersonMatchesSearchPredicate predicateWith(String... tagNames) {
         List<Tag> tags = List.of(tagNames).stream().map(Tag::new).toList();
-        return new PersonMatchesSearchPredicate(List.of(), List.of(), tags);
+        return new PersonMatchesSearchPredicate(List.of(), tags);
     }
 }
