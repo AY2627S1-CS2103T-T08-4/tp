@@ -21,6 +21,7 @@ class JsonSerializableAddressBook {
 
     public static final String MESSAGE_DUPLICATE_PERSON = "Client list contains duplicate client(s).";
     public static final String MESSAGE_NULL_PERSON = "Client list contains null client(s).";
+    public static final String MESSAGE_NULL_PERSON_LIST = "Client list cannot be null.";
 
     private final List<JsonAdaptedPerson> persons = new ArrayList<>();
 
@@ -28,7 +29,11 @@ class JsonSerializableAddressBook {
      * Constructs a {@code JsonSerializableAddressBook} with the given persons.
      */
     @JsonCreator
-    public JsonSerializableAddressBook(@JsonProperty("persons") List<JsonAdaptedPerson> persons) {
+    public JsonSerializableAddressBook(@JsonProperty("persons") List<JsonAdaptedPerson> persons)
+            throws IllegalValueException {
+        if (persons == null) {
+            throw new IllegalValueException(MESSAGE_NULL_PERSON_LIST);
+        }
         this.persons.addAll(persons);
     }
 

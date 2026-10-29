@@ -114,6 +114,20 @@ public class MainAppTest {
     }
 
     @Test
+    public void init_topLevelNullDataFile_logicIsReadOnly() throws Exception {
+        Path dataFile = temporaryFolder.resolve("topLevelNullSieve.json");
+        Files.writeString(dataFile, "null");
+        mainApp.userPrefsFilePath = temporaryFolder.resolve("initPrefs.json");
+        mainApp.addressBookFilePath = dataFile;
+
+        mainApp.init();
+
+        assertTrue(mainApp.isInitialDataCorrupted);
+        assertEquals(new AddressBook(), mainApp.model.getAddressBook());
+        assertThrows(CommandException.class, () -> mainApp.logic.execute("clear"));
+    }
+
+    @Test
     public void initPrefs_nullGuiSettings_usesAndSavesDefaultPreferences() throws Exception {
         Path prefsFile = temporaryFolder.resolve("nullGuiSettings.json");
         Files.writeString(prefsFile, "{\"guiSettings\":null}");

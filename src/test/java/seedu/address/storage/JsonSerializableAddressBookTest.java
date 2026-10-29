@@ -6,8 +6,10 @@ import static seedu.address.testutil.Assert.assertThrows;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
 import seedu.address.commons.exceptions.IllegalValueException;
 import seedu.address.commons.util.JsonUtil;
@@ -46,12 +48,21 @@ public class JsonSerializableAddressBookTest {
     }
 
     @Test
-    public void toModelType_nullPerson_throwsIllegalValueException() {
+    public void toModelType_nullPerson_throwsIllegalValueException() throws IllegalValueException {
         JsonSerializableAddressBook addressBook = new JsonSerializableAddressBook(
                 Collections.singletonList(null));
 
         assertThrows(IllegalValueException.class, JsonSerializableAddressBook.MESSAGE_NULL_PERSON,
                 addressBook::toModelType);
+    }
+
+    @Test
+    public void constructor_nullPersonList_throwsIllegalValueException() {
+        List<JsonAdaptedPerson> nullPersonList = null;
+        Executable constructor = () -> new JsonSerializableAddressBook(nullPersonList);
+
+        assertThrows(IllegalValueException.class, JsonSerializableAddressBook.MESSAGE_NULL_PERSON_LIST,
+                constructor);
     }
 
 }
