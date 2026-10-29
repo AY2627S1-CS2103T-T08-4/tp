@@ -168,10 +168,12 @@ A few parts of the main window are worth knowing about when changing them:
   returns to its full layout.
 
   `Person` is immutable, so commands such as `edit`, `tag` and `untag` replace an item in the observable list rather
-  than modifying it. JavaFX can temporarily clear the `ListView` selection during that replacement. To keep the same
-  client highlighted and refresh the open details, `PersonListPanel` detects a replacement containing the selected
-  person and reselects the corresponding replacement index on the next JavaFX pulse. A deletion or filter removal is
-  not restored, so the resulting null selection closes the panel.
+  than modifying it, and `undo`, `redo`, `find` and `filter` replace the whole list. After such a change, the
+  `ListView` selects by row, which may now hold another client. To keep the same client highlighted and refresh the
+  open details, `PersonListPanel` looks for the client with the same name in the new list (names are unique), or the
+  client that replaced it after an `edit` that renamed it, and selects that client after the command has finished.
+  If the client is no longer shown, e.g. after `delete` or a `find` that excludes them, the selection is cleared,
+  which closes the panel.
 
 The following sequence diagram shows the UI interactions when a user opens the detail panel, switches clients, and
 then closes it. `Logic` and `Model` are omitted because viewing details does not use either component.
@@ -1701,6 +1703,9 @@ The data file is `data/sieve.json` inside that folder.
 
     1. Test case: `clear`<br>
        Expected: Every client is deleted, and the count above the list shows `0 clients`.
+
+    1. Test case: `clear` again<br>
+       Expected: Nothing changes. The status message shows `There are no clients to clear.`
 
 ### Checking phone numbers and email addresses
 

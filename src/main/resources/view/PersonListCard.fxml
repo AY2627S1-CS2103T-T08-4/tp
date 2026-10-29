@@ -17,7 +17,7 @@
     <Label fx:id="id" styleClass="cell_index_label" minWidth="28"/>
     <VBox spacing="4" HBox.hgrow="ALWAYS">
         <!-- Lines the phone up with the first line of the name, so it stays on that line when a long name wraps -->
-        <HBox alignment="BASELINE_LEFT">
+        <HBox alignment="BASELINE_LEFT" spacing="8">
             <Label fx:id="name" text="\$first" styleClass="cell_big_label" wrapText="true">
                 <minHeight>
                     <!-- Gives a long name the height of all its lines, so it wraps instead of being cut off -->

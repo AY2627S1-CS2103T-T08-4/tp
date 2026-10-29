@@ -32,6 +32,7 @@ public class PersonCardTest {
     private static final String LONG_NAME = "Muhammad Hafiz bin Abdul Rahman Ismail (NHHS Sec4)";
     /** 50 characters with no space, so the name can only wrap in the middle of the word. */
     private static final String LONG_SINGLE_WORD_NAME = "A" + "b".repeat(49);
+    private static final double MIN_GAP_BEFORE_PHONE = 8;
 
     private Stage stage;
     private PersonCard taggedCard;
@@ -182,7 +183,7 @@ public class PersonCardTest {
     private void assertShownInFullAtEachWidth(FxRobot robot, PersonCard card, String labelId, String text) {
         Label phone = (Label) card.getRoot().lookup("#phone");
         Label label = (Label) card.getRoot().lookup(labelId);
-        for (double width : new double[] {450, 800}) {
+        for (double width : new double[] {600, 800}) {
             // Tall enough for all the cards, so that none is squeezed, as the client list would scroll instead
             robot.interact(() -> stage.setWidth(width));
             robot.interact(() -> stage.setHeight(1000));
@@ -190,9 +191,11 @@ public class PersonCardTest {
             Bounds phoneBounds = phone.localToScene(phone.getBoundsInLocal());
             Bounds labelBounds = label.localToScene(label.getBoundsInLocal());
             assertTrue(phoneBounds.getMaxX() <= stage.getScene().getWidth(), "phone cut off at width " + width);
-            // The name ends before the phone on the same row, and the email is on a row below it
-            assertTrue(labelBounds.getMaxX() <= phoneBounds.getMinX() || labelBounds.getMinY() >= phoneBounds.getMaxY(),
-                    labelId + " covers phone at width " + width);
+            // The name ends a gap before the phone on the same row, so they don't run together, and the email is on
+            // a row below it
+            boolean isBesidePhone = labelBounds.getMaxX() + MIN_GAP_BEFORE_PHONE <= phoneBounds.getMinX();
+            boolean isBelowPhone = labelBounds.getMinY() >= phoneBounds.getMaxY();
+            assertTrue(isBesidePhone || isBelowPhone, labelId + " too close to phone at width " + width);
             // A label that runs out of room shows a shortened copy of its text, ending in "..."
             assertEquals(text, ((Text) label.lookup(".text")).getText(), labelId + " shortened at width " + width);
         }

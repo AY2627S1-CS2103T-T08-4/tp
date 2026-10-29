@@ -1,5 +1,6 @@
 package seedu.address.ui;
 
+import java.util.List;
 import java.util.logging.Logger;
 
 import javafx.application.Platform;
@@ -32,6 +33,7 @@ public class PersonListPanel extends UiPart<Region> {
     @FXML
     private ListView<Person> personListView;
     private final ReadOnlyObjectWrapper<Person> selectedPerson = new ReadOnlyObjectWrapper<>();
+    private final ObservableList<Person> allPersons;
     private boolean isCompact;
     private boolean isRestoringSelection;
     @FXML
@@ -43,11 +45,13 @@ public class PersonListPanel extends UiPart<Region> {
      */
     public PersonListPanel(ObservableList<Person> personList, ObservableList<Person> allPersons) {
         super(FXML);
+        this.allPersons = allPersons;
         personList.addListener((ListChangeListener<Person>) this::restoreSelectionAfterReplacement);
         personListView.setItems(personList);
         personListView.setCellFactory(listView -> new PersonListViewCell());
         personListView.getSelectionModel().selectedItemProperty().addListener((observable, oldPerson, newPerson) -> {
-            if (newPerson != null || !isRestoringSelection) {
+            // While restoring, the ListView briefly selects by row, which may be another client or none
+            if (!isRestoringSelection) {
                 selectedPerson.set(newPerson);
             }
         });
@@ -67,22 +71,42 @@ public class PersonListPanel extends UiPart<Region> {
         return selectedPerson.getReadOnlyProperty();
     }
 
+    /**
+     * Keeps the same client selected after the displayed list changes, or clears the selection if that client is
+     * no longer shown. The ListView would otherwise select by row: an edit replaces the client's {@code Person},
+     * and undo, find and filter replace the whole list.
+     */
     private void restoreSelectionAfterReplacement(ListChangeListener.Change<? extends Person> change) {
-        while (change.next()) {
-            Person currentSelection = selectedPerson.get();
-            int removedIndex = change.getRemoved().indexOf(currentSelection);
-            if (change.wasReplaced() && removedIndex >= 0) {
-                int replacementIndex = change.getFrom() + removedIndex;
-                if (replacementIndex < change.getTo()) {
-                    isRestoringSelection = true;
-                    selectedPerson.set(change.getList().get(replacementIndex));
-                    Platform.runLater(() -> {
-                        personListView.getSelectionModel().select(replacementIndex);
-                        isRestoringSelection = false;
-                    });
-                }
-            }
+        Person currentSelection = selectedPerson.get();
+        // An edit replaces the client and then shows all clients again, so look for the client once, after both
+        if (currentSelection == null || isRestoringSelection) {
+            return;
         }
+        Person renamedClient = getRenamedClient(change, currentSelection);
+        isRestoringSelection = true;
+        Platform.runLater(() -> {
+            // Names are unique, so a client with the same name is the same client, perhaps edited
+            Person newSelection = personListView.getItems().stream().filter(currentSelection::hasSameName)
+                    .findFirst().orElse(renamedClient);
+            if (newSelection == null) {
+                personListView.getSelectionModel().clearSelection();
+            } else {
+                personListView.getSelectionModel().select(newSelection);
+            }
+            isRestoringSelection = false;
+            selectedPerson.set(newSelection);
+        });
+    }
+
+    /**
+     * Returns the client that replaced only {@code person} in {@code change}, if {@code person} has also left the
+     * address book, as after an edit that renames it. Otherwise, returns null.
+     */
+    private Person getRenamedClient(ListChangeListener.Change<? extends Person> change, Person person) {
+        change.reset();
+        boolean isRenamed = !allPersons.contains(person) && change.next()
+                && change.getRemoved().equals(List.of(person)) && change.getAddedSize() == 1;
+        return isRenamed ? change.getAddedSubList().get(0) : null;
     }
 
     /**
