@@ -58,9 +58,10 @@ public class NameTest {
     }
 
     @Test
-    public void normalizeName_extraWhitespace_collapsed() {
-        // normalizeName only calls StringUtil.normalizeWhitespace, whose partitions StringUtilTest covers
-        assertEquals("Liam O'Brien", Name.normalizeName("  Liam \t O'Brien "));
+    public void normalizeName_extraWhitespaceAndCurlyApostrophe_bothNormalized() {
+        // normalizeName only calls StringUtil.normalizeWhitespace and normalizeApostrophes, whose partitions
+        // StringUtilTest and normalizeApostrophes below cover
+        assertEquals("Liam O'Brien", Name.normalizeName("  Liam \t O\u2019Brien "));
     }
 
     @Test
@@ -72,11 +73,6 @@ public class NameTest {
         // a character that is not allowed, whatever the length
         assertEquals(Name.MESSAGE_CONSTRAINTS, Name.getErrorMessage("Ravi s/o Kumar"));
         assertEquals(Name.MESSAGE_CONSTRAINTS, Name.getErrorMessage("a".repeat(Name.MAX_LENGTH) + "/"));
-    }
-
-    @Test
-    public void normalizeName_curlyApostrophe_replaced() {
-        assertEquals("Liam O'Brien", Name.normalizeName("Liam O\u2019Brien"));
     }
 
     @Test

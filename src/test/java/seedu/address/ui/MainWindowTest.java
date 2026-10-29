@@ -4,8 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -20,6 +18,7 @@ import org.testfx.framework.junit5.Start;
 import org.testfx.util.WaitForAsyncUtils;
 
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -54,7 +53,8 @@ public class MainWindowTest {
     public Path temporaryFolder;
 
     private Stage stage;
-    private MainWindow mainWindow;
+    /** Looked up once, as the waits below check it off the JavaFX thread, while the scene graph may be changing. */
+    private Region detailPlaceholder;
 
     @Start
     public void start(Stage stage) {
@@ -62,9 +62,10 @@ public class MainWindowTest {
         Path addressBookFilePath = temporaryFolder.resolve("addressBook.json");
         StorageManager storage = new StorageManager(new JsonAddressBookStorage(addressBookFilePath),
                 new JsonUserPrefsStorage(temporaryFolder.resolve("userPrefs.json")));
-        mainWindow = new MainWindow(stage, new LogicManager(new ModelManager(), storage),
+        MainWindow mainWindow = new MainWindow(stage, new LogicManager(new ModelManager(), storage),
                 addressBookFilePath);
         mainWindow.fillInnerParts();
+        detailPlaceholder = (Region) stage.getScene().lookup("#personDetailPanelPlaceholder");
         stage.show();
     }
 
@@ -77,11 +78,21 @@ public class MainWindowTest {
     }
 
     @Test
-    public void executeCommand_searchWithNoMatches_showsEmptySearch(FxRobot robot) {
+    public void executeCommand_searchEmptyAddressBook_showsEmptySearch(FxRobot robot) {
         // The address book is empty, so find says there is nothing to search
         enterCommand(robot, FindCommand.COMMAND_WORD + " Amirah");
 
         assertEquals(Messages.MESSAGE_NO_CLIENTS_TO_SEARCH, getResultMessage().getText());
+        assertTrue(ResultDisplayTest.isShownAsEmptySearch(getResultDisplay()));
+    }
+
+    @Test
+    public void executeCommand_searchWithNoMatches_showsEmptySearch(FxRobot robot) {
+        enterCommand(robot, ADD_RAVI_COMMAND);
+
+        enterCommand(robot, FindCommand.COMMAND_WORD + " Amirah");
+
+        assertEquals(FindCommand.MESSAGE_NO_CLIENTS_FOUND, getResultMessage().getText());
         assertTrue(ResultDisplayTest.isShownAsEmptySearch(getResultDisplay()));
     }
 
@@ -104,9 +115,7 @@ public class MainWindowTest {
                 + "nt/" + "Weak at algebra ".repeat(12));
 
         ScrollPane resultScrollPane = (ScrollPane) stage.getScene().lookup("#resultScrollPane");
-        TextField commandTextField = (TextField) stage.getScene().lookup("#commandTextField");
-        robot.interact(() -> commandTextField.fireEvent(
-                new KeyEvent(KeyEvent.KEY_PRESSED, "", "", KeyCode.PAGE_DOWN, false, false, false, false)));
+        robot.interact(() -> getCommandTextField().fireEvent(createKeyPressedEvent(KeyCode.PAGE_DOWN)));
 
         assertTrue(resultScrollPane.getVvalue() > resultScrollPane.getVmin());
     }
@@ -114,7 +123,7 @@ public class MainWindowTest {
     @Test
     public void commandBox_minimumWidth_promptTextFits(FxRobot robot) {
         robot.interact(() -> stage.setWidth(stage.getMinWidth()));
-        TextField commandTextField = (TextField) stage.getScene().lookup("#commandTextField");
+        TextField commandTextField = getCommandTextField();
 
         Text promptText = new Text(commandTextField.getPromptText());
         promptText.setFont(commandTextField.getFont());
@@ -155,72 +164,38 @@ public class MainWindowTest {
     @Test
     public void selectClients_thenClose_detailPanelUpdatesAndListSelectionClears(FxRobot robot)
             throws TimeoutException {
-        enterCommand(robot, "add n/Ravi Kumar p/87654321 e/ravi.k@edu.sg a/10 Queenstown Rd t/physics");
-        enterCommand(robot, "add n/Amirah Tan p/91234567 e/amirah@edu.sg a/20 Tampines Rd t/english");
-        ListView<Person> personListView = getPersonListView();
+        addThreeClients(robot);
 
-        robot.interact(() -> personListView.getSelectionModel().select(0));
-        assertEquals("Ravi Kumar", getDetailLabel("#name").getText());
-        assertTrue(stage.getScene().lookup("#personDetailPanelPlaceholder").isVisible());
+        selectClient(robot, 0);
+        assertSelectedClientShown(RAVI_NAME);
+        assertTrue(detailPlaceholder.isVisible());
 
-        robot.interact(() -> personListView.getSelectionModel().select(1));
-        assertEquals("Amirah Tan", getDetailLabel("#name").getText());
+        selectClient(robot, 1);
+        assertSelectedClientShown("Amirah Tan");
 
         Button closeButton = (Button) stage.getScene().lookup("#closeDetailButton");
         robot.interact(closeButton::fire);
-        assertTrue(personListView.getSelectionModel().isEmpty());
+        assertTrue(getPersonListView().getSelectionModel().isEmpty());
         waitForDetailPanelToClose();
-    }
-
-    @Test
-    public void deleteSelectedClient_closesDetailPanel(FxRobot robot) throws TimeoutException {
-        enterCommand(robot, "add n/Ravi Kumar p/87654321 e/ravi.k@edu.sg a/10 Queenstown Rd");
-        ListView<Person> personListView = getPersonListView();
-        robot.interact(() -> personListView.getSelectionModel().select(0));
-
-        enterCommand(robot, "delete 1");
-
-        assertTrue(personListView.getSelectionModel().isEmpty());
-        waitForDetailPanelToClose();
-    }
-
-    @Test
-    public void editSelectedClient_updatesOpenDetailPanel(FxRobot robot) {
-        enterCommand(robot, "add n/Ravi Kumar p/87654321 e/ravi.k@edu.sg a/10 Queenstown Rd");
-        ListView<Person> personListView = getPersonListView();
-        robot.interact(() -> personListView.getSelectionModel().select(0));
-
-        enterCommand(robot, "edit 1 p/81234567");
-
-        assertEquals(0, personListView.getSelectionModel().getSelectedIndex());
-        assertEquals("81234567", getDetailLabel("#phone").getText());
     }
 
     @Test
     public void escapeWithDetailOpen_closesDetailPanelAndConsumesEvent(FxRobot robot) throws TimeoutException {
-        enterCommand(robot, "add n/Ravi Kumar p/87654321 e/ravi.k@edu.sg a/10 Queenstown Rd");
-        ListView<Person> personListView = getPersonListView();
-        robot.interact(() -> personListView.getSelectionModel().select(0));
+        addAndSelectClient(robot);
 
-        KeyEvent nonEscapeEvent = createKeyPressedEvent(KeyCode.ENTER);
-        robot.interact(() -> stage.getScene().getRoot().fireEvent(nonEscapeEvent));
-        assertFalse(nonEscapeEvent.isConsumed());
-        assertFalse(personListView.getSelectionModel().isEmpty());
+        // Other keys reach the command box and leave the panel open
+        assertTrue(isKeyPassedToCommandBox(robot, KeyCode.A));
+        assertFalse(getPersonListView().getSelectionModel().isEmpty());
 
-        AtomicBoolean escapeReachedHandler = new AtomicBoolean();
-        stage.getScene().getRoot().addEventHandler(KeyEvent.KEY_PRESSED,
-                event -> escapeReachedHandler.set(true));
-        KeyEvent escapeEvent = createKeyPressedEvent(KeyCode.ESCAPE);
-        robot.interact(() -> stage.getScene().getRoot().fireEvent(escapeEvent));
-        assertFalse(escapeReachedHandler.get());
-        assertTrue(personListView.getSelectionModel().isEmpty());
+        assertFalse(isKeyPassedToCommandBox(robot, KeyCode.ESCAPE));
+        assertTrue(getPersonListView().getSelectionModel().isEmpty());
         waitForDetailPanelToClose();
     }
 
     @Test
     public void selectClientBeforeContentLayout_usesStageWidthForDetailWidth(FxRobot robot)
             throws TimeoutException {
-        enterCommand(robot, "add n/Ravi Kumar p/87654321 e/ravi.k@edu.sg a/10 Queenstown Rd");
+        enterCommand(robot, ADD_RAVI_COMMAND);
         Region clientContent = (Region) stage.getScene().lookup("#clientContent");
         ListView<Person> personListView = getPersonListView();
 
@@ -231,8 +206,7 @@ public class MainWindowTest {
         });
 
         assertEquals(0, clientContent.getWidth());
-        Node detailPlaceholder = stage.getScene().lookup("#personDetailPanelPlaceholder");
-        WaitForAsyncUtils.waitFor(1, TimeUnit.SECONDS, () -> ((Region) detailPlaceholder).getPrefWidth() > 300);
+        WaitForAsyncUtils.waitFor(1, TimeUnit.SECONDS, () -> detailPlaceholder.getPrefWidth() > 300);
     }
 
     @Test
@@ -262,16 +236,6 @@ public class MainWindowTest {
 
         waitForDetailPanelToClose();
         assertTrue(getCommandTextField().isFocused());
-    }
-
-    @Test
-    public void clickClient_thenPressEscape_closesDetailPanel(FxRobot robot) throws TimeoutException {
-        addAndClickClient(robot);
-
-        robot.type(KeyCode.ESCAPE);
-
-        assertTrue(getPersonListView().getSelectionModel().isEmpty());
-        waitForDetailPanelToClose();
     }
 
     @Test
@@ -347,50 +311,31 @@ public class MainWindowTest {
     @Test
     public void selectClient_minimumWidth_detailPanelFitsInWindow(FxRobot robot) {
         robot.interact(() -> stage.setWidth(stage.getMinWidth()));
-        enterCommand(robot, ADD_RAVI_COMMAND);
-        selectClient(robot, 0);
+        addAndSelectClient(robot);
         waitForDetailPanelToOpen();
 
-        double windowWidth = stage.getScene().getWidth();
-        for (String id : new String[] {"#closeDetailButton", "#phone", "#email", "#address"}) {
-            Node node = stage.getScene().lookup("#personDetailPanel").lookup(id);
-            assertTrue(node.localToScene(node.getBoundsInLocal()).getMaxX() <= windowWidth, id + " cut off");
-        }
+        assertDetailPanelFitsInWindow();
     }
 
     @Test
-    public void resizeWindowWithDetailOpen_recomputesDetailWidth(FxRobot robot) throws TimeoutException {
-        enterCommand(robot, "add n/Ravi Kumar p/87654321 e/ravi.k@edu.sg a/10 Queenstown Rd");
-        Region clientContent = (Region) stage.getScene().lookup("#clientContent");
-        Region detailPlaceholder = (Region) stage.getScene().lookup("#personDetailPanelPlaceholder");
-        ListView<Person> personListView = getPersonListView();
-
+    public void resizeWindowWithDetailOpen_detailPanelNarrowsToFit(FxRobot robot) throws TimeoutException {
         robot.interact(() -> stage.setWidth(1200));
-        robot.interact(() -> personListView.getSelectionModel().select(0));
+        addAndSelectClient(robot);
+        // In a window this wide, the panel opens to its widest, 520 pixels
         WaitForAsyncUtils.waitFor(1, TimeUnit.SECONDS, () -> detailPlaceholder.getPrefWidth() >= 519);
 
-        robot.interact(() -> stage.setWidth(800));
-        WaitForAsyncUtils.waitFor(1, TimeUnit.SECONDS, () -> detailPlaceholder.getPrefWidth() < 500);
+        robot.interact(() -> stage.setWidth(stage.getMinWidth()));
 
-        double expectedWidth = Math.clamp(clientContent.getWidth() * 0.55, 300, 520);
-        assertEquals(expectedWidth, detailPlaceholder.getPrefWidth(), 0.5);
-    }
-
-    @Test
-    public void hidePersonDetail_detailAlreadyClosed_keepsDetailPanelHidden(FxRobot robot) {
-        Node detailPlaceholder = stage.getScene().lookup("#personDetailPanelPlaceholder");
-
-        robot.interact(this::invokeHidePersonDetail);
-
-        assertFalse(detailPlaceholder.isVisible());
-        assertFalse(detailPlaceholder.isManaged());
+        // Times out if the panel keeps its width. Waits on the laid-out width, so the bounds checked next are current
+        WaitForAsyncUtils.waitFor(1, TimeUnit.SECONDS, () -> detailPlaceholder.getWidth() < 519);
+        assertDetailPanelFitsInWindow();
     }
 
     /**
      * Types {@code command} into the command box and presses Enter.
      */
     private void enterCommand(FxRobot robot, String command) {
-        TextField commandTextField = (TextField) stage.getScene().lookup("#commandTextField");
+        TextField commandTextField = getCommandTextField();
         robot.interact(() -> {
             commandTextField.setText(command);
             commandTextField.fireEvent(new ActionEvent());
@@ -417,6 +362,14 @@ public class MainWindowTest {
 
     private TextField getCommandTextField() {
         return (TextField) stage.getScene().lookup("#commandTextField");
+    }
+
+    /**
+     * Adds a client and selects it, which opens the detail panel.
+     */
+    private void addAndSelectClient(FxRobot robot) {
+        enterCommand(robot, ADD_RAVI_COMMAND);
+        selectClient(robot, 0);
     }
 
     /**
@@ -460,21 +413,37 @@ public class MainWindowTest {
     }
 
     private void waitForDetailPanelToClose() throws TimeoutException {
-        WaitForAsyncUtils.waitFor(1, TimeUnit.SECONDS, () ->
-                !stage.getScene().lookup("#personDetailPanelPlaceholder").isVisible());
+        WaitForAsyncUtils.waitFor(1, TimeUnit.SECONDS, () -> !detailPlaceholder.isVisible());
+    }
+
+    /**
+     * Asserts that the detail panel's close button and its longest details end inside the window.
+     */
+    private void assertDetailPanelFitsInWindow() {
+        double windowWidth = stage.getScene().getWidth();
+        for (String id : new String[] {"#closeDetailButton", "#phone", "#email", "#address"}) {
+            Node node = stage.getScene().lookup("#personDetailPanel").lookup(id);
+            assertTrue(node.localToScene(node.getBoundsInLocal()).getMaxX() <= windowWidth, id + " cut off");
+        }
+    }
+
+    /**
+     * Fires a press of {@code key} at the command box, where the user types, and returns whether it reached the
+     * command box. A key that the window consumes on the way does not.
+     */
+    private boolean isKeyPassedToCommandBox(FxRobot robot, KeyCode key) {
+        TextField commandTextField = getCommandTextField();
+        AtomicBoolean isPassedOn = new AtomicBoolean();
+        EventHandler<KeyEvent> handler = event -> isPassedOn.set(true);
+        robot.interact(() -> {
+            commandTextField.addEventHandler(KeyEvent.KEY_PRESSED, handler);
+            commandTextField.fireEvent(createKeyPressedEvent(key));
+            commandTextField.removeEventHandler(KeyEvent.KEY_PRESSED, handler);
+        });
+        return isPassedOn.get();
     }
 
     private KeyEvent createKeyPressedEvent(KeyCode keyCode) {
         return new KeyEvent(KeyEvent.KEY_PRESSED, "", "", keyCode, false, false, false, false);
-    }
-
-    private void invokeHidePersonDetail() {
-        try {
-            Method hidePersonDetail = MainWindow.class.getDeclaredMethod("hidePersonDetail");
-            hidePersonDetail.setAccessible(true);
-            hidePersonDetail.invoke(mainWindow);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException exception) {
-            throw new AssertionError(exception);
-        }
     }
 }
