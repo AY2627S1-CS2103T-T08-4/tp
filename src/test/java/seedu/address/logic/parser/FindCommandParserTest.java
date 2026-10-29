@@ -39,6 +39,12 @@ public class FindCommandParserTest {
     }
 
     @Test
+    public void parse_curlyApostrophe_readAsStraightApostrophe() {
+        FindCommand expectedFindCommand = new FindCommand(new NameContainsKeywordsPredicate(List.of("O'Brien")));
+        assertParseSuccess(parser, "O\u2019Brien", expectedFindCommand);
+    }
+
+    @Test
     public void parse_phoneOrTagPrefix_throwsParseException() {
         // phone and tag are searched with filter, so their prefixes are not keywords
         assertParseFailure(parser, " p/9123 4567", FindCommand.MESSAGE_INVALID_KEYWORDS);

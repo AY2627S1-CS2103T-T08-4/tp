@@ -20,6 +20,8 @@ public class Messages {
     public static final String MESSAGE_NOTE_NOT_LAST = "A note cannot contain n/, p/, e/, a/, t/, fee/ or due/, "
             + "as everything after nt/ is part of the note. Put nt/NOTE last, and write such text another way, "
             + "e.g. N/A instead of n/a.";
+    public static final String MESSAGE_NO_CLIENTS_TO_SEARCH =
+            "There are no clients in Sieve yet, so there is nothing to search. Use add to add one.";
 
     private static final String MESSAGE_UNKNOWN_PREFIX =
             "Unknown prefix %1$s. Check it for a typo, or type help to see the prefixes each command accepts.";
@@ -117,6 +119,12 @@ public class Messages {
                 .append(person.getAddress());
         if (!person.getNote().isEmpty()) {
             builder.append("; Note: ").append(person.getNote());
+        }
+        if (!person.getFee().isEmpty()) {
+            builder.append("; Fee: ").append(person.getFee());
+        }
+        if (!person.getDueDate().isEmpty()) {
+            builder.append("; Due: ").append(person.getDueDate());
         }
         builder.append("; Tags: ");
         person.getTags().forEach(builder::append);

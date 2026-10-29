@@ -13,6 +13,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import seedu.address.logic.Messages;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
@@ -60,7 +61,7 @@ public class FilterCommandTest {
     @Test
     public void execute_phone_returnsMatchingPerson() {
         PersonMatchesSearchPredicate predicate = new PersonMatchesSearchPredicate(
-                List.of(), List.of(new Phone("94351253")), List.of());
+                List.of(new Phone("94351253")), List.of());
         FilterCommand command = new FilterCommand(predicate);
         expectedModel.updateFilteredPersonList(predicate);
 
@@ -70,7 +71,7 @@ public class FilterCommandTest {
 
     @Test
     public void execute_multipleDifferentPhones_returnsMatchingPersons() {
-        PersonMatchesSearchPredicate predicate = new PersonMatchesSearchPredicate(List.of(),
+        PersonMatchesSearchPredicate predicate = new PersonMatchesSearchPredicate(
                 List.of(new Phone("94351253"), new Phone("98765432")), List.of());
         FilterCommand command = new FilterCommand(predicate);
         expectedModel.updateFilteredPersonList(predicate);
@@ -82,7 +83,7 @@ public class FilterCommandTest {
     @Test
     public void execute_phoneAndTag_returnsPersonMatchingBoth() {
         PersonMatchesSearchPredicate predicate = new PersonMatchesSearchPredicate(
-                List.of(), List.of(new Phone("98765432")), List.of(new Tag("friends")));
+                List.of(new Phone("98765432")), List.of(new Tag("friends")));
         FilterCommand command = new FilterCommand(predicate);
         expectedModel.updateFilteredPersonList(predicate);
 
@@ -99,6 +100,17 @@ public class FilterCommandTest {
         CommandResult expectedResult = CommandResult.forEmptySearch(FilterCommand.MESSAGE_NO_CLIENTS_FOUND);
         assertCommandSuccess(command, model, expectedResult, expectedModel);
         assertEquals(List.of(), model.getFilteredPersonList());
+    }
+
+    @Test
+    public void execute_emptyAddressBook_noClientsToSearch() {
+        PersonMatchesSearchPredicate predicate = predicateWith("Physics");
+        Model emptyModel = new ModelManager();
+        Model expectedEmptyModel = new ModelManager();
+        expectedEmptyModel.updateFilteredPersonList(predicate);
+
+        CommandResult expectedResult = CommandResult.forEmptySearch(Messages.MESSAGE_NO_CLIENTS_TO_SEARCH);
+        assertCommandSuccess(new FilterCommand(predicate), emptyModel, expectedResult, expectedEmptyModel);
     }
 
     @Test
@@ -121,6 +133,6 @@ public class FilterCommandTest {
 
     private PersonMatchesSearchPredicate predicateWith(String... tagNames) {
         List<Tag> tags = List.of(tagNames).stream().map(Tag::new).toList();
-        return new PersonMatchesSearchPredicate(List.of(), List.of(), tags);
+        return new PersonMatchesSearchPredicate(List.of(), tags);
     }
 }
