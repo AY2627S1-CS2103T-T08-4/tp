@@ -91,6 +91,11 @@ public class ParserUtilTest {
     }
 
     @Test
+    public void parseName_curlyApostrophe_returnsNameWithStraightApostrophe() throws Exception {
+        assertEquals(new Name("Liam O'Brien"), ParserUtil.parseName("Liam O\u2019Brien"));
+    }
+
+    @Test
     public void parseName_validValueWithInternalWhitespace_returnsCollapsedName() throws Exception {
         Name expectedName = new Name("Liam O'Brien");
         assertEquals(expectedName, ParserUtil.parseName("Liam   O'Brien"));

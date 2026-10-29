@@ -101,6 +101,7 @@ Format: `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [nt/NOTE] [fee/FEE] [due/DU
 **Names:**
 * A name must start with a letter, and can only contain letters, digits, spaces, hyphens (`-`), apostrophes (`'`), full stops (`.`) and parentheses (`()`), up to 50 characters.
 * For example, `John Tan (NHHS)` and `Nur-Aisyah O'Brien` are accepted, but `Ravi s/o Kumar` is not, because of the `/`.
+* A curly apostrophe (`’`), which phones and chat apps often type or paste instead of `'`, is saved as `'`. For example, `O’Brien` is saved as `O'Brien`.
 * Letters means `A` to `Z`, so names with accented letters (e.g. `José`) or Chinese characters are not supported.
 * Write such names without the `/` or accents, e.g. `Ravi s.o. Kumar` or `Jose`.
 </box>
@@ -173,7 +174,7 @@ Format: `find KEYWORD [MORE_KEYWORDS]...`
 * The search is case-insensitive; for example, `amirah` matches `Amirah`.
 * Keyword order does not matter; for example, `Tan Amirah` matches `Amirah Tan`.
 * A keyword matches the **start** of a word of a name, or the start of a part of a word separated by punctuation; for example, `Ami` matches `Amirah`, `Bri` matches `O'Brien`, `Ais` matches `Nur-Aisyah`, and `NHHS` matches `John Tan (NHHS)`.
-* Punctuation is ignored; for example, `obrien` and `O'Brien` both match `O'Brien`.
+* Punctuation is ignored; for example, `obrien`, `O'Brien` and `O’Brien` (with a curly apostrophe) all match `O'Brien`.
 * A keyword does not match the middle or end of a word; for example, `rien` does not match `O'Brien`, and `rah` does not match `Amirah`.
 * Clients matching at least one keyword are returned (an `OR` search); for example, `Amirah Farhan` returns `Amirah Tan` and `Farhan Ali`.
 

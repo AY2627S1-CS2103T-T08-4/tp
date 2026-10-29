@@ -64,6 +64,22 @@ public class NameTest {
     }
 
     @Test
+    public void normalizeName_curlyApostrophe_replaced() {
+        assertEquals("Liam O'Brien", Name.normalizeName("Liam O\u2019Brien"));
+    }
+
+    @Test
+    public void normalizeApostrophes() {
+        // every apostrophe-like character is replaced
+        assertEquals("'a'b'c'", Name.normalizeApostrophes("\u2018a\u2019b\u02BCc\u2032"));
+
+        // a straight apostrophe and other text are kept
+        assertEquals("O'Brien \"Jr\"", Name.normalizeApostrophes("O'Brien \"Jr\""));
+
+        assertThrows(NullPointerException.class, () -> Name.normalizeApostrophes(null));
+    }
+
+    @Test
     public void isSameName() {
         Name name = new Name("John Tan");
 

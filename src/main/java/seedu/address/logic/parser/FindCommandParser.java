@@ -31,7 +31,8 @@ public class FindCommandParser implements Parser<FindCommand> {
      */
     public FindCommand parse(String args) throws ParseException {
         requireNonNull(args);
-        String trimmedArgs = args.trim();
+        // Keywords accept curly apostrophes as names do, so that find O’Brien works
+        String trimmedArgs = Name.normalizeApostrophes(args.trim());
         if (trimmedArgs.isEmpty()) {
             throw new ParseException(
                     String.format(MESSAGE_INVALID_COMMAND_FORMAT, FindCommand.MESSAGE_USAGE));
