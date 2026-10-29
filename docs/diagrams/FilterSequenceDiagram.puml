@@ -1,0 +1,123 @@
+@startuml
+!include style.puml
+skinparam ArrowFontStyle plain
+
+box Logic LOGIC_COLOR_T1
+participant ":LogicManager" as LogicManager LOGIC_COLOR
+participant ":AddressBookParser" as AddressBookParser LOGIC_COLOR
+participant ":FilterCommandParser" as FilterCommandParser LOGIC_COLOR
+participant "ArgumentTokenizer" as ArgumentTokenizer LOGIC_COLOR
+participant "argMultimap:ArgumentMultimap" as ArgumentMultimap LOGIC_COLOR
+participant "ParserUtil" as ParserUtil LOGIC_COLOR
+participant "f:FilterCommand" as FilterCommand LOGIC_COLOR
+participant "p:PersonMatchesSearchPredicate" as Predicate LOGIC_COLOR
+participant "r:CommandResult" as CommandResult LOGIC_COLOR
+end box
+
+box Model MODEL_COLOR_T1
+participant "m:Model" as Model MODEL_COLOR
+end box
+
+[-> LogicManager : execute("filter p/92345678 t/Sec4")
+activate LogicManager
+
+LogicManager -> AddressBookParser : parseCommand("filter p/92345678 t/Sec4")
+activate AddressBookParser
+
+create FilterCommandParser
+AddressBookParser -> FilterCommandParser
+activate FilterCommandParser
+FilterCommandParser --> AddressBookParser
+deactivate FilterCommandParser
+
+AddressBookParser -> FilterCommandParser : parse("p/92345678 t/Sec4")
+activate FilterCommandParser
+FilterCommandParser -> ArgumentTokenizer : tokenize(args, PREFIX_PHONE, PREFIX_TAG,\nother add/edit prefixes)
+activate ArgumentTokenizer
+ArgumentTokenizer --> FilterCommandParser : argMultimap
+deactivate ArgumentTokenizer
+
+loop for each unsupported add/edit prefix
+    FilterCommandParser -> ArgumentMultimap : getValue(otherPrefix)
+    activate ArgumentMultimap
+    ArgumentMultimap --> FilterCommandParser : value
+    deactivate ArgumentMultimap
+end
+
+FilterCommandParser -> ArgumentMultimap : verifyNoUnknownPrefixesInPreamble()
+activate ArgumentMultimap
+ArgumentMultimap --> FilterCommandParser
+deactivate ArgumentMultimap
+
+FilterCommandParser -> ArgumentMultimap : verifyNoUnknownPrefixesIn(PREFIX_PHONE, PREFIX_TAG)
+activate ArgumentMultimap
+ArgumentMultimap --> FilterCommandParser
+deactivate ArgumentMultimap
+
+FilterCommandParser -> ArgumentMultimap : getAllValues(PREFIX_PHONE)
+activate ArgumentMultimap
+ArgumentMultimap --> FilterCommandParser : phoneValues
+deactivate ArgumentMultimap
+
+FilterCommandParser -> ArgumentMultimap : getAllValues(PREFIX_TAG)
+activate ArgumentMultimap
+ArgumentMultimap --> FilterCommandParser : tagValues
+deactivate ArgumentMultimap
+
+FilterCommandParser -> ArgumentMultimap : getPreamble()
+activate ArgumentMultimap
+ArgumentMultimap --> FilterCommandParser : preamble
+deactivate ArgumentMultimap
+
+loop for each phone value
+    FilterCommandParser -> ParserUtil : parsePhone(phoneValue)
+    activate ParserUtil
+    ParserUtil --> FilterCommandParser : Phone
+    deactivate ParserUtil
+end
+
+loop for each tag value
+    FilterCommandParser -> ParserUtil : parseTag(tagValue)
+    activate ParserUtil
+    ParserUtil --> FilterCommandParser : Tag
+    deactivate ParserUtil
+end
+
+create Predicate
+FilterCommandParser -> Predicate : create(phones, tags)
+activate Predicate
+Predicate --> FilterCommandParser
+deactivate Predicate
+
+create FilterCommand
+FilterCommandParser -> FilterCommand : create(predicate)
+activate FilterCommand
+FilterCommand --> FilterCommandParser
+deactivate FilterCommand
+FilterCommandParser --> AddressBookParser : f
+deactivate FilterCommandParser
+AddressBookParser --> LogicManager : f
+deactivate AddressBookParser
+
+LogicManager -> FilterCommand : execute(m)
+activate FilterCommand
+FilterCommand -> Model : updateFilteredPersonList(predicate)
+activate Model
+Model --> FilterCommand
+deactivate Model
+FilterCommand -> Model : getFilteredPersonList()
+activate Model
+Model --> FilterCommand : matching clients
+deactivate Model
+
+create CommandResult
+FilterCommand -> CommandResult : create(result message)
+activate CommandResult
+CommandResult --> FilterCommand
+deactivate CommandResult
+FilterCommand --> LogicManager : r
+deactivate FilterCommand
+
+[<--LogicManager
+deactivate LogicManager
+@enduml
