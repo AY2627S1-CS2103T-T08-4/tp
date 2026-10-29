@@ -161,9 +161,10 @@ A few parts of the main window are worth knowing about when changing them:
   navigating to another screen or creating another window. The detail view is read-only and does not call `Logic` or
   mutate `Model` data.
 
-  `MainWindow` reveals and hides the panel with a 200 ms JavaFX `Timeline`. The panel width is 55% of the available
-  client-content width, clamped between 300 and 520 pixels, while its opacity changes at the same time. A bound
-  rectangular clip prevents the panel's contents from overflowing during the width animation. When the close button
+  The panel's width is bound to 55% of the client-content width, clamped between 300 and 520 pixels, so it follows
+  the window when the user resizes it. `MainWindow` reveals and hides the panel with a 200 ms JavaFX `Timeline` that
+  animates an expansion factor from 0 to 1, which scales that width, while the panel's opacity changes at the same
+  time. A bound rectangular clip prevents the panel's contents from overflowing during the animation. When the close button
   or Esc clears the selection, the animation is reversed; the panel becomes unmanaged after it finishes, and the list
   returns to its full layout.
 
@@ -832,7 +833,13 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
       Use case resumes at step 1.
 
-* 4a. Sieve cannot write to the data file.
+* 3a. The data file is read-only.
+
+    * 3a1. Sieve shows an error saying that the data file is read-only, and adds no client.
+
+      Use case ends.
+
+* 4a. Sieve cannot write to the data file for another reason, e.g. the disk is full.
 
     * 4a1. Sieve shows a warning that the client was added to the current view but not saved.
 
