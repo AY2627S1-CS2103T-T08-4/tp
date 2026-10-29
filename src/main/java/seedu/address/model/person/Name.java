@@ -38,6 +38,13 @@ public class Name {
      */
     public static final String VALIDATION_REGEX = "[A-Za-z][" + NAME_CHARACTERS + " ]*";
 
+    /**
+     * Apostrophe-like characters that phones and word processors put in place of {@code '},
+     * e.g. in "O’Brien" copied from a chat. Right and left single quotes, the modifier letter apostrophe
+     * and the prime.
+     */
+    private static final String APOSTROPHE_LIKE_REGEX = "[\u2018\u2019\u02BC\u2032]";
+
     public final String fullName;
 
     /**
@@ -52,13 +59,23 @@ public class Name {
     }
 
     /**
-     * Returns {@code name} trimmed, with consecutive whitespaces collapsed into a single space.
+     * Returns {@code name} trimmed, with consecutive whitespaces collapsed into a single space,
+     * and apostrophe-like characters replaced as in {@link #normalizeApostrophes(String)}.
      * The result may still be an invalid name.
      *
      * @param name A name as typed by the user.
      */
     public static String normalizeName(String name) {
-        return StringUtil.normalizeWhitespace(name);
+        return normalizeApostrophes(StringUtil.normalizeWhitespace(name));
+    }
+
+    /**
+     * Returns {@code text} with every apostrophe-like character, such as the curly {@code ’},
+     * replaced by a straight apostrophe {@code '}, so that "O’Brien" is read as "O'Brien".
+     */
+    public static String normalizeApostrophes(String text) {
+        requireNonNull(text);
+        return text.replaceAll(APOSTROPHE_LIKE_REGEX, "'");
     }
 
     /**
