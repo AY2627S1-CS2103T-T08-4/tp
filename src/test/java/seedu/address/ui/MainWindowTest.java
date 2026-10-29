@@ -232,6 +232,24 @@ public class MainWindowTest {
     }
 
     @Test
+    public void resizeWindowWithDetailOpen_recomputesDetailWidth(FxRobot robot) throws TimeoutException {
+        enterCommand(robot, "add n/Ravi Kumar p/87654321 e/ravi.k@edu.sg a/10 Queenstown Rd");
+        Region clientContent = (Region) stage.getScene().lookup("#clientContent");
+        Region detailPlaceholder = (Region) stage.getScene().lookup("#personDetailPanelPlaceholder");
+        ListView<Person> personListView = getPersonListView();
+
+        robot.interact(() -> stage.setWidth(1200));
+        robot.interact(() -> personListView.getSelectionModel().select(0));
+        WaitForAsyncUtils.waitFor(1, TimeUnit.SECONDS, () -> detailPlaceholder.getPrefWidth() >= 519);
+
+        robot.interact(() -> stage.setWidth(800));
+        WaitForAsyncUtils.waitFor(1, TimeUnit.SECONDS, () -> detailPlaceholder.getPrefWidth() < 500);
+
+        double expectedWidth = Math.clamp(clientContent.getWidth() * 0.55, 300, 520);
+        assertEquals(expectedWidth, detailPlaceholder.getPrefWidth(), 0.5);
+    }
+
+    @Test
     public void hidePersonDetail_detailAlreadyClosed_keepsDetailPanelHidden(FxRobot robot) {
         Node detailPlaceholder = stage.getScene().lookup("#personDetailPanelPlaceholder");
 

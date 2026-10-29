@@ -7,6 +7,9 @@ import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -57,6 +60,7 @@ public class MainWindow extends UiPart<Stage> {
     private ResultDisplay resultDisplay;
     private HelpWindow helpWindow;
     private Timeline detailAnimation;
+    private final DoubleProperty detailExpansion = new SimpleDoubleProperty(0);
     private boolean isDetailOpen;
 
     @FXML
@@ -149,6 +153,9 @@ public class MainWindow extends UiPart<Stage> {
 
         personDetailPanel = new PersonDetailPanel(personListPanel::clearSelection);
         personDetailPanelPlaceholder.getChildren().add(personDetailPanel.getRoot());
+        personDetailPanelPlaceholder.prefWidthProperty().bind(
+                Bindings.createDoubleBinding(() -> calculateDetailWidth() * detailExpansion.get(),
+                        clientContent.widthProperty(), primaryStage.widthProperty(), detailExpansion));
         clipDetailPanelDuringAnimation();
         personListPanel.selectedPersonProperty().addListener((observable, oldPerson, selectedPerson) -> {
             if (selectedPerson == null) {
@@ -193,9 +200,7 @@ public class MainWindow extends UiPart<Stage> {
         personDetailPanelPlaceholder.setManaged(true);
         personDetailPanelPlaceholder.setVisible(true);
 
-        double contentWidth = clientContent.getWidth() > 0 ? clientContent.getWidth() : primaryStage.getWidth();
-        double targetWidth = Math.clamp(contentWidth * DETAIL_WIDTH_RATIO, MIN_DETAIL_WIDTH, MAX_DETAIL_WIDTH);
-        animatePersonDetail(targetWidth, 1, null);
+        animatePersonDetail(1, 1, null);
     }
 
     private void hidePersonDetail() {
@@ -211,12 +216,17 @@ public class MainWindow extends UiPart<Stage> {
         });
     }
 
-    private void animatePersonDetail(double targetWidth, double targetOpacity, Runnable onFinished) {
+    private double calculateDetailWidth() {
+        double contentWidth = clientContent.getWidth() > 0 ? clientContent.getWidth() : primaryStage.getWidth();
+        return Math.clamp(contentWidth * DETAIL_WIDTH_RATIO, MIN_DETAIL_WIDTH, MAX_DETAIL_WIDTH);
+    }
+
+    private void animatePersonDetail(double targetExpansion, double targetOpacity, Runnable onFinished) {
         if (detailAnimation != null) {
             detailAnimation.stop();
         }
         detailAnimation = new Timeline(new KeyFrame(DETAIL_ANIMATION_DURATION,
-                new KeyValue(personDetailPanelPlaceholder.prefWidthProperty(), targetWidth, Interpolator.EASE_BOTH),
+                new KeyValue(detailExpansion, targetExpansion, Interpolator.EASE_BOTH),
                 new KeyValue(personDetailPanelPlaceholder.opacityProperty(), targetOpacity, Interpolator.EASE_BOTH)));
         if (onFinished != null) {
             detailAnimation.setOnFinished(event -> onFinished.run());
