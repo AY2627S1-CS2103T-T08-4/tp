@@ -3,7 +3,9 @@ package seedu.address.logic.commands;
 import static java.util.Objects.requireNonNull;
 
 import java.util.function.Predicate;
+import java.util.logging.Logger;
 
+import seedu.address.commons.core.LogsCenter;
 import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.logic.Messages;
 import seedu.address.model.Model;
@@ -31,9 +33,15 @@ public class FindCommand extends Command {
             + " Keywords must match the start of a name part (e.g. Bri, not rien). "
             + "Check the spelling, or use list to see all clients.";
 
+    private static final Logger logger = LogsCenter.getLogger(FindCommand.class);
+
     private final Predicate<Person> predicate;
 
+    /**
+     * Creates a {@code FindCommand} that shows the persons matching {@code predicate}.
+     */
     public FindCommand(Predicate<Person> predicate) {
+        requireNonNull(predicate);
         this.predicate = predicate;
     }
 
@@ -42,8 +50,12 @@ public class FindCommand extends Command {
         requireNonNull(model);
         model.updateFilteredPersonList(predicate);
         int matchCount = model.getFilteredPersonList().size();
+        logger.fine("Find matched " + matchCount + " client(s) for " + predicate);
         if (matchCount == 0) {
-            return CommandResult.forEmptySearch(MESSAGE_NO_CLIENTS_FOUND);
+            // With no clients at all, the tips to check the spelling or use list cannot help
+            boolean isAddressBookEmpty = model.getAddressBook().getPersonList().isEmpty();
+            return CommandResult.forEmptySearch(isAddressBookEmpty
+                    ? Messages.MESSAGE_NO_CLIENTS_TO_SEARCH : MESSAGE_NO_CLIENTS_FOUND);
         }
         return new CommandResult(Messages.getPersonsListedOverviewMessage(matchCount));
     }

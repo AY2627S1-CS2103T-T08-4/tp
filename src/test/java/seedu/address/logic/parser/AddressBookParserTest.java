@@ -137,7 +137,7 @@ public class AddressBookParserTest {
         FilterCommand command = (FilterCommand) parser.parseCommand(
                 FilterCommand.COMMAND_WORD + " t/Physics t/Secondary 4");
 
-        assertEquals(new FilterCommand(new PersonMatchesSearchPredicate(List.of(), List.of(), tags)), command);
+        assertEquals(new FilterCommand(new PersonMatchesSearchPredicate(List.of(), tags)), command);
     }
 
     @Test

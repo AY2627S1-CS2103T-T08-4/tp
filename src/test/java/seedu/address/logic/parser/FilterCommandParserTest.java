@@ -20,7 +20,7 @@ public class FilterCommandParserTest {
     @Test
     public void parse_tags_returnsFilterCommand() {
         FilterCommand expectedCommand = new FilterCommand(
-                new PersonMatchesSearchPredicate(List.of(), List.of(),
+                new PersonMatchesSearchPredicate(List.of(),
                         List.of(new Tag("Physics"), new Tag("Secondary 4"))));
 
         assertParseSuccess(parser, " t/Physics t/Secondary 4", expectedCommand);
@@ -29,14 +29,14 @@ public class FilterCommandParserTest {
     @Test
     public void parse_phone_returnsFilterCommand() {
         FilterCommand expectedCommand = new FilterCommand(
-                new PersonMatchesSearchPredicate(List.of(), List.of(new Phone("91234567")), List.of()));
+                new PersonMatchesSearchPredicate(List.of(new Phone("91234567")), List.of()));
 
         assertParseSuccess(parser, " p/9123 4567", expectedCommand);
     }
 
     @Test
     public void parse_multiplePhonesAndTags_returnsFilterCommand() {
-        FilterCommand expectedCommand = new FilterCommand(new PersonMatchesSearchPredicate(List.of(),
+        FilterCommand expectedCommand = new FilterCommand(new PersonMatchesSearchPredicate(
                 List.of(new Phone("91234567"), new Phone("98765432")),
                 List.of(new Tag("Physics"), new Tag("Secondary 4"))));
 
