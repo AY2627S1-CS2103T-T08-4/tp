@@ -101,8 +101,8 @@ specifies the layout of [
 
 The look of the UI is defined in `.css` files in the same folder:
 
-* `LightTheme.css` defines the colour palette once, as looked-up colours on `.root` (e.g. `-sieve-accent`), and every
-  other rule refers to these names. To change a colour, change it in `.root` only. Each window is a separate JavaFX
+* `LightTheme.css` defines the color palette once, as looked-up colors on `.root` (e.g. `-sieve-accent`), and every
+  other rule refers to these names. To change a color, change it in `.root` only. Each window is a separate JavaFX
   `Scene` with its own stylesheets, so both `MainWindow.fxml` and `HelpWindow.fxml` load `LightTheme.css`.
 * `LightTheme.css` also loads the bundled Inter font from `src/main/resources/fonts` with `@font-face`, and sets it on
   `.root`, so all text uses it on every platform. JavaFX registers the SemiBold font as a separate family, so rules
@@ -127,9 +127,9 @@ A few parts of the main window are worth knowing about when changing them:
   The result never takes keyboard focus, so `CommandBox` scrolls it a page at a time with Page Up and Page Down,
   through `ResultDisplay#scrollPage(VerticalDirection)`, while the user keeps typing.
 
-* **Tag colours.** `PersonCard` gives each tag a style class from `TagColor`, from `tag-color-0` to `tag-color-11`.
-  `TagColor` picks it from the tag's name, ignoring case, so a tag has the same colour on every client and every
-  launch. `LightTheme.css` has one `#tags .tag-color-N` rule for each class. To add a colour, add a rule and raise
+* **Tag colors.** `PersonCard` gives each tag a style class from `TagColor`, from `tag-color-0` to `tag-color-11`.
+  `TagColor` picks it from the tag's name, ignoring case, so a tag has the same color on every client and every
+  launch. `LightTheme.css` has one `#tags .tag-color-N` rule for each class. To add a color, add a rule and raise
   `TagColor.PALETTE_SIZE` to match.
 * **Client count.** `PersonListPanel` binds the text of the count above the list to the displayed client list, which
   is the `Model`'s filtered list. The count therefore updates after any command that changes or narrows down the
@@ -292,7 +292,7 @@ If no client matches, `FindCommand` returns `FindCommand.MESSAGE_NO_CLIENTS_FOUN
 
 `filter` narrows the displayed client list by exact phone numbers and tags. `FilterCommandParser` tokenizes the arguments on `p/` and `t/`, rejects unprefixed text, and requires at least one phone number or tag. It uses `ParserUtil.parsePhone` and `ParserUtil.parseTag`, giving `filter` the same validation and whitespace normalization as `find` and `add`.
 
-`FilterCommandParser` builds a `PersonMatchesSearchPredicate` without name keywords. Any supplied phone number may match, all supplied tags must match, and supplying both fields requires both conditions to match.
+`FilterCommandParser` builds a `PersonMatchesSearchPredicate` from the phone numbers and tags. Any supplied phone number may match, all supplied tags must match, and supplying both fields requires both conditions to match.
 
 ### Tag and untag features
 
@@ -1091,6 +1091,9 @@ The data file is `data/sieve.json` inside that folder.
     1. Test case: `filter p/92345678 t/Sec4`<br>
        Expected: Only `Brandon Sim` is listed because both the phone and tag filters match.
 
+    1. Test case: `filter t/Nothing`<br>
+       Expected: No clients are listed. The status message shows `0 clients found matching your search term(s).`, followed by tips for filtering again.
+
     1. Test case: `filter p/9123`<br>
        Expected: The displayed list does not change. An error message about the phone number format is shown.
 
@@ -1304,7 +1307,9 @@ The data file is `data/sieve.json` inside that folder.
 
     1. Test case: `delete 1, 2`, followed by `undo`.<br>
        Expected: Both deleted clients are restored by the single `undo` command. The full client list is displayed and
-       the status message shows `Undid the last change. Showing all clients.`
+       the status message shows:<br>
+       `Undid the last change.`<br>
+       `Showing all clients.`
 
 ### Undoing changes
 
@@ -1313,7 +1318,9 @@ The data file is `data/sieve.json` inside that folder.
     1. Prerequisites: Use the `list` command to display multiple clients.
 
     1. Test case: `delete 1`, then `undo`<br>
-       Expected: The deleted client is back in the list. The status message shows `Undid the last change. Showing all clients.`
+       Expected: The deleted client is back in the list. The status message shows:<br>
+       `Undid the last change.`<br>
+       `Showing all clients.`
 
 1. Undoing several changes in a row
 
@@ -1368,7 +1375,9 @@ The data file is `data/sieve.json` inside that folder.
     1. Prerequisites: Use the `list` command to display multiple clients.
 
     1. Test case: `delete 1`, then `undo`, then `redo`<br>
-       Expected: The client is deleted again. The status message shows `Redid the last undone change. Showing all clients.`
+       Expected: The client is deleted again. The status message shows:<br>
+       `Redid the last undone change.`<br>
+       `Showing all clients.`
 
 1. Redoing several undone changes in a row
 

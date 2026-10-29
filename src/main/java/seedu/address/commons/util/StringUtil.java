@@ -39,6 +39,16 @@ public class StringUtil {
     }
 
     /**
+     * Returns {@code s} trimmed, with consecutive whitespaces collapsed into a single space.
+     * e.g. "  Alex   Yeoh " becomes "Alex Yeoh".
+     * @throws NullPointerException if {@code s} is null.
+     */
+    public static String normalizeWhitespace(String s) {
+        requireNonNull(s);
+        return s.trim().replaceAll("\\s+", " ");
+    }
+
+    /**
      * Returns a detailed message of {@code t}, including the stack trace.
      */
     public static String getDetails(Throwable t) {

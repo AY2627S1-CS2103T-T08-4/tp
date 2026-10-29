@@ -2,6 +2,7 @@ package seedu.address.logic.parser;
 
 import static java.util.Objects.requireNonNull;
 import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
+import static seedu.address.logic.parser.CliSyntax.PREFIXES_EXCEPT_NOTE;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_ADDRESS;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_DUE_DATE;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_EMAIL;
@@ -40,7 +41,7 @@ public class EditCommandParser implements Parser<EditCommand> {
                 PREFIX_FEE, PREFIX_DUE_DATE, PREFIX_TAG);
 
         // Checked before the index, so that edit 1 z/x n/Amy names z/ instead of rejecting "1 z/x" as an index
-        argMultimap.verifyNoUnknownPrefixInPreamble();
+        argMultimap.verifyNoUnknownPrefixesInPreamble();
         String preamble = argMultimap.getPreamble();
         if (preamble.isEmpty()) {
             throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, EditCommand.MESSAGE_USAGE));
@@ -57,8 +58,7 @@ public class EditCommandParser implements Parser<EditCommand> {
         argMultimap.verifyNoDuplicatePrefixesFor(PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL, PREFIX_ADDRESS, PREFIX_NOTE,
             PREFIX_FEE, PREFIX_DUE_DATE);
         // Notes are free text, where words such as "w/" (with) are normal
-        argMultimap.verifyNoUnknownPrefixesIn(PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL, PREFIX_ADDRESS, PREFIX_FEE,
-            PREFIX_DUE_DATE, PREFIX_TAG);
+        argMultimap.verifyNoUnknownPrefixesIn(PREFIXES_EXCEPT_NOTE);
 
         EditPersonDescriptor editPersonDescriptor = new EditPersonDescriptor();
 
