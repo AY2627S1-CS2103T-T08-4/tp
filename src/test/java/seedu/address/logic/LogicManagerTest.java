@@ -53,7 +53,7 @@ public class LogicManagerTest {
     private static final IOException DUMMY_IO_EXCEPTION = new IOException("dummy IO exception");
     private static final IOException DUMMY_AD_EXCEPTION = new AccessDeniedException("dummy access denied exception");
     private static final String ADD_AMY_COMMAND =
-            AddCommand.COMMAND_WORD + NAME_DESC_AMY + PHONE_DESC_AMY + EMAIL_DESC_AMY + ADDRESS_DESC_AMY;
+        AddCommand.COMMAND_WORD + NAME_DESC_AMY + PHONE_DESC_AMY + EMAIL_DESC_AMY + ADDRESS_DESC_AMY;
 
     @TempDir
     public Path temporaryFolder;
@@ -118,7 +118,9 @@ public class LogicManagerTest {
         logic = new LogicManager(model, new StorageManager(addressBookStorage,
             new JsonUserPrefsStorage(temporaryFolder.resolve("unsavablePrefs.json"))));
 
-        assertEquals(ListCommand.MESSAGE_SUCCESS, logic.execute(ListCommand.COMMAND_WORD).getFeedbackToUser());
+        assertEquals(ListCommand.MESSAGE_SUCCESS, logic
+            .execute(ListCommand.COMMAND_WORD)
+            .getFeedbackToUser());
         logic.execute(FindCommand.COMMAND_WORD + " Amy");
     }
 
@@ -130,7 +132,9 @@ public class LogicManagerTest {
         Model expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
         String expectedMessage = String.format(LogicManager.READ_ONLY_FILE_ERROR_FORMAT, filePath);
 
-        assertTrue(filePath.toFile().setWritable(false));
+        assertTrue(filePath
+            .toFile()
+            .setWritable(false));
         try {
             // Running as a user who can write to any file, such as root, cannot test this
             assumeFalse(Files.isWritable(filePath));
@@ -143,9 +147,13 @@ public class LogicManagerTest {
             // Commands that change nothing still work
             logic.execute(ListCommand.COMMAND_WORD);
             logic.execute(FindCommand.COMMAND_WORD + " Amy");
-            assertEquals(1, model.getFilteredPersonList().size());
+            assertEquals(1, model
+                .getFilteredPersonList()
+                .size());
         } finally {
-            filePath.toFile().setWritable(true);
+            filePath
+                .toFile()
+                .setWritable(true);
         }
     }
 
@@ -184,7 +192,7 @@ public class LogicManagerTest {
     @Test
     public void execute_undoAfterUntag_restoresRemovedTag() throws Exception {
         String addCommand = AddCommand.COMMAND_WORD + NAME_DESC_AMY + PHONE_DESC_AMY
-                + EMAIL_DESC_AMY + ADDRESS_DESC_AMY + " t/friends";
+            + EMAIL_DESC_AMY + ADDRESS_DESC_AMY + " t/friends";
         logic.execute(addCommand);
         Model expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
 
@@ -211,8 +219,12 @@ public class LogicManagerTest {
         CommandResult result = logic.execute(ADD_AMY_COMMAND);
 
         // The text the user reads, unlike other tests, which format the same message constant as the command
-        assertTrue(result.getFeedbackToUser().endsWith("\nShowing all clients."));
-        assertEquals(1, model.getFilteredPersonList().size());
+        assertTrue(result
+            .getFeedbackToUser()
+            .endsWith("\nShowing all clients."));
+        assertEquals(1, model
+            .getFilteredPersonList()
+            .size());
     }
 
     @Test
@@ -237,21 +249,28 @@ public class LogicManagerTest {
         LogicManager lm = new LogicManager(model, storage, true,
             "Client 'Amy': Invalid Phone Number!");
         assertEquals("Client 'Amy': Invalid Phone Number!", lm.getDataCorruptionReason());
-        assertEquals("", new LogicManager(model, storage,
-            false, "ignored").getDataCorruptionReason());
-    
+        assertEquals("", new LogicManager(model, storage, false,
+            "ignored").getDataCorruptionReason());
+    }
+
     @Test
     public void getAllPersonList_listFiltered_includesHiddenPersons() throws Exception {
         logic.execute(ADD_AMY_COMMAND);
         logic.execute(FindCommand.COMMAND_WORD + " Zzz");
 
-        assertTrue(logic.getFilteredPersonList().isEmpty());
-        assertEquals(List.of(new PersonBuilder(AMY).withTags().build()), logic.getAllPersonList());
+        assertTrue(logic
+            .getFilteredPersonList()
+            .isEmpty());
+        assertEquals(List.of(new PersonBuilder(AMY)
+            .withTags()
+            .build()), logic.getAllPersonList());
     }
 
     @Test
     public void getAllPersonList_modifyList_throwsUnsupportedOperationException() {
-        assertThrows(UnsupportedOperationException.class, () -> logic.getAllPersonList().remove(0));
+        assertThrows(UnsupportedOperationException.class, () -> logic
+            .getAllPersonList()
+            .remove(0));
     }
 
     @Test

@@ -53,7 +53,7 @@ class JsonSerializableAddressBook {
      */
     public AddressBook toModelType() throws IllegalValueException {
         AddressBook addressBook = new AddressBook();
-                for (int i = 0; i < persons.size(); i++) {
+        for (int i = 0; i < persons.size(); i++) {
             JsonAdaptedPerson jsonAdaptedPerson = persons.get(i);
             if (jsonAdaptedPerson == null) {
                 throw new IllegalValueException(MESSAGE_NULL_PERSON);

@@ -45,6 +45,13 @@ public class LogicManager implements Logic {
     private boolean isReadOnlyMode = false;
 
     /**
+     * Constructs a {@code LogicManager} with the given {@code Model} and {@code Storage}.
+     */
+    public LogicManager(Model model, Storage storage) {
+        this(model, storage, false);
+    }
+
+    /**
      * Constructs a {@code LogicManager} with an option to initialize in read-only mode.
      */
     public LogicManager(Model model, Storage storage, boolean isDataCorrupted) {
