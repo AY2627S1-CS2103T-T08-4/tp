@@ -135,7 +135,7 @@ Format: `add n/NAME p/PHONE e/EMAIL a/ADDRESS [fee/FEE] [due/DUE_DATE] [t/TAG]..
 
 Examples:
 * `add n/Jason Quek p/91234567 e/jasonquek@gmail.com a/Blk 123 Yishun Ave 5 #04-12`
-* `add n/Brandon Sim p/92345678 e/brandonsim@sample.com a/10 Queenstown Rd nt/Parent prefers WhatsApp after 6pm` adds a client with a note.
+* `add n/Olivia Ng p/93338888 e/olivia@example.com a/Blk 8 Clementi Rd nt/Parent prefers WhatsApp after 6pm` adds a client with a note.
 * `add n/Matthias Tan t/Physics e/matthias.tan@gmail.com a/10 Queenstown Rd p/8123 4567 t/Sec4` adds a client with two tags. Fields can be given in any order, and spaces in the phone number are ignored.
 * `add n/Lena Ong p/91230000 e/lena@example.com a/Blk 3 Clementi Rd fee/250 due/01-11-2026` adds a client with a fee and a due date.
 
