@@ -50,7 +50,7 @@ public class AddressBookParserTest {
 
     @Test
     public void parseCommand_addWithBilling() throws Exception {
-        Person person = new PersonBuilder().withFee("250").withDueDate("01-11-2026").build();
+        Person person = new PersonBuilder().withFee("250").withDueDate("01-11-2030").build();
         AddCommand command = (AddCommand) parser.parseCommand(PersonUtil.getAddCommand(person));
         assertEquals(new AddCommand(person), command);
     }
@@ -74,7 +74,14 @@ public class AddressBookParserTest {
     @Test
     public void parseCommand_clear() throws Exception {
         assertTrue(parser.parseCommand(ClearCommand.COMMAND_WORD) instanceof ClearCommand);
-        assertTrue(parser.parseCommand(ClearCommand.COMMAND_WORD + " 3") instanceof ClearCommand);
+        assertTrue(parser.parseCommand("  " + ClearCommand.COMMAND_WORD + "  ") instanceof ClearCommand);
+    }
+
+    @Test
+    public void parseCommand_clearWithParameters_throwsParseException() {
+        // clear 3 must not delete every client when client 3 was meant
+        assertThrows(ParseException.class, ClearCommand.MESSAGE_NO_PARAMETERS, ()
+            -> parser.parseCommand(ClearCommand.COMMAND_WORD + " 3"));
     }
 
     @Test
@@ -130,7 +137,7 @@ public class AddressBookParserTest {
         FilterCommand command = (FilterCommand) parser.parseCommand(
                 FilterCommand.COMMAND_WORD + " t/Physics t/Secondary 4");
 
-        assertEquals(new FilterCommand(new PersonMatchesSearchPredicate(List.of(), List.of(), tags)), command);
+        assertEquals(new FilterCommand(new PersonMatchesSearchPredicate(List.of(), tags)), command);
     }
 
     @Test
@@ -162,13 +169,26 @@ public class AddressBookParserTest {
     @Test
     public void parseCommand_undo() throws Exception {
         assertTrue(parser.parseCommand(UndoCommand.COMMAND_WORD) instanceof UndoCommand);
-        assertTrue(parser.parseCommand(UndoCommand.COMMAND_WORD + " 3") instanceof UndoCommand);
+    }
+
+    @Test
+    public void parseCommand_undoWithParameters_throwsParseException() {
+        // undo 3 must not silently undo only one change
+        assertThrows(ParseException.class, UndoCommand.MESSAGE_NO_PARAMETERS, ()
+            -> parser.parseCommand(UndoCommand.COMMAND_WORD + " 3"));
+        assertThrows(ParseException.class, UndoCommand.MESSAGE_NO_PARAMETERS, ()
+            -> parser.parseCommand(UndoCommand.COMMAND_WORD + " all"));
     }
 
     @Test
     public void parseCommand_redo() throws Exception {
         assertTrue(parser.parseCommand(RedoCommand.COMMAND_WORD) instanceof RedoCommand);
-        assertTrue(parser.parseCommand(RedoCommand.COMMAND_WORD + " 3") instanceof RedoCommand);
+    }
+
+    @Test
+    public void parseCommand_redoWithParameters_throwsParseException() {
+        assertThrows(ParseException.class, RedoCommand.MESSAGE_NO_PARAMETERS, ()
+            -> parser.parseCommand(RedoCommand.COMMAND_WORD + " 3"));
     }
 
     @Test

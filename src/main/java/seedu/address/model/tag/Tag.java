@@ -26,8 +26,20 @@ public class Tag {
      */
     public Tag(String tagName) {
         requireNonNull(tagName);
-        checkArgument(isValidTagName(tagName), MESSAGE_CONSTRAINTS);
-        this.tagName = tagName;
+        String normalizedTagName = normalizeTagName(tagName);
+        checkArgument(isValidTagName(normalizedTagName), MESSAGE_CONSTRAINTS);
+        this.tagName = normalizedTagName;
+    }
+
+    /**
+     * Returns {@code tagName} trimmed, with consecutive whitespaces collapsed into a single space,
+     * so that tags such as "Sec 4" and "Sec  4" are the same. The result may still be an invalid tag name.
+     *
+     * @param tagName A tag name as typed by the user or read from the data file.
+     */
+    public static String normalizeTagName(String tagName) {
+        requireNonNull(tagName);
+        return tagName.trim().replaceAll("\\s+", " ");
     }
 
     /**

@@ -16,7 +16,15 @@ public class Messages {
     public static final String MESSAGE_INVALID_COMMAND_FORMAT = "Invalid command format!\n%1$s";
     public static final String MESSAGE_DUPLICATE_FIELDS =
                 "Multiple values specified for the following single-valued field(s): ";
+    public static final String MESSAGE_SHOWING_ALL_CLIENTS = "Showing all clients.";
+    public static final String MESSAGE_NOTE_NOT_LAST = "A note cannot contain n/, p/, e/, a/, t/, fee/ or due/, "
+            + "as everything after nt/ is part of the note. Put nt/NOTE last, and write such text another way, "
+            + "e.g. N/A instead of n/a.";
+    public static final String MESSAGE_NO_CLIENTS_TO_SEARCH =
+            "There are no clients in Sieve yet, so there is nothing to search. Use add to add one.";
 
+    private static final String MESSAGE_UNKNOWN_PREFIX =
+            "Unknown prefix %1$s. Check it for a typo, or type help to see the prefixes each command accepts.";
     private static final String MESSAGE_INDEX_OUT_OF_BOUNDS =
             "Error: The index provided is out of bounds! Current list only contains %1$s.";
     private static final String MESSAGE_PERSONS_LISTED_OVERVIEW = "%1$s found matching your search term(s).";
@@ -26,6 +34,14 @@ public class Messages {
             "A client named %1$s already exists in Sieve, with the phone number %2$s. "
                     + "Check that the name and phone numbers are correct. "
                     + "If this is a different client, add a detail to tell them apart, e.g. \"%1$s (NHHS)\".";
+
+    /**
+     * Returns an error message for {@code unknownPrefix}, a word such as {@code z/} that looks like a prefix
+     * but is not one.
+     */
+    public static String getErrorMessageForUnknownPrefix(String unknownPrefix) {
+        return String.format(MESSAGE_UNKNOWN_PREFIX, unknownPrefix);
+    }
 
     /**
      * Returns {@code count} followed by "client" or "clients", e.g. "0 clients", "1 client" or "3 clients".
@@ -65,6 +81,19 @@ public class Messages {
     }
 
     /**
+     * Returns the error message for {@code person} having the same name as the {@code existing} client.
+     * If their phone numbers also match, the client was most likely added before.
+     * Otherwise, they may be a different client who happens to have the same name.
+     */
+    public static String getDuplicateMessage(Person existing, Person person) {
+        // Add and edit only call this with the client that Model#findPersonWithSameName returned
+        assert existing.hasSameName(person) : "Only clients with the same name are duplicates";
+        return existing.hasSamePhone(person)
+                ? getClientAlreadyExistsMessage(existing)
+                : getNameAlreadyUsedMessage(existing);
+    }
+
+    /**
      * Returns an error message indicating the duplicate prefixes.
      */
     public static String getErrorMessageForDuplicatePrefixes(Prefix... duplicatePrefixes) {
@@ -90,6 +119,12 @@ public class Messages {
                 .append(person.getAddress());
         if (!person.getNote().isEmpty()) {
             builder.append("; Note: ").append(person.getNote());
+        }
+        if (!person.getFee().isEmpty()) {
+            builder.append("; Fee: ").append(person.getFee());
+        }
+        if (!person.getDueDate().isEmpty()) {
+            builder.append("; Due: ").append(person.getDueDate());
         }
         builder.append("; Tags: ");
         person.getTags().forEach(builder::append);

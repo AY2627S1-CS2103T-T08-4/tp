@@ -6,9 +6,14 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.testutil.Assert.assertThrows;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
 import org.junit.jupiter.api.Test;
 
 public class DueDateTest {
+
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd-MM-uuuu");
 
     @Test
     public void constructor_null_throwsNullPointerException() {
@@ -19,6 +24,24 @@ public class DueDateTest {
     public void constructor_invalidDueDate_throwsIllegalArgumentException() {
         assertThrows(IllegalArgumentException.class, () -> new DueDate("tomorrow"));
         assertThrows(IllegalArgumentException.class, () -> new DueDate("30-02-2026"));
+        assertThrows(IllegalArgumentException.class, () -> new DueDate("01-01-0000"));
+    }
+
+
+
+    @Test
+    public void isTodayOrLater() {
+        assertTrue(DueDate.isTodayOrLater("")); // empty means none set
+        assertTrue(DueDate.isTodayOrLater(LocalDate
+            .now().format(DATE_FORMAT)));
+        assertTrue(DueDate.isTodayOrLater(LocalDate.now().plusDays(1).format(DATE_FORMAT)));
+        assertFalse(DueDate.isTodayOrLater(LocalDate.now().minusDays(1).format(DATE_FORMAT)));
+    }
+
+    @Test
+    public void constructor_pastDate_success() {
+        // past dates must still load from the data file
+        assertEquals("01-01-2020", new DueDate("01-01-2020").value);
     }
 
     @Test
@@ -44,6 +67,9 @@ public class DueDateTest {
         assertTrue(DueDate.isValidDueDate("01-11-2026"));
         assertTrue(DueDate.isValidDueDate("29-02-2024")); // leap day
         assertTrue(DueDate.isValidDueDate("01-01-2020")); // past dates are allowed
+        assertTrue(DueDate.isValidDueDate("01-01-2000")); // earliest year
+        assertTrue(DueDate.isValidDueDate("31-12-9999")); // latest year
+        assertTrue(DueDate.isValidDueDate("29-02-2000")); // leap year
 
         // invalid due dates
         assertFalse(DueDate.isValidDueDate(" ")); // spaces only
@@ -54,6 +80,16 @@ public class DueDateTest {
         assertFalse(DueDate.isValidDueDate("1-1-2026")); // missing zero padding
         assertFalse(DueDate.isValidDueDate("2026-11-01")); // wrong order
         assertFalse(DueDate.isValidDueDate("01/11/2026")); // wrong separator
+        assertFalse(DueDate.isValidDueDate("31-12-1999")); // just below the range
+        assertFalse(DueDate.isValidDueDate("01-01-0000")); // year zero
+        assertFalse(DueDate.isValidDueDate("00-00-0000"));
+        assertFalse(DueDate.isValidDueDate("01-01-+10000")); // above the range
+        assertFalse(DueDate.isValidDueDate("01-01--0001")); // negative year
+        assertFalse(DueDate.isValidDueDate("31-02-2026"));
+        assertFalse(DueDate.isValidDueDate("31-04-2026")); // April has 30 days
+        assertFalse(DueDate.isValidDueDate("29-02-2100")); // divisible by 100, not a leap year
+        assertFalse(DueDate.isValidDueDate("00-01-2026")); // no day 0
+        assertFalse(DueDate.isValidDueDate("01-00-2026")); // no month 0
     }
 
     @Test

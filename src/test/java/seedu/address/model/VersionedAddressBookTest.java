@@ -4,26 +4,30 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.testutil.TypicalPersons.ALICE;
+import static seedu.address.testutil.TypicalPersons.BENSON;
 import static seedu.address.testutil.TypicalPersons.BOB;
 import static seedu.address.testutil.TypicalPersons.getTypicalAddressBook;
 
 import org.junit.jupiter.api.Test;
 
+import seedu.address.model.person.Person;
+import seedu.address.testutil.PersonBuilder;
+
 public class VersionedAddressBookTest {
 
     private final VersionedAddressBook versionedAddressBook = new VersionedAddressBook(getTypicalAddressBook());
+    private final Person aliceWithUpperCaseTag = new PersonBuilder(ALICE).withTags("FRIENDS").build();
 
     @Test
-    public void constructor_nothingToUndoOrRedo() {
+    public void constructor_typicalAddressBook_nothingToUndoOrRedo() {
         assertEquals(getTypicalAddressBook(), versionedAddressBook);
         assertFalse(versionedAddressBook.canUndoAddressBook());
         assertFalse(versionedAddressBook.canRedoAddressBook());
     }
 
     @Test
-    public void commitAddressBook_canUndo() {
-        versionedAddressBook.removePerson(ALICE);
-        versionedAddressBook.commitAddressBook();
+    public void commitAddressBook_afterChange_canUndo() {
+        deleteAndCommit(ALICE);
         assertTrue(versionedAddressBook.canUndoAddressBook());
     }
 
@@ -35,8 +39,7 @@ public class VersionedAddressBookTest {
 
     @Test
     public void commitAddressBook_noChangeAfterChange_undoesOnlyTheChange() {
-        versionedAddressBook.removePerson(ALICE);
-        versionedAddressBook.commitAddressBook();
+        deleteAndCommit(ALICE);
         versionedAddressBook.commitAddressBook();
 
         versionedAddressBook.undoAddressBook();
@@ -46,11 +49,8 @@ public class VersionedAddressBookTest {
 
     @Test
     public void commitAddressBook_changeThenRevert_bothUndoable() {
-        versionedAddressBook.removePerson(ALICE);
-        versionedAddressBook.commitAddressBook();
-        AddressBook withoutAlice = new AddressBook(versionedAddressBook);
-        versionedAddressBook.addPerson(ALICE);
-        versionedAddressBook.commitAddressBook();
+        AddressBook withoutAlice = deleteAndCommit(ALICE);
+        addAndCommit(ALICE);
 
         // Re-adding Alice is a real change even though Alice was in an earlier state
         versionedAddressBook.undoAddressBook();
@@ -62,9 +62,35 @@ public class VersionedAddressBookTest {
     }
 
     @Test
-    public void undoAddressBook_afterChange_restoresPreviousState() {
-        versionedAddressBook.removePerson(ALICE);
+    public void commitAddressBook_tagCaseOnlyChange_canUndo() {
+        versionedAddressBook.setPerson(ALICE, aliceWithUpperCaseTag);
         versionedAddressBook.commitAddressBook();
+        assertTrue(versionedAddressBook.canUndoAddressBook());
+
+        versionedAddressBook.undoAddressBook();
+        assertEquals(getTypicalAddressBook(), versionedAddressBook);
+    }
+
+    @Test
+    public void undoAddressBook_tagCaseOnlyChangeAfterDelete_undoesOneAtATime() {
+        AddressBook withoutBenson = deleteAndCommit(BENSON);
+        versionedAddressBook.setPerson(ALICE, aliceWithUpperCaseTag);
+        versionedAddressBook.commitAddressBook();
+        AddressBook withUpperCaseTag = new AddressBook(versionedAddressBook);
+
+        // The first undo reverts only the tag case change, so Benson stays deleted
+        versionedAddressBook.undoAddressBook();
+        assertEquals(withoutBenson, versionedAddressBook);
+        assertTrue(versionedAddressBook.canUndoAddressBook());
+
+        // The tag case change is not lost, and can be redone
+        versionedAddressBook.redoAddressBook();
+        assertEquals(withUpperCaseTag, versionedAddressBook);
+    }
+
+    @Test
+    public void undoAddressBook_afterChange_restoresPreviousState() {
+        deleteAndCommit(ALICE);
 
         versionedAddressBook.undoAddressBook();
         assertEquals(getTypicalAddressBook(), versionedAddressBook);
@@ -82,11 +108,8 @@ public class VersionedAddressBookTest {
 
     @Test
     public void undoAddressBook_twoChanges_undoesOneAtATime() {
-        versionedAddressBook.removePerson(ALICE);
-        versionedAddressBook.commitAddressBook();
-        AddressBook withoutAlice = new AddressBook(versionedAddressBook);
-        versionedAddressBook.addPerson(BOB);
-        versionedAddressBook.commitAddressBook();
+        AddressBook withoutAlice = deleteAndCommit(ALICE);
+        addAndCommit(BOB);
 
         versionedAddressBook.undoAddressBook();
         assertEquals(withoutAlice, versionedAddressBook);
@@ -99,11 +122,9 @@ public class VersionedAddressBookTest {
 
     @Test
     public void undoAddressBook_changeAfterUndo_doesNotBringBackUndoneChange() {
-        versionedAddressBook.removePerson(ALICE);
-        versionedAddressBook.commitAddressBook();
+        deleteAndCommit(ALICE);
         versionedAddressBook.undoAddressBook();
-        versionedAddressBook.addPerson(BOB);
-        versionedAddressBook.commitAddressBook();
+        addAndCommit(BOB);
 
         // Undoing the add should go back to the state after the first undo, with Alice still present
         versionedAddressBook.undoAddressBook();
@@ -113,8 +134,7 @@ public class VersionedAddressBookTest {
 
     @Test
     public void undoAddressBook_afterChange_canRedo() {
-        versionedAddressBook.removePerson(ALICE);
-        versionedAddressBook.commitAddressBook();
+        deleteAndCommit(ALICE);
         assertFalse(versionedAddressBook.canRedoAddressBook());
 
         versionedAddressBook.undoAddressBook();
@@ -123,9 +143,7 @@ public class VersionedAddressBookTest {
 
     @Test
     public void redoAddressBook_afterUndo_restoresUndoneState() {
-        versionedAddressBook.removePerson(ALICE);
-        versionedAddressBook.commitAddressBook();
-        AddressBook withoutAlice = new AddressBook(versionedAddressBook);
+        AddressBook withoutAlice = deleteAndCommit(ALICE);
         versionedAddressBook.undoAddressBook();
 
         versionedAddressBook.redoAddressBook();
@@ -139,12 +157,8 @@ public class VersionedAddressBookTest {
 
     @Test
     public void redoAddressBook_twoUndos_redoesInOrder() {
-        versionedAddressBook.removePerson(ALICE);
-        versionedAddressBook.commitAddressBook();
-        AddressBook withoutAlice = new AddressBook(versionedAddressBook);
-        versionedAddressBook.addPerson(BOB);
-        versionedAddressBook.commitAddressBook();
-        AddressBook withBob = new AddressBook(versionedAddressBook);
+        AddressBook withoutAlice = deleteAndCommit(ALICE);
+        AddressBook withBob = addAndCommit(BOB);
         versionedAddressBook.undoAddressBook();
         versionedAddressBook.undoAddressBook();
 
@@ -159,8 +173,7 @@ public class VersionedAddressBookTest {
 
     @Test
     public void commitAddressBook_noChangeAfterUndo_canStillRedo() {
-        versionedAddressBook.removePerson(ALICE);
-        versionedAddressBook.commitAddressBook();
+        deleteAndCommit(ALICE);
         versionedAddressBook.undoAddressBook();
 
         // LogicManager commits after undo too, which must not clear the redo history
@@ -170,12 +183,28 @@ public class VersionedAddressBookTest {
 
     @Test
     public void commitAddressBook_changeAfterUndo_nothingToRedo() {
-        versionedAddressBook.removePerson(ALICE);
-        versionedAddressBook.commitAddressBook();
+        deleteAndCommit(ALICE);
         versionedAddressBook.undoAddressBook();
-        versionedAddressBook.addPerson(BOB);
-        versionedAddressBook.commitAddressBook();
+        addAndCommit(BOB);
 
         assertFalse(versionedAddressBook.canRedoAddressBook());
+    }
+
+    /**
+     * Deletes {@code person}, commits the change, and returns a copy of the state after it.
+     */
+    private AddressBook deleteAndCommit(Person person) {
+        versionedAddressBook.removePerson(person);
+        versionedAddressBook.commitAddressBook();
+        return new AddressBook(versionedAddressBook);
+    }
+
+    /**
+     * Adds {@code person}, commits the change, and returns a copy of the state after it.
+     */
+    private AddressBook addAndCommit(Person person) {
+        versionedAddressBook.addPerson(person);
+        versionedAddressBook.commitAddressBook();
+        return new AddressBook(versionedAddressBook);
     }
 }

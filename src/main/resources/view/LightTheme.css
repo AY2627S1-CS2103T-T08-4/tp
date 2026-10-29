@@ -20,19 +20,18 @@
     -sieve-border: #e2e5ec;
     -sieve-text: #1f2430;
     -sieve-text-muted: #6b7280;
-    -sieve-accent: #2f4fd8;     /* the blue in the mockup */
+    -sieve-accent: #2f4fd8;     /* command box border, selected client and default button */
+    /* Only the startup alerts use this, and they are always light, so DarkTheme.css leaves it out */
+    -sieve-on-accent: white;    /* text on an accent background */
     -sieve-selected: #eef2ff;   /* selected client row */
     -sieve-error: #c0392b;
+    -sieve-error-background: #fdecec;
     -sieve-success: #1e8e3e;
 }
 
 .label {
     -fx-font-size: 11pt;
     -fx-text-fill: -sieve-text;
-}
-
-.text-field {
-    -fx-font-size: 12pt;
 }
 
 .list-view {
@@ -62,8 +61,7 @@
     -fx-padding: 0 0 0 0;
 }
 
-.list-cell:filled:even,
-.list-cell:filled:odd {
+.list-cell:filled {
     -fx-background-color: -sieve-list;
     /* top right bottom left: a thin line under each client instead of stripes */
     -fx-border-color: transparent transparent -sieve-border transparent;
@@ -74,7 +72,7 @@
 }
 
 .list-cell:filled:selected #cardPane {
-    /* blue bar on the left of the selected client, as in the mockup */
+    /* a bar on the left of the selected client */
     -fx-border-color: -sieve-accent;
 }
 
@@ -111,14 +109,68 @@
     -fx-text-fill: -sieve-accent;
 }
 
+/* Client details shown beside the list after a client is selected. */
+.person-detail-container {
+    -fx-background-color: -sieve-surface;
+    -fx-border-color: transparent transparent transparent -sieve-border;
+}
+
+#personDetailPanel,
+#personDetailPanel > .viewport,
+.person-detail-panel {
+    -fx-background-color: -sieve-surface;
+}
+
+.person-detail-name {
+    -fx-font-family: "Inter SemiBold";
+    -fx-font-size: 27px;
+}
+
+.button.detail-close-button {
+    -fx-padding: 0;
+    -fx-min-width: 30;
+    -fx-pref-width: 30;
+    -fx-min-height: 30;
+    -fx-pref-height: 30;
+    -fx-background-color: transparent;
+    -fx-border-color: #000000;
+    -fx-font-size: 21px;
+    -fx-text-fill: -sieve-text-muted;
+}
+
+.button.detail-close-button:hover {
+    -fx-background-color: -sieve-selected;
+}
+
+.person-detail-fields {
+    -fx-border-color: -sieve-border transparent transparent transparent;
+}
+
+.person-detail-row {
+    -fx-padding: 16 0 16 0;
+    -fx-border-color: transparent transparent -sieve-border transparent;
+}
+
+.person-detail-label {
+    -fx-min-width: 110;
+    -fx-pref-width: 110;
+    -fx-max-width: 110;
+    -fx-text-fill: -sieve-text-muted;
+}
+
+.person-detail-value {
+    -fx-font-size: 15px;
+    -fx-text-fill: -sieve-text;
+}
+
 .stack-pane {
-     -fx-background-color: -sieve-window;
+    -fx-background-color: -sieve-window;
 }
 
 .pane-with-border {
-     -fx-background-color: -sieve-window;
-     -fx-border-color: -sieve-border;
-     -fx-border-top-width: 1px;
+    -fx-background-color: -sieve-window;
+    -fx-border-color: -sieve-border;
+    -fx-border-top-width: 1px;
 }
 
 .status-bar {
@@ -130,9 +182,17 @@
     -fx-text-fill: -sieve-text;
 }
 
+/* The scroll pane around a long message blends into the result line */
+.result-display .scroll-pane,
+.result-display .scroll-pane > .viewport {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+
 /*
  * The icon is an empty Region given a shape: -fx-shape takes an SVG path, and the
- * background colour fills that shape. The shape is scaled to the region's size.
+ * background color fills that shape. The shape is scaled to the region's size.
  */
 .result-icon {
     -fx-min-width: 16;
@@ -156,6 +216,13 @@
 
 .result-display:error .label {
     -fx-text-fill: -sieve-error;
+}
+
+/* :empty-search is set by ResultDisplay when find or filter matches no clients */
+.result-display:empty-search .result-icon {
+    -fx-background-color: -sieve-text-muted;
+    /* a circle with an "i" cut out: the "i" is drawn in the opposite direction, which leaves it unfilled */
+    -fx-shape: "M8 0.5 A7.5 7.5 0 1 1 7.99 0.5 Z M7 3.5 L7 5.5 L9 5.5 L9 3.5 Z M7 7 L7 12.5 L9 12.5 L9 7 Z";
 }
 
 .status-bar .label {
@@ -189,13 +256,19 @@
     -fx-background-color: -sieve-window;
 }
 
+.top-bar {
+    -fx-background-color: -sieve-window;
+    -fx-padding: 0 8 0 0;
+}
+
+.theme-toggle-button {
+    -fx-padding: 4 12 4 12;
+    -fx-font-size: 10pt;
+}
+
 .menu-bar .label {
     -fx-font-size: 14pt;
     -fx-text-fill: -sieve-text;
-}
-
-.menu .left-container {
-    -fx-background-color: transparent;
 }
 
 .button {
@@ -220,7 +293,7 @@
 .button:default {
     -fx-background-color: -sieve-accent;
     -fx-border-color: -sieve-accent;
-    -fx-text-fill: white;
+    -fx-text-fill: -sieve-on-accent;
 }
 
 .button:default:hover {
@@ -312,7 +385,7 @@
 /* A command that failed. CommandBox removes the error class as soon as the user edits the text. */
 #commandTextField.error {
     -fx-border-color: -sieve-error;
-    -fx-background-color: #fdecec;
+    -fx-background-color: -sieve-error-background;
 }
 
 #tags {
@@ -328,7 +401,7 @@
 }
 
 /*
- * One background and text colour pair for each palette entry, chosen in TagColor.java.
+ * One background and text color pair for each palette entry, chosen in TagColor.java.
  * Keep the number of rules equal to TagColor.PALETTE_SIZE.
  * #tags is an id, which outranks any number of classes, so these beat .list-cell .label.
  */

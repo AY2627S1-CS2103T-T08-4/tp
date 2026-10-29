@@ -1,4 +1,4 @@
-/* Colours come from LightTheme.css, which the help window loads first */
+/* Colors come from LightTheme.css, which the help window loads first */
 #helpMessageContainer {
     -fx-background-color: -sieve-window;
 }

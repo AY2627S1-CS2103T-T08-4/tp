@@ -9,6 +9,7 @@ Class "<<interface>>\nReadOnlyAddressBook" as ReadOnlyAddressBook
 Class "<<interface>>\nReadOnlyUserPrefs" as ReadOnlyUserPrefs
 Class "<<interface>>\nModel" as Model
 Class AddressBook
+Class VersionedAddressBook
 Class ModelManager
 Class UserPrefs
 
@@ -18,6 +19,9 @@ Class Address
 Class Email
 Class Name
 Class Phone
+Class Note
+Class Fee
+Class DueDate
 Class Tag
 
 Class I #FFFFFF
@@ -31,7 +35,8 @@ AddressBook .up.|> ReadOnlyAddressBook
 ModelManager .up.|> Model
 Model .right.> ReadOnlyUserPrefs
 Model .left.> ReadOnlyAddressBook
-ModelManager -left-> "1" AddressBook
+VersionedAddressBook -left-|> AddressBook
+ModelManager -left-> "1" VersionedAddressBook
 ModelManager -right-> "1" UserPrefs
 UserPrefs .up.|> ReadOnlyUserPrefs
 
@@ -41,6 +46,9 @@ Person *--> Name
 Person *--> Phone
 Person *--> Email
 Person *--> Address
+Person *--> Note
+Person *--> Fee
+Person *--> DueDate
 Person *--> "*" Tag
 
 Person -[hidden]up--> I
@@ -49,6 +57,9 @@ UniquePersonList -[hidden]right-> I
 Name -[hidden]right-> Phone
 Phone -[hidden]right-> Address
 Address -[hidden]right-> Email
+Note -[hidden]right-> Fee
+Fee -[hidden]right-> DueDate
+Name -[hidden]down-> Note
 
 ModelManager --> "~* filtered" Person
 @enduml

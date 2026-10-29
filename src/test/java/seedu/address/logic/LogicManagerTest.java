@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -27,6 +28,7 @@ import seedu.address.logic.commands.AddCommand;
 import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.DeleteCommand;
 import seedu.address.logic.commands.EditCommand;
+import seedu.address.logic.commands.FindCommand;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.RedoCommand;
 import seedu.address.logic.commands.UndoCommand;
@@ -49,6 +51,8 @@ import seedu.address.testutil.PersonBuilder;
 public class LogicManagerTest {
     private static final IOException DUMMY_IO_EXCEPTION = new IOException("dummy IO exception");
     private static final IOException DUMMY_AD_EXCEPTION = new AccessDeniedException("dummy access denied exception");
+    private static final String ADD_AMY_COMMAND =
+            AddCommand.COMMAND_WORD + NAME_DESC_AMY + PHONE_DESC_AMY + EMAIL_DESC_AMY + ADDRESS_DESC_AMY;
 
     @TempDir
     public Path temporaryFolder;
@@ -79,6 +83,11 @@ public class LogicManagerTest {
     }
 
     @Test
+    public void execute_indexTooLargeForInt_showsOutOfBounds() {
+        assertCommandException("edit 2147483648 n/Amy", Messages.getIndexOutOfBoundsMessage(0));
+    }
+
+    @Test
     public void execute_validCommand_success() throws Exception {
         String listCommand = ListCommand.COMMAND_WORD;
         assertCommandSuccess(listCommand, ListCommand.MESSAGE_SUCCESS, model);
@@ -98,7 +107,7 @@ public class LogicManagerTest {
 
     @Test
     public void execute_successfulMutatingCommand_canUndo() throws Exception {
-        logic.execute(AddCommand.COMMAND_WORD + NAME_DESC_AMY + PHONE_DESC_AMY + EMAIL_DESC_AMY + ADDRESS_DESC_AMY);
+        logic.execute(ADD_AMY_COMMAND);
         assertTrue(model.canUndoAddressBook());
     }
 
@@ -110,7 +119,7 @@ public class LogicManagerTest {
 
     @Test
     public void execute_undoAfterAdd_removesAddedClient() throws Exception {
-        logic.execute(AddCommand.COMMAND_WORD + NAME_DESC_AMY + PHONE_DESC_AMY + EMAIL_DESC_AMY + ADDRESS_DESC_AMY);
+        logic.execute(ADD_AMY_COMMAND);
         // list changes nothing, so it must not use up the undo
         logic.execute(ListCommand.COMMAND_WORD);
 
@@ -120,7 +129,7 @@ public class LogicManagerTest {
 
     @Test
     public void execute_undoAfterEditThatChangesNothing_revertsChangeBeforeIt() throws Exception {
-        logic.execute(AddCommand.COMMAND_WORD + NAME_DESC_AMY + PHONE_DESC_AMY + EMAIL_DESC_AMY + ADDRESS_DESC_AMY);
+        logic.execute(ADD_AMY_COMMAND);
         // Amy already has this phone number, so the edit succeeds but changes nothing
         logic.execute(EditCommand.COMMAND_WORD + " 1" + PHONE_DESC_AMY);
 
@@ -142,7 +151,7 @@ public class LogicManagerTest {
 
     @Test
     public void execute_redoAfterUndo_restoresAddedClient() throws Exception {
-        logic.execute(AddCommand.COMMAND_WORD + NAME_DESC_AMY + PHONE_DESC_AMY + EMAIL_DESC_AMY + ADDRESS_DESC_AMY);
+        logic.execute(ADD_AMY_COMMAND);
         ModelManager expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
         logic.execute(UndoCommand.COMMAND_WORD);
         // list changes nothing, so it must not clear the redo history
@@ -153,11 +162,21 @@ public class LogicManagerTest {
     }
 
     @Test
+    public void execute_addAfterFind_saysShowingAllClients() throws Exception {
+        logic.execute(FindCommand.COMMAND_WORD + " Bob");
+        CommandResult result = logic.execute(ADD_AMY_COMMAND);
+
+        // The text the user reads, unlike other tests, which format the same message constant as the command
+        assertTrue(result.getFeedbackToUser().endsWith("\nShowing all clients."));
+        assertEquals(1, model.getFilteredPersonList().size());
+    }
+
+    @Test
     public void execute_redoAfterNewChange_throwsCommandException() throws Exception {
-        logic.execute(AddCommand.COMMAND_WORD + NAME_DESC_AMY + PHONE_DESC_AMY + EMAIL_DESC_AMY + ADDRESS_DESC_AMY);
+        logic.execute(ADD_AMY_COMMAND);
         logic.execute(UndoCommand.COMMAND_WORD);
         // adding Amy again is a new change, so the undone add can no longer be redone
-        logic.execute(AddCommand.COMMAND_WORD + NAME_DESC_AMY + PHONE_DESC_AMY + EMAIL_DESC_AMY + ADDRESS_DESC_AMY);
+        logic.execute(ADD_AMY_COMMAND);
 
         assertCommandException(RedoCommand.COMMAND_WORD, RedoCommand.MESSAGE_NOTHING_TO_REDO);
     }
@@ -167,6 +186,20 @@ public class LogicManagerTest {
         assertThrows(UnsupportedOperationException.class, () -> logic
             .getFilteredPersonList()
             .remove(0));
+    }
+
+    @Test
+    public void getAllPersonList_listFiltered_includesHiddenPersons() throws Exception {
+        logic.execute(ADD_AMY_COMMAND);
+        logic.execute(FindCommand.COMMAND_WORD + " Zzz");
+
+        assertTrue(logic.getFilteredPersonList().isEmpty());
+        assertEquals(List.of(new PersonBuilder(AMY).withTags().build()), logic.getAllPersonList());
+    }
+
+    @Test
+    public void getAllPersonList_modifyList_throwsUnsupportedOperationException() {
+        assertThrows(UnsupportedOperationException.class, () -> logic.getAllPersonList().remove(0));
     }
 
     @Test

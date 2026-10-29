@@ -51,14 +51,15 @@ public class VersionedAddressBook extends AddressBook {
     }
 
     /**
-     * Restores the state saved by the last {@link #commitAddressBook()}.
+     * Restores the state before the last change recorded by {@link #commitAddressBook()}.
      * Check {@link #canUndoAddressBook()} before calling this.
      */
     public void undoAddressBook() {
+        // UndoCommand checks canUndoAddressBook() first and shows an error, so this only fails on a bug
         assert canUndoAddressBook() : "No state to undo to";
         redoHistory.push(current);
-        this.current = undoHistory.pop();
-        this.resetData(this.current);
+        current = undoHistory.pop();
+        resetData(current);
     }
 
     /**
@@ -66,9 +67,10 @@ public class VersionedAddressBook extends AddressBook {
      * Check {@link #canRedoAddressBook()} before calling this.
      */
     public void redoAddressBook() {
+        // RedoCommand checks canRedoAddressBook() first and shows an error, so this only fails on a bug
         assert canRedoAddressBook() : "No state to redo to";
         undoHistory.push(current);
-        this.current = redoHistory.pop();
-        this.resetData(this.current);
+        current = redoHistory.pop();
+        resetData(current);
     }
 }

@@ -33,6 +33,15 @@ public class CommandResultTest {
 
         // different exit value -> returns false
         assertFalse(commandResult.equals(new CommandResult("feedback", false, true)));
+
+        // different isEmptySearch value -> returns false
+        assertFalse(commandResult.equals(CommandResult.forEmptySearch("feedback")));
+    }
+
+    @Test
+    public void isEmptySearch() {
+        assertTrue(CommandResult.forEmptySearch("feedback").isEmptySearch());
+        assertFalse(new CommandResult("feedback").isEmptySearch());
     }
 
     @Test
@@ -50,6 +59,9 @@ public class CommandResultTest {
 
         // different exit value -> returns different hashcode
         assertNotEquals(commandResult.hashCode(), new CommandResult("feedback", false, true).hashCode());
+
+        // different isEmptySearch value -> returns different hashcode
+        assertNotEquals(commandResult.hashCode(), CommandResult.forEmptySearch("feedback").hashCode());
     }
 
     @Test
@@ -57,7 +69,8 @@ public class CommandResultTest {
         CommandResult commandResult = new CommandResult("feedback");
         String expected = CommandResult.class.getCanonicalName() + "{feedbackToUser="
                 + commandResult.getFeedbackToUser() + ", showHelp=" + commandResult.isShowHelp()
-                + ", exit=" + commandResult.isExit() + "}";
+                + ", exit=" + commandResult.isExit()
+                + ", isEmptySearch=" + commandResult.isEmptySearch() + "}";
         assertEquals(expected, commandResult.toString());
     }
 }

@@ -13,7 +13,12 @@ end box
 user -[USER_COLOR]> CommandBox : press Up
 activate CommandBox
 
-CommandBox -> CommandHistory : getPreviousCommand()
+CommandBox -> TextField : getText()
+activate TextField
+TextField --> CommandBox : currentText
+deactivate TextField
+
+CommandBox -> CommandHistory : getPreviousCommand(currentText)
 activate CommandHistory
 
 CommandHistory --> CommandBox : recalledCommand
@@ -30,8 +35,6 @@ opt recalledCommand is present
     TextField --> CommandBox
     deactivate TextField
 end
-
-CommandBox -> CommandBox : event.consume()
 
 CommandBox --> user
 deactivate CommandBox

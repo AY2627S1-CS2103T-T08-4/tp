@@ -7,54 +7,64 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Keeps track of all past commands the user has inputted during the session.
- * Every non-empty command entered is remembered, whether it succeeded or failed.
- * Consecutively repeated commands are also saved.
+ * Keeps track of the commands entered during the session, so that Up and Down can show them again.
+ * Every command added is kept, whether it succeeded or failed, including consecutive repeats.
+ * When the user goes back from a half-typed command, it is kept and shown again after the newest command.
  */
 public class CommandHistory {
 
     private final List<String> commands = new ArrayList<>();
-    private int current = 0; // position of the command shown in the command box
+    /** Index of the command recalled with Up or Down, or {@code commands.size()} when past the newest one. */
+    private int currentIndex = 0;
+    /** The text that was in the command box when the user last went back from past the newest command. */
+    private String draft = "";
 
     /**
-     * Saves {@code command} into commands.
+     * Saves {@code command} as the newest command and moves back to the end of the history,
+     * so that {@link #getPreviousCommand(String)} returns {@code command} next.
      */
     public void add(String command) {
         requireNonNull(command);
         commands.add(command);
-        current = commands.size();
+        currentIndex = commands.size();
     }
 
     /**
      * Moves back one command and returns it.
+     * When moving back from past the newest command, {@code currentText} is kept as the draft,
+     * which {@link #getNextCommand()} returns after the newest command.
      * Returns an empty {@code Optional} if there is no earlier command to show,
      * either because nothing has been entered yet or because the oldest command is already shown.
+     *
+     * @param currentText The text in the command box.
      */
-    public Optional<String> getPreviousCommand() {
-        if (current <= 0) {
+    public Optional<String> getPreviousCommand(String currentText) {
+        requireNonNull(currentText);
+        if (currentIndex <= 0) {
             return Optional.empty();
         }
 
-        current--;
-        return Optional.of(commands.get(current));
+        if (currentIndex == commands.size()) {
+            draft = currentText;
+        }
+        currentIndex--;
+        return Optional.of(commands.get(currentIndex));
     }
 
     /**
      * Moves forward one command and returns it.
      * Returns an empty {@code Optional} if there is no next command to show.
-     * Returns an empty string when moving past the newest command, so the command box is cleared.
+     * Returns the draft when moving past the newest command, so a half-typed command comes back.
      */
     public Optional<String> getNextCommand() {
-        if (current >= commands.size()) {
+        if (currentIndex >= commands.size()) {
             return Optional.empty();
         }
 
-        if (current == commands.size() - 1) {
-            current++;
-            return Optional.of("");
+        currentIndex++;
+        if (currentIndex == commands.size()) {
+            return Optional.of(draft);
         }
-
-        current++;
-        return Optional.of(commands.get(current));
+        return Optional.of(commands.get(currentIndex));
     }
 }

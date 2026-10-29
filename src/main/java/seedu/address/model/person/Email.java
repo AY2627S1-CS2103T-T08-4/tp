@@ -9,8 +9,13 @@ import static seedu.address.commons.util.AppUtil.checkArgument;
  */
 public class Email {
 
-    public static final String MESSAGE_CONSTRAINTS =
-            "Invalid Email! Please enter a valid email address format (e.g., student@domain.com).";
+    // The longest email address that can be delivered (RFC 5321)
+    public static final int MAX_LENGTH = 254;
+    public static final String MESSAGE_CONSTRAINTS = String.format(
+            "Invalid Email! Enter an email such as student@domain.com, up to %d characters. Before the @, use only "
+                    + "letters, digits and + _ . - (not at the start or end, and not two in a row). "
+                    + "After the @, use a domain name with a full stop, such as gmail.com.",
+            MAX_LENGTH);
     private static final String SPECIAL_CHARACTERS = "+_.-";
     // alphanumeric and special characters
     private static final String ALPHANUMERIC_NO_UNDERSCORE = "[^\\W_]+"; // alphanumeric characters except underscore
@@ -19,7 +24,8 @@ public class Email {
     private static final String DOMAIN_PART_REGEX = ALPHANUMERIC_NO_UNDERSCORE
             + "(-" + ALPHANUMERIC_NO_UNDERSCORE + ")*";
     private static final String DOMAIN_LAST_PART_REGEX = "(" + DOMAIN_PART_REGEX + "){2,}$"; // At least two chars
-    private static final String DOMAIN_REGEX = "(" + DOMAIN_PART_REGEX + "\\.)*" + DOMAIN_LAST_PART_REGEX;
+    // At least one dot, so that a name without a top-level domain such as "a@localhost" is rejected
+    private static final String DOMAIN_REGEX = "(" + DOMAIN_PART_REGEX + "\\.)+" + DOMAIN_LAST_PART_REGEX;
     public static final String VALIDATION_REGEX = LOCAL_PART_REGEX + "@" + DOMAIN_REGEX;
 
     public final String value;
@@ -39,7 +45,8 @@ public class Email {
      * Returns true if a given string is a valid email.
      */
     public static boolean isValidEmail(String test) {
-        return test.matches(VALIDATION_REGEX);
+        // The length is checked first, as the regex overflows the stack on inputs thousands of characters long
+        return test.length() <= MAX_LENGTH && test.matches(VALIDATION_REGEX);
     }
 
     @Override

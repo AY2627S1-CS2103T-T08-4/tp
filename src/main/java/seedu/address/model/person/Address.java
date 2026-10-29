@@ -3,6 +3,8 @@ package seedu.address.model.person;
 import static java.util.Objects.requireNonNull;
 import static seedu.address.commons.util.AppUtil.checkArgument;
 
+import seedu.address.commons.util.StringUtil;
+
 /**
  * Represents a Person's address in the address book.
  * Guarantees: immutable; is valid as declared in {@link #isValidAddress(String)}
@@ -11,14 +13,17 @@ public class Address {
 
     public static final int MAX_LENGTH = 150;
     public static final String MESSAGE_CONSTRAINTS = String.format(
-            "Invalid Address! Address field cannot be empty or more than %d characters.",
+            "Invalid Address! Addresses must contain at least one letter or digit, "
+                    + "and be at most %d characters long. If the client has no address, enter e.g. a/Online.",
             MAX_LENGTH);
 
     /*
      * The first character of the address must not be a whitespace,
      * otherwise " " (a blank string) becomes a valid input.
+     * The address must also contain a letter or digit in any language, so that one made only of
+     * invisible characters, such as a non-breaking space, is rejected, while "Blk 1" or an address in Chinese is not.
      */
-    public static final String VALIDATION_REGEX = "[^\\s].*";
+    public static final String VALIDATION_REGEX = "(?=.*[\\p{L}\\p{N}])[^\\s].*";
 
     public final String value;
 
@@ -40,8 +45,7 @@ public class Address {
      * @param address An address as typed by the user.
      */
     public static String normalizeAddress(String address) {
-        requireNonNull(address);
-        return address.trim().replaceAll("\\s+", " ");
+        return StringUtil.normalizeWhitespace(address);
     }
 
     /**

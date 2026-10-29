@@ -22,7 +22,8 @@
   `src/main/resources/fonts/Inter-LICENSE.txt`.
 * Sieve uses [JavaFX](https://openjfx.io/) for its graphical user interface.
 * Sieve uses [Jackson](https://github.com/FasterXML/jackson) for JSON data storage.
-* Sieve uses [JUnit 5](https://junit.org/junit5/) for automated testing.
+* Sieve uses [JUnit 5](https://junit.org/junit5/) for automated testing, and [TestFX](https://github.com/TestFX/TestFX)
+  to test its user interface.
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -33,6 +34,15 @@ Refer to the guide [_Setting up and getting started_](SettingUp.md).
 --------------------------------------------------------------------------------------------------------------------
 
 ## **Design**
+
+<box type="info" seamless>
+
+**Note on names in the code:** Sieve is built on AddressBook-Level3 (AB3) and keeps its class and package names. In
+the code, a client is a `Person` and the client list is an `AddressBook`, as in `UniquePersonList`, `AddressBookParser`
+and `JsonAddressBookStorage`, and every class is in the `seedu.address` package. This guide uses these names when it
+refers to code, and *client* and *client list* otherwise. Renaming them would touch almost every file without changing
+any behaviour, so we kept AB3's names.
+</box>
 
 ### Architecture
 
@@ -89,9 +99,9 @@ The **API** of this component is specified in [
 
 <puml src="diagrams/UiClassDiagram.puml" alt="Structure of the UI Component"/>
 
-The UI consists of a `MainWindow` and its parts, such as `CommandBox`, `ResultDisplay`, `PersonListPanel`, and
-`StatusBarFooter`. All of these, including `MainWindow`, inherit from the abstract `UiPart` class, which captures common
-behavior among classes that represent visible GUI parts.
+The UI consists of a `MainWindow` and its parts, such as `CommandBox`, `ResultDisplay`, `PersonListPanel`,
+`PersonDetailPanel`, and `StatusBarFooter`. All of these, including `MainWindow`, inherit from the abstract `UiPart`
+class, which captures common behavior among classes that represent visible GUI parts.
 
 The `UI` component uses the JavaFX UI framework. The layouts of these UI parts are defined in matching `.fxml` files in
 `src/main/resources/view`. For example, [
@@ -101,9 +111,14 @@ specifies the layout of [
 
 The look of the UI is defined in `.css` files in the same folder:
 
-* `LightTheme.css` defines the colour palette once, as looked-up colours on `.root` (e.g. `-sieve-accent`), and every
-  other rule refers to these names. To change a colour, change it in `.root` only. Each window is a separate JavaFX
-  `Scene` with its own stylesheets, so both `MainWindow.fxml` and `HelpWindow.fxml` load `LightTheme.css`.
+* `LightTheme.css` defines the color palette once, as looked-up colors on `.root` (e.g. `-sieve-accent`), and every
+  other rule refers to these names. To change a color, change it in `.root` only (and in `DarkTheme.css`, below). Each
+  window is a separate JavaFX `Scene` with its own stylesheets, so both `MainWindow.fxml` and `HelpWindow.fxml` load
+  `LightTheme.css`.
+* `DarkTheme.css` gives the same looked-up colors, and the tag colors, their dark-theme values. It is not loaded at
+  startup. `MainWindow#handleToggleTheme()` adds it after `LightTheme.css`, so that its values win, or removes it
+  again, and `HelpWindow#setDarkTheme(boolean)` does the same for the help window. A color that differs between the
+  themes is therefore set in both files.
 * `LightTheme.css` also loads the bundled Inter font from `src/main/resources/fonts` with `@font-face`, and sets it on
   `.root`, so all text uses it on every platform. JavaFX registers the SemiBold font as a separate family, so rules
   that need it use `-fx-font-family: "Inter SemiBold"` rather than `-fx-font-weight`.
@@ -113,16 +128,53 @@ A few parts of the main window are worth knowing about when changing them:
 
 * **Command results.** `MainWindow` shows the result of a command with `ResultDisplay#setFeedbackToUser(String)`, or
   with `ResultDisplay#setErrorToUser(String)` if the command failed. `ResultDisplay` turns its `:error` pseudo-class on
-  or off to match, and `LightTheme.css` uses it to show a green tick or a red cross and red text. The icons are empty
+  or off to match, and `LightTheme.css` uses it to show a green tick or a red cross and red text. When `find` or
+  `filter` matches no clients, the command returns `CommandResult#forEmptySearch(String)`, and `MainWindow` calls
+  `ResultDisplay#setEmptySearchToUser(String)` instead, which turns on the `:empty-search` pseudo-class to show a grey
+  "i". A search that finds nothing has still run correctly, so it is neither a success nor an error. The icons are empty
   `Region`s shaped with `-fx-shape`, so no image files are needed. The result line is hidden until the first command.
+  The message sits in a `WrappingScrollPane`, so a long message (e.g. after deleting many clients) scrolls once it
+  reaches the pane's `maxHeight`, instead of squeezing the client list. A plain `ScrollPane` would not work here: its
+  parent asks for its height before the message is wrapped, so a message that wraps onto a second line would need to
+  be scrolled. `WrappingScrollPane` reports that its height depends on its width, as a wrapping `Label` does, and
+  fits its content to its width, without which that would not be true. Its `maxHeight` is a whole number of lines,
+  so that no line is cut in half.
+  The result never takes keyboard focus, so `CommandBox` scrolls it a page at a time with Page Up and Page Down,
+  through `ResultDisplay#scrollPage(VerticalDirection)`, while the user keeps typing.
 
-* **Tag colours.** `PersonCard` gives each tag a style class from `TagColor`, from `tag-color-0` to `tag-color-11`.
-  `TagColor` picks it from the tag's name, ignoring case, so a tag has the same colour on every client and every
-  launch. `LightTheme.css` has one `#tags .tag-color-N` rule for each class. To add a colour, add a rule and raise
-  `TagColor.PALETTE_SIZE` to match.
+* **Tag colors.** `PersonCard` gives each tag a style class from `TagColor`, from `tag-color-0` to `tag-color-11`.
+  `TagColor` picks it from the tag's name, ignoring case, so a tag has the same color on every client and every
+  launch. `LightTheme.css` and `DarkTheme.css` each have one `#tags .tag-color-N` rule for each class. To add a color,
+  add a rule to both files and raise `TagColor.PALETTE_SIZE` to match.
 * **Client count.** `PersonListPanel` binds the text of the count above the list to the displayed client list, which
   is the `Model`'s filtered list. The count therefore updates after any command that changes or narrows down the
   list, such as `delete` or `find`, without the commands having to update it.
+* **Empty list.** When no client is shown, the list's placeholder suggests `add` if Sieve has no clients at all, or
+  `list` if a search or filter hides them. `PersonListPanel` binds the placeholder to `Logic#getAllPersonList()`, the
+  unfiltered list, to tell the two apart.
+
+* **Client detail panel.** `PersonListPanel` exposes a read-only `selectedPersonProperty`, which `MainWindow` observes.
+  Selecting a client causes `MainWindow` to pass that `Person` to `PersonDetailPanel#setPerson(Person)`, put the list
+  into compact mode, and reveal the panel on the right. Selecting another client updates the existing panel instead of
+  navigating to another screen or creating another window. The detail view is read-only and does not call `Logic` or
+  mutate `Model` data.
+
+  `MainWindow` reveals and hides the panel with a 200 ms JavaFX `Timeline`. The panel width is 55% of the available
+  client-content width, clamped between 300 and 520 pixels, while its opacity changes at the same time. A bound
+  rectangular clip prevents the panel's contents from overflowing during the width animation. When the close button
+  or Esc clears the selection, the animation is reversed; the panel becomes unmanaged after it finishes, and the list
+  returns to its full layout.
+
+  `Person` is immutable, so commands such as `edit`, `tag` and `untag` replace an item in the observable list rather
+  than modifying it. JavaFX can temporarily clear the `ListView` selection during that replacement. To keep the same
+  client highlighted and refresh the open details, `PersonListPanel` detects a replacement containing the selected
+  person and reselects the corresponding replacement index on the next JavaFX pulse. A deletion or filter removal is
+  not restored, so the resulting null selection closes the panel.
+
+The following sequence diagram shows the UI interactions when a user opens the detail panel, switches clients, and
+then closes it. `Logic` and `Model` are omitted because viewing details does not use either component.
+
+<puml src="diagrams/ClientDetailSequenceDiagram.puml" alt="Opening, updating and closing the client detail panel" />
 
 The `UI` component,
 
@@ -140,10 +192,10 @@ Here's a (partial) class diagram of the `Logic` component:
 
 <puml src="diagrams/LogicClassDiagram.puml" width="550"/>
 
-The sequence diagram below illustrates the interactions within the `Logic` component, taking `execute("delete 1")` API
+The sequence diagram below illustrates the interactions within the `Logic` component, taking `execute("delete 1, 3")` API
 call as an example.
 
-<puml src="diagrams/DeleteSequenceDiagram.puml" alt="Interactions Inside the Logic Component for the `delete 1` Command" />
+<puml src="diagrams/DeleteSequenceDiagram.puml" alt="Interactions Inside the Logic Component for the `delete 1, 3` Command" />
 
 <box type="info" seamless>
 
@@ -167,8 +219,11 @@ How the `Logic` component works:
    `undo` or `redo`) is rejected with a `CommandException` before it runs, to protect the data file from being
    overwritten, while a malformed command still shows its usual parse error. Non-mutating commands like `list`, `find`
    and `help` remain fully operational. Every command that changes data must override `Command#isMutating()` to
-   return `true`. Here are the other classes in `Logic` (omitted from the
-   class diagram above) that are used for parsing a user command:
+   return `true`. The activity diagram below shows how `LogicManager` handles a parsed command in read-only mode.
+
+<puml src="diagrams/ReadOnlyActivityDiagram.puml" width="300" />
+
+Here are the other classes in `Logic` (omitted from the class diagram above) that are used for parsing a user command:
 
 <puml src="diagrams/ParserClasses.puml" width="600"/>
 
@@ -192,6 +247,8 @@ How the parsing works:
 The `Model` component,
 
 * stores the address book data i.e., all `Person` objects (which are contained in a `UniquePersonList` object).
+  `ModelManager` keeps it in a `VersionedAddressBook`, an `AddressBook` that also keeps the history for `undo` and
+  `redo` (see [Undo/redo feature](#undo-redo-feature)).
 * stores the `Person` objects selected by the current filter, such as search results, in a separate _filtered_ list. It
   exposes this list as an unmodifiable `ObservableList<Person>` that the UI can observe and bind to, so the UI updates
   when the list changes.
@@ -241,7 +298,7 @@ This section describes some noteworthy details on how certain features are imple
 
 `find` filters the displayed client list by name keywords. `FindCommandParser` validates the input and builds a `NameContainsKeywordsPredicate`, which decides which clients match. Searching by tag is done with `filter`.
 
-**Parsing.** `FindCommandParser` splits the trimmed arguments on whitespace, and every piece must be a valid keyword. There are no prefixes, so input such as `p/91234567` or `t/sec4` is rejected as an invalid keyword (`/` is not a name character). At least one keyword must be given.
+**Parsing.** `FindCommandParser` splits the trimmed arguments on whitespace, and every piece must be a valid keyword. There are no prefixes, so a keyword that starts with an add or edit prefix in any case, such as `n/Amy` or `t/sec4`, is rejected with `FindCommand.MESSAGE_PREFIX_IN_KEYWORDS`, which points to `filter`. This is checked before the keyword characters, so the tutor is told the prefix is the problem. Any other keyword with a `/` is rejected as an invalid keyword (`/` is not a name character). At least one keyword must be given.
 
 **Name keyword validation.** `Name` exposes the characters allowed in a name as `Name.NAME_CHARACTERS` (letters, digits and the punctuation in `Name.NAME_PUNCTUATION`: `'`, `.`, `(`, `)` and `-`). `Name.VALIDATION_REGEX` and `FindCommandParser`'s keyword regex are both built from this constant, so `find` always accepts the same characters as names. A keyword must also contain at least one letter or digit, so keywords such as `-` are rejected.
 
@@ -276,9 +333,9 @@ If no client matches, `FindCommand` returns `FindCommand.MESSAGE_NO_CLIENTS_FOUN
 
 ### Filter feature
 
-`filter` narrows the displayed client list by exact phone numbers and tags. `FilterCommandParser` tokenizes the arguments on `p/` and `t/`, rejects unprefixed text, and requires at least one phone number or tag. It uses `ParserUtil.parsePhone` and `ParserUtil.parseTag`, giving `filter` the same validation and whitespace normalization as `find` and `add`.
+`filter` narrows the displayed client list by exact phone numbers and tags. `FilterCommandParser` tokenizes the arguments on `p/` and `t/`, and also on the other add and edit prefixes, so that `t/Math n/Amy` is not read as the tag `Math n/Amy`. Any of those other prefixes is rejected with `FilterCommand.MESSAGE_OTHER_PREFIX`, which points to `find`, and an unknown prefix such as `x/` is named. The parser then rejects unprefixed text, and requires at least one phone number or tag. It uses `ParserUtil.parsePhone` and `ParserUtil.parseTag`, giving `filter` the same validation and whitespace normalization as `find` and `add`.
 
-`FilterCommandParser` builds a `PersonMatchesSearchPredicate` without name keywords. Any supplied phone number may match, all supplied tags must match, and supplying both fields requires both conditions to match.
+`FilterCommandParser` builds a `PersonMatchesSearchPredicate` from the phone numbers and tags. Any supplied phone number may match, all supplied tags must match, and supplying both fields requires both conditions to match.
 
 The following sequence diagram shows how `filter` parses its phone and tag criteria, creates a predicate, and updates the model's filtered list.
 
@@ -286,9 +343,40 @@ The following sequence diagram shows how `filter` parses its phone and tag crite
 
 ### Tag and untag features
 
-`TagCommandParser` and `UntagCommandParser` parse the displayed client index and one or more `t/` values using `ParserUtil.parseIndex` and `ParserUtil.parseTag`. Their command constructors remove duplicate requested tags while preserving input order.
+`TagCommandParser` and `UntagCommandParser` parse the displayed client index and one or more `t/` values using `ParserUtil.parseIndex` and `ParserUtil.parseTag`. They reject unknown prefixes before parsing tag values. Their command constructors remove duplicate requested tags while preserving input order.
 
-Both commands replace the selected immutable `Person` with a copy containing an updated tag set. `TagCommand` adds only tags the client does not already have, while `UntagCommand` removes only tags the client currently has. Tag equality is case-insensitive. Confirmation messages list only tags that were actually added or removed; when no change is needed, the commands leave the model unchanged and return a specific no-change message.
+Both commands replace the selected immutable `Person` with a copy containing an updated tag set. `TagCommand` adds only tags the client does not already have, while `UntagCommand` removes only tags the client currently has. Tag names are normalized by trimming and collapsing repeated whitespace, and equality is case-insensitive. After a successful change, both commands preserve the currently displayed clients, replacing the updated client in that list even if it no longer matches an earlier filter. Confirmation messages report both the tags changed and the tags already present or not found. Matching tags use the spelling stored on the client. When no change is needed, the commands leave the model unchanged and report why no tags were changed.
+
+### Notes feature
+
+`Note` is a free-text field for details about a client that do not fit a tag, such as a student's exam date or a parent's preferred contact time. It is an immutable class in `seedu.address.model.person`, is held by `Person`, is set through the `add` and `edit` commands with the `nt/` prefix, and is optional.
+
+**Model.** `Person` holds a `Note` next to its `Address`. An empty note (`Note.EMPTY`) means "not set", so `Person` never holds `null`. `Note` accepts up to 200 characters (`Note.MAX_LENGTH`). `Note#normalizeNote` trims the input and collapses repeated spaces before it is validated.
+
+**Parsing.** `ParserUtil#parseNote` normalizes and validates the input, and an empty input gives `Note.EMPTY`.
+
+* `AddCommandParser` uses `Note.EMPTY` when `nt/` is missing.
+* `EditCommandParser` sets the note in the `EditPersonDescriptor` only when `nt/` is present. A bare `nt/` sets `Note.EMPTY`, which clears the note, while a missing prefix leaves the note unchanged.
+* Repeating `nt/` is rejected with `verifyNoDuplicatePrefixesFor`.
+* `nt/` must be the last prefix. `ArgumentTokenizer` starts a new value at every known prefix, so in `edit 1 nt/Revise t/tests` the note would be cut short and `tests` would replace all the client's tags. Both parsers therefore call `ParserUtil#verifyNoteIsLast`, which uses `ArgumentTokenizer#hasPrefixAfter` with `CliSyntax.PREFIXES_EXCEPT_NOTE` and rejects the command with `Messages.MESSAGE_NOTE_NOT_LAST` if any known prefix follows `nt/`. The check runs after the unknown-prefix check and before the duplicate-prefix check, so `nt/call before e/visit` gets the note error instead of a repeated `e/`. Unknown prefix-like words, such as `w/`, are still allowed in a note.
+
+**Storage.** `JsonAdaptedPerson` stores the note as a string. `toModelType()` treats a missing (`null`) note as empty, so data files saved before notes existed still load and do not trigger the read-only fallback mode. A note that is present but longer than 200 characters throws an `IllegalValueException`.
+
+**UI.** `PersonCard` shows the note and hides the note line (`setVisible(false)` and `setManaged(false)`) when the note is empty, so it takes up no space.
+
+No command was added, so nothing new needs `isMutating()`. `add` and `edit` already override it.
+
+#### Design considerations:
+
+**Aspect: Representing "no note"**
+
+* **Alternative 1 (current choice):** A `Note.EMPTY` constant holding an empty string.
+    * Pros: `Person` never holds `null`, so callers need no null checks, and `edit 1 nt/` clearing the note falls out naturally.
+    * Cons: Callers must use `isEmpty()` to tell whether a note is set.
+
+* **Alternative 2:** `Optional<Note>` on `Person`.
+    * Pros: Makes "not set" explicit in the type.
+    * Cons: Every caller, the storage layer and the UI must unwrap it, for a field that has no behaviour of its own.
 
 The following sequence diagrams show the parsing and execution flow for the two commands:
 
@@ -303,11 +391,12 @@ The following sequence diagrams show the parsing and execution flow for the two 
 **Model.** `Person` holds a `Fee` and a `DueDate` next to its `Note`. An empty value (`Fee.EMPTY` or `DueDate.EMPTY`) means "not set", so `Person` never holds `null`.
 
 * `Fee` accepts 1 to 7 digits with an optional fractional part of 1 or 2 digits. It stores the value with exactly two decimal places (using `BigDecimal#setScale`), so `250`, `250.0` and `250.00` are the same fee.
-* `DueDate` accepts a real calendar date in the format `DD-MM-YYYY`. It is checked with a `DateTimeFormatter` in `ResolverStyle.STRICT` mode, so dates such as `30-02-2026` are rejected. Dates in the past are allowed, so that overdue payments can be recorded.
+* `DueDate` accepts a real calendar date in the format `DD-MM-YYYY`, checked in `ResolverStyle.STRICT` mode, with a year from `MIN_YEAR` (2000) to `MAX_YEAR` (9999). The pattern uses `uuuu` rather than `yyyy`, which allows year 0, so the range check is what rejects `01-01-0000`. `DueDate` itself accepts past dates, because the data file must still load after a due date passes.
 * Both classes keep their value as a `String`, like `Note`, and provide a `normalize...` method (trim only) that the parser and storage call before validating.
 
 **Parsing.** `CliSyntax` defines the prefixes `fee/` and `due/`. `ParserUtil#parseFee` and `ParserUtil#parseDueDate` trim and validate the input, and an empty input gives the empty value.
 
+* `ParserUtil#parseDueDate` rejects a date before today (`DueDate#isTodayOrLater`), so only `add` and `edit` enforce it. The rule is not in `DueDate`, because that would make stored due dates invalid as time passes and send Sieve into read-only mode.
 * `AddCommandParser` uses the empty value when a prefix is missing, so both fields are optional.
 * `EditCommandParser` sets a field in the `EditPersonDescriptor` only when its prefix is present. A present prefix with no value sets the empty value, which clears the field, while a missing prefix leaves the field unchanged.
 * Repeating a prefix is rejected with `verifyNoDuplicatePrefixesFor`.
@@ -359,6 +448,16 @@ No command was added, so nothing new needs `isMutating()`. `add` and `edit` alre
 * **Alternative 2:** `YYYY-MM-DD`.
     * Pros: Sorts in date order, and is unambiguous.
     * Cons: Less natural to type for most tutors.
+
+**Aspect: Where the valid due date rule is enforced**
+
+* **Alternative 1 (current choice):** In `ParserUtil`, so only newly typed dates are checked.
+  * Pros: A due date that passes later does not invalidate the data file, and an unrelated `edit` of an overdue client still works.
+  * Cons: An already-overdue payment cannot be recorded by typing a past date.
+
+* **Alternative 2:** In `DueDate`.
+  * Pros: One place enforces the rule.
+  * Cons: The data file becomes invalid as soon as any stored due date passes.
   
 ### Undo/redo feature
 
@@ -374,7 +473,7 @@ The history is kept by `VersionedAddressBook`, which extends `AddressBook` with 
 
 It adds the following operations, which are exposed in the `Model` interface under the same names:
 
-* `VersionedAddressBook#commitAddressBook()`: pushes `current` onto `undoHistory`, empties `redoHistory`, and saves a copy of the client list as `current`. Does nothing if the client list still matches `current`.
+* `VersionedAddressBook#commitAddressBook()`: pushes `current` onto `undoHistory`, empties `redoHistory`, and saves a copy of the client list as `current`. Does nothing if the client list still matches `current`. The check uses `equals()`, so `Person#equals()` compares tag names exactly, even though `Tag#equals()` ignores letter case to prevent duplicate tags. Otherwise, an edit that only changes `Math` to `MATH` would be saved to the data file but not committed, and the next `undo` would revert it together with the change before it.
 * `VersionedAddressBook#undoAddressBook()`: pushes `current` onto `redoHistory`, then pops the top of `undoHistory` and restores the client list to it.
 * `VersionedAddressBook#redoAddressBook()`: pushes `current` onto `undoHistory`, then pops the top of `redoHistory` and restores the client list to it.
 * `VersionedAddressBook#canUndoAddressBook()` and `VersionedAddressBook#canRedoAddressBook()`: return whether the matching stack has anything in it.
@@ -497,36 +596,37 @@ The history is kept in memory only, so it is lost when the app is closed. In rea
 
 The command history lets users bring back earlier commands with the Up and Down keys. It is handled entirely by the `UI` component: `CommandBox` owns a `CommandHistory`, which stores the commands. `Logic` and `Model` are not involved.
 
-`CommandHistory` has no JavaFX code, so it can be unit tested on its own. It keeps two fields:
+`CommandHistory` has no JavaFX code, so it can be unit tested on its own. It keeps three fields:
 
 * `commands`: every command entered in this session, oldest first.
-* `current`: the position of the command shown in the command box. It equals `commands.size()` when no command is being recalled.
+* `currentIndex`: the position of the command shown in the command box. It equals `commands.size()` when no command is being recalled.
+* `draft`: the text that was in the command box when the user last pressed Up while no command was being recalled. This is usually a command the user has not finished typing.
 
 It has the following operations:
 
-* `CommandHistory#add(command)`: adds the command to the end of `commands` and sets `current` to `commands.size()`, so the next Up starts from the newest command.
-* `CommandHistory#getPreviousCommand()`: moves `current` back one and returns that command. Returns an empty `Optional` if `current` is already 0.
-* `CommandHistory#getNextCommand()`: moves `current` forward one and returns that command. Returns an empty string when moving past the most recent command, so the command box is cleared, and an empty `Optional` if no command is being recalled.
+* `CommandHistory#add(command)`: adds the command to the end of `commands` and sets `currentIndex` to `commands.size()`, so the next Up starts from the newest command.
+* `CommandHistory#getPreviousCommand(currentText)`: moves `currentIndex` back one and returns that command. If no command was being recalled, it first saves `currentText`, the text in the command box, as `draft`. Returns an empty `Optional` if `currentIndex` is already 0.
+* `CommandHistory#getNextCommand()`: moves `currentIndex` forward one and returns that command. Returns `draft` when moving past the most recent command, so a half-typed command comes back, and an empty `Optional` if no command is being recalled.
 
 `CommandBox` uses it in two places:
 
 * `CommandBox#handleCommandEntered()` adds every non-blank command to the history before executing it. This way, a command that fails is kept and can be recalled to fix it.
-* `CommandBox#handleKeyPressed()` handles Up and Down. If the history returns a command, it is put in the text field with the cursor at the end. The key event is then consumed, so the text field does not also move the cursor. Other keys are left to the text field, so the cursor can still be moved within a recalled command.
+* `CommandBox#handleKeyPressed()` handles Up and Down. If the history returns a command, it is put in the text field with the cursor at the end. The key event is then consumed, so the text field does not also move the cursor. It also passes Page Up and Page Down to the `ResultScroller` it was created with, which scrolls the command result (see [UI component](#ui-component)). Other keys are left to the text field, so the cursor can still be moved within a recalled command. Up and Down with Shift, Ctrl, Alt or Meta held are left to the text field too, so that Shift+Up still selects text.
 
 The following sequence diagram shows what happens when the user presses Up:
 
 <puml src="diagrams/CommandHistorySequenceDiagram.puml" alt="CommandHistorySequenceDiagram" />
 
-The table below shows how `current` changes after the user enters `list` and then `find Amirah`, so `commands` is `[list, find Amirah]` and `current` is 2.
+The table below shows how `currentIndex` and `draft` change after the user enters `list` and then `find Amirah`, and then types `del` without pressing Enter. At the start, `commands` is `[list, find Amirah]`, `currentIndex` is 2 and `draft` is empty.
 
-Key pressed | `current` after | Command box shows
-------------|-----------------|------------------
-Up          | 1               | `find Amirah`
-Up          | 0               | `list`
-Up          | 0               | `list` (unchanged, as there is no earlier command)
-Down        | 1               | `find Amirah`
-Down        | 2               | nothing (cleared)
-Down        | 2               | unchanged, so any text the user has typed is kept
+Key pressed | `currentIndex` after | `draft` after | Command box shows
+------------|----------------------|---------------|------------------
+Up          | 1                    | `del`         | `find Amirah`
+Up          | 0                    | `del`         | `list`
+Up          | 0                    | `del`         | `list` (unchanged, as there is no earlier command)
+Down        | 1                    | `del`         | `find Amirah`
+Down        | 2                    | `del`         | `del` (the draft)
+Down        | 2                    | `del`         | unchanged, so any text the user has typed is kept
 
 #### Design considerations:
 
@@ -549,6 +649,70 @@ Down        | 2               | unchanged, so any text the user has typed is kep
 * **Alternative 2:** Only commands that succeed.
   * Pros: The history is shorter.
   * Cons: A failed command cannot be recalled, so the user must retype it to fix a typo.
+
+**Aspect: What Down shows after the newest command:**
+
+* **Alternative 1 (current choice):** The text that was in the command box before the user pressed Up, as in bash.
+  * Pros: A half-typed command is not lost when the user looks back at an earlier command.
+  * Cons: `CommandHistory` must keep one more field, and `CommandBox` must pass it the current text.
+
+* **Alternative 2:** An empty command box.
+  * Pros: Simpler, as `CommandHistory` only needs to know the commands entered.
+  * Cons: Pressing Up while typing loses the half-typed command for good.
+
+### Input validation
+
+Every client detail is checked against one rule in two places. `ParserUtil#parseXYZ` checks what the user types, and
+`JsonAdaptedPerson#toModelType()` checks what is loaded from the data file. Both call the model class's
+`isValidXYZ` method (e.g. `Phone#isValidPhone(String)`), and the user sees that class's `MESSAGE_CONSTRAINTS`, so a
+rule only needs to change in one place. A value in the data file that breaks a rule makes Sieve start in read-only
+mode (see [Logic component](#logic-component)).
+
+Some checks are worth knowing about:
+
+* **Unknown prefixes.** `ArgumentTokenizer` only splits the input at the prefixes a command accepts, so a mistyped
+  prefix, such as `z/` in `a/Blk 1 z/x`, would otherwise be saved as part of the address. `AddCommandParser` and
+  `EditCommandParser` therefore call `ArgumentMultimap#verifyNoUnknownPrefixesInPreamble()` and
+  `ArgumentMultimap#verifyNoUnknownPrefixesIn(PREFIXES_EXCEPT_NOTE)`, which reject any word of letters followed by
+  `/`. These run before the other checks, so that `add N/Amy …` names the unknown `N/` instead of reporting that
+  `n/NAME` is missing. The note is left out, because it is free text, where words such as `w/` (with) are normal.
+* **Phone numbers.** `Phone#stripPhone(String)` first removes spaces, hyphens and parentheses. `ParserUtil#parsePhone`
+  then checks `Phone#hasCountryCode(String)` before `Phone#isValidPhone(String)`, so `+65 9123 4567`, `6591234567`
+  and `006591234567` get `Phone.MESSAGE_COUNTRY_CODE`, which says to leave the country code out, instead of the
+  general 8-digit message.
+* **Email addresses.** `Email#isValidEmail(String)` checks the length (`Email.MAX_LENGTH`, 254 characters, the
+  longest address that can be delivered) before the regex, because the regex overflows the stack on inputs that are
+  thousands of characters long.
+* **Addresses.** `Address.VALIDATION_REGEX` requires at least one Unicode letter or digit, so an address of only
+  spaces, punctuation or invisible characters (such as non-breaking spaces) is rejected, while addresses in other
+  scripts still pass.
+
+#### Design considerations:
+
+**Aspect: A phone number with a country code:**
+
+* **Alternative 1 (current choice):** Reject it, with a message that says to leave the country code out.
+  * Pros: Every stored number has the same 8-digit form, so `filter p/` and the duplicate checks compare like with
+    like, and the user learns the rule the first time.
+  * Cons: A number copied from a contacts app must have its `+65` removed by hand.
+
+* **Alternative 2:** Remove a leading `+65` and store the remaining 8 digits.
+  * Pros: Copied numbers work as they are.
+  * Cons: Sieve silently changes what the user typed, and numbers from other countries still need their own error,
+    so there are two rules to explain instead of one.
+
+**Aspect: A word that looks like a prefix but is not one:**
+
+* **Alternative 1 (current choice):** Reject it as an unknown prefix, except in a note.
+  * Pros: A typo such as `P/91234567` is reported, instead of being saved inside another detail where the user may
+    not notice it.
+  * Cons: A detail that really contains such a word, such as `c/o` in an address, must be written differently (the
+    UG suggests `care of`).
+
+* **Alternative 2:** Keep it as part of the value, as AB3 does.
+  * Pros: No detail is rejected for containing a `/`.
+  * Cons: A mistyped prefix ends up in the previous detail without a warning, e.g. `a/Blk 1 z/x` saves the address
+    `Blk 1 z/x`.
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -592,10 +756,13 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 | `* * *`  | tutor                                  | find a client by name keyword                                                                         | I can pull up their details immediately when needed                                     |
 | `* * *`  | tutor                                  | delete a client I no longer tutor, e.g. a student who has graduated                                   | I can maintain an updated and clean list                                                |
 | `* *`    | tutor managing several former clients  | delete multiple clients in one command                                                                | I can clean up my client list without repeating the same command                        |
-| `* * *`  | tutor                                  | tag a client with free-form labels, and add or remove a single tag without retyping the whole contact | I can group clients the way my business actually works and keep small corrections cheap |
+| `* * *`  | tutor                                  | tag a client with free-form labels, and add or remove a single tag without retyping the whole client  | I can group clients the way my business actually works and keep small corrections cheap |
 | `* * *`  | tutor                                  | see all my clients as a numbered list                                                                 | I can refer to any of them by index in later commands                                   |
+| `* * *`  | tutor                                  | select a client and view all their details beside the client list                                     | I can review their information without navigating away from the list                    |
 | `* * *`  | careless typist                        | undo my last command                                                                                  | a mistyped delete isn't a disaster                                                      |
 | `* *`    | careless typist                        | redo a change I undid                                                                                 | undoing one step too far is easy to fix                                                 |
+| `* *`    | fast typist                            | bring back a command I entered earlier and edit it                                                    | I can fix a typo or repeat a command without retyping all of it                         |
+| `* *`    | user who edits the data file by hand   | have Sieve refuse to overwrite a data file it cannot read                                             | I can fix my mistake without losing my client records                                   |
 | `* *`    | new user switching from other tools    | bulk-add multiple clients at once                                                                     | I don't have to re-enter my existing client list one by one                             |
 | `* *`    | tutor                                  | filter clients by one or more phone numbers or tags in a single command                               | I can locate exact contacts or answer questions like "Sec 4 physics on Thursday" in one go |
 | `* *`    | tutor                                  | mark a client as inactive (e.g. paused for exams or a break) instead of deleting them                 | I keep their record and can resume lessons later without re-adding them from scratch    |
@@ -617,6 +784,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 | `*`      | tutor who runs group classes           | record a single session covering multiple students at once                                            | I don't have to repeat the same entry per student                                       |
 | `*`      | tutor who runs group classes           | see which enrolled students are attending a specific session                                          | I know who to expect and who is away                                                    |
 | `*`      | tutor who runs group classes           | bill a group class as a single unit                                                                   | I don't have to track payment separately for each student in it                         |
+| `*`      | tutor who works late at night          | switch the app to a dark theme                                                                        | the screen is easier on my eyes                                                         |
 
 ### Use cases
 
@@ -713,6 +881,40 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
       Use case resumes at step 3.
 
+**Use case: UC2A - View a client's details**
+
+**MSS**
+
+1. Tutor displays a list of clients.
+2. Tutor selects a client from the list.
+3. Sieve highlights that client, compacts the list and shows the client's details in a panel beside it.
+
+   Use case ends.
+
+**Extensions**
+
+* 1a. No clients are displayed.
+
+  Use case ends.
+
+* 3a. Tutor selects another displayed client.
+
+    * 3a1. Sieve moves the highlight and updates the open panel with that client's details.
+
+      Use case resumes at step 3.
+
+* 3b. Tutor closes the detail panel.
+
+    * 3b1. Sieve clears the selection and restores the full-width client list.
+
+      Use case ends.
+
+* 3c. The selected client is deleted or removed from the displayed results by a search or filter.
+
+    * 3c1. Sieve closes the detail panel and restores the full-width client list.
+
+      Use case ends.
+
 **Use case: UC3 - Tag clients to organise them**
 
 **MSS**
@@ -757,7 +959,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
       Use case continues from step 5.
 
-**Use case: UC3A - Remove tags from a client**
+**Use case: UC4 - Remove tags from a client**
 
 **MSS**
 
@@ -775,15 +977,21 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
     * 3a1. Sieve shows an error message and no tags are removed.
 
+      Use case resumes at step 3.
+
 * 3b. A specified tag is invalid.
 
     * 3b1. Sieve shows an error message and no tags are removed.
 
+      Use case resumes at step 3.
+
 * 4a. The client has none of the specified tags.
 
-    * 4a1. Sieve reports that the client does not have any specified tags and leaves the client unchanged.
+    * 4a1. Sieve reports that no tags were removed, lists the tags not found, and leaves the client unchanged.
 
-**Use case: UC4 - Delete one or more clients who no longer need tuition**
+      Use case ends.
+
+**Use case: UC5 - Delete one or more clients who no longer need tuition**
 
 **MSS**
 
@@ -831,7 +1039,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
       Use case resumes at step 3.
 
-**Use case: UC5 - Start with a clean client list on first use**
+**Use case: UC6 - Start with a clean client list on first use**
 
 **MSS**
 
@@ -848,13 +1056,56 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 * 2a. A data file exists but is corrupted.
 
-    * 2a1. Sieve starts with an empty list, shows an error message and leaves the file untouched.
+    * 2a1. Sieve starts in read-only mode with an empty list, shows an error message and leaves the file untouched.
+      Commands that change data are blocked until the tutor fixes or deletes the file and restarts Sieve.
 
-      Use case resumes at step 6.
+      Use case ends.
 
 * 4a. Tutor decides to keep the sample clients.
 
   Use case ends.
+
+**Use case: UC7 - Undo a mistaken change**
+
+**MSS**
+
+1. Tutor changes the client list by mistake, e.g. deletes the wrong client
+2. Tutor requests to undo the last change
+3. Sieve restores the client list to how it was before that change, saves it, and shows all clients
+
+   Use case ends.
+
+**Extensions**
+
+* 2a. There is no change left to undo, e.g. because Sieve has just been started.
+
+    * 2a1. Sieve shows an error message, and the client list stays as it is.
+
+      Use case ends.
+
+* 2b. Tutor gives a parameter, e.g. to undo three changes at once.
+
+    * 2b1. Sieve shows an error message saying that undo takes no parameters, and undoes nothing.
+
+      Use case resumes at step 2.
+
+* 2c. Sieve is in read-only mode because the data file is corrupted.
+
+    * 2c1. Sieve rejects the undo, as it does every command that changes data.
+
+      Use case ends.
+
+* 3a. Tutor wants to undo an earlier change as well.
+
+  Use case resumes at step 2.
+
+* 3b. Tutor decides the undo was a mistake.
+
+    * 3b1. Tutor requests to redo the change.
+
+    * 3b2. Sieve applies the change again, saves it, and shows all clients.
+
+      Use case ends.
 
 ### Non-Functional Requirements
 
@@ -865,25 +1116,32 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 4. Sieve should store client data locally and should not require an Internet connection for its core features.
 5. If the data file is missing or corrupted, Sieve should remain usable and should not overwrite the corrupted file
    before informing the user of the loading error.
-6. Tutor with above-average typing speed for regular English text should be able to perform most client-management tasks
-   faster using commands than using mouse-based interactions.
+6. A tutor with above-average typing speed for regular English text should be able to perform most client-management
+   tasks faster using commands than using mouse-based interactions.
+7. Client data should be stored locally in a human-editable JSON file, `data/sieve.json`. The file is not encrypted, so
+   keeping it private is left to the user's operating system account.
 
 ### Glossary
 
-* **Client**: A person receiving private tuition from the tutor and whose details are managed in Sieve. In the current
-  implementation and some inherited documentation, a client may also be referred to as a *person* or *contact*.
+* **Client**: A person receiving private tuition from the tutor and whose details are managed in Sieve. In the code, a
+  client is a `Person` (see the note at the start of [Design](#design)).
 * **Client record**: The collection of details stored in Sieve for one client, consisting of a name, phone number, email
   address, physical address, an optional note, an optional fee, an optional payment due date, and zero or more tags.
 * **Client list**: The collection of all client records stored in Sieve.
+* **Command box**: The text field at the top of Sieve's window, where the user types commands.
 * **Currently displayed client list**: The numbered list of clients presently shown in the application. It may contain
   all clients or only the clients returned by a search.
 * **Index**: The positive integer shown beside a client in the currently displayed client list. Commands such as `edit`
   and `delete` use this number to identify a client.
 * **Mainstream OS**: A currently supported version of Windows, Linux, or macOS that can run Java `25` or later.
+* **MSS (Main Success Scenario)**: The steps of a use case when everything goes as planned. The extensions after it
+  describe what happens otherwise.
 * **Prefix**: A command marker, such as `n/`, `p/`, `e/`, `a/`, `nt/`, `fee/`, `due/` or `t/`, that identifies the type of client detail
   following it.
-* **Tag**: A user-defined alphanumeric label attached to a client record for categorisation, such as a subject,
-  education level, or lesson day.
+* **Read-only mode**: The mode Sieve starts in when its data file is corrupted. Sieve shows an empty list and blocks
+  every command that would change data, so that the file is not overwritten before the user fixes it.
+* **Tag**: A user-defined label of letters, digits and spaces, attached to a client record for categorisation, such
+  as a subject, education level, or lesson day. Tags that differ only in letter case count as the same tag.
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -903,14 +1161,14 @@ Given below are instructions to test the app manually.
 
     1. Download the JAR file and copy it into an empty folder.
 
-    1. Double-click the JAR file.<br>
+    1. Open a terminal in that folder and run `java -jar sieve.jar`.<br>
        Expected: The GUI opens with a set of sample clients. The window size may not be optimal.
 
 1. Saving window preferences
 
     1. Resize the window to an optimal size. Move the window to a different location. Close the window.
 
-    1. Relaunch the app by double-clicking the JAR file.<br>
+    1. Relaunch the app with `java -jar sieve.jar` from the same folder.<br>
        Expected: The most recent window size and location are retained.
 
 ### Handling data files
@@ -972,6 +1230,151 @@ The data file is `data/sieve.json` inside that folder.
        `delete 1`.<br>
        Expected: The app opens without a popup and shows its clients. Commands that change data work again, and
        the change is saved to `data/sieve.json`.
+
+### Adding clients
+
+1. Adding a client with valid details
+
+    1. Prerequisites: Start with the sample data (delete `data/sieve.json` if it exists, or use a fresh folder).
+
+    1. Test case: `add n/Liam Tan p/93334444 e/liam@example.com a/Blk 5 Clementi Rd`<br>
+       Expected: `Liam Tan` is added at the end of the list. The status message starts with `New client added: Liam Tan`.
+
+    1. Test case: `add t/Math n/Mia Lee e/mia@example.com a/Blk 6 Clementi Rd p/9333 5555 t/Sec3`<br>
+       Expected: `Mia Lee` is added with the phone number `93335555` and the tags `Math` and `Sec3`. Parameters can be in
+       any order, and spaces in the phone number are ignored.
+
+1. Adding a client with missing or invalid details
+
+    1. Test case: `add n/Noah Lim p/93336666 e/noah@example.com`<br>
+       Expected: No client is added. An invalid command format error is shown, because the address is missing.
+
+    1. Test case: `add n/Noah Lim p/1234 e/noah@example.com a/Blk 7 Clementi Rd`<br>
+       Expected: No client is added. The status message shows the phone number constraints.
+
+    1. Test case: `add n/Noah Lim p/93336666 e/noah@localhost a/Blk 7 Clementi Rd`<br>
+       Expected: No client is added. The status message shows the email constraints.
+
+    1. Test case: `add n/Ravi s/o Kumar p/93336666 e/ravi@example.com a/Blk 7 Clementi Rd`<br>
+       Expected: No client is added. The status message reports the unknown prefix `s/`.
+
+### Editing clients
+
+1. Editing a client's details
+
+    1. Prerequisites: Start with the sample data.
+
+    1. Test case: `edit 2 p/93337777`<br>
+       Expected: `Brandon Sim`'s phone number becomes `93337777`. The other details are unchanged.
+
+    1. Test case: `edit 2 t/`<br>
+       Expected: All of `Brandon Sim`'s tags are removed.
+
+    1. Test case: `edit 1 p/91234567` (`Amirah Tan`'s current phone number)<br>
+       Expected: The client is unchanged. The status message shows `No change: Amirah Tan already has these details.`
+
+1. Editing after a search
+
+    1. Test case: `find Brandon`, then `edit 1 e/brandon.sim@example.com`<br>
+       Expected: The email is updated, and the full client list is shown again.
+
+1. Editing with invalid input
+
+    1. Test case: `edit 2`<br>
+       Expected: The status message shows `At least one field to edit must be provided.`
+
+    1. Test case: `edit 0 p/93337777`<br>
+       Expected: An invalid command format error is shown, saying that the index must be a positive integer.
+
+    1. Test case: `edit 99 p/93337777`<br>
+       Expected: An error says the index is out of bounds and gives the number of clients in the list.
+
+### Recording notes
+
+1. Notes in the sample data
+
+    1. Prerequisites: Start with the sample data.
+
+    1. Test case: Look at the cards for `Amirah Tan` and `Brandon Sim`.<br>
+       Expected: `Amirah Tan` shows the note `Weak at algebra, prelims in March`. `Brandon Sim` shows no note line.
+
+1. Adding, changing and clearing a note
+
+    1. Test case: `add n/Olivia Ng p/93338888 e/olivia@example.com a/Blk 8 Clementi Rd nt/Parent prefers WhatsApp after 6pm`<br>
+       Expected: `Olivia Ng` is added, and the card shows the note.
+
+    1. Prerequisites for the following cases: Note the index of `Olivia Ng` in the list.
+
+    1. Test case: `edit INDEX nt/Exam in March`<br>
+       Expected: The note is replaced with `Exam in March`, not added to.
+
+    1. Test case: `edit INDEX nt/Meet w/ parent`<br>
+       Expected: The note becomes `Meet w/ parent`. `w/` is not a prefix, so it is allowed in a note.
+
+    1. Test case: `edit INDEX nt/`<br>
+       Expected: The note is cleared, and the note line disappears from the card.
+
+1. The note must be the last parameter
+
+    1. Test case: `edit 1 nt/Revise t/tests`<br>
+       Expected: `Amirah Tan` is unchanged, and her tags are kept. The status message says that a note cannot contain
+       prefixes such as `t/`, and that `nt/NOTE` must be last.
+
+    1. Test case: `edit 1 nt/Allergies n/a`<br>
+       Expected: `Amirah Tan` is unchanged. The same status message is shown, suggesting `N/A` instead of `n/a`.
+
+    1. Test case: `edit 1 nt/Allergies N/A`<br>
+       Expected: The note becomes `Allergies N/A`. `N/` is not a prefix, so it is allowed in a note.
+
+    1. Test case: `edit 1 t/Math nt/Exam soon`<br>
+       Expected: `Amirah Tan`'s tags are replaced with `Math`, and her note becomes `Exam soon`.
+
+1. Invalid notes
+
+    1. Test case: `edit 1 nt/` followed by 201 characters (e.g. paste 201 copies of `a`)<br>
+       Expected: The client is unchanged. The status message says that notes cannot be more than 200 characters.
+
+    1. Test case: `edit 1 nt/one nt/two`<br>
+       Expected: The client is unchanged. The status message reports the repeated `nt/` prefix.
+
+1. Data files saved before notes existed
+
+    1. Prerequisites: Close the app. In `data/sieve.json`, delete the `"note"` line of one client (and the comma before
+       it if needed).
+
+    1. Test case: Relaunch the app.<br>
+       Expected: The app opens normally with no warning popup. The client shows no note.
+
+### Handling duplicate names
+
+1. Adding a client whose name is already used
+
+    1. Prerequisites: Start with the sample data.
+
+    1. Test case: `add n/Amirah Tan p/91234567 e/amirah2@example.com a/Blk 9 Clementi Rd`<br>
+       Expected: No client is added. The status message says that this client already exists, with the phone number
+       `91234567`.
+
+    1. Test case: `add n/amirah tan p/91234567 e/amirah2@example.com a/Blk 9 Clementi Rd`<br>
+       Expected: Same as previous, because names are compared ignoring case.
+
+    1. Test case: `add n/Amirah Tan p/98887777 e/amirah2@example.com a/Blk 9 Clementi Rd`<br>
+       Expected: No client is added. The status message says that a client named `Amirah Tan` already exists with a
+       different phone number, and suggests adding a detail to the name, e.g. `Amirah Tan (NHHS)`.
+
+    1. Test case: `add n/Amirah Tan (NHHS) p/98887777 e/amirah2@example.com a/Blk 9 Clementi Rd`<br>
+       Expected: `Amirah Tan (NHHS)` is added.
+
+1. Different clients sharing a phone number
+
+    1. Test case: `add n/Kelly Sim p/92345678 e/kelly@example.com a/10 Queenstown Rd`<br>
+       Expected: `Kelly Sim` is added, even though `Brandon Sim` has the same phone number.
+
+1. Renaming a client to a name that is already used
+
+    1. Test case: `edit 2 n/Amirah Tan`, then `edit 2 n/amirah TAN`<br>
+       Expected: `Brandon Sim` is not renamed in either case. The status message says that a client named
+       `Amirah Tan` already exists.
 
 ### Finding clients
 
@@ -1035,6 +1438,17 @@ The data file is `data/sieve.json` inside that folder.
     1. Test case: `filter p/92345678 t/Sec4`<br>
        Expected: Only `Brandon Sim` is listed because both the phone and tag filters match.
 
+    1. Prerequisites: Start with the sample data, enter `list`, then `tag 1 t/Sec 4`.
+
+    1. Test case: `filter t/Sec  4`<br>
+       Expected: Only `Amirah Tan` is listed. Repeated spaces are collapsed, so `Sec  4` matches `Sec 4`.
+
+    1. Test case: `filter t/Sec4`<br>
+       Expected: Only `Brandon Sim` is listed. `Sec4` remains distinct from `Sec 4`.
+
+    1. Test case: `filter t/Nothing`<br>
+       Expected: No clients are listed. The status message shows `0 clients found matching your search term(s).`, followed by tips for filtering again.
+
     1. Test case: `filter p/9123`<br>
        Expected: The displayed list does not change. An error message about the phone number format is shown.
 
@@ -1048,10 +1462,18 @@ The data file is `data/sieve.json` inside that folder.
     1. Prerequisites: Start with the sample data, where `Amirah Tan` already has the `Math` tag.
 
     1. Test case: `tag 1 t/Math t/Physics`<br>
-       Expected: `Physics` is added while `Math` is not duplicated. The success message lists only `Physics`.
+       Expected: `Physics` is added while `Math` is not duplicated. The result lists `Physics` as added and `Math` as already present.
+
+    1. Prerequisites: Start with the sample data.
+
+    1. Test case: `tag 1 t/Sec  4`<br>
+       Expected: The new tag is stored and displayed as `Sec 4`.
 
     1. Test case: `tag 1 t/Math`<br>
-       Expected: The client is unchanged and Sieve shows `Amirah Tan has all of the tag(s).`
+       Expected: The client is unchanged and Sieve reports that no tags were added, listing `Math` as already present.
+
+    1. Test case: `tag 1 t/Math z/x`<br>
+       Expected: The client is unchanged and Sieve reports `z/` as an unknown prefix.
 
 ### Removing tags from clients
 
@@ -1060,13 +1482,26 @@ The data file is `data/sieve.json` inside that folder.
     1. Prerequisites: Start with the sample data, where `Amirah Tan` has the `Math`, `Sec4`, and `Urgent` tags.
 
     1. Test case: `untag 1 t/Math t/Physics`<br>
-       Expected: `Math` is removed while `Sec4` and `Urgent` remain. The success message lists only `Math`.
+       Expected: `Math` is removed while `Sec4` and `Urgent` remain. The result lists `Math` as removed and `Physics` as not found.
 
     1. Test case: `untag 1 t/SEC4`<br>
        Expected: `Sec4` is removed despite the different letter case.
 
+    1. Prerequisites: Start with the sample data, where `Amirah Tan` has the tag `Math`.
+
+    1. Test case: `untag 1 t/math`<br>
+       Expected: The result reports `Math` as removed, using the stored spelling rather than `math`.
+
+    1. Prerequisites: Start with the sample data and enter `filter t/Physics`, which shows only `Brandon Sim`.
+
+    1. Test case: `untag 1 t/Physics`<br>
+       Expected: `Physics` is removed from `Brandon Sim`, and `Brandon Sim` remains visible in the filtered list.
+
     1. Test case: `untag 1 t/Biology`<br>
-       Expected: The client is unchanged and Sieve reports that the client does not have any specified tags.
+       Expected: The client is unchanged and Sieve reports that no tags were removed, listing `Biology` as not found.
+
+    1. Test case: `untag 1 t/Math z/x`<br>
+       Expected: The client is unchanged and Sieve reports `z/` as an unknown prefix.
 
     1. Test case: `untag 1 t/`<br>
        Expected: The client is unchanged and an error message about the tag format is shown.
@@ -1078,12 +1513,12 @@ The data file is `data/sieve.json` inside that folder.
     1. Prerequisites: Start with the sample data (delete `data/sieve.json` if it exists, or use a fresh folder).
 
     1. Test case: Look at the cards for `Amirah Tan` and `Charlotte Oliveiro`.<br>
-       Expected: `Amirah Tan` shows `Fee: 250.00` and `Due: 01-11-2026`. `Charlotte Oliveiro` shows neither line.
+       Expected: `Amirah Tan` shows `Fee: 250.00` and `Due: 01-11-2026`. `Devi Ramasamy` shows neither line.
 
 1. Adding a client with a fee and due date
 
-    1. Test case: `add n/Lena Ong p/91230000 e/lena@example.com a/Blk 3 Clementi Rd fee/250 due/01-11-2026`<br>
-       Expected: The new client's card shows `Fee: 250.00` and `Due: 01-11-2026`.
+    1. Test case: `add n/Lena Ong p/91230000 e/lena@example.com a/Blk 3 Clementi Rd fee/250 due/01-11-2030`<br>
+       Expected: The new client's card shows `Fee: 250.00` and `Due: 01-11-2030`.
 
     1. Test case: `add n/Kai Lim p/91230001 e/kai@example.com a/Blk 4 Clementi Rd fee/180.5`<br>
        Expected: The card shows `Fee: 180.50` and no due date.
@@ -1092,8 +1527,8 @@ The data file is `data/sieve.json` inside that folder.
 
     1. Prerequisites: Use the `list` command, and note the index of `Lena Ong`.
 
-    1. Test case: `edit INDEX fee/300 due/15-11-2026`<br>
-       Expected: The card shows `Fee: 300.00` and `Due: 15-11-2026`. The other details are unchanged.
+    1. Test case: `edit INDEX fee/300 due/15-11-2030`<br>
+       Expected: The card shows `Fee: 300.00` and `Due: 15-11-2030`. The other details are unchanged.
 
     1. Test case: `edit INDEX fee/`<br>
        Expected: The fee line disappears. The due date is unchanged.
@@ -1106,11 +1541,17 @@ The data file is `data/sieve.json` inside that folder.
     1. Test cases: `edit INDEX fee/-5`, `edit INDEX fee/abc`, `edit INDEX fee/250.555`<br>
        Expected: The client is unchanged. The status message shows the fee constraints.
 
-    1. Test cases: `edit INDEX due/30-02-2026`, `edit INDEX due/2026-11-01`, `edit INDEX due/1-1-2026`<br>
-       Expected: The client is unchanged. The status message shows the due date constraints.
+    1. Test cases: `edit INDEX due/30-02-2026`, `edit INDEX due/2026-11-01`, `edit INDEX due/1-1-2026`, `edit INDEX due/01-01-0000`, `edit INDEX due/31-12-1999`<br>
+   Expected: The client is unchanged. The status message shows the due date constraints.
+
+    1. Test case: `edit INDEX due/` followed by yesterday's date in `DD-MM-YYYY`<br>
+    Expected: The client is unchanged. The status message says due dates cannot be in the past.
+
+    1. Test cases: `edit INDEX due/` followed by today's date, then `edit INDEX due/29-02-2028`<br>
+    Expected: The due date is accepted and shown on the card.
 
     1. Test case: `edit INDEX fee/1 fee/2`<br>
-       Expected: The client is unchanged. The status message reports the repeated `fee/` prefix.
+    Expected: The client is unchanged. The status message reports the repeated `fee/` prefix.
 
 1. Billing details survive other commands
 
@@ -1129,6 +1570,12 @@ The data file is `data/sieve.json` inside that folder.
 
     1. Test case: Set a client's `"fee"` to `"-5"` in the file and relaunch.<br>
        Expected: The warning popup appears and the app starts in read-only mode with an empty list.
+
+    1. Test case: Set a client's `"dueDate"` to `"01-01-2020"` in the file and relaunch.<br>
+         Expected: The app opens normally and the card shows `Due: 01-01-2020`. Then enter `edit INDEX nt/test`. The due date is unchanged.
+
+    1. Test case: Set a client's `"dueDate"` to `"01-01-0000"` in the file and relaunch.<br>
+      Expected: The warning popup appears and the app starts in read-only mode with an empty list.
 
 ### Deleting clients
 
@@ -1169,7 +1616,7 @@ The data file is `data/sieve.json` inside that folder.
        Expected: No client is deleted. The status message shows:<br>
        `Invalid command format!`<br>
        `Error: Index not provided!`<br>
-       `Expected format: delete INDEX`
+       `Expected format: delete INDEX [, INDEX]...`
 
 1. Deleting using an invalid index
 
@@ -1236,7 +1683,51 @@ The data file is `data/sieve.json` inside that folder.
 
     1. Test case: `delete 1, 2`, followed by `undo`.<br>
        Expected: Both deleted clients are restored by the single `undo` command. The full client list is displayed and
-       the status message shows `Undid the last change. Showing all clients.`
+       the status message shows:<br>
+       `Undid the last change.`<br>
+       `Showing all clients.`
+
+### Clearing all clients
+
+1. Clearing with and without a parameter
+
+    1. Prerequisites: Start with the sample data.
+
+    1. Test case: `clear 3`<br>
+       Expected: No client is deleted. The status message shows
+       `clear takes no parameters, as it deletes every client. To delete some clients, use delete INDEX.`
+
+    1. Test case: `clear`<br>
+       Expected: Every client is deleted, and the count above the list shows `0 clients`.
+
+### Checking phone numbers and email addresses
+
+1. Phone numbers
+
+    1. Prerequisites: Start with the sample data.
+
+    1. Test cases: `edit 1 p/+65 9123 4567`, `edit 1 p/6591234567` and `edit 1 p/0065 9123 4567`<br>
+       Expected: The client is unchanged. The status message says to leave out the country code, e.g. `91234567`,
+       not `+65 9123 4567`.
+
+    1. Test case: `edit 1 p/12345678`<br>
+       Expected: The client is unchanged. The status message says that the number must be an 8-digit Singapore number
+       starting with 3, 6, 8 or 9.
+
+    1. Test case: `edit 1 p/(8123) 4568`<br>
+       Expected: The phone number becomes `81234568`, as spaces and parentheses are ignored.
+
+1. Email addresses
+
+    1. Test case: `edit 1 e/amirah@localhost`<br>
+       Expected: The client is unchanged. The status message lists the rules for email addresses.
+
+    1. Test case: `edit 1 e/` followed by 244 copies of `a` and then `@gmail.com` (254 characters in all)<br>
+       Expected: The email address is changed.
+
+    1. Test case: the same with 245 copies of `a` (255 characters)<br>
+       Expected: The client is unchanged. The status message lists the email rules, including the limit of 254
+       characters.
 
 ### Undoing changes
 
@@ -1245,7 +1736,9 @@ The data file is `data/sieve.json` inside that folder.
     1. Prerequisites: Use the `list` command to display multiple clients.
 
     1. Test case: `delete 1`, then `undo`<br>
-       Expected: The deleted client is back in the list. The status message shows `Undid the last change. Showing all clients.`
+       Expected: The deleted client is back in the list. The status message shows:<br>
+       `Undid the last change.`<br>
+       `Showing all clients.`
 
 1. Undoing several changes in a row
 
@@ -1262,6 +1755,13 @@ The data file is `data/sieve.json` inside that folder.
     1. Test case: `delete 1`, then `delete 0`, then `undo`<br>
        Expected: `delete 0` shows an error. `undo` restores the client deleted by `delete 1`.
 
+1. Undoing an edit that only changes the letter case of a tag
+
+    1. Prerequisites: The first client has the tag `Math`.
+
+    1. Test case: `delete 2`, then `edit 1 t/MATH`, then `undo`<br>
+       Expected: The first client's tag is back to `Math`, and the client deleted by `delete 2` is still deleted. A second `undo` restores that client.
+
 1. Undoing a clear
 
     1. Test case: `clear`, then `undo`<br>
@@ -1274,6 +1774,18 @@ The data file is `data/sieve.json` inside that folder.
     1. Test case: `undo`<br>
        Expected: The client list is unchanged. The status message shows `Error: There is nothing to undo.`
 
+1. Undoing with a parameter
+
+    1. Test case: `delete 1`, then `undo 3`<br>
+       Expected: The status message shows `undo takes no parameters. Run undo again to undo more changes.` The client stays deleted until a plain `undo`.
+
+1. An edit that changes nothing adds nothing to undo
+
+    1. Prerequisites: Use the `list` command. The first client is `Amirah Tan`.
+
+    1. Test case: `delete 2`, then `edit 1 n/Amirah Tan`, then `undo`<br>
+       Expected: `edit` shows `No change: Amirah Tan already has these details.` `undo` brings back the client deleted by `delete 2`.
+
 ### Redoing changes
 
 1. Redoing an undone change
@@ -1281,7 +1793,9 @@ The data file is `data/sieve.json` inside that folder.
     1. Prerequisites: Use the `list` command to display multiple clients.
 
     1. Test case: `delete 1`, then `undo`, then `redo`<br>
-       Expected: The client is deleted again. The status message shows `Redid the last undone change. Showing all clients.`
+       Expected: The client is deleted again. The status message shows:<br>
+       `Redid the last undone change.`<br>
+       `Showing all clients.`
 
 1. Redoing several undone changes in a row
 
@@ -1329,3 +1843,17 @@ The data file is `data/sieve.json` inside that folder.
 
     1. Test case: enter a few commands, close Sieve, reopen it, then press Up<br>
        Expected: The command box stays empty.
+
+### Scrolling a long result
+
+1. Scrolling with the keyboard
+
+    1. Prerequisites: Start with the sample data, and make the window as small as it goes.
+
+    1. Test case: `delete 1, 2, 3, 4, 5`, then type `list` without pressing Enter, then press Page Down twice and Page Up once<br>
+       Expected: The result stops growing at 7 lines and gets a scroll bar, and the client list keeps the rest of the
+       window. Page Down shows the next lines of the result, stopping at the last deleted client, and Page Up goes
+       back. The command box still shows `list`.
+
+    1. Test case: `undo`, then press Page Down<br>
+       Expected: The short result does not move.
