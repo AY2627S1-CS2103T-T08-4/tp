@@ -168,18 +168,43 @@ public class CommandBoxTest {
     }
 
     @Test
+    public void handleCommandEntered_editedRecalledCommand_runsEditedText(FxRobot robot) {
+        enterCommand(robot, VALID_COMMAND);
+        pressKey(robot, KeyCode.UP);
+
+        // The recalled command, changed before pressing Enter
+        enterCommand(robot, OTHER_VALID_COMMAND);
+        assertEquals(List.of(VALID_COMMAND, OTHER_VALID_COMMAND), executedCommands);
+
+        // Both are remembered, the edited one as the newest
+        pressKey(robot, KeyCode.UP);
+        assertEquals(OTHER_VALID_COMMAND, commandTextField.getText());
+        pressKey(robot, KeyCode.UP);
+        assertEquals(VALID_COMMAND, commandTextField.getText());
+    }
+
+    @Test
+    public void handleKeyPressed_downAfterEditingRecalledCommand_restoresTypedText(FxRobot robot) {
+        enterCommand(robot, VALID_COMMAND);
+        robot.interact(() -> commandTextField.setText("add n/Half typed"));
+        pressKey(robot, KeyCode.UP);
+        robot.interact(() -> commandTextField.setText(VALID_COMMAND + " edited"));
+
+        // The edit to the recalled command is dropped, and the half-typed command comes back
+        pressKey(robot, KeyCode.DOWN);
+        assertEquals("add n/Half typed", commandTextField.getText());
+    }
+
+    @Test
     public void handleKeyPressed_upOrDownWithModifier_leavesTextUnchanged(FxRobot robot) {
         enterCommand(robot, VALID_COMMAND);
         enterCommand(robot, OTHER_VALID_COMMAND);
         robot.interact(() -> commandTextField.setText("del"));
 
         for (KeyCode key : new KeyCode[] {KeyCode.UP, KeyCode.DOWN}) {
-            // Shift, Ctrl, Alt and Meta, one at a time
-            for (int modifier = 0; modifier < 4; modifier++) {
-                KeyEvent event = new KeyEvent(KeyEvent.KEY_PRESSED, "", "", key,
-                        modifier == 0, modifier == 1, modifier == 2, modifier == 3);
-                robot.interact(() -> commandTextField.fireEvent(event));
-                assertEquals("del", commandTextField.getText());
+            for (KeyCode modifier : new KeyCode[] {KeyCode.SHIFT, KeyCode.CONTROL, KeyCode.ALT, KeyCode.META}) {
+                pressKey(robot, key, modifier);
+                assertEquals("del", commandTextField.getText(), modifier + "+" + key);
             }
         }
 
@@ -233,11 +258,14 @@ public class CommandBoxTest {
     }
 
     /**
-     * Presses {@code key} while the command box is focused.
+     * Presses {@code key} while the command box is focused, holding down any {@code modifiers}
+     * ({@code SHIFT}, {@code CONTROL}, {@code ALT} or {@code META}).
      */
-    private void pressKey(FxRobot robot, KeyCode key) {
-        robot.interact(() -> commandTextField.fireEvent(
-                new KeyEvent(KeyEvent.KEY_PRESSED, "", "", key, false, false, false, false)));
+    private void pressKey(FxRobot robot, KeyCode key, KeyCode... modifiers) {
+        List<KeyCode> heldKeys = List.of(modifiers);
+        KeyEvent event = new KeyEvent(KeyEvent.KEY_PRESSED, "", "", key, heldKeys.contains(KeyCode.SHIFT),
+                heldKeys.contains(KeyCode.CONTROL), heldKeys.contains(KeyCode.ALT), heldKeys.contains(KeyCode.META));
+        robot.interact(() -> commandTextField.fireEvent(event));
     }
 
     private boolean hasErrorStyle() {

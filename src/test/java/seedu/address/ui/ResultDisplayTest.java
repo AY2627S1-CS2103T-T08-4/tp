@@ -13,6 +13,7 @@ import org.testfx.framework.junit5.Start;
 
 import javafx.css.PseudoClass;
 import javafx.geometry.VerticalDirection;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -201,8 +202,8 @@ public class ResultDisplayTest {
         assertEquals(message, resultMessage.getText());
         assertTrue(root.isVisible());
         assertTrue(root.isManaged());
-        assertEquals(isError, isShownAsError());
-        assertEquals(isEmptySearch, isShownAsEmptySearch());
+        assertEquals(isError, isShownAsError(root));
+        assertEquals(isEmptySearch, isShownAsEmptySearch(root));
     }
 
     /**
@@ -233,11 +234,19 @@ public class ResultDisplayTest {
         return ((Text) resultMessage.lookup(".text")).getText();
     }
 
-    private boolean isShownAsError() {
-        return root.getPseudoClassStates().contains(ERROR_PSEUDO_CLASS);
+    /**
+     * Returns true if {@code resultDisplay}, the root of a {@code ResultDisplay}, is styled as an error.
+     * Also used by {@code MainWindowTest}.
+     */
+    static boolean isShownAsError(Node resultDisplay) {
+        return resultDisplay.getPseudoClassStates().contains(ERROR_PSEUDO_CLASS);
     }
 
-    private boolean isShownAsEmptySearch() {
-        return root.getPseudoClassStates().contains(EMPTY_SEARCH_PSEUDO_CLASS);
+    /**
+     * Returns true if {@code resultDisplay}, the root of a {@code ResultDisplay}, is styled as an empty search.
+     * Also used by {@code MainWindowTest}.
+     */
+    static boolean isShownAsEmptySearch(Node resultDisplay) {
+        return resultDisplay.getPseudoClassStates().contains(EMPTY_SEARCH_PSEUDO_CLASS);
     }
 }

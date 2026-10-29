@@ -39,6 +39,10 @@ class JsonAdaptedTag {
      * @throws IllegalValueException if there were any data constraints violated in the adapted tag.
      */
     public Tag toModelType() throws IllegalValueException {
+        if (tagName == null) {
+            throw new IllegalValueException(Tag.MESSAGE_CONSTRAINTS);
+        }
+        // Normalize so that tags saved before spaces were collapsed, e.g. "Sec  4", still match "Sec 4"
         String normalizedTagName = Tag.normalizeTagName(tagName);
         if (!Tag.isValidTagName(normalizedTagName)) {
             throw new IllegalValueException(Tag.MESSAGE_CONSTRAINTS);

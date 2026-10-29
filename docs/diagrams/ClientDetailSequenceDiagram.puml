@@ -1,0 +1,56 @@
+@startuml
+!include style.puml
+skinparam ArrowFontStyle plain
+
+Actor User as user USER_COLOR
+
+box UI UI_COLOR_T1
+participant ":PersonListPanel" as PersonListPanel UI_COLOR
+participant ":MainWindow" as MainWindow UI_COLOR
+participant ":PersonDetailPanel" as PersonDetailPanel UI_COLOR
+end box
+
+user -[USER_COLOR]> PersonListPanel : select client
+activate PersonListPanel
+PersonListPanel -> PersonListPanel : selectedPerson.set(person)
+PersonListPanel --> MainWindow : selectedPerson changed
+deactivate PersonListPanel
+
+activate MainWindow
+MainWindow -> PersonDetailPanel : setPerson(person)
+activate PersonDetailPanel
+PersonDetailPanel --> MainWindow
+deactivate PersonDetailPanel
+MainWindow -> PersonListPanel : setCompact(true)
+MainWindow -> MainWindow : animatePersonDetail(open)
+MainWindow --> user : show selected client's details
+deactivate MainWindow
+
+user -[USER_COLOR]> PersonListPanel : select another client
+activate PersonListPanel
+PersonListPanel -> PersonListPanel : selectedPerson.set(otherPerson)
+PersonListPanel --> MainWindow : selectedPerson changed
+deactivate PersonListPanel
+
+activate MainWindow
+MainWindow -> PersonDetailPanel : setPerson(otherPerson)
+activate PersonDetailPanel
+PersonDetailPanel --> MainWindow
+deactivate PersonDetailPanel
+MainWindow --> user : update open details
+deactivate MainWindow
+
+user -[USER_COLOR]> PersonDetailPanel : click close
+activate PersonDetailPanel
+PersonDetailPanel -> PersonListPanel : clearSelection()
+activate PersonListPanel
+PersonListPanel --> MainWindow : selectedPerson changed to null
+deactivate PersonListPanel
+deactivate PersonDetailPanel
+
+activate MainWindow
+MainWindow -> MainWindow : animatePersonDetail(close)
+MainWindow -> PersonListPanel : setCompact(false)
+MainWindow --> user : restore full-width list
+deactivate MainWindow
+@enduml

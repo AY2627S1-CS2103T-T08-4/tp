@@ -11,13 +11,22 @@ import java.time.format.ResolverStyle;
 /**
  * Represents a Person's payment due date in the address book, in the format DD-MM-YYYY.
  * An empty due date means the client has no due date set.
- * Past dates are allowed, so that overdue payments can be recorded.
+ * A due date typed into add or edit cannot be in the past, but past dates already stored still load,
+ * so a due date that passes does not make the data file invalid.
  * Guarantees: immutable; is valid as declared in {@link #isValidDueDate(String)}
  */
 public class DueDate {
 
+    /** Earliest year accepted, so that a mistyped year such as 0000 is caught. */
+    public static final int MIN_YEAR = 2000;
+    /** Latest year accepted, as the format has four digits for the year. */
+    public static final int MAX_YEAR = 9999;
+
     public static final String MESSAGE_CONSTRAINTS =
-        "Invalid Due date! Due dates must be a real date in the format DD-MM-YYYY, for example 01-11-2026.";
+        "Invalid Due date! Due dates must be a real date from 01-01-" + MIN_YEAR + " to 31-12-" + MAX_YEAR
+            + ", in the format DD-MM-YYYY, for example 01-11-2026.";
+    public static final String MESSAGE_PAST_DATE =
+        "Invalid Due date! Due dates cannot be in the past. Use today's date or a later date.";
 
     public static final DueDate EMPTY = new DueDate("");
 
@@ -49,7 +58,8 @@ public class DueDate {
     }
 
     /**
-     * Returns true if a given string is a valid due date.
+     * Returns true if a given string is a valid due date: empty, or a real calendar date in the format
+     * DD-MM-YYYY whose year is between {@code MIN_YEAR} and {@code MAX_YEAR}. Past dates are valid.
      */
     public static boolean isValidDueDate(String test) {
         requireNonNull(test);
@@ -57,11 +67,21 @@ public class DueDate {
             return true;
         }
         try {
-            LocalDate.parse(test, FORMATTER);
-            return true;
+            int year = LocalDate.parse(test, FORMATTER).getYear();
+            return year >= MIN_YEAR && year <= MAX_YEAR;
         } catch (DateTimeParseException e) {
             return false;
         }
+    }
+
+    /**
+     * Returns true if {@code test} is empty, or a date that is today or later.
+     * {@code test} must already be a valid due date.
+     */
+    public static boolean isTodayOrLater(String test) {
+        requireNonNull(test);
+        assert isValidDueDate(test);
+        return test.isEmpty() || !LocalDate.parse(test, FORMATTER).isBefore(LocalDate.now());
     }
 
     /**

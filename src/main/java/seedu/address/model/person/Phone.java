@@ -18,8 +18,9 @@ public class Phone {
 
     // Formatting characters users commonly type in phone numbers, e.g. "9123 4567" or "(9123)-4567".
     private static final String FORMATTING_CHARACTERS_REGEX = "[\\s\\-()]";
-    // A number with a country code, e.g. "+6591234567", "+14155552671", or "6591234567" without the "+"
-    private static final String COUNTRY_CODE_REGEX = "\\+.*|65\\d{8}";
+    // A number with a country code, e.g. "+6591234567", "+14155552671", or "6591234567" without the "+",
+    // or "006591234567" with "00" in place of the "+"
+    private static final String COUNTRY_CODE_REGEX = "\\+.*|(00)?65\\d{8}";
 
     public final String value;
 

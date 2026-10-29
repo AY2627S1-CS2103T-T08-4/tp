@@ -29,9 +29,9 @@ public class UntagCommand extends Command {
             + " INDEX t/TAG [t/MORE_TAGS]...";
 
     public static final String MESSAGE_UNTAG_PERSON_SUCCESS = "Removed from %1$s: %2$s.";
-    public static final String MESSAGE_TAGS_NOT_FOUND = "\nNot found (ignored): %s.";
+    public static final String MESSAGE_TAGS_NOT_FOUND = "\nNot found: %s.";
     public static final String MESSAGE_PERSON_NOT_TAGGED =
-            "No tags removed from %1$s. Not found (ignored): %2$s.";
+            "No tags removed from %1$s. Not found: %2$s.";
 
     private final Index targetIndex;
     private final List<Tag> tagsToRemove;

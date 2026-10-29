@@ -29,9 +29,9 @@ public class TagCommand extends Command {
         + " INDEX t/TAG [t/MORE_TAGS]...";
 
     public static final String MESSAGE_TAG_PERSON_SUCCESS = "Tagged %1$s with: %2$s.";
-    public static final String MESSAGE_TAGS_ALREADY_PRESENT = "\nAlready present (ignored): %s.";
+    public static final String MESSAGE_TAGS_ALREADY_PRESENT = "\nAlready present: %s.";
     public static final String MESSAGE_PERSON_ALREADY_TAGGED =
-            "No tags added to %1$s. Already present (ignored): %2$s.";
+            "No tags added to %1$s. Already present: %2$s.";
 
     private final Index targetIndex;
     private final List<Tag> tagsToAdd;

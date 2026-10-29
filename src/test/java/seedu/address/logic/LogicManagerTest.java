@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -27,6 +28,7 @@ import seedu.address.logic.commands.AddCommand;
 import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.DeleteCommand;
 import seedu.address.logic.commands.EditCommand;
+import seedu.address.logic.commands.FindCommand;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.RedoCommand;
 import seedu.address.logic.commands.UndoCommand;
@@ -160,6 +162,16 @@ public class LogicManagerTest {
     }
 
     @Test
+    public void execute_addAfterFind_saysShowingAllClients() throws Exception {
+        logic.execute(FindCommand.COMMAND_WORD + " Bob");
+        CommandResult result = logic.execute(ADD_AMY_COMMAND);
+
+        // The text the user reads, unlike other tests, which format the same message constant as the command
+        assertTrue(result.getFeedbackToUser().endsWith("\nShowing all clients."));
+        assertEquals(1, model.getFilteredPersonList().size());
+    }
+
+    @Test
     public void execute_redoAfterNewChange_throwsCommandException() throws Exception {
         logic.execute(ADD_AMY_COMMAND);
         logic.execute(UndoCommand.COMMAND_WORD);
@@ -174,6 +186,20 @@ public class LogicManagerTest {
         assertThrows(UnsupportedOperationException.class, () -> logic
             .getFilteredPersonList()
             .remove(0));
+    }
+
+    @Test
+    public void getAllPersonList_listFiltered_includesHiddenPersons() throws Exception {
+        logic.execute(ADD_AMY_COMMAND);
+        logic.execute(FindCommand.COMMAND_WORD + " Zzz");
+
+        assertTrue(logic.getFilteredPersonList().isEmpty());
+        assertEquals(List.of(new PersonBuilder(AMY).withTags().build()), logic.getAllPersonList());
+    }
+
+    @Test
+    public void getAllPersonList_modifyList_throwsUnsupportedOperationException() {
+        assertThrows(UnsupportedOperationException.class, () -> logic.getAllPersonList().remove(0));
     }
 
     @Test

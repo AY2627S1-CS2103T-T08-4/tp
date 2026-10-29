@@ -38,6 +38,14 @@ public class TagTest {
     }
 
     @Test
+    public void normalizeTagName() {
+        assertThrows(NullPointerException.class, () -> Tag.normalizeTagName(null));
+        assertEquals("Sec 4", Tag.normalizeTagName("Sec  4"));
+        assertEquals("Sec 4", Tag.normalizeTagName("  Sec \t 4  "));
+        assertEquals("Math", Tag.normalizeTagName("Math"));
+    }
+
+    @Test
     public void equals_tagsDifferOnlyInCase_returnsTrue() {
         Tag lowercaseTag = new Tag("physics");
         Tag uppercaseTag = new Tag("PHYSICS");

@@ -21,6 +21,7 @@
     -sieve-text: #1f2430;
     -sieve-text-muted: #6b7280;
     -sieve-accent: #2f4fd8;     /* command box border, selected client and default button */
+    /* Only the startup alerts use this, and they are always light, so DarkTheme.css leaves it out */
     -sieve-on-accent: white;    /* text on an accent background */
     -sieve-selected: #eef2ff;   /* selected client row */
     -sieve-error: #c0392b;
@@ -106,6 +107,60 @@
 
 .list-cell:filled:selected .cell_index_label {
     -fx-text-fill: -sieve-accent;
+}
+
+/* Client details shown beside the list after a client is selected. */
+.person-detail-container {
+    -fx-background-color: -sieve-surface;
+    -fx-border-color: transparent transparent transparent -sieve-border;
+}
+
+#personDetailPanel,
+#personDetailPanel > .viewport,
+.person-detail-panel {
+    -fx-background-color: -sieve-surface;
+}
+
+.person-detail-name {
+    -fx-font-family: "Inter SemiBold";
+    -fx-font-size: 27px;
+}
+
+.button.detail-close-button {
+    -fx-padding: 0;
+    -fx-min-width: 30;
+    -fx-pref-width: 30;
+    -fx-min-height: 30;
+    -fx-pref-height: 30;
+    -fx-background-color: transparent;
+    -fx-border-color: #000000;
+    -fx-font-size: 21px;
+    -fx-text-fill: -sieve-text-muted;
+}
+
+.button.detail-close-button:hover {
+    -fx-background-color: -sieve-selected;
+}
+
+.person-detail-fields {
+    -fx-border-color: -sieve-border transparent transparent transparent;
+}
+
+.person-detail-row {
+    -fx-padding: 16 0 16 0;
+    -fx-border-color: transparent transparent -sieve-border transparent;
+}
+
+.person-detail-label {
+    -fx-min-width: 110;
+    -fx-pref-width: 110;
+    -fx-max-width: 110;
+    -fx-text-fill: -sieve-text-muted;
+}
+
+.person-detail-value {
+    -fx-font-size: 15px;
+    -fx-text-fill: -sieve-text;
 }
 
 .stack-pane {

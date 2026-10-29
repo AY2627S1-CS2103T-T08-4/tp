@@ -13,9 +13,16 @@ activate Model
 Model -> VersionedAddressBook : undoAddressBook()
 activate VersionedAddressBook
 
-VersionedAddressBook -> VersionedAddressBook : redoHistory.push(current)
-VersionedAddressBook -> VersionedAddressBook : current = undoHistory.pop()
+note right of VersionedAddressBook
+  Pushes current onto redoHistory,
+  then pops undoHistory into current
+end note
+
 VersionedAddressBook -> VersionedAddressBook : resetData(current)
+activate VersionedAddressBook
+VersionedAddressBook --> VersionedAddressBook
+deactivate VersionedAddressBook
+
 VersionedAddressBook --> Model
 deactivate VersionedAddressBook
 

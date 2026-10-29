@@ -23,7 +23,7 @@ public class UntagCommandParser implements Parser<UntagCommand> {
      */
     public UntagCommand parse(String args) throws ParseException {
         ArgumentMultimap argMultimap = ArgumentTokenizer.tokenize(args, PREFIX_TAG);
-        argMultimap.verifyNoUnknownPrefixInPreamble();
+        argMultimap.verifyNoUnknownPrefixesInPreamble();
         argMultimap.verifyNoUnknownPrefixesIn(PREFIX_TAG);
         List<String> tagValues = argMultimap.getAllValues(PREFIX_TAG);
 

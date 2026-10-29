@@ -1,5 +1,6 @@
 package seedu.address.commons.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.testutil.Assert.assertThrows;
@@ -121,6 +122,30 @@ public class StringUtilTest {
 
         // Matches multiple words in sentence
         assertTrue(StringUtil.containsWordIgnoreCase("AAA bBb ccc  bbb", "bbB"));
+    }
+
+    //---------------- Tests for normalizeWhitespace --------------------------------------
+
+    @Test
+    public void normalizeWhitespace_nullGiven_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> StringUtil.normalizeWhitespace(null));
+    }
+
+    @Test
+    public void normalizeWhitespace_validInputs_correctResult() {
+        // EP: no whitespace to remove -> unchanged
+        assertEquals("", StringUtil.normalizeWhitespace("")); // Boundary value
+        assertEquals("Alex Yeoh", StringUtil.normalizeWhitespace("Alex Yeoh"));
+
+        // EP: whitespace only -> empty
+        assertEquals("", StringUtil.normalizeWhitespace(" \t\n "));
+
+        // EP: leading or trailing whitespace -> trimmed
+        assertEquals("Alex Yeoh", StringUtil.normalizeWhitespace("  Alex Yeoh \n"));
+
+        // EP: whitespace runs inside -> one space each
+        assertEquals("Alex Yeoh", StringUtil.normalizeWhitespace("Alex  Yeoh")); // two spaces (boundary case)
+        assertEquals("Alex Yeoh Tan", StringUtil.normalizeWhitespace("Alex\tYeoh\n\nTan")); // tab and line breaks
     }
 
     //---------------- Tests for getDetails --------------------------------------

@@ -6,6 +6,8 @@ import static seedu.address.logic.parser.ParserUtil.MESSAGE_INVALID_INDEX;
 import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalIndexes.INDEX_FIRST_PERSON;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Set;
 
@@ -23,6 +25,8 @@ import seedu.address.model.person.Phone;
 import seedu.address.model.tag.Tag;
 
 public class ParserUtilTest {
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd-MM-uuuu");
+
     private static final String INVALID_NAME = "R@chel";
     private static final String INVALID_PHONE = "+651234";
     private static final String INVALID_ADDRESS = " ";
@@ -37,6 +41,27 @@ public class ParserUtilTest {
     private static final String VALID_TAG_2 = "neighbour";
 
     private static final String WHITESPACE = " \t\r\n";
+
+    @Test
+    public void parseDueDate_outOfRangeYear_throwsParseException() {
+        assertThrows(ParseException.class, DueDate.MESSAGE_CONSTRAINTS, () -> ParserUtil.parseDueDate("01-01-0000"));
+        assertThrows(ParseException.class, DueDate.MESSAGE_CONSTRAINTS, () -> ParserUtil.parseDueDate("31-12-1999"));
+    }
+
+    @Test
+    public void parseDueDate_todayAndTomorrow_returnsDueDate() throws Exception {
+        String today = LocalDate.now().format(DATE_FORMAT);
+        String tomorrow = LocalDate
+            .now().plusDays(1).format(DATE_FORMAT);
+        assertEquals(new DueDate(today), ParserUtil.parseDueDate(today));
+        assertEquals(new DueDate(tomorrow), ParserUtil.parseDueDate(tomorrow));
+    }
+
+    @Test
+    public void parseDueDate_yesterday_throwsParseException() {
+        String yesterday = LocalDate.now().minusDays(1).format(DATE_FORMAT);
+        assertThrows(ParseException.class, DueDate.MESSAGE_PAST_DATE, () -> ParserUtil.parseDueDate(yesterday));
+    }
 
     @Test
     public void parseIndex_invalidInput_throwsParseException() {
@@ -91,6 +116,11 @@ public class ParserUtilTest {
     }
 
     @Test
+    public void parseName_curlyApostrophe_returnsNameWithStraightApostrophe() throws Exception {
+        assertEquals(new Name("Liam O'Brien"), ParserUtil.parseName("Liam O\u2019Brien"));
+    }
+
+    @Test
     public void parseName_validValueWithInternalWhitespace_returnsCollapsedName() throws Exception {
         Name expectedName = new Name("Liam O'Brien");
         assertEquals(expectedName, ParserUtil.parseName("Liam   O'Brien"));
@@ -107,7 +137,8 @@ public class ParserUtilTest {
     @Test
     public void parseName_tooLong_throwsParseException() {
         String tooLongName = "a".repeat(Name.MAX_LENGTH + 1);
-        assertThrows(ParseException.class, Name.MESSAGE_CONSTRAINTS, () -> ParserUtil.parseName(tooLongName));
+        assertThrows(ParseException.class, Name.getErrorMessage(tooLongName), () -> ParserUtil.parseName(tooLongName));
+        assertTrue(Name.getErrorMessage(tooLongName).contains("this one has " + (Name.MAX_LENGTH + 1)));
     }
 
     @Test
@@ -143,10 +174,10 @@ public class ParserUtilTest {
 
     @Test
     public void parsePhone_countryCode_throwsParseExceptionWithCountryCodeMessage() {
-        assertThrows(ParseException.class, Phone.MESSAGE_COUNTRY_CODE, () -> ParserUtil.parsePhone("+65 9123 4567"));
-        assertThrows(ParseException.class, Phone.MESSAGE_COUNTRY_CODE, () -> ParserUtil.parsePhone("(+65) 811878"));
-        assertThrows(ParseException.class, Phone.MESSAGE_COUNTRY_CODE, () -> ParserUtil.parsePhone("65 9123 4567"));
-        assertThrows(ParseException.class, Phone.MESSAGE_COUNTRY_CODE, () -> ParserUtil.parsePhone("+1 415 555 2671"));
+        // PhoneTest#hasCountryCode covers which numbers have a country code
+        assertThrows(ParseException.class, Phone.MESSAGE_COUNTRY_CODE, () -> ParserUtil.parsePhone("+6591234567"));
+        // checked after the formatting characters are removed
+        assertThrows(ParseException.class, Phone.MESSAGE_COUNTRY_CODE, () -> ParserUtil.parsePhone("(+65) 9123-4567"));
     }
 
     @Test
@@ -213,7 +244,7 @@ public class ParserUtilTest {
     @Test
     public void parseNote_tooLong_throwsParseException() {
         String tooLongNote = "a".repeat(Note.MAX_LENGTH + 1);
-        assertThrows(ParseException.class, Note.MESSAGE_CONSTRAINTS, () -> ParserUtil.parseNote(tooLongNote));
+        assertThrows(ParseException.class, Note.getErrorMessage(tooLongNote), () -> ParserUtil.parseNote(tooLongNote));
     }
 
     @Test
@@ -275,7 +306,7 @@ public class ParserUtilTest {
 
     @Test
     public void parseDueDate_validValueWithWhitespace_returnsTrimmedDueDate() throws Exception {
-        assertEquals(new DueDate("01-11-2026"), ParserUtil.parseDueDate(WHITESPACE + "01-11-2026" + WHITESPACE));
+        assertEquals(new DueDate("01-11-2099"), ParserUtil.parseDueDate(WHITESPACE + "01-11-2099" + WHITESPACE));
     }
 
     @Test
@@ -327,6 +358,8 @@ public class ParserUtilTest {
     @Test
     public void parseTag_validValueWithRepeatedWhitespace_returnsNormalizedTag() throws Exception {
         assertEquals(new Tag("Secondary 4"), ParserUtil.parseTag(" Secondary  4 "));
+        assertEquals("Sec 4", ParserUtil.parseTag("Sec  4").tagName);
+        assertEquals("Sec 4", ParserUtil.parseTag(" Sec \t 4 ").tagName);
     }
 
     @Test
