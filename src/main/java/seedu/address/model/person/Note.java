@@ -15,7 +15,6 @@ public class Note {
     public static final int MAX_LENGTH = 200;
     public static final String MESSAGE_CONSTRAINTS = String.format(
             "Invalid Note! Notes cannot be more than %d characters.", MAX_LENGTH);
-
     public static final Note EMPTY = new Note("");
 
     private static final String MESSAGE_TOO_LONG = MESSAGE_CONSTRAINTS

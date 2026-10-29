@@ -17,6 +17,9 @@ public class Messages {
     public static final String MESSAGE_DUPLICATE_FIELDS =
                 "Multiple values specified for the following single-valued field(s): ";
     public static final String MESSAGE_SHOWING_ALL_CLIENTS = "Showing all clients.";
+    public static final String MESSAGE_NOTE_NOT_LAST = "A note cannot contain n/, p/, e/, a/, t/, fee/ or due/, "
+            + "as everything after nt/ is part of the note. Put nt/NOTE last, and write such text another way, "
+            + "e.g. N/A instead of n/a.";
     public static final String MESSAGE_NO_CLIENTS_TO_SEARCH =
             "There are no clients in Sieve yet, so there is nothing to search. Use add to add one.";
 

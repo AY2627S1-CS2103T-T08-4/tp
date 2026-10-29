@@ -55,10 +55,12 @@ public class EditCommandParser implements Parser<EditCommand> {
             throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, pe.getMessage()), pe);
         }
 
-        argMultimap.verifyNoDuplicatePrefixesFor(PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL, PREFIX_ADDRESS, PREFIX_NOTE,
-            PREFIX_FEE, PREFIX_DUE_DATE);
         // Notes are free text, where words such as "w/" (with) are normal
         argMultimap.verifyNoUnknownPrefixesIn(PREFIXES_EXCEPT_NOTE);
+        // Checked before duplicates, so that nt/call p/after 6 is not reported as a repeated p/
+        ParserUtil.verifyNoteIsLast(args);
+        argMultimap.verifyNoDuplicatePrefixesFor(PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL, PREFIX_ADDRESS, PREFIX_NOTE,
+            PREFIX_FEE, PREFIX_DUE_DATE);
 
         EditPersonDescriptor editPersonDescriptor = new EditPersonDescriptor();
 

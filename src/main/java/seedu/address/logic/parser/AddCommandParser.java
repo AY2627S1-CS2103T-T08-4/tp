@@ -55,6 +55,8 @@ public class AddCommandParser implements Parser<AddCommand> {
         argMultimap.verifyNoUnknownPrefixesInPreamble();
         // Notes are free text, where words such as "w/" (with) are normal
         argMultimap.verifyNoUnknownPrefixesIn(PREFIXES_EXCEPT_NOTE);
+        // Checked before duplicates, so that nt/call before e/visit is not reported as a repeated e/
+        ParserUtil.verifyNoteIsLast(args);
         String missingFields = getMissingFields(argMultimap);
         if (!missingFields.isEmpty()) {
             throw new ParseException(String.format(MESSAGE_MISSING_FIELDS, missingFields, AddCommand.MESSAGE_USAGE));
