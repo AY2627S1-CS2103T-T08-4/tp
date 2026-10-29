@@ -9,7 +9,7 @@
   <Label fx:id="clientCount" styleClass="client-count" maxWidth="Infinity" />
   <ListView fx:id="personListView" VBox.vgrow="ALWAYS">
     <placeholder>
-      <Label styleClass="list-placeholder" text="No clients to show. Use list to show all clients, or add to add one." />
+      <Label fx:id="placeholder" styleClass="list-placeholder" />
     </placeholder>
   </ListView>
 </VBox>
