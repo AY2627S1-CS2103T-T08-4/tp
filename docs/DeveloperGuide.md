@@ -275,7 +275,7 @@ This section describes some noteworthy details on how certain features are imple
 
 `find` filters the displayed client list by name keywords. `FindCommandParser` validates the input and builds a `NameContainsKeywordsPredicate`, which decides which clients match. Searching by tag is done with `filter`.
 
-**Parsing.** `FindCommandParser` splits the trimmed arguments on whitespace, and every piece must be a valid keyword. There are no prefixes, so input such as `p/91234567` or `t/sec4` is rejected as an invalid keyword (`/` is not a name character). At least one keyword must be given.
+**Parsing.** `FindCommandParser` splits the trimmed arguments on whitespace, and every piece must be a valid keyword. There are no prefixes, so a keyword that starts with an add or edit prefix in any case, such as `n/Amy` or `t/sec4`, is rejected with `FindCommand.MESSAGE_PREFIX_IN_KEYWORDS`, which points to `filter`. This is checked before the keyword characters, so the tutor is told the prefix is the problem. Any other keyword with a `/` is rejected as an invalid keyword (`/` is not a name character). At least one keyword must be given.
 
 **Name keyword validation.** `Name` exposes the characters allowed in a name as `Name.NAME_CHARACTERS` (letters, digits and the punctuation in `Name.NAME_PUNCTUATION`: `'`, `.`, `(`, `)` and `-`). `Name.VALIDATION_REGEX` and `FindCommandParser`'s keyword regex are both built from this constant, so `find` always accepts the same characters as names. A keyword must also contain at least one letter or digit, so keywords such as `-` are rejected.
 

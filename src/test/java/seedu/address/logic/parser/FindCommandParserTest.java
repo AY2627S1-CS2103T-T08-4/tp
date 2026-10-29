@@ -47,9 +47,26 @@ public class FindCommandParserTest {
     @Test
     public void parse_phoneOrTagPrefix_throwsParseException() {
         // phone and tag are searched with filter, so their prefixes are not keywords
-        assertParseFailure(parser, " p/9123 4567", FindCommand.MESSAGE_INVALID_KEYWORDS);
-        assertParseFailure(parser, " t/sec4", FindCommand.MESSAGE_INVALID_KEYWORDS);
-        assertParseFailure(parser, "Liam t/sec4", FindCommand.MESSAGE_INVALID_KEYWORDS);
+        assertParseFailure(parser, " p/9123 4567", FindCommand.MESSAGE_PREFIX_IN_KEYWORDS);
+        assertParseFailure(parser, " t/sec4", FindCommand.MESSAGE_PREFIX_IN_KEYWORDS);
+        assertParseFailure(parser, "Liam t/sec4", FindCommand.MESSAGE_PREFIX_IN_KEYWORDS);
+
+        // a name prefix, as typed in add and edit
+        assertParseFailure(parser, "n/Amy", FindCommand.MESSAGE_PREFIX_IN_KEYWORDS);
+
+        // a bare prefix, an upper-case one, or the longer fee/ and nt/
+        assertParseFailure(parser, "n/", FindCommand.MESSAGE_PREFIX_IN_KEYWORDS);
+        assertParseFailure(parser, "N/Amy", FindCommand.MESSAGE_PREFIX_IN_KEYWORDS);
+        assertParseFailure(parser, "fee/250", FindCommand.MESSAGE_PREFIX_IN_KEYWORDS);
+        assertParseFailure(parser, "nt/exam", FindCommand.MESSAGE_PREFIX_IN_KEYWORDS);
+    }
+
+    @Test
+    public void parse_slashNotAfterLetters_invalidKeyword() {
+        // a slash that does not follow a prefix gets the usual invalid keyword message
+        assertParseFailure(parser, "Amy/Tan", FindCommand.MESSAGE_INVALID_KEYWORDS);
+        assertParseFailure(parser, "/Amy", FindCommand.MESSAGE_INVALID_KEYWORDS);
+        assertParseFailure(parser, "12/3", FindCommand.MESSAGE_INVALID_KEYWORDS);
     }
 
     @Test
@@ -57,8 +74,9 @@ public class FindCommandParserTest {
         // underscore
         assertParseFailure(parser, "Amirah_Tan", FindCommand.MESSAGE_INVALID_KEYWORDS);
 
-        // slash (prefix delimiter, not allowed in names)
-        assertParseFailure(parser, "a/l", FindCommand.MESSAGE_INVALID_KEYWORDS);
+        // slash (prefix delimiter, not allowed in names); a/l starts with the a/ prefix, so it gets the prefix message
+        assertParseFailure(parser, "s/o", FindCommand.MESSAGE_INVALID_KEYWORDS);
+        assertParseFailure(parser, "a/l", FindCommand.MESSAGE_PREFIX_IN_KEYWORDS);
 
         // punctuation only
         assertParseFailure(parser, "-", FindCommand.MESSAGE_INVALID_KEYWORDS);
