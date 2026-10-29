@@ -1,7 +1,10 @@
 package seedu.address.model.person;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -17,8 +20,12 @@ public class NameContainsKeywordsPredicate implements Predicate<Person> {
 
     private final List<String> keywords;
 
+    /**
+     * Creates a predicate that matches names against a copy of {@code keywords}.
+     */
     public NameContainsKeywordsPredicate(List<String> keywords) {
-        this.keywords = keywords;
+        requireNonNull(keywords);
+        this.keywords = List.copyOf(keywords);
     }
 
     @Override
@@ -56,7 +63,7 @@ public class NameContainsKeywordsPredicate implements Predicate<Person> {
      * Returns {@code text} in lower case with name punctuation removed.
      */
     private static String normalize(String text) {
-        return text.replaceAll(PUNCTUATION_REGEX, "").toLowerCase();
+        return text.replaceAll(PUNCTUATION_REGEX, "").toLowerCase(Locale.ROOT);
     }
 
     @Override
@@ -71,6 +78,11 @@ public class NameContainsKeywordsPredicate implements Predicate<Person> {
         }
 
         return keywords.equals(otherNameContainsKeywordsPredicate.keywords);
+    }
+
+    @Override
+    public int hashCode() {
+        return keywords.hashCode();
     }
 
     @Override

@@ -49,15 +49,17 @@ public class EditCommand extends Command {
             + "[" + PREFIX_PHONE + "PHONE] "
             + "[" + PREFIX_EMAIL + "EMAIL] "
             + "[" + PREFIX_ADDRESS + "ADDRESS] "
-            + "[" + PREFIX_NOTE + "NOTE] "
             + "[" + PREFIX_FEE + "FEE] "
             + "[" + PREFIX_DUE_DATE + "DUE_DATE] "
-            + "[" + PREFIX_TAG + "TAG]...\n"
+            + "[" + PREFIX_TAG + "TAG]... "
+            + "[" + PREFIX_NOTE + "NOTE]\n"
             + "Example: " + COMMAND_WORD + " 1 "
             + PREFIX_PHONE + "91234567 "
             + PREFIX_EMAIL + "matthias.tan@gmail.com";
 
-    public static final String MESSAGE_EDIT_PERSON_SUCCESS = "Edited client: %1$s";
+    public static final String MESSAGE_EDIT_PERSON_SUCCESS =
+            "Edited client: %1$s\n" + Messages.MESSAGE_SHOWING_ALL_CLIENTS;
+    public static final String MESSAGE_NO_CHANGE = "No change: %1$s already has these details.";
     public static final String MESSAGE_NOT_EDITED = "At least one field to edit must be provided.";
 
     private final Index index;
@@ -86,12 +88,16 @@ public class EditCommand extends Command {
 
         Person personToEdit = lastShownList.get(index.getZeroBased());
         Person editedPerson = createEditedPerson(personToEdit, editPersonDescriptor);
+        // Nothing changes, so there is nothing to undo, and the displayed list is kept as it is
+        if (editedPerson.equals(personToEdit)) {
+            return new CommandResult(String.format(MESSAGE_NO_CHANGE, personToEdit.getName()));
+        }
 
         // Skip the client being edited, so that changing only the case of their own name is allowed
         Optional<Person> sameNamePerson = model.findPersonWithSameName(editedPerson)
                 .filter(existing -> !existing.equals(personToEdit));
         if (sameNamePerson.isPresent()) {
-            throw new CommandException(getDuplicateMessage(sameNamePerson.get(), editedPerson));
+            throw new CommandException(Messages.getDuplicateMessage(sameNamePerson.get(), editedPerson));
         }
 
         model.setPerson(personToEdit, editedPerson);

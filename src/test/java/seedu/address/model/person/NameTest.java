@@ -38,6 +38,9 @@ public class NameTest {
         assertFalse(Name.isValidName("Siti a/l Rahman")); // '/' is the prefix delimiter
         assertFalse(Name.isValidName("(NHHS) John Tan")); // starts with a parenthesis
         assertFalse(Name.isValidName("Rajesh s\\o Kumar")); // backslash
+        assertFalse(Name.isValidName("John\tTan")); // whitespace other than a space, which normalizeName replaces
+        assertFalse(Name.isValidName("José Tan")); // accented letter, not supported (see the UG)
+        assertFalse(Name.isValidName("陈伟明")); // starts with a Chinese character, not supported (see the UG)
         assertFalse(Name.isValidName("a".repeat(Name.MAX_LENGTH + 1))); // one character over the limit
 
         // valid name
@@ -55,17 +58,42 @@ public class NameTest {
     }
 
     @Test
-    public void normalizeName() {
-        // null name
-        assertThrows(NullPointerException.class, () -> Name.normalizeName(null));
+    public void normalizeName_extraWhitespace_collapsed() {
+        // normalizeName only calls StringUtil.normalizeWhitespace, whose partitions StringUtilTest covers
+        assertEquals("Liam O'Brien", Name.normalizeName("  Liam \t O'Brien "));
+    }
 
-        // whitespace trimmed and collapsed
-        assertEquals("Liam O'Brien", Name.normalizeName("  Liam   O'Brien ")); // leading, trailing and internal
-        assertEquals("Liam O'Brien", Name.normalizeName("Liam\tO'Brien")); // tab
-        assertEquals("", Name.normalizeName(" \t ")); // whitespace only
+    @Test
+    public void getErrorMessage() {
+        // only too long: the length is given instead of the character rules
+        assertEquals("Invalid Name! Names cannot be more than 50 characters, but this one has 51.",
+                Name.getErrorMessage("a".repeat(Name.MAX_LENGTH + 1)));
 
-        // already normalized -> unchanged
-        assertEquals("Nur-Aisyah Tan", Name.normalizeName("Nur-Aisyah Tan"));
+        // a character that is not allowed, whatever the length
+        assertEquals(Name.MESSAGE_CONSTRAINTS, Name.getErrorMessage("Ravi s/o Kumar"));
+        assertEquals(Name.MESSAGE_CONSTRAINTS, Name.getErrorMessage("a".repeat(Name.MAX_LENGTH) + "/"));
+    }
+
+    @Test
+    public void normalizeName_curlyApostrophe_replaced() {
+        assertEquals("Liam O'Brien", Name.normalizeName("Liam O\u2019Brien"));
+    }
+
+    @Test
+    public void normalizeApostrophes() {
+        // each apostrophe-like character, written as an escape as it looks like ' in most fonts, becomes '
+        assertEquals("O'Brien", Name.normalizeApostrophes("O\u2019Brien")); // right single quote, the usual one
+        assertEquals("O'Brien", Name.normalizeApostrophes("O\u2018Brien")); // left single quote
+        assertEquals("O'Brien", Name.normalizeApostrophes("O\u02BCBrien")); // modifier letter apostrophe
+        assertEquals("O'Brien", Name.normalizeApostrophes("O\u2032Brien")); // prime
+
+        // every one in the text is replaced
+        assertEquals("'a'b'", Name.normalizeApostrophes("\u2018a\u2019b\u2019"));
+
+        // text that already uses the straight ' is unchanged, and double quotes are not apostrophes
+        assertEquals("O'Brien \"Jr\"", Name.normalizeApostrophes("O'Brien \"Jr\""));
+
+        assertThrows(NullPointerException.class, () -> Name.normalizeApostrophes(null));
     }
 
     @Test

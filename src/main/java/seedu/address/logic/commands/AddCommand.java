@@ -31,10 +31,10 @@ public class AddCommand extends Command {
             + PREFIX_PHONE + "PHONE "
             + PREFIX_EMAIL + "EMAIL "
             + PREFIX_ADDRESS + "ADDRESS "
-            + "[" + PREFIX_NOTE + "NOTE] "
             + "[" + PREFIX_FEE + "FEE] "
             + "[" + PREFIX_DUE_DATE + "DUE_DATE] "
-            + "[" + PREFIX_TAG + "TAG]...\n"
+            + "[" + PREFIX_TAG + "TAG]... "
+            + "[" + PREFIX_NOTE + "NOTE]\n"
             + "Example: " + COMMAND_WORD + " "
             + PREFIX_NAME + "Jason Quek "
             + PREFIX_PHONE + "91234567 "
@@ -43,7 +43,7 @@ public class AddCommand extends Command {
             + PREFIX_TAG + "Math "
             + PREFIX_TAG + "Sec4";
 
-    public static final String MESSAGE_SUCCESS = "New client added: %1$s";
+    public static final String MESSAGE_SUCCESS = "New client added: %1$s\n" + Messages.MESSAGE_SHOWING_ALL_CLIENTS;
 
     private final Person toAdd;
 
@@ -61,7 +61,7 @@ public class AddCommand extends Command {
 
         Optional<Person> sameNamePerson = model.findPersonWithSameName(toAdd);
         if (sameNamePerson.isPresent()) {
-            throw new CommandException(getDuplicateMessage(sameNamePerson.get(), toAdd));
+            throw new CommandException(Messages.getDuplicateMessage(sameNamePerson.get(), toAdd));
         }
 
         model.addPerson(toAdd);

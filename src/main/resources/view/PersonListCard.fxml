@@ -16,8 +16,14 @@
     <!-- A fixed width keeps names lined up when the index goes from 9 to 10 -->
     <Label fx:id="id" styleClass="cell_index_label" minWidth="28"/>
     <VBox spacing="4" HBox.hgrow="ALWAYS">
-        <HBox alignment="CENTER_LEFT">
-            <Label fx:id="name" text="\$first" styleClass="cell_big_label"/>
+        <!-- Lines the phone up with the first line of the name, so it stays on that line when a long name wraps -->
+        <HBox alignment="BASELINE_LEFT" spacing="8">
+            <Label fx:id="name" text="\$first" styleClass="cell_big_label" wrapText="true">
+                <minHeight>
+                    <!-- Gives a long name the height of all its lines, so it wraps instead of being cut off -->
+                    <Region fx:constant="USE_PREF_SIZE"/>
+                </minHeight>
+            </Label>
             <!-- An empty region that grows to fill the gap, pushing the phone number to the right -->
             <Region HBox.hgrow="ALWAYS"/>
             <Label fx:id="phone" styleClass="cell_phone_label" text="\$phone">
@@ -28,15 +34,8 @@
             </Label>
         </HBox>
         <FlowPane fx:id="tags"/>
-        <HBox spacing="16">
-            <Label fx:id="email" styleClass="cell_small_label" text="\$email">
-                <minWidth>
-                    <!-- When the row is too narrow, the address is shortened first -->
-                    <Region fx:constant="USE_PREF_SIZE"/>
-                </minWidth>
-            </Label>
-            <Label fx:id="address" styleClass="cell_small_label" text="\$address"/>
-        </HBox>
+        <Label fx:id="email" styleClass="cell_small_label" wrapText="true" text="\$email"/>
+        <Label fx:id="address" styleClass="cell_small_label" wrapText="true" text="\$address"/>
         <HBox fx:id="billing" spacing="16">
             <Label fx:id="fee" styleClass="cell_small_label" text="\$fee"/>
             <Label fx:id="dueDate" styleClass="cell_small_label" text="\$dueDate"/>

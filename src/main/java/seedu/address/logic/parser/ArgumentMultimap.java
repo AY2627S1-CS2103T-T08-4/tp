@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import seedu.address.logic.Messages;
@@ -19,6 +21,15 @@ import seedu.address.logic.parser.exceptions.ParseException;
  */
 public class ArgumentMultimap {
 
+    /**
+     * A word that looks like a prefix: letters then "/", at the start of a value or after a space,
+     * e.g. {@code z/} in {@code Blk 1 z/x} or in {@code z/x}.
+     */
+    private static final Pattern PREFIX_LIKE_WORD = Pattern.compile("(?<!\\S)[A-Za-z]+/");
+
+    /** The key under which the preamble is stored. */
+    private static final Prefix PREAMBLE = new Prefix("");
+
     /** Prefixes mapped to their respective arguments */
     private final Map<Prefix, List<String>> argMultimap = new HashMap<>();
 
@@ -30,9 +41,7 @@ public class ArgumentMultimap {
      * @param argValue Argument value to be associated with the specified prefix key
      */
     public void put(Prefix prefix, String argValue) {
-        List<String> argValues = getAllValues(prefix);
-        argValues.add(argValue);
-        argMultimap.put(prefix, argValues);
+        argMultimap.computeIfAbsent(prefix, k -> new ArrayList<>()).add(argValue);
     }
 
     /**
@@ -59,7 +68,7 @@ public class ArgumentMultimap {
      * Returns the preamble (text before the first valid prefix). Trims any leading/trailing spaces.
      */
     public String getPreamble() {
-        return getValue(new Prefix("")).orElse("");
+        return getValue(PREAMBLE).orElse("");
     }
 
     /**
@@ -73,6 +82,31 @@ public class ArgumentMultimap {
 
         if (duplicatedPrefixes.length > 0) {
             throw new ParseException(Messages.getErrorMessageForDuplicatePrefixes(duplicatedPrefixes));
+        }
+    }
+
+    /**
+     * Throws a {@code ParseException} if the preamble contains a word that looks like a prefix,
+     * e.g. {@code z/} in {@code 1 z/x n/Amy}, where the unknown prefix comes before every known one.
+     */
+    public void verifyNoUnknownPrefixesInPreamble() throws ParseException {
+        verifyNoUnknownPrefixesIn(PREAMBLE);
+    }
+
+    /**
+     * Throws a {@code ParseException} if a value of any of {@code prefixes} contains a word that looks like a prefix,
+     * e.g. {@code z/} in {@code a/Blk 1 z/x}.
+     * The tokenizer has already split off every prefix it was given, so such a word is an unknown prefix,
+     * most likely a typo, that would otherwise be saved as part of the value.
+     */
+    public void verifyNoUnknownPrefixesIn(Prefix... prefixes) throws ParseException {
+        for (Prefix prefix : prefixes) {
+            for (String value : getAllValues(prefix)) {
+                Matcher matcher = PREFIX_LIKE_WORD.matcher(value);
+                if (matcher.find()) {
+                    throw new ParseException(Messages.getErrorMessageForUnknownPrefix(matcher.group()));
+                }
+            }
         }
     }
 }

@@ -4,6 +4,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
+<?import seedu.address.ui.WrappingScrollPane?>
 
 <!-- An icon and the message, only as tall as the message needs -->
 <HBox styleClass="result-display" spacing="10" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
@@ -11,5 +12,10 @@
     <Insets top="2" right="16" bottom="8" left="16" />
   </padding>
   <Region fx:id="resultIcon" styleClass="result-icon" />
-  <Label fx:id="resultMessage" wrapText="true" HBox.hgrow="ALWAYS" />
+  <!-- A message taller than maxHeight scrolls, so that it cannot squeeze the client list.
+       maxHeight is 7 lines of 20px, so that no line is cut in half. -->
+  <WrappingScrollPane fx:id="resultScrollPane" focusTraversable="false" minHeight="0" maxHeight="140"
+                      HBox.hgrow="ALWAYS">
+    <Label fx:id="resultMessage" wrapText="true" />
+  </WrappingScrollPane>
 </HBox>

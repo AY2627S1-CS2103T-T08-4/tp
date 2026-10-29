@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.logic.commands.CommandTestUtil.assertCommandSuccess;
+import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalPersons.BENSON;
 import static seedu.address.testutil.TypicalPersons.CARL;
 import static seedu.address.testutil.TypicalPersons.DANIEL;
@@ -15,6 +16,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import seedu.address.logic.Messages;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
@@ -60,7 +62,7 @@ public class FindCommandTest {
         NameContainsKeywordsPredicate predicate = preparePredicate(" ");
         FindCommand command = new FindCommand(predicate);
         expectedModel.updateFilteredPersonList(predicate);
-        assertCommandSuccess(command, model, expectedMessage, expectedModel);
+        assertCommandSuccess(command, model, CommandResult.forEmptySearch(expectedMessage), expectedModel);
         assertEquals(List.of(), model.getFilteredPersonList());
     }
 
@@ -70,8 +72,18 @@ public class FindCommandTest {
         NameContainsKeywordsPredicate predicate = preparePredicate("urz");
         FindCommand command = new FindCommand(predicate);
         expectedModel.updateFilteredPersonList(predicate);
-        assertCommandSuccess(command, model, expectedMessage, expectedModel);
+        assertCommandSuccess(command, model, CommandResult.forEmptySearch(expectedMessage), expectedModel);
         assertEquals(List.of(), model.getFilteredPersonList());
+    }
+
+    @Test
+    public void execute_emptyAddressBook_noClientsToSearch() {
+        Model emptyModel = new ModelManager();
+        NameContainsKeywordsPredicate predicate = preparePredicate("amirah");
+        Model expectedEmptyModel = new ModelManager();
+        expectedEmptyModel.updateFilteredPersonList(predicate);
+        assertCommandSuccess(new FindCommand(predicate), emptyModel,
+                CommandResult.forEmptySearch(Messages.MESSAGE_NO_CLIENTS_TO_SEARCH), expectedEmptyModel);
     }
 
     @Test
@@ -107,6 +119,11 @@ public class FindCommandTest {
     @Test
     public void isMutating_findCommand_returnsFalse() {
         assertFalse(new FindCommand(preparePredicate("keyword")).isMutating());
+    }
+
+    @Test
+    public void constructor_nullPredicate_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> new FindCommand(null));
     }
 
     @Test

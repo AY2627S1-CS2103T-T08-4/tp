@@ -1,6 +1,6 @@
 /*
  * Loaded after LightTheme.css when dark mode is enabled. The shared UI rules use
- * these looked-up colours, so changing the palette updates the entire scene.
+ * these looked-up colors, so changing the palette updates the entire scene.
  */
 .root {
     -sieve-window: #171a21;
@@ -12,14 +12,11 @@
     -sieve-accent: #8da2ff;
     -sieve-selected: #30384f;
     -sieve-error: #ff8174;
+    -sieve-error-background: #42272a;
     -sieve-success: #67d98b;
 }
 
-#commandTextField.error {
-    -fx-background-color: #42272a;
-}
-
-/* Darker tag fills retain each tag's colour while avoiding bright pills. */
+/* Darker tag fills retain each tag's color while avoiding bright pills. */
 #tags .tag-color-0 { -fx-background-color: #29375f; -fx-text-fill: #b8c5ff; }
 #tags .tag-color-1 { -fx-background-color: #234332; -fx-text-fill: #8de0a8; }
 #tags .tag-color-2 { -fx-background-color: #493b22; -fx-text-fill: #f5cb73; }

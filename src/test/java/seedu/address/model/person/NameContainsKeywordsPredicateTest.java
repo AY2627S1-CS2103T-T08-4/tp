@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -141,9 +142,25 @@ public class NameContainsKeywordsPredicateTest {
         assertFalse(predicate.test(new PersonBuilder().withName("Alice Bob").build()));
 
         // Keywords match phone, email and address, but do not match name
-        predicate = new NameContainsKeywordsPredicate(List.of("12345678", "alice@email.com", "Main", "Street"));
-        assertFalse(predicate.test(new PersonBuilder().withName("Alice").withPhone("12345678")
+        predicate = new NameContainsKeywordsPredicate(List.of("91234567", "alice@email.com", "Main", "Street"));
+        assertFalse(predicate.test(new PersonBuilder().withName("Alice").withPhone("91234567")
                 .withEmail("alice@email.com").withAddress("Main Street").build()));
+    }
+
+    @Test
+    public void hashCode_equalKeywords_sameHashCode() {
+        assertEquals(new NameContainsKeywordsPredicate(List.of("Alice", "Bob")).hashCode(),
+                new NameContainsKeywordsPredicate(List.of("Alice", "Bob")).hashCode());
+    }
+
+    @Test
+    public void constructor_keywordsChangedAfterCreation_predicateUnchanged() {
+        List<String> keywords = new ArrayList<>(List.of("Alice"));
+        NameContainsKeywordsPredicate predicate = new NameContainsKeywordsPredicate(keywords);
+        keywords.set(0, "Bob");
+
+        assertTrue(predicate.test(new PersonBuilder().withName("Alice Pauline").build()));
+        assertFalse(predicate.test(new PersonBuilder().withName("Bob Choo").build()));
     }
 
     @Test

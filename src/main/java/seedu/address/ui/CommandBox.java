@@ -1,9 +1,12 @@
 package seedu.address.ui;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.Optional;
 
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.geometry.VerticalDirection;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -22,39 +25,63 @@ public class CommandBox extends UiPart<Region> {
 
     private final CommandHistory commandHistory = new CommandHistory();
     private final CommandExecutor commandExecutor;
+    private final ResultScroller resultScroller;
 
     @FXML
     private TextField commandTextField;
 
     /**
-     * Creates a {@code CommandBox} with the given {@code CommandExecutor}.
+     * Creates a {@code CommandBox} that runs commands with {@code commandExecutor}, and scrolls the result of the
+     * last command with {@code resultScroller}.
      */
-    public CommandBox(CommandExecutor commandExecutor) {
+    public CommandBox(CommandExecutor commandExecutor, ResultScroller resultScroller) {
         super(FXML);
-        this.commandExecutor = commandExecutor;
-        // calls #setStyleToDefault() whenever there is a change to the text of the command box.
+        this.commandExecutor = requireNonNull(commandExecutor);
+        this.resultScroller = requireNonNull(resultScroller);
+        // A failed command stays red only until the user edits it
         commandTextField.textProperty().addListener((unused1, unused2, unused3) -> setStyleToDefault());
         commandTextField.setOnKeyPressed(this::handleKeyPressed);
     }
 
     /**
-     * Shows the previous or next command in the history when the Up or Down keys are pressed.
+     * Shows the previous or next command in the history when the Up or Down keys are pressed, and scrolls the
+     * result of the last command when the Page Up or Page Down keys are pressed.
+     * The focus stays in the command box, so the user can keep typing.
      */
     private void handleKeyPressed(KeyEvent event) {
-        Optional<String> recalledCommand;
-        if (event.getCode() == KeyCode.UP) {
-            recalledCommand = commandHistory.getPreviousCommand();
-        } else if (event.getCode() == KeyCode.DOWN) {
-            recalledCommand = commandHistory.getNextCommand();
-        } else {
+        KeyCode key = event.getCode();
+        // Up and Down with a modifier are left to the text field, e.g. Shift+Up selects text
+        if ((key == KeyCode.UP || key == KeyCode.DOWN) && hasModifierDown(event)) {
             return;
         }
 
+        switch (key) {
+            case PAGE_UP -> resultScroller.scrollPage(VerticalDirection.UP);
+            case PAGE_DOWN -> resultScroller.scrollPage(VerticalDirection.DOWN);
+            case UP -> showRecalledCommand(commandHistory.getPreviousCommand(commandTextField.getText()));
+            case DOWN -> showRecalledCommand(commandHistory.getNextCommand());
+            default -> {
+                return;
+            }
+        }
+        event.consume();
+    }
+
+    /**
+     * Returns true if Shift, Ctrl, Alt or Meta is held down during {@code event}.
+     */
+    private static boolean hasModifierDown(KeyEvent event) {
+        return event.isShiftDown() || event.isControlDown() || event.isAltDown() || event.isMetaDown();
+    }
+
+    /**
+     * Shows {@code recalledCommand} in the command box with the cursor at the end, if there is one.
+     */
+    private void showRecalledCommand(Optional<String> recalledCommand) {
         recalledCommand.ifPresent(command -> {
             commandTextField.setText(command);
             commandTextField.end();
         });
-        event.consume();
     }
 
     /**
@@ -108,6 +135,19 @@ public class CommandBox extends UiPart<Region> {
          * @see seedu.address.logic.Logic#execute(String)
          */
         CommandResult execute(String commandText) throws CommandException, ParseException;
+    }
+
+    /**
+     * Represents a function that scrolls the result of the last command.
+     */
+    @FunctionalInterface
+    public interface ResultScroller {
+        /**
+         * Scrolls the result one page in {@code direction}.
+         *
+         * @see ResultDisplay#scrollPage(VerticalDirection)
+         */
+        void scrollPage(VerticalDirection direction);
     }
 
 }

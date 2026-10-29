@@ -15,4 +15,8 @@ public class CliSyntax {
     public static final Prefix PREFIX_FEE = new Prefix("fee/");
     public static final Prefix PREFIX_DUE_DATE = new Prefix("due/");
 
+    /** Every prefix that add and edit accept, apart from {@code PREFIX_NOTE}. */
+    public static final Prefix[] PREFIXES_EXCEPT_NOTE = {PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL, PREFIX_ADDRESS,
+        PREFIX_FEE, PREFIX_DUE_DATE, PREFIX_TAG};
+
 }

@@ -10,11 +10,17 @@ import static seedu.address.commons.util.AppUtil.checkArgument;
 public class Phone {
 
     public static final String MESSAGE_CONSTRAINTS =
-            "Invalid Phone Number! Enter 8 digits (e.g. 91234567).";
-    public static final String VALIDATION_REGEX = "\\d{8}";
+            "Invalid Phone Number! Enter an 8-digit Singapore number starting with 3, 6, 8 or 9 (e.g. 91234567).";
+    public static final String MESSAGE_COUNTRY_CODE = "Invalid Phone Number! Leave out the country code. "
+            + "Sieve only stores Singapore numbers, so enter just the 8 digits (e.g. 91234567, not +65 9123 4567).";
+    // Singapore numbers start with 3 (VoIP), 6 (landline), 8 or 9 (mobile)
+    public static final String VALIDATION_REGEX = "[3689]\\d{7}";
 
     // Formatting characters users commonly type in phone numbers, e.g. "9123 4567" or "(9123)-4567".
-    public static final String FORMATTING_CHARACTERS_REGEX = "[\\s\\-()]";
+    private static final String FORMATTING_CHARACTERS_REGEX = "[\\s\\-()]";
+    // A number with a country code, e.g. "+6591234567", "+14155552671", or "6591234567" without the "+",
+    // or "006591234567" with "00" in place of the "+"
+    private static final String COUNTRY_CODE_REGEX = "\\+.*|(00)?65\\d{8}";
 
     public final String value;
 
@@ -45,6 +51,14 @@ public class Phone {
      */
     public static boolean isValidPhone(String test) {
         return test.matches(VALIDATION_REGEX);
+    }
+
+    /**
+     * Returns true if {@code strippedPhone}, a phone number with its formatting characters removed,
+     * starts with a country code, which Sieve's phone numbers leave out.
+     */
+    public static boolean hasCountryCode(String strippedPhone) {
+        return strippedPhone.matches(COUNTRY_CODE_REGEX);
     }
 
     @Override

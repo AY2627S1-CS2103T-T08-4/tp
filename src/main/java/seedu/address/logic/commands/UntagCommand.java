@@ -29,7 +29,9 @@ public class UntagCommand extends Command {
             + " INDEX t/TAG [t/MORE_TAGS]...";
 
     public static final String MESSAGE_UNTAG_PERSON_SUCCESS = "Removed from %1$s: %2$s.";
-    public static final String MESSAGE_PERSON_NOT_TAGGED = "%1$s does not have any of the specified tags.";
+    public static final String MESSAGE_TAGS_NOT_FOUND = "\nNot found: %s.";
+    public static final String MESSAGE_PERSON_NOT_TAGGED =
+            "No tags removed from %1$s. Not found: %2$s.";
 
     private final Index targetIndex;
     private final List<Tag> tagsToRemove;
@@ -57,29 +59,53 @@ public class UntagCommand extends Command {
 
         Person personToUntag = lastShownList.get(targetIndex.getZeroBased());
         List<Tag> existingTagsToRemove = getExistingTags(personToUntag);
+        List<Tag> missingTags = getMissingTags(personToUntag);
 
         if (existingTagsToRemove.isEmpty()) {
-            return new CommandResult(String.format(MESSAGE_PERSON_NOT_TAGGED, personToUntag.getName()));
+            return new CommandResult(String.format(MESSAGE_PERSON_NOT_TAGGED,
+                    personToUntag.getName(), getTagNames(missingTags)));
         }
 
         Person untaggedPerson = createUntaggedPerson(personToUntag, existingTagsToRemove);
+        Set<Person> displayedPersons = new HashSet<>(lastShownList);
         model.setPerson(personToUntag, untaggedPerson);
+        updateDisplayedPersons(model, displayedPersons, personToUntag, untaggedPerson);
 
-        String tagNames = existingTagsToRemove.stream()
-                .map(tag -> tag.tagName)
-                .collect(Collectors.joining(", "));
+        String message = String.format(MESSAGE_UNTAG_PERSON_SUCCESS,
+                personToUntag.getName(), getTagNames(existingTagsToRemove));
+        if (!missingTags.isEmpty()) {
+            message += String.format(MESSAGE_TAGS_NOT_FOUND, getTagNames(missingTags));
+        }
 
-        return new CommandResult(String.format(MESSAGE_UNTAG_PERSON_SUCCESS, personToUntag.getName(), tagNames));
+        return new CommandResult(message);
     }
 
     /**
-     * Returns the requested tags that {@code person} currently has.
+     * Returns the requested tags that {@code person} currently has, using their stored names.
      */
     private List<Tag> getExistingTags(Person person) {
         return tagsToRemove
                 .stream()
-                .filter(person.getTags()::contains)
+                .flatMap(requestedTag -> person.getTags().stream().filter(requestedTag::equals))
                 .toList();
+    }
+
+    /**
+     * Returns the requested tags that {@code person} does not have.
+     */
+    private List<Tag> getMissingTags(Person person) {
+        return tagsToRemove.stream()
+                .filter(tag -> !person.getTags().contains(tag))
+                .toList();
+    }
+
+    /**
+     * Returns the tag names as a comma-separated string.
+     */
+    private String getTagNames(List<Tag> tags) {
+        return tags.stream()
+                .map(tag -> tag.tagName)
+                .collect(Collectors.joining(", "));
     }
 
     /**
@@ -91,6 +117,16 @@ public class UntagCommand extends Command {
         return new Person(personToUntag.getName(), personToUntag.getPhone(), personToUntag.getEmail(),
                 personToUntag.getAddress(), personToUntag.getNote(), personToUntag.getFee(),
                 personToUntag.getDueDate(), updatedTags);
+    }
+
+    /**
+     * Keeps the same clients displayed after replacing one of them with its updated version.
+     */
+    private void updateDisplayedPersons(Model model, Set<Person> displayedPersons, Person originalPerson,
+                                        Person updatedPerson) {
+        displayedPersons.remove(originalPerson);
+        displayedPersons.add(updatedPerson);
+        model.updateFilteredPersonList(displayedPersons::contains);
     }
 
     @Override
