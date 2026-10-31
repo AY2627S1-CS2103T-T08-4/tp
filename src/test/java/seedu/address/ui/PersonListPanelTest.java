@@ -1,6 +1,7 @@
 package seedu.address.ui;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.testutil.TypicalPersons.ALICE;
@@ -9,6 +10,7 @@ import static seedu.address.testutil.TypicalPersons.CARL;
 import static seedu.address.testutil.TypicalPersons.DANIEL;
 
 import java.util.List;
+import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,6 +21,8 @@ import org.testfx.framework.junit5.Start;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
+import javafx.geometry.Bounds;
+import javafx.geometry.VerticalDirection;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
@@ -26,9 +30,13 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.stage.Stage;
 import seedu.address.model.person.Person;
+import seedu.address.testutil.PersonBuilder;
 
 @ExtendWith(ApplicationExtension.class)
 public class PersonListPanelTest {
+
+    /** More clients than fit in the list at once. */
+    private static final int MANY_CLIENTS = 20;
 
     private final ObservableList<Person> persons = FXCollections.observableArrayList(ALICE, BENSON, CARL);
     // The app shows a FilteredList, which find and filter narrow down, so the tests use one too
@@ -124,6 +132,106 @@ public class PersonListPanelTest {
 
         robot.interact(() -> personListPanel.setCompact(false));
         assertEmailShownOnEveryCard(true);
+    }
+
+    @Test
+    public void scrollPage_manyClients_scrollsWithoutSkippingClients(FxRobot robot) {
+        showManyClients(robot);
+        List<Integer> firstPage = getShownRows(robot);
+
+        robot.interact(() -> personListPanel.scrollPage(VerticalDirection.DOWN));
+        List<Integer> secondPage = getShownRows(robot);
+        assertTrue(secondPage.get(0) > firstPage.get(0));
+        assertTrue(secondPage.get(0) <= firstPage.get(firstPage.size() - 1) + 1);
+
+        robot.interact(() -> personListPanel.scrollPage(VerticalDirection.UP));
+        assertEquals(firstPage, getShownRows(robot));
+    }
+
+    @Test
+    public void scrollPage_pastEitherEnd_stopsThere(FxRobot robot) {
+        showManyClients(robot);
+        List<Integer> firstPage = getShownRows(robot);
+
+        robot.interact(() -> personListPanel.scrollPage(VerticalDirection.UP));
+        assertEquals(firstPage, getShownRows(robot));
+
+        for (int i = 0; i < MANY_CLIENTS; i++) {
+            robot.interact(() -> personListPanel.scrollPage(VerticalDirection.DOWN));
+        }
+        assertTrue(getShownRows(robot).contains(MANY_CLIENTS - 1));
+    }
+
+    @Test
+    public void scrollPage_upThenDownFromTop_movesDownAtOnce(FxRobot robot) {
+        showManyClients(robot);
+        List<Integer> firstPage = getShownRows(robot);
+
+        // In one go, as with a held key. Going past the top must not use up the next scroll
+        robot.interact(() -> {
+            personListPanel.scrollPage(VerticalDirection.UP);
+            personListPanel.scrollPage(VerticalDirection.DOWN);
+        });
+
+        assertNotEquals(firstPage, getShownRows(robot));
+    }
+
+    @Test
+    public void scrollPage_noClientSelected_selectsNothing(FxRobot robot) {
+        showManyClients(robot);
+
+        robot.interact(() -> personListPanel.scrollPage(VerticalDirection.DOWN));
+
+        assertTrue(personListView.getSelectionModel().isEmpty());
+        assertNull(personListPanel.selectedPersonProperty().get());
+    }
+
+    @Test
+    public void scrollPage_clientSelected_keepsSelection(FxRobot robot) {
+        showManyClients(robot);
+        Person selectedClient = persons.get(1);
+        robot.interact(() -> personListView.getSelectionModel().select(selectedClient));
+
+        robot.interact(() -> personListPanel.scrollPage(VerticalDirection.DOWN));
+
+        assertEquals(selectedClient, personListView.getSelectionModel().getSelectedItem());
+        assertEquals(selectedClient, personListPanel.selectedPersonProperty().get());
+    }
+
+    @Test
+    public void scrollPage_allClientsFit_doesNotAffectLaterLists(FxRobot robot) {
+        robot.interact(() -> personListPanel.scrollPage(VerticalDirection.DOWN));
+        assertEquals(List.of(0, 1, 2), getShownRows(robot));
+
+        robot.interact(persons::clear);
+        robot.interact(() -> personListPanel.scrollPage(VerticalDirection.DOWN));
+
+        // As after find, Shift+Page Down, then list. The longer list starts from its first client
+        showManyClients(robot);
+        assertEquals(0, getShownRows(robot).get(0));
+    }
+
+    private void showManyClients(FxRobot robot) {
+        List<Person> clients = IntStream.range(0, MANY_CLIENTS)
+                .mapToObj(i -> new PersonBuilder().withName("Client " + i).build())
+                .toList();
+        robot.interact(() -> persons.setAll(clients));
+    }
+
+    /**
+     * Returns the rows of the list that are on screen, even if only in part, from top to bottom.
+     */
+    private List<Integer> getShownRows(FxRobot robot) {
+        // The rows otherwise only move on the next pulse
+        robot.interact(() -> personListPanel.getRoot().layout());
+        Bounds listBounds = personListView.localToScene(personListView.getBoundsInLocal());
+        return personListView.lookupAll(".list-cell").stream()
+                .map(cell -> (ListCell<?>) cell)
+                .filter(cell -> cell.isVisible() && cell.getItem() != null)
+                .filter(cell -> cell.localToScene(cell.getBoundsInLocal()).intersects(listBounds))
+                .map(ListCell::getIndex)
+                .sorted()
+                .toList();
     }
 
     /**

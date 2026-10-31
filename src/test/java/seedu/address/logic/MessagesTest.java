@@ -75,9 +75,16 @@ public class MessagesTest {
     }
 
     @Test
+    public void messageUnknownCommand_saysHowToFindTheCommandWords() {
+        assertEquals("Unknown command. Command words are in lower case. Type help to see them.",
+                Messages.MESSAGE_UNKNOWN_COMMAND);
+    }
+
+    @Test
     public void getErrorMessageForUnknownPrefix_prefixLikeWord_namesItAndHowToFix() {
         assertEquals("Unknown prefix z/. Check it for a typo, "
-                        + "or type help to see the prefixes each command accepts.",
+                        + "or type help to see the prefixes each command accepts. "
+                        + "If it is part of a detail, replace the / with another character.",
                 Messages.getErrorMessageForUnknownPrefix("z/"));
     }
 

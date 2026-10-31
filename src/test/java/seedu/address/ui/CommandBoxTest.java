@@ -37,6 +37,7 @@ public class CommandBoxTest {
 
     private final List<String> executedCommands = new ArrayList<>();
     private final List<VerticalDirection> scrolledDirections = new ArrayList<>();
+    private final List<VerticalDirection> clientListScrolledDirections = new ArrayList<>();
     private TextField commandTextField;
 
     @Start
@@ -50,7 +51,7 @@ public class CommandBoxTest {
                 throw new ParseException("Unknown command");
             }
             return new CommandResult("Command executed");
-        }, scrolledDirections::add);
+        }, scrolledDirections::add, clientListScrolledDirections::add);
         commandTextField = (TextField) commandBox.getRoot().lookup("#commandTextField");
         stage.setScene(new Scene(commandBox.getRoot()));
         stage.show();
@@ -58,8 +59,12 @@ public class CommandBoxTest {
 
     @Test
     public void constructor_null_throwsNullPointerException() {
-        assertThrows(NullPointerException.class, () -> new CommandBox(null, scrolledDirections::add));
-        assertThrows(NullPointerException.class, () -> new CommandBox(commandText -> null, null));
+        assertThrows(NullPointerException.class, () ->
+                new CommandBox(null, scrolledDirections::add, clientListScrolledDirections::add));
+        assertThrows(NullPointerException.class, () ->
+                new CommandBox(commandText -> null, null, clientListScrolledDirections::add));
+        assertThrows(NullPointerException.class, () ->
+                new CommandBox(commandText -> null, scrolledDirections::add, null));
     }
 
     @Test
@@ -232,6 +237,21 @@ public class CommandBoxTest {
         pressKey(robot, KeyCode.PAGE_UP);
 
         assertEquals(List.of(VerticalDirection.DOWN, VerticalDirection.UP), scrolledDirections);
+        assertTrue(clientListScrolledDirections.isEmpty());
+        assertEquals("del", commandTextField.getText());
+        assertEquals(List.of(VALID_COMMAND), executedCommands);
+    }
+
+    @Test
+    public void handleKeyPressed_shiftPageUpAndPageDown_scrollClientListAndKeepTypedText(FxRobot robot) {
+        enterCommand(robot, VALID_COMMAND);
+        robot.interact(() -> commandTextField.setText("del"));
+
+        pressKey(robot, KeyCode.PAGE_DOWN, KeyCode.SHIFT);
+        pressKey(robot, KeyCode.PAGE_UP, KeyCode.SHIFT);
+
+        assertEquals(List.of(VerticalDirection.DOWN, VerticalDirection.UP), clientListScrolledDirections);
+        assertTrue(scrolledDirections.isEmpty());
         assertEquals("del", commandTextField.getText());
         assertEquals(List.of(VALID_COMMAND), executedCommands);
     }

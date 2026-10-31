@@ -9,9 +9,11 @@ import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.geometry.VerticalDirection;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.ScrollBar;
 import javafx.scene.layout.Region;
 import seedu.address.logic.Messages;
 import seedu.address.model.person.Person;
@@ -105,6 +107,15 @@ public class PersonListPanel extends UiPart<Region> {
         boolean isRenamed = !allPersons.contains(person) && change.next()
                 && change.getRemoved().equals(List.of(person)) && change.getAddedSize() == 1;
         return isRenamed ? change.getAddedSubList().get(0) : null;
+    }
+
+    /**
+     * Scrolls the list about one page in {@code direction}, leaving the selection as it is.
+     */
+    public void scrollPage(VerticalDirection direction) {
+        ScrollBar scrollBar = (ScrollBar) personListView.lookup(".scroll-bar:vertical");
+        double step = direction == VerticalDirection.UP ? -scrollBar.getVisibleAmount() : scrollBar.getVisibleAmount();
+        scrollBar.setValue(Math.clamp(scrollBar.getValue() + step, scrollBar.getMin(), scrollBar.getMax()));
     }
 
     /**

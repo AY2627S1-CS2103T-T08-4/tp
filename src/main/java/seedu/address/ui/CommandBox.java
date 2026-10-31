@@ -3,6 +3,7 @@ package seedu.address.ui;
 import static java.util.Objects.requireNonNull;
 
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -26,18 +27,21 @@ public class CommandBox extends UiPart<Region> {
     private final CommandHistory commandHistory = new CommandHistory();
     private final CommandExecutor commandExecutor;
     private final ResultScroller resultScroller;
+    private final Consumer<VerticalDirection> clientListScroller;
 
     @FXML
     private TextField commandTextField;
 
     /**
      * Creates a {@code CommandBox} that runs commands with {@code commandExecutor}, and scrolls the result of the
-     * last command with {@code resultScroller}.
+     * last command with {@code resultScroller}, and the client list with {@code clientListScroller}.
      */
-    public CommandBox(CommandExecutor commandExecutor, ResultScroller resultScroller) {
+    public CommandBox(CommandExecutor commandExecutor, ResultScroller resultScroller,
+            Consumer<VerticalDirection> clientListScroller) {
         super(FXML);
         this.commandExecutor = requireNonNull(commandExecutor);
         this.resultScroller = requireNonNull(resultScroller);
+        this.clientListScroller = requireNonNull(clientListScroller);
         // A failed command stays red only until the user edits it
         commandTextField.textProperty().addListener((unused1, unused2, unused3) -> setStyleToDefault());
         commandTextField.setOnKeyPressed(this::handleKeyPressed);
@@ -52,7 +56,7 @@ public class CommandBox extends UiPart<Region> {
 
     /**
      * Shows the previous or next command in the history when the Up or Down keys are pressed, and scrolls the
-     * result of the last command when the Page Up or Page Down keys are pressed.
+     * result of the last command when the Page Up or Page Down keys are pressed, or the client list if Shift is held.
      * The focus stays in the command box, so the user can keep typing.
      */
     private void handleKeyPressed(KeyEvent event) {
@@ -62,9 +66,10 @@ public class CommandBox extends UiPart<Region> {
             return;
         }
 
+        Consumer<VerticalDirection> scroller = event.isShiftDown() ? clientListScroller : resultScroller::scrollPage;
         switch (key) {
-            case PAGE_UP -> resultScroller.scrollPage(VerticalDirection.UP);
-            case PAGE_DOWN -> resultScroller.scrollPage(VerticalDirection.DOWN);
+            case PAGE_UP -> scroller.accept(VerticalDirection.UP);
+            case PAGE_DOWN -> scroller.accept(VerticalDirection.DOWN);
             case UP -> showRecalledCommand(commandHistory.getPreviousCommand(commandTextField.getText()));
             case DOWN -> showRecalledCommand(commandHistory.getNextCommand());
             default -> {

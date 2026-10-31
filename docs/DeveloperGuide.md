@@ -140,7 +140,8 @@ A few parts of the main window are worth knowing about when changing them:
   fits its content to its width, without which that would not be true. Its `maxHeight` is a whole number of lines,
   so that no line is cut in half.
   The result never takes keyboard focus, so `CommandBox` scrolls it a page at a time with Page Up and Page Down,
-  through `ResultDisplay#scrollPage(VerticalDirection)`, while the user keeps typing.
+  through `ResultDisplay#scrollPage(VerticalDirection)`, while the user keeps typing. Shift+Page Up and Shift+Page
+  Down scroll the client list in the same way, through `PersonListPanel#scrollPage(VerticalDirection)`.
 
 * **Tag colors.** `PersonCard` gives each tag a style class from `TagColor`, from `tag-color-0` to `tag-color-11`.
   `TagColor` picks it from the tag's name, ignoring case, so a tag has the same color on every client and every
@@ -559,7 +560,7 @@ The history is kept in memory only, so it is lost when the app is closed. In rea
 
 * **Alternative 1 (current choice):** Saves the entire client list after each change.
   * Pros: Easy to implement, and works for every command, including new ones, without extra code.
-  * Cons: Uses more memory, as each change stores a full copy of the client list. This is acceptable for a tutor's client list of tens of clients.
+  * Cons: Uses more memory, as each change stores a full copy of the client list. This is acceptable even at 1,000 clients, as the copies share the same immutable `Person` objects, so each copy only holds a list of references.
 
 * **Alternative 2:** Each command knows how to undo and redo itself.
   * Pros: Uses less memory (e.g. for `delete`, just save the client being deleted).
@@ -1868,7 +1869,7 @@ The data file is `data/sieve.json` inside that folder.
     1. Test case: enter a few commands, close Sieve, reopen it, then press Up<br>
        Expected: The command box stays empty.
 
-### Scrolling a long result
+### Scrolling a long result or the client list
 
 1. Scrolling with the keyboard
 
@@ -1881,3 +1882,6 @@ The data file is `data/sieve.json` inside that folder.
 
     1. Test case: `undo`, then press Page Down<br>
        Expected: The short result does not move.
+
+    1. Test case: with more clients than fit in the list, type `list` without pressing Enter, then press Shift+Page Down<br>
+       Expected: The client list scrolls down, and no client is selected. The command box still shows `list`.
