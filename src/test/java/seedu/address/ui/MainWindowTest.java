@@ -422,6 +422,29 @@ public class MainWindowTest {
     }
 
     @Test
+    public void undo_renamedSelectedClientAfterFind_staysSelected(FxRobot robot) {
+        addThreeClients(robot);
+        selectClient(robot, 2);
+        enterCommand(robot, "edit 3 n/Charlotte Lim");
+        enterCommand(robot, "find Charlotte Lim");
+
+        enterCommand(robot, "undo");
+
+        assertSelectedClientShown("Charlotte Lee");
+    }
+
+    @Test
+    public void undo_clientRenamedBeforeSelection_staysSelected(FxRobot robot) {
+        addThreeClients(robot);
+        enterCommand(robot, "edit 3 n/Charlotte Lim");
+        selectClient(robot, 2);
+
+        enterCommand(robot, "undo");
+
+        assertSelectedClientShown("Charlotte Lee");
+    }
+
+    @Test
     public void find_selectedClientNotFound_closesDetailPanel(FxRobot robot) throws TimeoutException {
         addThreeClients(robot);
         enterCommand(robot, "find Charlotte");
