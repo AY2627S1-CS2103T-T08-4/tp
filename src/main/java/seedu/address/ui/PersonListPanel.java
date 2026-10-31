@@ -1,6 +1,9 @@
 package seedu.address.ui;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -34,6 +37,7 @@ public class PersonListPanel extends UiPart<Region> {
 
     private final ReadOnlyObjectWrapper<Person> selectedPerson = new ReadOnlyObjectWrapper<>();
     private final ObservableList<Person> allPersons;
+    private final Map<Person, Set<Person>> renamedClients = new HashMap<>();
     private boolean isCompact;
     private boolean isRestoringSelection;
 
@@ -44,9 +48,10 @@ public class PersonListPanel extends UiPart<Region> {
     public PersonListPanel(ObservableList<Person> personList, ObservableList<Person> allPersons) {
         super(FXML);
         this.allPersons = allPersons;
+        allPersons.addListener((ListChangeListener<Person>) this::rememberRenamedClients);
         personList.addListener((ListChangeListener<Person>) this::restoreSelectionAfterReplacement);
         personListView.setItems(personList);
-        personListView.setCellFactory(listView -> new PersonListViewCell());
+        rebuildCells();
         personListView.getSelectionModel().selectedItemProperty().addListener((observable, oldPerson, newPerson) -> {
             // While restoring, the ListView briefly selects by row, which may be another client or none
             if (!isRestoringSelection) {
@@ -80,12 +85,11 @@ public class PersonListPanel extends UiPart<Region> {
         if (currentSelection == null || isRestoringSelection) {
             return;
         }
-        Person renamedClient = getRenamedClient(change, currentSelection);
         isRestoringSelection = true;
         Platform.runLater(() -> {
             // Names are unique, so a client with the same name is the same client, perhaps edited
             Person newSelection = personListView.getItems().stream().filter(currentSelection::hasSameName)
-                    .findFirst().orElse(renamedClient);
+                    .findFirst().orElseGet(() -> getRenamedClient(currentSelection));
             if (newSelection == null) {
                 personListView.getSelectionModel().clearSelection();
             } else {
@@ -97,14 +101,36 @@ public class PersonListPanel extends UiPart<Region> {
     }
 
     /**
-     * Returns the client that replaced only {@code person} in {@code change}, if {@code person} has also left the
-     * address book, as after an edit that renames it. Otherwise, returns null.
+     * Remembers single-client replacements that change the client's name. The full client list sees the replacement
+     * even when the displayed list's current filter removes the renamed client.
      */
-    private Person getRenamedClient(ListChangeListener.Change<? extends Person> change, Person person) {
-        change.reset();
-        boolean isRenamed = !allPersons.contains(person) && change.next()
-                && change.getRemoved().equals(List.of(person)) && change.getAddedSize() == 1;
-        return isRenamed ? change.getAddedSubList().get(0) : null;
+    private void rememberRenamedClients(ListChangeListener.Change<? extends Person> change) {
+        while (change.next()) {
+            if (change.getRemovedSize() != 1 || change.getAddedSize() != 1) {
+                continue;
+            }
+            Person before = change.getRemoved().get(0);
+            Person after = change.getAddedSubList().get(0);
+            if (!before.hasSameName(after)) {
+                rememberRename(before, after);
+            }
+        }
+    }
+
+    /** Remembers both directions of a rename so that selection can follow successive undo and redo commands. */
+    private void rememberRename(Person before, Person after) {
+        renamedClients.computeIfAbsent(before, ignored -> new HashSet<>()).add(after);
+        renamedClients.computeIfAbsent(after, ignored -> new HashSet<>()).add(before);
+    }
+
+    /**
+     * Returns a remembered renamed version of {@code person} that is now in the address book, or null if none exists.
+     */
+    private Person getRenamedClient(Person person) {
+        return renamedClients.getOrDefault(person, Set.of()).stream()
+                .filter(allPersons::contains)
+                .findFirst()
+                .orElse(null);
     }
 
     /**
@@ -122,7 +148,12 @@ public class PersonListPanel extends UiPart<Region> {
             return;
         }
         this.isCompact = isCompact;
-        personListView.refresh();
+        rebuildCells();
+    }
+
+    /** Recreates every list cell so that its card uses the current compact setting. */
+    private void rebuildCells() {
+        personListView.setCellFactory(listView -> new PersonListViewCell());
     }
 
     /**

@@ -33,6 +33,15 @@ public class IndexListParserTest {
     }
 
     @Test
+    public void parse_multipleIndexesWithoutCommas_throwsParseException() {
+        String expectedMessage = String.format(
+                MESSAGE_INVALID_COMMAND_FORMAT,
+                IndexListParser.MESSAGE_MISSING_COMMA);
+
+        assertThrows(ParseException.class, expectedMessage, () -> IndexListParser.parse("1 2", TEST_USAGE));
+    }
+
+    @Test
     public void parse_duplicateIndexes_throwsParseException() {
         String expectedMessage = String.format(
                 MESSAGE_INVALID_COMMAND_FORMAT,

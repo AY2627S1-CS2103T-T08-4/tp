@@ -78,6 +78,22 @@ public class DeleteCommandParserTest {
     }
 
     @Test
+    public void parse_multipleIndexesWithoutCommas_throwsParseException() {
+        assertParseFailure(
+                parser,
+                "1 2 3",
+                String.format(
+                        MESSAGE_INVALID_COMMAND_FORMAT,
+                        IndexListParser.MESSAGE_MISSING_COMMA));
+        assertParseFailure(
+                parser,
+                "1 2, 3",
+                String.format(
+                        MESSAGE_INVALID_COMMAND_FORMAT,
+                        IndexListParser.MESSAGE_MISSING_COMMA));
+    }
+
+    @Test
     public void parse_nonPositiveIndex_throwsParseException() {
         assertParseFailure(
                 parser,

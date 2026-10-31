@@ -745,10 +745,11 @@ Some checks are worth knowing about:
 * manages a large and growing roster of clients
 * teaches clients across varying subjects and education levels
 * manages irregular and frequently changing schedules
+* prefers typing to using the mouse, and types fast
 
 **Value proposition**: Tutors managing many clients with different subjects, levels, and constantly shifting schedules
 often lose track of details across scattered notes or apps. Sieve keeps every client organised in one place and lets
-tutors instantly find or filter anyone, keeping admin work out of the way of teaching.
+fast-typing tutors find and update client details quickly using commands, keeping admin work out of the way of teaching.
 
 ### User stories
 
@@ -902,40 +903,6 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
       Use case ends.
 
-**Use case: UC2A - View a client's details**
-
-**MSS**
-
-1. Tutor displays a list of clients.
-2. Tutor selects a client from the list.
-3. Sieve highlights that client, compacts the list and shows the client's details in a panel beside it.
-
-   Use case ends.
-
-**Extensions**
-
-* 1a. No clients are displayed.
-
-  Use case ends.
-
-* 3a. Tutor selects another displayed client.
-
-    * 3a1. Sieve moves the highlight and updates the open panel with that client's details.
-
-      Use case resumes at step 3.
-
-* 3b. Tutor closes the detail panel.
-
-    * 3b1. Sieve clears the selection and restores the full-width client list.
-
-      Use case ends.
-
-* 3c. The selected client is deleted or removed from the displayed results by a search or filter.
-
-    * 3c1. Sieve closes the detail panel and restores the full-width client list.
-
-      Use case ends.
-
 **Use case: UC3 - Tag clients to organise them**
 
 **MSS**
@@ -1027,28 +994,34 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 **Extensions**
 
-* 2a. No clients are displayed.
+* 3a. No clients are displayed when the tutor requests a deletion.
 
-    * 2a1. Sieve shows:
+    * 3a1. Sieve shows:
       `Error: Cannot delete from an empty client list.`
 
       Use case ends.
 
-* 3a. No index is provided.
-
-    * 3a1. Sieve shows an error message with the expected command format.
-
-      Use case resumes at step 3.
-
-* 3b. An index is not a positive integer, or an index is missing between two commas.
+* 3b. No index is provided.
 
     * 3b1. Sieve shows an error message with the expected command format.
 
       Use case resumes at step 3.
 
-* 3c. The same index is provided more than once.
+* 3c. An index is not a positive integer.
 
-    * 3c1. Sieve shows:
+    * 3c1. Sieve shows an error message saying that an index must be a positive integer.
+
+      Use case resumes at step 3.
+
+* 3d. An index is missing between two commas, or before or after a comma.
+
+    * 3d1. Sieve shows an error message with the expected command format.
+
+      Use case resumes at step 3.
+
+* 3e. The same index is provided more than once.
+
+    * 3e1. Sieve shows:
       `Duplicate indexes are not allowed.`
 
       Use case resumes at step 3.
@@ -1125,6 +1098,40 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
     * 3b1. Tutor requests to redo the change.
 
     * 3b2. Sieve applies the change again, saves it, and shows all clients.
+
+      Use case ends.
+
+**Use case: UC8 - View a client's details**
+
+**MSS**
+
+1. Tutor displays a list of clients.
+2. Tutor selects a client from the list.
+3. Sieve highlights that client, compacts the list and shows the client's details in a panel beside it.
+
+   Use case ends.
+
+**Extensions**
+
+* 1a. No clients are displayed.
+
+  Use case ends.
+
+* 3a. Tutor selects another displayed client.
+
+    * 3a1. Sieve moves the highlight and updates the open panel with that client's details.
+
+      Use case resumes at step 3.
+
+* 3b. Tutor closes the detail panel.
+
+    * 3b1. Sieve clears the selection and restores the full-width client list.
+
+      Use case ends.
+
+* 3c. The selected client is deleted or removed from the displayed results by a search or filter.
+
+    * 3c1. Sieve closes the detail panel and restores the full-width client list.
 
       Use case ends.
 
@@ -1642,8 +1649,16 @@ The data file is `data/sieve.json` inside that folder.
 1. Deleting using an invalid index
 
     1. Test cases: `delete 0`, `delete -1`, and `delete x`.<br>
-       Expected: No client is deleted. The status message indicates that the command format or index is invalid and
-       displays the usage instructions.
+       Expected: No client is deleted. The status message shows:<br>
+       `Invalid command format!`<br>
+       `Index must be a positive integer.`
+
+1. Deleting multiple indices without commas
+
+    1. Test case: `delete 1 2 3`.<br>
+       Expected: No client is deleted. The status message shows:<br>
+       `Invalid command format!`<br>
+       `Indices must be separated by commas, e.g. delete 1, 2, 3.`
 
 1. Deleting multiple clients
 
@@ -1694,9 +1709,18 @@ The data file is `data/sieve.json` inside that folder.
 
     1. Prerequisites: Use `list` to display multiple clients and note the displayed clients.
 
-    1. Test cases: `delete 1,,3`, `delete ,1,2`, `delete 1,2,`, `delete 1,x` and `delete 0,1`.<br>
-       Expected: No client is deleted. The status message indicates that the command format is invalid and displays
-       the bulk-delete usage instructions.
+    1. Test cases: `delete 1,,3`, `delete ,1,2` and `delete 1,2,`.<br>
+       Expected: No client is deleted. The status message shows `Invalid command format!` followed by the bulk-delete
+       usage instructions.
+
+1. Bulk deleting with an invalid index
+
+    1. Prerequisites: Use `list` to display multiple clients and note the displayed clients.
+
+    1. Test cases: `delete 1,x` and `delete 0,1`.<br>
+       Expected: No client is deleted. The status message shows:<br>
+       `Invalid command format!`<br>
+       `Index must be a positive integer.`
 
 1. Undoing a bulk deletion
 
