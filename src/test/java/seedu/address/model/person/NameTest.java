@@ -65,6 +65,13 @@ public class NameTest {
     }
 
     @Test
+    public void messageConstraints_writesPunctuationInWordsOnly() {
+        assertTrue(Name.MESSAGE_CONSTRAINTS.contains("hyphens, apostrophes, full stops and parentheses"));
+        // Angle brackets around each character could be read as allowed characters too
+        assertFalse(Name.MESSAGE_CONSTRAINTS.contains("<"));
+    }
+
+    @Test
     public void getErrorMessage() {
         // only too long: the length is given instead of the character rules
         assertEquals("Invalid Name! Names cannot be more than 50 characters, but this one has 51.",

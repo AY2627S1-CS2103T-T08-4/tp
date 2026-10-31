@@ -172,7 +172,8 @@ public class MainWindow extends UiPart<Stage> {
         StatusBarFooter statusBarFooter = new StatusBarFooter(dataFilePath);
         statusbarPlaceholder.getChildren().add(statusBarFooter.getRoot());
 
-        CommandBox commandBox = new CommandBox(this::executeCommand, resultDisplay::scrollPage);
+        CommandBox commandBox = new CommandBox(this::executeCommand, resultDisplay::scrollPage,
+                personListPanel::scrollPage);
         commandBoxPlaceholder.getChildren().add(commandBox.getRoot());
         // The detail panel's ScrollPane takes the focus when clicked, so the command box takes it back
         personDetailPanel.getRoot().addEventFilter(MouseEvent.MOUSE_RELEASED, event -> commandBox.requestFocus());

@@ -12,7 +12,8 @@ import seedu.address.model.person.Person;
  */
 public class Messages {
 
-    public static final String MESSAGE_UNKNOWN_COMMAND = "Unknown command.";
+    public static final String MESSAGE_UNKNOWN_COMMAND =
+            "Unknown command. Command words are in lower case. Type help to see them.";
     public static final String MESSAGE_INVALID_COMMAND_FORMAT = "Invalid command format!\n%1$s";
     public static final String MESSAGE_DUPLICATE_FIELDS =
                 "Multiple values specified for the following single-valued field(s): ";
@@ -24,7 +25,8 @@ public class Messages {
             "There are no clients in Sieve yet, so there is nothing to search. Use add to add one.";
 
     private static final String MESSAGE_UNKNOWN_PREFIX =
-            "Unknown prefix %1$s. Check it for a typo, or type help to see the prefixes each command accepts.";
+            "Unknown prefix %1$s. Check it for a typo, or type help to see the prefixes each command accepts."
+                    + " If it is part of a detail, replace the / with another character.";
     private static final String MESSAGE_INDEX_OUT_OF_BOUNDS =
             "Error: The index provided is out of bounds! Current list only contains %1$s.";
     private static final String MESSAGE_PERSONS_LISTED_OVERVIEW = "%1$s found matching your search term(s).";

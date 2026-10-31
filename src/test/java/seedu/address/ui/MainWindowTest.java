@@ -30,6 +30,7 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
+import javafx.scene.control.ScrollBar;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
@@ -135,6 +136,31 @@ public class MainWindowTest {
         robot.interact(() -> getCommandTextField().fireEvent(createKeyPressedEvent(KeyCode.PAGE_DOWN)));
 
         assertTrue(resultScrollPane.getVvalue() > resultScrollPane.getVmin());
+    }
+
+    @Test
+    public void shiftPageDownAndUpInCommandBox_manyClients_scrollsListOnly(FxRobot robot) {
+        for (int i = 0; i < 8; i++) {
+            enterCommand(robot, "add n/Client " + i + " p/9123456" + i + " e/client" + i + "@edu.sg a/1 Bishan St");
+        }
+        ScrollBar listScrollBar = (ScrollBar) getPersonListView().lookup(".scroll-bar:vertical");
+        robot.clickOn("#commandTextField");
+        robot.write("del");
+
+        robot.press(KeyCode.SHIFT).type(KeyCode.PAGE_DOWN).release(KeyCode.SHIFT);
+
+        double scrolledValue = listScrollBar.getValue();
+        assertTrue(scrolledValue > listScrollBar.getMin());
+        assertTrue(getPersonListView().getSelectionModel().isEmpty());
+        assertEquals(getCommandTextField(), stage.getScene().getFocusOwner());
+        assertEquals("del", getCommandTextField().getText());
+
+        // Without Shift, the key is for the result, so the list stays where it is
+        robot.type(KeyCode.PAGE_DOWN);
+        assertEquals(scrolledValue, listScrollBar.getValue());
+
+        robot.press(KeyCode.SHIFT).type(KeyCode.PAGE_UP).release(KeyCode.SHIFT);
+        assertTrue(listScrollBar.getValue() < scrolledValue);
     }
 
     @Test
