@@ -100,7 +100,7 @@ date when those optional details have been recorded.
 
 ### Viewing help: `help`
 
-Opens a help window that lists every command and its format, with a link to this user guide that you can copy with **Copy URL**. You can also open it from the **Help** menu or by pressing **F1**.
+Opens a help window that lists every command and its format, with a link to this user guide that you can copy with **Copy URL**. You can also open it from the **Help** menu or by pressing **F1**. On a Mac laptop, you may need to hold **Fn** as well.
 
 ![help message](images/helpMessage.png)
 
@@ -109,7 +109,7 @@ Format: `help`
 
 ### Adding a client: `add`
 
-Adds a client to Sieve, then shows the full client list, so that the new client is not hidden by an earlier `find` or `filter`. You may need to scroll to see the new client, e.g. with **Shift+Page Down**.
+Adds a client to Sieve, then shows the full client list, so that the new client is not hidden by an earlier `find` or `filter`. You may need to scroll to see the new client, e.g. with [**Shift+Page Down**](#keyboard-shortcuts).
 
 Format: `add n/NAME p/PHONE e/EMAIL a/ADDRESS [fee/FEE] [due/DUE_DATE] [t/TAG]... [nt/NOTE]`
 
@@ -189,7 +189,7 @@ Format: `edit INDEX [n/NAME] [p/PHONE] [e/EMAIL] [a/ADDRESS] [fee/FEE] [due/DUE_
 * Editing the fee or due date replaces the existing value. To remove a client's fee, enter `fee/` without a value after it. To remove a client's due date, enter `due/` without a value after it.
 * A new due date must follow the same rules as in `add`. Editing other fields of a client whose due date has passed leaves that due date as it is, and `due/` with no value clears it.
 * The note must be the last parameter, and cannot contain any of the prefixes listed in [`add`](#adding-a-client-add). For example, `edit 1 nt/Revise t/tests` is rejected instead of replacing the client's tags.
-* After an edit, the full client list is shown, so that the edited client is not hidden by an earlier `find` or `filter`. You may need to scroll to see the client, e.g. with **Shift+Page Down**.
+* After an edit, the full client list is shown, so that the edited client is not hidden by an earlier `find` or `filter`. You may need to scroll to see the client, e.g. with [**Shift+Page Down**](#keyboard-shortcuts).
 * If the new values are the same as the client's current ones, Sieve shows `No change: NAME already has these details.` and keeps the displayed list as it is.
 
 Examples:
@@ -337,7 +337,7 @@ Format: `undo`
 * Commands that do not change anything, such as `list`, `find` and `help`, are skipped. Commands that fail are also skipped.
 * An `edit`, `tag`, or `untag` that leaves the client exactly as before is also skipped, and its result says that nothing changed. For example, this happens when the edited value is unchanged, every requested tag already exists, or none of the requested tags exist. An `undo` after it reverts the preceding change instead.
 * An `edit` that only changes the letter case of a tag, e.g. from `Math` to `MATH`, counts as a change and can be undone.
-* After an undo, the full client list is shown, so that the restored client is not hidden by an earlier `find`. You may need to scroll to see the client, e.g. with **Shift+Page Down**.
+* After an undo, the full client list is shown, so that the restored client is not hidden by an earlier `find`. You may need to scroll to see the client, e.g. with [**Shift+Page Down**](#keyboard-shortcuts).
 * The result, `Undid the last change.`, does not say which change was undone. Showing what was undone is not supported, so check the client list if you are unsure.
 * The undone change is saved to the data file straight away, like any other change.
 * If there is nothing left to undo, the following error is shown: `Error: There is nothing to undo.`
@@ -394,6 +394,7 @@ When the result of a command is too long to show in full, such as after deleting
 
 * Press **Page Down** in the command box to see the next lines of the result, and **Page Up** to go back.
 * Press **Shift+Page Down** in the command box to see the next clients in the list, and **Shift+Page Up** to go back. This does not select a client.
+* On a Mac laptop, which has no Page Up or Page Down keys, hold **Fn** and press **Up** or **Down** instead. For example, press **Fn+Down** for Page Down, and **Fn+Shift+Down** for Shift+Page Down.
 * Whatever you have typed in the command box is kept, so you can keep typing.
 * You can also scroll the result and the client list with the mouse.
 
@@ -458,6 +459,18 @@ Action     | Format, Examples
 **Tag**    | `tag INDEX t/TAG [t/MORE_TAGS]...`<br> e.g., `tag 1 t/physics t/sec4`
 **Undo**   | `undo`
 **Untag**  | `untag INDEX t/TAG [t/MORE_TAGS]...`<br> e.g., `untag 1 t/Math`
-**Recall a command** | **Up** and **Down** in the command box
-**Scroll the result** | **Page Up** and **Page Down** in the command box
-**Scroll the client list** | **Shift+Page Up** and **Shift+Page Down** in the command box
+
+--------------------------------------------------------------------------------------------------------------------
+
+## Keyboard shortcuts
+
+These keys all work with the cursor in the command box.
+
+Action | Key | On a Mac laptop
+-------|-----|----------------
+**Run the command** | **Enter** | **Return**
+**Recall an earlier or later command** | **Up** or **Down** | **Up** or **Down**
+**Scroll the result** | **Page Up** or **Page Down** | **Fn+Up** or **Fn+Down**
+**Scroll the client list** | **Shift+Page Up** or **Shift+Page Down** | **Fn+Shift+Up** or **Fn+Shift+Down**
+**Open the help window** | **F1** | **F1**, or **Fn+F1** if F1 changes the screen brightness
+**Close the client's details panel** | **Esc** | **Esc**

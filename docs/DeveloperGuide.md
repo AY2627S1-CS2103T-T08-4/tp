@@ -155,6 +155,12 @@ A few parts of the main window are worth knowing about when changing them:
   unfiltered list, to tell the two apart. The client detail panel (below) does not get in the way: an empty list has
   no selected client, so when `clear` or a search empties the list, the panel closes and the list, with its
   placeholder, takes the full width again.
+* **Keyboard shortcuts.** `CommandBox` handles the keys that belong to the command box. Enter runs the command, Up and
+  Down recall commands (see [Command history feature](#command-history-feature)), Page Up and Page Down scroll the
+  result, and Shift+Page Up and Shift+Page Down scroll the client list. `MainWindow` handles the other two. F1 opens
+  the help window, through an accelerator on the **Help** menu item, and Esc closes the client detail panel, through
+  an event filter on the window. Mac laptops have no Page Up or Page Down keys, but macOS reports Fn+Up and Fn+Down as
+  those keys, so they need no code of their own.
 
 * **Client detail panel.** `PersonListPanel` exposes a read-only `selectedPersonProperty`, which `MainWindow` observes.
   Selecting a client causes `MainWindow` to pass that `Person` to `PersonDetailPanel#setPerson(Person)`, put the list
@@ -617,7 +623,7 @@ It has the following operations:
 `CommandBox` uses it in two places:
 
 * `CommandBox#handleCommandEntered()` adds every non-blank command to the history before executing it. This way, a command that fails is kept and can be recalled to fix it.
-* `CommandBox#handleKeyPressed()` handles Up and Down. If the history returns a command, it is put in the text field with the cursor at the end. The key event is then consumed, so the text field does not also move the cursor. It also passes Page Up and Page Down to the `ResultScroller` it was created with, which scrolls the command result (see [UI component](#ui-component)). Other keys are left to the text field, so the cursor can still be moved within a recalled command. Up and Down with Shift, Ctrl, Alt or Meta held are left to the text field too, so that Shift+Up still selects text.
+* `CommandBox#handleKeyPressed()` handles Up and Down. If the history returns a command, it is put in the text field with the cursor at the end. The key event is then consumed, so the text field does not also move the cursor. It also passes Page Up and Page Down to the `ResultScroller` it was created with, which scrolls the command result, or to `clientListScroller` if Shift is held, which scrolls the client list (see [UI component](#ui-component)). Other keys are left to the text field, so the cursor can still be moved within a recalled command. Up and Down with Shift, Ctrl, Alt or Meta held are left to the text field too, so that Shift+Up still selects text.
 
 The following sequence diagram shows what happens when the user presses Up:
 
@@ -1873,7 +1879,8 @@ The data file is `data/sieve.json` inside that folder.
 
 1. Scrolling with the keyboard
 
-    1. Prerequisites: Start with the sample data, and make the window as small as it goes.
+    1. Prerequisites: Start with the sample data, and make the window as small as it goes. On a Mac laptop, use Fn+Up
+       and Fn+Down for Page Up and Page Down.
 
     1. Test case: `delete 1, 2, 3, 4, 5`, then type `list` without pressing Enter, then press Page Down twice and Page Up once<br>
        Expected: The result stops growing at 7 lines and gets a scroll bar, and the client list keeps the rest of the
@@ -1883,5 +1890,19 @@ The data file is `data/sieve.json` inside that folder.
     1. Test case: `undo`, then press Page Down<br>
        Expected: The short result does not move.
 
-    1. Test case: with more clients than fit in the list, type `list` without pressing Enter, then press Shift+Page Down<br>
-       Expected: The client list scrolls down, and no client is selected. The command box still shows `list`.
+    1. Test case: with more clients than fit in the list, type `list` without pressing Enter, then press Shift+Page Down, then Shift+Page Up<br>
+       Expected: The client list scrolls down and back up, and no client is selected. The command box still shows `list`.
+
+### Opening help and closing the detail panel with the keyboard
+
+1. Opening the help window
+
+    1. Test case: press F1. On a Mac laptop, press Fn+F1 if F1 changes the screen brightness.<br>
+       Expected: The help window opens.
+
+1. Closing the client detail panel
+
+    1. Prerequisites: Click a client, so that the detail panel is open.
+
+    1. Test case: press Esc<br>
+       Expected: The panel closes, no client is selected, and the list returns to its full width.
