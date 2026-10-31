@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Path;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -25,6 +26,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -385,6 +387,41 @@ public class MainWindowTest {
     }
 
     @Test
+    public void edit_renameSelectedClientAfterTag_staysSelected(FxRobot robot) {
+        addThreeClients(robot);
+        selectClient(robot, 0);
+        enterCommand(robot, "tag 1 t/Zed");
+
+        enterCommand(robot, "edit 1 n/Ravi Raman");
+
+        assertSelectedClientShown("Ravi Raman");
+    }
+
+    @Test
+    public void edit_renameSelectedClientAfterUntag_staysSelected(FxRobot robot) {
+        addThreeClients(robot);
+        selectClient(robot, 0);
+        enterCommand(robot, "untag 1 t/Math");
+
+        enterCommand(robot, "edit 1 n/Ravi Raman");
+
+        assertSelectedClientShown("Ravi Raman");
+    }
+
+    @Test
+    public void undoAndRedo_renamedSelectedClient_staysSelected(FxRobot robot) {
+        addThreeClients(robot);
+        selectClient(robot, 2);
+        enterCommand(robot, "edit 3 n/Charlotte Lim");
+
+        enterCommand(robot, "undo");
+        assertSelectedClientShown("Charlotte Lee");
+
+        enterCommand(robot, "redo");
+        assertSelectedClientShown("Charlotte Lim");
+    }
+
+    @Test
     public void find_selectedClientNotFound_closesDetailPanel(FxRobot robot) throws TimeoutException {
         addThreeClients(robot);
         enterCommand(robot, "find Charlotte");
@@ -415,6 +452,28 @@ public class MainWindowTest {
         waitForDetailPanelToOpen();
 
         assertDetailPanelFitsInWindow();
+    }
+
+    @Test
+    public void selectClient_firstTimeEveryVisibleListRowIsCompact(FxRobot robot) {
+        addSixClients(robot);
+
+        selectClient(robot, 0);
+        waitForDetailPanelToOpen();
+
+        List<Node> cards = getPersonListView().lookupAll(".list-cell").stream()
+                .map(node -> (ListCell<?>) node)
+                .filter(cell -> cell.isVisible() && cell.getItem() != null)
+                .map(ListCell::getGraphic)
+                .toList();
+        assertTrue(cards.size() >= 4);
+        for (Node card : cards) {
+            for (String selector : List.of("#email", "#address")) {
+                Node detail = card.lookup(selector);
+                assertFalse(detail.isVisible());
+                assertFalse(detail.isManaged());
+            }
+        }
     }
 
     @Test
@@ -531,6 +590,13 @@ public class MainWindowTest {
         enterCommand(robot, ADD_RAVI_COMMAND);
         enterCommand(robot, "add n/Amirah Tan p/91234567 e/amirah@edu.sg a/20 Tampines Rd t/English");
         enterCommand(robot, "add n/Charlotte Lee p/98765432 e/charlotte@edu.sg a/30 Bishan St t/Math");
+    }
+
+    private void addSixClients(FxRobot robot) {
+        addThreeClients(robot);
+        enterCommand(robot, "add n/Devi Ramasamy p/81234567 e/devi@edu.sg a/40 Pasir Ris Dr");
+        enterCommand(robot, "add n/Evelyn Rodrigues p/87651234 e/evelyn@edu.sg a/50 Ang Mo Kio Ave");
+        enterCommand(robot, "add n/Farhan Ali p/91122334 e/farhan@edu.sg a/60 Aljunied St");
     }
 
     private void selectClient(FxRobot robot, int zeroBasedIndex) {

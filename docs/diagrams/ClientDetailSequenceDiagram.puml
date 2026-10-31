@@ -13,7 +13,7 @@ end box
 user -[USER_COLOR]> PersonListPanel : select client
 activate PersonListPanel
 PersonListPanel -> PersonListPanel : selectedPerson.set(person)
-PersonListPanel --> MainWindow : selectedPerson changed
+PersonListPanel -> MainWindow : selectedPerson changed
 deactivate PersonListPanel
 
 activate MainWindow
@@ -29,7 +29,7 @@ deactivate MainWindow
 user -[USER_COLOR]> PersonListPanel : select another client
 activate PersonListPanel
 PersonListPanel -> PersonListPanel : selectedPerson.set(otherPerson)
-PersonListPanel --> MainWindow : selectedPerson changed
+PersonListPanel -> MainWindow : selectedPerson changed
 deactivate PersonListPanel
 
 activate MainWindow
@@ -44,7 +44,7 @@ user -[USER_COLOR]> PersonDetailPanel : click close
 activate PersonDetailPanel
 PersonDetailPanel -> PersonListPanel : clearSelection()
 activate PersonListPanel
-PersonListPanel --> MainWindow : selectedPerson changed to null
+PersonListPanel -> MainWindow : selectedPerson changed to null
 deactivate PersonListPanel
 deactivate PersonDetailPanel
 

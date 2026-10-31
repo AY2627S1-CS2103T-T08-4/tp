@@ -18,6 +18,8 @@ public final class IndexListParser {
 
     public static final String MESSAGE_DUPLICATE_INDEX =
             "Duplicate indexes are not allowed.";
+    public static final String MESSAGE_MISSING_COMMA =
+            "Indices must be separated by commas, e.g. delete 1, 2, 3.";
 
     private IndexListParser() {
     }
@@ -52,6 +54,11 @@ public final class IndexListParser {
                 throw new ParseException(String.format(
                         MESSAGE_INVALID_COMMAND_FORMAT,
                         usageMessage));
+            }
+            if (trimmedIndex.split("\\s+").length > 1) {
+                throw new ParseException(String.format(
+                        MESSAGE_INVALID_COMMAND_FORMAT,
+                        MESSAGE_MISSING_COMMA));
             }
 
             Index index;

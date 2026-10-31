@@ -41,6 +41,10 @@ Sieve is a **desktop app that helps self-employed private tuition teachers keep 
 
 1. Refer to the [Features](#features) section below for details of each command.
 
+Sieve opens in the light theme each time it is launched. Click **Dark theme** at the top of the window to use the dark
+colour scheme; the button then changes to **Light theme**, which switches back. The selected theme is not saved between
+launches.
+
 --------------------------------------------------------------------------------------------------------------------
 
 ## Features
@@ -84,6 +88,10 @@ Sieve is a **desktop app that helps self-employed private tuition teachers keep 
 
 Click anywhere on a client's row to open their detailed information panel on the right. The client list becomes more
 compact to make room for the panel, and the selected client remains highlighted.
+
+The panel can only be opened by clicking a client; there is no command or keyboard shortcut that opens it. The
+full-width client list shows the same details, while the panel presents one client's details separately for easier
+reading.
 
 The panel shows the client's name, tags, phone number, email address and address. It also shows their note, fee and due
 date when those optional details have been recorded.
