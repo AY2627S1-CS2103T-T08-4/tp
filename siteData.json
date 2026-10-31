@@ -76,7 +76,8 @@
         "undoing-changes": "Undoing changes",
         "redoing-changes": "Redoing changes",
         "recalling-previous-commands": "Recalling previous commands",
-        "scrolling-a-long-result": "Scrolling a long result"
+        "scrolling-a-long-result-or-the-client-list": "Scrolling a long result or the client list",
+        "opening-help-and-closing-the-detail-panel-with-the-keyboard": "Opening help and closing the detail panel with the keyboard"
       },
       "headingKeywords": {}
     },
@@ -137,13 +138,14 @@
         "undoing-a-change-undo": "Undoing a change: undo",
         "redoing-an-undone-change-redo": "Redoing an undone change: redo",
         "recalling-previous-commands-up-and-down-keys": "Recalling previous commands: Up and Down keys",
-        "scrolling-a-long-result-page-up-and-page-down-keys": "Scrolling a long result: Page Up and Page Down keys",
+        "scrolling-a-long-result-or-the-client-list-page-up-and-page-down-keys": "Scrolling a long result or the client list: Page Up and Page Down keys",
         "exiting-the-program-exit": "Exiting the program: exit",
         "saving-the-data": "Saving the data",
         "editing-the-data-file": "Editing the data file",
         "faq": "FAQ",
         "known-issues": "Known issues",
-        "command-summary": "Command summary"
+        "command-summary": "Command summary",
+        "keyboard-shortcuts": "Keyboard shortcuts"
       },
       "headingKeywords": {}
     },
