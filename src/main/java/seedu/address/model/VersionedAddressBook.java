@@ -2,12 +2,17 @@ package seedu.address.model;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.logging.Logger;
+
+import seedu.address.commons.core.LogsCenter;
 
 /**
  * An {@code AddressBook} that remembers a history of past states, so that changes can be undone and redone.
  * Changes can be undone one at a time, back to the state at startup.
  */
 public class VersionedAddressBook extends AddressBook {
+    private static final Logger logger = LogsCenter.getLogger(VersionedAddressBook.class);
+
     private final Deque<ReadOnlyAddressBook> undoHistory = new ArrayDeque<>();
     private final Deque<ReadOnlyAddressBook> redoHistory = new ArrayDeque<>();
     private ReadOnlyAddressBook current;
@@ -60,6 +65,7 @@ public class VersionedAddressBook extends AddressBook {
         redoHistory.push(current);
         current = undoHistory.pop();
         resetData(current);
+        logger.fine("Undid a change, " + undoHistory.size() + " left to undo");
     }
 
     /**
@@ -72,5 +78,6 @@ public class VersionedAddressBook extends AddressBook {
         undoHistory.push(current);
         current = redoHistory.pop();
         resetData(current);
+        logger.fine("Redid a change, " + redoHistory.size() + " left to redo");
     }
 }

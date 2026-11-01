@@ -140,6 +140,8 @@ public class PersonListPanel extends UiPart<Region> {
      */
     public void scrollPage(VerticalDirection direction) {
         ScrollBar scrollBar = (ScrollBar) personListView.lookup(".scroll-bar:vertical");
+        // The ListView builds its scroll bars when first shown, which is before a key press can reach this
+        assert scrollBar != null : "The list has not been shown yet";
         double step = direction == VerticalDirection.UP ? -scrollBar.getVisibleAmount() : scrollBar.getVisibleAmount();
         scrollBar.setValue(Math.clamp(scrollBar.getValue() + step, scrollBar.getMin(), scrollBar.getMax()));
     }
