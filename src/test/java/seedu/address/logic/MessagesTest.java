@@ -1,12 +1,16 @@
 package seedu.address.logic;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_PHONE;
 
 import org.junit.jupiter.api.Test;
 
 import seedu.address.testutil.PersonBuilder;
 
 public class MessagesTest {
+
+    private static final String JOHN_TAN_BASICS = "John Tan; Phone: 91234567; Email: john@example.com; Address: Blk 1";
 
     private final PersonBuilder johnTan = new PersonBuilder().withName("John Tan").withPhone("91234567")
             .withEmail("john@example.com").withAddress("Blk 1").withTags("sec4");
@@ -20,45 +24,39 @@ public class MessagesTest {
 
     @Test
     public void format_personWithFee_includesFee() {
-        assertEquals("John Tan; Phone: 91234567; Email: john@example.com; Address: Blk 1; "
-                + "Fee: 80.00; Tags: [sec4]", Messages.format(johnTan.withFee("80").build()));
+        assertEquals(JOHN_TAN_BASICS + "; Fee: 80.00; Tags: [sec4]", Messages.format(johnTan.withFee("80").build()));
     }
 
     @Test
     public void format_personWithZeroFee_includesFee() {
-        assertEquals("John Tan; Phone: 91234567; Email: john@example.com; Address: Blk 1; "
-                + "Fee: 0.00; Tags: [sec4]", Messages.format(johnTan.withFee("0").build()));
+        assertEquals(JOHN_TAN_BASICS + "; Fee: 0.00; Tags: [sec4]", Messages.format(johnTan.withFee("0").build()));
     }
 
     @Test
     public void format_personWithDueDate_includesDueDate() {
-        assertEquals("John Tan; Phone: 91234567; Email: john@example.com; Address: Blk 1; "
-                + "Due: 01-12-2026; Tags: [sec4]",
+        assertEquals(JOHN_TAN_BASICS + "; Due: 01-12-2026; Tags: [sec4]",
                 Messages.format(johnTan.withDueDate("01-12-2026").build()));
     }
 
     @Test
     public void format_personWithoutNote_omitsNote() {
-        assertEquals("John Tan; Phone: 91234567; Email: john@example.com; Address: Blk 1; Tags: [sec4]",
-                Messages.format(johnTan.withNote("").build()));
+        assertEquals(JOHN_TAN_BASICS + "; Tags: [sec4]", Messages.format(johnTan.withNote("").build()));
     }
 
     @Test
     public void format_personWithoutTags_omitsTags() {
-        assertEquals("John Tan; Phone: 91234567; Email: john@example.com; Address: Blk 1",
-                Messages.format(johnTan.withTags().build()));
+        assertEquals(JOHN_TAN_BASICS, Messages.format(johnTan.withTags().build()));
     }
 
     @Test
     public void format_personWithNote_includesNote() {
-        assertEquals("John Tan; Phone: 91234567; Email: john@example.com; Address: Blk 1; "
-                + "Note: Weak at algebra; Tags: [sec4]", Messages.format(johnTan.withNote("Weak at algebra").build()));
+        assertEquals(JOHN_TAN_BASICS + "; Note: Weak at algebra; Tags: [sec4]",
+                Messages.format(johnTan.withNote("Weak at algebra").build()));
     }
 
     @Test
     public void format_personWithNoteFeeAndDueDate_includesAllInOrder() {
-        assertEquals("John Tan; Phone: 91234567; Email: john@example.com; Address: Blk 1; "
-                + "Note: Weak at algebra; Fee: 80.00; Due: 01-12-2026; Tags: [sec4]",
+        assertEquals(JOHN_TAN_BASICS + "; Note: Weak at algebra; Fee: 80.00; Due: 01-12-2026; Tags: [sec4]",
                 Messages.format(johnTan.withNote("Weak at algebra").withFee("80").withDueDate("01-12-2026").build()));
     }
 
@@ -86,6 +84,12 @@ public class MessagesTest {
                         + "or type help to see the prefixes each command accepts. "
                         + "If it is part of a detail, replace the / with another character.",
                 Messages.getErrorMessageForUnknownPrefix("z/"));
+    }
+
+    @Test
+    public void getErrorMessageForDuplicatePrefixes_twoPrefixes_listsBoth() {
+        assertEquals("Multiple values specified for the following single-valued field(s): n/ p/",
+                Messages.getErrorMessageForDuplicatePrefixes(PREFIX_NAME, PREFIX_PHONE));
     }
 
     @Test
