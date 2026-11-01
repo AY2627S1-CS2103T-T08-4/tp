@@ -22,9 +22,9 @@ You can run tests in two ways.
 * **Method 2: Using Gradle**
   * Open a console and run the command `gradlew clean test` (Mac/Linux: `./gradlew clean test`)
 
-<box type="warning" seamless>
+<box type="info" seamless>
 
-**Caution:** UI tests use the real mouse and keyboard, so they may fail if you use the computer while they run. To run the tests without a window, run `set CI=true` and then `gradlew clean test` (Mac/Linux: `CI=true ./gradlew clean test`).
+**Note:** Gradle runs the UI tests without opening a window, so you can keep using the computer while they run. To watch them on your screen, first run `set SHOW_UI_TESTS=true`, then `gradlew clean test` (Mac/Linux: `SHOW_UI_TESTS=true ./gradlew clean test`). They then use your real mouse and keyboard, so they may fail if you use the computer at the same time, or if your system blocks simulated input. IntelliJ's own JUnit runner (Method 1) also uses the real screen.
 </box>
 
 <box type="info" seamless>

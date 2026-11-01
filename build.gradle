@@ -31,7 +31,7 @@ checkstyle {
 test {
     useJUnitPlatform()
 
-    if (System.getenv('CI') != null) {
+    if (System.getenv('SHOW_UI_TESTS') == null) {
         systemProperty 'java.awt.headless', 'true'
         systemProperty 'testfx.robot', 'glass'
         systemProperty 'testfx.headless', 'true'
