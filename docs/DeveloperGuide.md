@@ -617,13 +617,13 @@ The command history lets users bring back earlier commands with the Up and Down 
 It has the following operations:
 
 * `CommandHistory#add(command)`: adds the command to the end of `commands` and sets `currentIndex` to `commands.size()`, so the next Up starts from the newest command.
-* `CommandHistory#getPreviousCommand(currentText)`: moves `currentIndex` back one and returns that command. If no command was being recalled, it first saves `currentText`, the text in the command box, as `draft`. Returns an empty `Optional` if `currentIndex` is already 0.
-* `CommandHistory#getNextCommand()`: moves `currentIndex` forward one and returns that command. Returns `draft` when moving past the most recent command, so a half-typed command comes back, and an empty `Optional` if no command is being recalled.
+* `CommandHistory#recallPreviousCommand(currentText)`: moves `currentIndex` back one and returns that command. If no command was being recalled, it first saves `currentText`, the text in the command box, as `draft`. Returns an empty `Optional` if `currentIndex` is already 0.
+* `CommandHistory#recallNextCommand()`: moves `currentIndex` forward one and returns that command. Returns `draft` when moving past the most recent command, so a half-typed command comes back, and an empty `Optional` if no command is being recalled.
 
 `CommandBox` uses it in two places:
 
 * `CommandBox#handleCommandEntered()` adds every non-blank command to the history before executing it. This way, a command that fails is kept and can be recalled to fix it.
-* `CommandBox#handleKeyPressed()` handles Up and Down. If the history returns a command, it is put in the text field with the cursor at the end. The key event is then consumed, so the text field does not also move the cursor. It also passes Page Up and Page Down to the `ResultScroller` it was created with, which scrolls the command result, or to `clientListScroller` if Shift is held, which scrolls the client list (see [UI component](#ui-component)). Other keys are left to the text field, so the cursor can still be moved within a recalled command. Up and Down with Shift, Ctrl, Alt or Meta held are left to the text field too, so that Shift+Up still selects text.
+* `CommandBox#handleKeyPressed()` handles Up and Down. If the history returns a command, it is put in the text field. Either way, the cursor is then put at the end, because the text field moves it for these keys before this handler runs, and consuming the key event is too late to stop that. It also passes Page Up and Page Down to the `ResultScroller` it was created with, which scrolls the command result, or to `clientListScroller` if Shift is held, which scrolls the client list (see [UI component](#ui-component)). Other keys are left to the text field, so the cursor can still be moved within a recalled command. Up and Down with Shift, Ctrl, Alt or Meta held are left to the text field too, so that Shift+Up still selects text.
 
 The following sequence diagram shows what happens when the user presses Up:
 
