@@ -116,6 +116,24 @@ public class PersonListPanelTest {
     }
 
     @Test
+    public void personListView_noClientsInReadOnlyMode_saysDataFileNotRead(FxRobot robot) {
+        ObservableList<Person> noClients = FXCollections.observableArrayList();
+        PersonListPanel[] readOnlyPanel = new PersonListPanel[1];
+        robot.interact(() -> readOnlyPanel[0] = new PersonListPanel(noClients, noClients, true));
+
+        assertEquals(PersonListPanel.MESSAGE_DATA_FILE_NOT_READ, getPlaceholderText(readOnlyPanel[0]));
+    }
+
+    @Test
+    public void personListView_noClientsNotInReadOnlyMode_suggestsAddOnly(FxRobot robot) {
+        ObservableList<Person> noClients = FXCollections.observableArrayList();
+        PersonListPanel[] normalPanel = new PersonListPanel[1];
+        robot.interact(() -> normalPanel[0] = new PersonListPanel(noClients, noClients, false));
+
+        assertEquals(PersonListPanel.MESSAGE_NO_CLIENTS, getPlaceholderText(normalPanel[0]));
+    }
+
+    @Test
     public void clientCount_listFiltered_countsDisplayedClientsOnly(FxRobot robot) {
         robot.interact(() -> displayedPersons.setPredicate(ALICE::equals));
         assertEquals("1 client", clientCount.getText());
@@ -301,5 +319,11 @@ public class PersonListPanelTest {
         Label placeholder = (Label) personListView.getPlaceholder();
         assertTrue(placeholder.isVisible());
         assertEquals(expectedText, placeholder.getText());
+    }
+
+    @SuppressWarnings("unchecked")
+    private String getPlaceholderText(PersonListPanel panel) {
+        ListView<Person> listView = (ListView<Person>) panel.getRoot().lookup("#personListView");
+        return ((Label) listView.getPlaceholder()).getText();
     }
 }

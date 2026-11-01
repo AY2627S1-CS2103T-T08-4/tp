@@ -226,7 +226,7 @@ Format: `find KEYWORD [MORE_KEYWORDS]...`
 * A keyword does not match the middle or end of a word; for example, `rien` does not match `O'Brien`, and `rah` does not match `Amirah`.
 * Clients matching at least one keyword are returned (an `OR` search); for example, `Amirah Farhan` returns `Amirah Tan` and `Farhan Ali`.
 
-If no client matches, Sieve shows `0 clients found` with tips for searching again. Use `list` to see all clients again. If you have not added any clients yet, Sieve says there is nothing to search instead.
+If no client matches, Sieve shows `0 clients found` with tips for searching again. Use `list` to see all clients again. If Sieve has no clients to search, it says so instead.
 
 Examples:
 * `find amirah` returns `Amirah Tan`
@@ -257,7 +257,7 @@ Format: `filter [p/PHONE]... [t/TAG]...`
 * A client must have every specified tag.
 * When phone numbers and tags are combined, a client must match both fields.
 * `filter` only takes `p/` and `t/`. Any other prefix, such as `n/`, is rejected with a reminder to use [`find`](#locating-clients-by-name-find) to search by name.
-* If no client matches, Sieve shows `0 clients found` with tips for filtering again. Use `list` to see all clients again. If you have not added any clients yet, Sieve says there is nothing to search instead.
+* If no client matches, Sieve shows `0 clients found` with tips for filtering again. Use `list` to see all clients again. If Sieve has no clients to search, it says so instead.
 
 Examples:
 * `filter p/9123 4567` returns the client with phone number `91234567`.
