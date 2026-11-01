@@ -6,7 +6,7 @@
 
 # Sieve User Guide
 
-Sieve is a **desktop app that helps self-employed private tuition teachers keep track of their clients**. Sieve is optimised for use through a Command Line Interface (CLI) while still providing you with a Graphical User Interface (GUI) to your results. If you can type fast, Sieve lets you find and update any client's details quicker than hunting through chats, notes apps and spreadsheets, so you spend less time on admin and more time teaching.
+Sieve is a **desktop app that helps self-employed private tuition teachers in Singapore keep track of their clients**. Sieve is optimised for use through a Command Line Interface (CLI), where you type commands, and shows your clients and the results in a Graphical User Interface (GUI). If you can type fast, Sieve lets you find and update any client's details quicker than hunting through chats, notes apps and spreadsheets, so you spend less time on admin and more time teaching.
 
 <!-- * Table of Contents -->
 <page-nav-print />
@@ -59,6 +59,8 @@ launches.
 * Words in `UPPER_CASE` are the parameters to be supplied by the user.<br>
   For example, in `add n/NAME`, replace `NAME` with a value such as `Amirah Tan`.
 
+* A prefix is the short marker in front of a detail, such as `n/` for the name and `p/` for the phone number.
+
 * Items in square brackets are optional.<br>
   For example, `n/NAME [t/TAG]` can be used as `n/Amirah Tan t/Math` or as `n/Amirah Tan`.
 
@@ -68,7 +70,7 @@ launches.
 * Parameters can be in any order, except the note (`nt/NOTE`), which must come last.<br>
   For example, if the command specifies `n/NAME p/PHONE`, `p/PHONE n/NAME` is also acceptable.
 
-* In `add` and `edit`, a word that looks like a prefix but is not one, such as `z/` in `a/Blk 1 z/x`, is rejected as an unknown prefix, so that a mistyped prefix is not saved as part of a detail. Any word followed by `/` counts, so write `Block A/B` as `Block A-B`.<br>
+* In `add` and `edit`, a word that looks like a prefix but is not one, such as `z/` in `a/Blk 1 z/x`, is rejected as an unknown prefix, so that a mistyped prefix is not saved as part of a detail. Any word of letters followed by `/` counts, so write `Block A/B` as `Block A-B`.<br>
   This applies to every parameter except the note, so a note such as `nt/Meet w/ parent` is fine. In an address, write `c/o` as `care of`.
 
 * Extraneous parameters for `help`, `list` and `exit` are ignored.<br>
@@ -121,6 +123,12 @@ Adds a client to Sieve, then shows the full client list, so that the new client 
 
 Format: `add n/NAME p/PHONE e/EMAIL a/ADDRESS [fee/FEE] [due/DUE_DATE] [t/TAG]... [nt/NOTE]`
 
+Examples:
+* `add n/Jason Quek p/91234567 e/jasonquek@gmail.com a/Blk 123 Yishun Ave 5 #04-12`
+* `add n/Olivia Ng p/93338888 e/olivia@example.com a/Blk 8 Clementi Rd nt/Parent prefers WhatsApp after 6pm` adds a client with a note.
+* `add n/Matthias Tan t/Physics e/matthias.tan@gmail.com a/10 Queenstown Rd p/8123 4567 t/Sec4` adds a client with two tags. Fields can be given in any order, and spaces in the phone number are ignored.
+* `add n/Lena Ong p/91230000 e/lena@example.com a/Blk 3 Clementi Rd fee/250 due/01-11-2030` adds a client with a fee and a due date.
+
 <box type="tip" seamless>
 
 **Tip:** A client can have any number of tags, including zero. Each tag follows the same rules as in [`tag`](#tagging-a-client-tag).
@@ -142,11 +150,11 @@ Format: `add n/NAME p/PHONE e/EMAIL a/ADDRESS [fee/FEE] [due/DUE_DATE] [t/TAG]..
 
 **Names:**
 * A name must start with a letter, and can only contain letters, digits, spaces, hyphens (`-`), apostrophes (`'`), full stops (`.`) and parentheses (`()`), up to 50 characters. If a name is longer, the error says how many characters it has.
-* For example, `John Tan (NHHS)` and `Nur-Aisyah O'Brien` are accepted, but `Ravi s/o Kumar` is not, because of the `/`.
+* For example, `John Tan (NHHS)` and `Nur-Aisyah O'Brien` are accepted, but `Ravi s/o Kumar` and `Kumar a/l Ravi` are not, because of the `/`.
 * A curly apostrophe (`’`), which phones and chat apps often type or paste instead of `'`, is saved as `'`. For example, `O’Brien` is saved as `O'Brien`.
 * Letters means `A` to `Z`, so names with accented letters (e.g. `José`) or Chinese characters are not supported.
 * Other symbols are not supported either, such as the `@` in `Tan Ah Kow @ Michael` or the comma in `Tan, Wei Ming`.
-* Write such names without these characters, e.g. `Ravi s.o. Kumar`, `Jose`, `Tan Ah Kow (Michael)` or `Tan Wei Ming`.
+* Write such names without these characters, e.g. `Ravi s.o. Kumar`, `Kumar a.l. Ravi`, `Jose`, `Tan Ah Kow (Michael)` or `Tan Wei Ming`.
 </box>
 
 <box type="info" seamless>
@@ -165,15 +173,10 @@ Format: `add n/NAME p/PHONE e/EMAIL a/ADDRESS [fee/FEE] [due/DUE_DATE] [t/TAG]..
 * A phone number must be an 8-digit Singapore number starting with `3`, `6`, `8` or `9`, e.g. `91234567`. Spaces, hyphens and parentheses are ignored, so `9123 4567` is also accepted.
 * Leave out the country code. Sieve is made for tutors in Singapore and only stores Singapore numbers, so every number would start with `+65`, which adds nothing. If you copy a number such as `+65 9123 4567`, enter it as `91234567`. Sieve shows a reminder if you include a country code. Numbers from other countries are not supported.
 * An email address can be up to 254 characters long. Before the `@`, it can contain letters, digits and `+`, `_`, `.` or `-`, but these symbols cannot come first, last or two in a row. After the `@`, it must be a domain name with a full stop, e.g. `amirah@gmail.com`. Addresses such as `amirah@localhost`, `o'brien@gmail.com` and `a__b@gmail.com` are not supported.
+* An email is required. If a client has none, enter a placeholder such as `e/none@example.com`.
 * An address is required. It can be up to 150 characters long and must contain at least one letter or digit. If the client has no address, for example because you teach them online, enter `a/Online` or similar.
 * If your data file is from an earlier version of Sieve and contains a phone number or email address that breaks these rules, Sieve opens in read-only mode. Correct it in the [data file](#editing-the-data-file) to continue.
 </box>
-
-Examples:
-* `add n/Jason Quek p/91234567 e/jasonquek@gmail.com a/Blk 123 Yishun Ave 5 #04-12`
-* `add n/Olivia Ng p/93338888 e/olivia@example.com a/Blk 8 Clementi Rd nt/Parent prefers WhatsApp after 6pm` adds a client with a note.
-* `add n/Matthias Tan t/Physics e/matthias.tan@gmail.com a/10 Queenstown Rd p/8123 4567 t/Sec4` adds a client with two tags. Fields can be given in any order, and spaces in the phone number are ignored.
-* `add n/Lena Ong p/91230000 e/lena@example.com a/Blk 3 Clementi Rd fee/250 due/01-11-2030` adds a client with a fee and a due date.
 
 ### Listing all clients: `list`
 
@@ -424,9 +427,9 @@ Sieve data is saved automatically as a JSON file `data/sieve.json`, inside the f
 <box type="warning" seamless>
 
 **Caution:**
-If your changes make the data file invalid, Sieve launches in a read-only fallback mode, displaying an empty list and showing a warning popup message at startup. The warning also says what is wrong with the file, so you can find and fix it. Sieve will completely block any subsequent command that attempts to mutate data, ensuring your original corrupted file is left completely untouched on disk so you can fix it safely. Still, we recommend backing up the file before editing it.<br>
+If your changes make the data file invalid, Sieve opens in read-only mode: it shows an empty list and a warning popup that says what is wrong with the file. Sieve then rejects every command that would change data, so your file stays exactly as it is and you can fix it. Still, we recommend backing up the file before editing it.<br>
 Files saved as "UTF-8 with BOM", which some Windows editors do, are also accepted.<br>
-Furthermore, certain edits can cause Sieve to behave in unexpected ways (e.g., if a value entered is outside of the acceptable range). Therefore, edit the data file only if you are confident that you can update it correctly.
+Edit the data file only if you are confident that you can update it correctly.
 </box>
 
 --------------------------------------------------------------------------------------------------------------------

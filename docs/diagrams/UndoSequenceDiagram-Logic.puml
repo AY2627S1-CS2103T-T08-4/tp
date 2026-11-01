@@ -42,7 +42,7 @@ activate Model
 Model --> UndoCommand
 deactivate Model
 
-UndoCommand -> Model : updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS)
+UndoCommand -> Model : updateFilteredPersonList(...)
 activate Model
 
 Model --> UndoCommand
@@ -56,7 +56,7 @@ destroy UndoCommand
 LogicManager -> Model : commitAddressBook()
 activate Model
 
-note right of Model : Does nothing, as the client list\nalready matches the saved state
+note left of Model : Does nothing, as the client list\nalready matches the saved state
 
 Model --> LogicManager
 deactivate Model

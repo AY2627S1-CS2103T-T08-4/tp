@@ -33,6 +33,7 @@
   * [FAQ]({{ baseUrl }}/UserGuide.html#faq)
   * [Known Issues]({{ baseUrl }}/UserGuide.html#known-issues)
   * [Command Summary]({{ baseUrl }}/UserGuide.html#command-summary)
+  * [Keyboard Shortcuts]({{ baseUrl }}/UserGuide.html#keyboard-shortcuts)
 * [Developer Guide]({{ baseUrl }}/DeveloperGuide.html) :expanded:
   * [Acknowledgements]({{ baseUrl }}/DeveloperGuide.html#acknowledgements)
   * [Setting Up]({{ baseUrl }}/DeveloperGuide.html#setting-up-getting-started)

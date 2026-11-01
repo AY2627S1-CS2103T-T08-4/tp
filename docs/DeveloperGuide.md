@@ -730,6 +730,10 @@ Some checks are worth knowing about:
   * Cons: A mistyped prefix ends up in the previous detail without a warning, e.g. `a/Blk 1 z/x` saves the address
     `Blk 1 z/x`.
 
+### Future improvements
+
+* **Copying client details.** Details on client cards and in the detail panel are JavaFX `Label`s, so they cannot be selected or copied. A tutor contacting a parent has to retype the phone number. A future version could show these details in read-only text fields, or add a copy button.
+
 --------------------------------------------------------------------------------------------------------------------
 
 ## **Documentation, logging, testing, dev-ops**
@@ -779,6 +783,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 | `* * *`  | careless typist                        | undo my last command                                                                                  | a mistyped delete isn't a disaster                                                      |
 | `* *`    | careless typist                        | redo a change I undid                                                                                 | undoing one step too far is easy to fix                                                 |
 | `* *`    | fast typist                            | bring back a command I entered earlier and edit it                                                    | I can fix a typo or repeat a command without retyping all of it                         |
+| `* *`    | fast typist                            | scroll the client list and long results from the keyboard                                             | I can keep my hands on the keyboard                                                     |
 | `* *`    | user who edits the data file by hand   | have Sieve refuse to overwrite a data file it cannot read                                             | I can fix my mistake without losing my client records                                   |
 | `* *`    | new user switching from other tools    | bulk-add multiple clients at once                                                                     | I don't have to re-enter my existing client list one by one                             |
 | `* *`    | tutor                                  | filter clients by one or more phone numbers or tags in a single command                               | I can locate exact contacts or answer questions like "Sec 4 physics on Thursday" in one go |
@@ -790,6 +795,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 | `* *`    | tutor considering a new client         | check whether a proposed time slot clashes with an existing client's schedule                         | I avoid double-booking myself                                                           |
 | `* *`    | tutor                                  | record whether a client has paid for the current month                                                | I know who has paid and who is still outstanding, even for parents who pay at month-end |
 | `* *`    | tutor                                  | see which clients have outstanding payments at a glance                                               | I don't have to check each client individually                                          |
+| `* *`    | tutor who works late at night          | switch the app to a dark theme                                                                        | the screen is easier on my eyes                                                         |
 | `*`      | tutor                                  | link a client to a family member who is also my client, such as a sibling                             | I can remember which students belong to the same household                              |
 | `*`      | tutor with limited time                | sort or flag clients by priority                                                                      | I know who to focus on when my own schedule is tight                                    |
 | `*`      | tutor                                  | see a quick count of my active clients                                                                | I can gauge my current workload at a glance                                             |
@@ -801,7 +807,6 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 | `*`      | tutor who runs group classes           | record a single session covering multiple students at once                                            | I don't have to repeat the same entry per student                                       |
 | `*`      | tutor who runs group classes           | see which enrolled students are attending a specific session                                          | I know who to expect and who is away                                                    |
 | `*`      | tutor who runs group classes           | bill a group class as a single unit                                                                   | I don't have to track payment separately for each student in it                         |
-| `*`      | tutor who works late at night          | switch the app to a dark theme                                                                        | the screen is easier on my eyes                                                         |
 
 ### Use cases
 
@@ -1177,6 +1182,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
   every command that would change data, so that the file is not overwritten before the user fixes it.
 * **Tag**: A user-defined label of letters, digits and spaces, attached to a client record for categorisation, such
   as a subject, education level, or lesson day. Tags that differ only in letter case count as the same tag.
+* **Tutor**: A self-employed private tuition teacher. Tutors are Sieve's target users and the actor in its use cases.
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -1886,7 +1892,7 @@ The data file is `data/sieve.json` inside that folder.
 
 1. Recalling a failed command
 
-    1. Test case: `edit 1 p/123`, then press Up, then use Left to move the cursor and change it to `edit 1 p/91234567`, then press Enter<br>
+    1. Test case: `edit 1 p/123`, then press Up, then use Left to move the cursor and change it to `edit 1 p/91234568`, then press Enter<br>
        Expected: Up shows `edit 1 p/123` with the cursor at the end. Left moves the cursor normally, and the corrected command succeeds.
 
 1. Keeping typed text
