@@ -24,6 +24,11 @@ You can run tests in two ways.
 
 <box type="info" seamless>
 
+**Note:** Gradle runs the UI tests without opening a window, so you can keep using the computer while they run. To watch them on your screen, first run `set SHOW_UI_TESTS=true`, then `gradlew clean test` (Mac/Linux: `SHOW_UI_TESTS=true ./gradlew clean test`). They then use your real mouse and keyboard, so they may fail if you use the computer at the same time, or if your system blocks simulated input. IntelliJ's own JUnit runner (Method 1) also uses the real screen.
+</box>
+
+<box type="info" seamless>
+
 **Link**: Read [this Gradle Tutorial from the se-edu/guides](https://se-education.org/guides/tutorials/gradle.html) to learn more about using Gradle.
 </box>
 
@@ -34,7 +39,7 @@ You can run tests in two ways.
 This project has three types of tests:
 
 1. *Unit tests* target the lowest-level methods and classes.<br>
-   For example: `seedu.address.commons.StringUtilTest`
+   For example: `seedu.address.commons.util.StringUtilTest`
 1. *Integration tests* check how multiple code units work together; the individual units are assumed to work.<br>
    For example: `seedu.address.storage.StorageManagerTest`
 1. *Hybrid tests* combine unit and integration testing. These tests check both the individual units and how they work together.<br>

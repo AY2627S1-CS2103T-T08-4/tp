@@ -17,89 +17,99 @@ public class CommandHistoryTest {
     }
 
     @Test
-    public void getPreviousCommand_null_throwsNullPointerException() {
+    public void recallPreviousCommand_null_throwsNullPointerException() {
         history.add("list");
-        assertThrows(NullPointerException.class, () -> history.getPreviousCommand(null));
+        assertThrows(NullPointerException.class, () -> history.recallPreviousCommand(null));
     }
 
     @Test
-    public void getPreviousCommand_emptyHistory_returnsEmpty() {
-        assertEquals(Optional.empty(), history.getPreviousCommand(""));
+    public void recallPreviousCommand_emptyHistory_returnsEmpty() {
+        assertEquals(Optional.empty(), history.recallPreviousCommand(""));
     }
 
     @Test
-    public void getPreviousCommand_twoCommands_returnsNewestFirst() {
+    public void recallPreviousCommand_twoCommands_returnsNewestFirst() {
         history.add("list");
         history.add("delete 1");
 
-        assertEquals(Optional.of("delete 1"), history.getPreviousCommand(""));
-        assertEquals(Optional.of("list"), history.getPreviousCommand(""));
+        assertEquals(Optional.of("delete 1"), history.recallPreviousCommand(""));
+        assertEquals(Optional.of("list"), history.recallPreviousCommand(""));
     }
 
     @Test
-    public void getPreviousCommand_atOldestCommand_returnsEmpty() {
+    public void recallPreviousCommand_atOldestCommand_returnsEmpty() {
         history.add("list");
-        history.getPreviousCommand("");
+        history.recallPreviousCommand("");
 
-        assertEquals(Optional.empty(), history.getPreviousCommand(""));
+        assertEquals(Optional.empty(), history.recallPreviousCommand(""));
     }
 
     @Test
-    public void getNextCommand_emptyHistory_returnsEmpty() {
-        assertEquals(Optional.empty(), history.getNextCommand());
+    public void recallNextCommand_emptyHistory_returnsEmpty() {
+        assertEquals(Optional.empty(), history.recallNextCommand());
     }
 
     @Test
-    public void getNextCommand_nothingRecalled_returnsEmpty() {
+    public void recallNextCommand_nothingRecalled_returnsEmpty() {
         history.add("list");
 
         // the user may be typing a new command, which must be kept
-        assertEquals(Optional.empty(), history.getNextCommand());
+        assertEquals(Optional.empty(), history.recallNextCommand());
     }
 
     @Test
-    public void getNextCommand_afterGoingBack_returnsNewerThenEmptyString() {
+    public void recallNextCommand_afterGoingBack_returnsNewerThenEmptyString() {
         history.add("list");
         history.add("delete 1");
-        history.getPreviousCommand("");
-        history.getPreviousCommand("");
+        history.recallPreviousCommand("");
+        history.recallPreviousCommand("");
 
-        assertEquals(Optional.of("delete 1"), history.getNextCommand());
-        assertEquals(Optional.of(""), history.getNextCommand());
-        assertEquals(Optional.empty(), history.getNextCommand());
+        assertEquals(Optional.of("delete 1"), history.recallNextCommand());
+        assertEquals(Optional.of(""), history.recallNextCommand());
+        assertEquals(Optional.empty(), history.recallNextCommand());
     }
 
     @Test
-    public void getNextCommand_pastNewestAfterTyping_returnsTypedText() {
+    public void recallNextCommand_pastNewestAfterTyping_returnsTypedText() {
         history.add("list");
-        history.getPreviousCommand("add n/Half typed");
+        history.recallPreviousCommand("add n/Half typed");
 
-        assertEquals(Optional.of("add n/Half typed"), history.getNextCommand());
-        assertEquals(Optional.empty(), history.getNextCommand());
+        assertEquals(Optional.of("add n/Half typed"), history.recallNextCommand());
+        assertEquals(Optional.empty(), history.recallNextCommand());
     }
 
     @Test
-    public void getPreviousCommand_whileRecalling_keepsTypedText() {
+    public void recallNextCommand_secondTripBack_returnsNewText() {
+        history.add("list");
+        history.recallPreviousCommand("first");
+        history.recallNextCommand();
+        history.recallPreviousCommand("second");
+
+        assertEquals(Optional.of("second"), history.recallNextCommand());
+    }
+
+    @Test
+    public void recallPreviousCommand_whileRecalling_keepsTypedText() {
         history.add("list");
         history.add("delete 1");
-        history.getPreviousCommand("add n/Half typed");
+        history.recallPreviousCommand("add n/Half typed");
         // The box now shows the recalled command, which must not replace the typed text
-        history.getPreviousCommand("delete 1");
+        history.recallPreviousCommand("delete 1");
 
-        assertEquals(Optional.of("delete 1"), history.getNextCommand());
-        assertEquals(Optional.of("add n/Half typed"), history.getNextCommand());
+        assertEquals(Optional.of("delete 1"), history.recallNextCommand());
+        assertEquals(Optional.of("add n/Half typed"), history.recallNextCommand());
     }
 
     @Test
     public void add_afterGoingBack_recallsNewCommandFirst() {
         history.add("list");
         history.add("delete 1");
-        history.getPreviousCommand("");
-        history.getPreviousCommand("");
+        history.recallPreviousCommand("");
+        history.recallPreviousCommand("");
         history.add("clear");
 
-        assertEquals(Optional.of("clear"), history.getPreviousCommand(""));
-        assertEquals(Optional.of("delete 1"), history.getPreviousCommand(""));
+        assertEquals(Optional.of("clear"), history.recallPreviousCommand(""));
+        assertEquals(Optional.of("delete 1"), history.recallPreviousCommand(""));
     }
 
     @Test
@@ -107,8 +117,8 @@ public class CommandHistoryTest {
         history.add("list");
         history.add("list");
 
-        assertEquals(Optional.of("list"), history.getPreviousCommand(""));
-        assertEquals(Optional.of("list"), history.getPreviousCommand(""));
-        assertEquals(Optional.empty(), history.getPreviousCommand(""));
+        assertEquals(Optional.of("list"), history.recallPreviousCommand(""));
+        assertEquals(Optional.of("list"), history.recallPreviousCommand(""));
+        assertEquals(Optional.empty(), history.recallPreviousCommand(""));
     }
 }

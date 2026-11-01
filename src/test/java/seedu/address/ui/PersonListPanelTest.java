@@ -1,6 +1,7 @@
 package seedu.address.ui;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -9,6 +10,8 @@ import static seedu.address.testutil.TypicalPersons.BENSON;
 import static seedu.address.testutil.TypicalPersons.CARL;
 import static seedu.address.testutil.TypicalPersons.DANIEL;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -28,6 +31,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.ScrollBar;
 import javafx.stage.Stage;
 import seedu.address.model.person.Person;
 import seedu.address.testutil.PersonBuilder;
@@ -58,6 +62,26 @@ public class PersonListPanelTest {
     @Test
     public void constructor_threeClients_showsCount() {
         assertEquals("3 clients", clientCount.getText());
+    }
+
+    @Test
+    public void personListView_threeClients_numbersRowsFromOne(FxRobot robot) {
+        robot.interact(() -> personListPanel.getRoot().layout());
+        List<String> rowNumbers = getVisibleCells(personListView).stream()
+                .sorted(Comparator.comparingInt(ListCell::getIndex))
+                .map(cell -> ((Label) cell.getGraphic().lookup("#id")).getText())
+                .toList();
+        assertEquals(List.of("1", "2", "3"), rowNumbers);
+    }
+
+    @Test
+    public void personListView_longEmail_noSidewaysScrolling(FxRobot robot) {
+        Person longEmailClient = new PersonBuilder().withEmail("a".repeat(110) + "@example.com").build();
+        robot.interact(() -> persons.setAll(longEmailClient));
+        robot.interact(() -> personListPanel.getRoot().layout());
+
+        ScrollBar sideways = (ScrollBar) personListView.lookup(".scroll-bar:horizontal");
+        assertFalse(sideways.isVisible());
     }
 
     @Test
@@ -108,8 +132,7 @@ public class PersonListPanelTest {
         // Daniel takes Carl's row, so a selection kept by row would show him
         robot.interact(() -> persons.setAll(ALICE, BENSON, DANIEL));
 
-        assertTrue(personListView.getSelectionModel().isEmpty());
-        assertNull(personListPanel.selectedPersonProperty().get());
+        assertNothingSelected();
     }
 
     @Test
@@ -119,8 +142,18 @@ public class PersonListPanelTest {
         // As after undo or find, which replace the whole list. Benson takes Carl's row
         robot.interact(() -> persons.setAll(CARL, ALICE, BENSON));
 
-        assertEquals(CARL, personListView.getSelectionModel().getSelectedItem());
-        assertEquals(CARL, personListPanel.selectedPersonProperty().get());
+        assertSelected(CARL);
+    }
+
+    @Test
+    public void selectedPerson_clientMovesRow_neverReportsAnotherClient(FxRobot robot) {
+        robot.interact(() -> personListView.getSelectionModel().select(CARL));
+        List<Person> reported = new ArrayList<>();
+        personListPanel.selectedPersonProperty().addListener((unused1, unused2, person) -> reported.add(person));
+
+        robot.interact(() -> persons.setAll(CARL, ALICE, BENSON));
+
+        assertTrue(reported.isEmpty());
     }
 
     @Test
@@ -182,8 +215,7 @@ public class PersonListPanelTest {
 
         robot.interact(() -> personListPanel.scrollPage(VerticalDirection.DOWN));
 
-        assertTrue(personListView.getSelectionModel().isEmpty());
-        assertNull(personListPanel.selectedPersonProperty().get());
+        assertNothingSelected();
     }
 
     @Test
@@ -194,8 +226,7 @@ public class PersonListPanelTest {
 
         robot.interact(() -> personListPanel.scrollPage(VerticalDirection.DOWN));
 
-        assertEquals(selectedClient, personListView.getSelectionModel().getSelectedItem());
-        assertEquals(selectedClient, personListPanel.selectedPersonProperty().get());
+        assertSelected(selectedClient);
     }
 
     @Test
@@ -209,6 +240,17 @@ public class PersonListPanelTest {
         // As after find, Shift+Page Down, then list. The longer list starts from its first client
         showManyClients(robot);
         assertEquals(0, getShownRows(robot).get(0));
+    }
+
+    /**
+     * Returns the cells of {@code listView} that show a client, as it keeps spare cells for scrolling, which are
+     * hidden or empty.
+     */
+    static List<ListCell<?>> getVisibleCells(ListView<Person> listView) {
+        return listView.lookupAll(".list-cell").stream()
+                .<ListCell<?>>map(cell -> (ListCell<?>) cell)
+                .filter(cell -> cell.isVisible() && cell.getItem() != null)
+                .toList();
     }
 
     private void showManyClients(FxRobot robot) {
@@ -225,9 +267,7 @@ public class PersonListPanelTest {
         // The rows otherwise only move on the next pulse
         robot.interact(() -> personListPanel.getRoot().layout());
         Bounds listBounds = personListView.localToScene(personListView.getBoundsInLocal());
-        return personListView.lookupAll(".list-cell").stream()
-                .map(cell -> (ListCell<?>) cell)
-                .filter(cell -> cell.isVisible() && cell.getItem() != null)
+        return getVisibleCells(personListView).stream()
                 .filter(cell -> cell.localToScene(cell.getBoundsInLocal()).intersects(listBounds))
                 .map(ListCell::getIndex)
                 .sorted()
@@ -238,18 +278,23 @@ public class PersonListPanelTest {
      * Asserts that every client's card shows its email if {@code isShown}, or hides it and leaves no gap otherwise.
      */
     private void assertEmailShownOnEveryCard(boolean isShown) {
-        // The ListView keeps spare cells for scrolling, which are hidden or empty
-        List<Node> cards = personListView.lookupAll(".list-cell").stream()
-                .map(cell -> (ListCell<?>) cell)
-                .filter(cell -> cell.isVisible() && cell.getItem() != null)
-                .map(ListCell::getGraphic)
-                .toList();
+        List<Node> cards = getVisibleCells(personListView).stream().map(ListCell::getGraphic).toList();
         assertEquals(persons.size(), cards.size());
         for (Node card : cards) {
             Node email = card.lookup("#email");
             assertEquals(isShown, email.isVisible());
             assertEquals(isShown, email.isManaged());
         }
+    }
+
+    private void assertSelected(Person person) {
+        assertEquals(person, personListView.getSelectionModel().getSelectedItem());
+        assertEquals(person, personListPanel.selectedPersonProperty().get());
+    }
+
+    private void assertNothingSelected() {
+        assertTrue(personListView.getSelectionModel().isEmpty());
+        assertNull(personListPanel.selectedPersonProperty().get());
     }
 
     private void assertPlaceholderShown(String expectedText) {

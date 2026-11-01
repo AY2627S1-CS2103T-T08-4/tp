@@ -10,7 +10,7 @@
 
 ![Ui](images/Ui.png)
 
-**Sieve is a desktop app that helps self-employed private tuition teachers keep track of their clients.** While it has a GUI, most of the user interactions happen using a CLI (Command Line Interface), so tutors who type fast can find and update any client's details in seconds.
+**Sieve is a desktop app that helps self-employed private tuition teachers in Singapore keep track of their clients.** While it has a GUI, most of the user interactions happen using a CLI (Command Line Interface), so tutors who type fast can find and update any client's details in seconds.
 
 * If you are interested in using Sieve, head over to the [_Quick Start_ section of the **User Guide**](UserGuide.html#quick-start).
 * If you are interested in developing Sieve, the [**Developer Guide**](DeveloperGuide.html) is a good place to start.

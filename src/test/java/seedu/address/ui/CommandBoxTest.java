@@ -101,7 +101,7 @@ public class CommandBoxTest {
     @Test
     public void commandTextField_editedAfterError_removesErrorStyle(FxRobot robot) {
         enterCommand(robot, INVALID_COMMAND);
-        robot.interact(() -> commandTextField.setText("delete 9"));
+        setText(robot, "delete 9");
 
         assertFalse(hasErrorStyle());
     }
@@ -131,7 +131,7 @@ public class CommandBoxTest {
     @Test
     public void handleKeyPressed_upAfterFailedCommand_showsFailedCommand(FxRobot robot) {
         enterCommand(robot, INVALID_COMMAND);
-        robot.interact(() -> commandTextField.setText(""));
+        setText(robot, "");
 
         pressKey(robot, KeyCode.UP);
         assertEquals(INVALID_COMMAND, commandTextField.getText());
@@ -154,16 +154,38 @@ public class CommandBoxTest {
     @Test
     public void handleKeyPressed_downWhileTyping_keepsTypedText(FxRobot robot) {
         enterCommand(robot, VALID_COMMAND);
-        robot.interact(() -> commandTextField.setText("del"));
+        setText(robot, "del");
 
         pressKey(robot, KeyCode.DOWN);
         assertEquals("del", commandTextField.getText());
     }
 
     @Test
+    public void handleKeyPressed_upPastOldestCommand_typingContinuesAtEnd(FxRobot robot) {
+        enterCommand(robot, VALID_COMMAND);
+        robot.clickOn(commandTextField);
+
+        robot.type(KeyCode.UP, KeyCode.UP);
+        robot.write("x");
+
+        assertEquals(VALID_COMMAND + "x", commandTextField.getText());
+    }
+
+    @Test
+    public void handleKeyPressed_upWithNoHistory_typingContinuesAtEnd(FxRobot robot) {
+        setText(robot, "abc");
+        robot.clickOn(commandTextField);
+
+        robot.type(KeyCode.UP);
+        robot.write("X");
+
+        assertEquals("abcX", commandTextField.getText());
+    }
+
+    @Test
     public void handleKeyPressed_upThenDownWhileTyping_restoresTypedText(FxRobot robot) {
         enterCommand(robot, VALID_COMMAND);
-        robot.interact(() -> commandTextField.setText("add n/Half typed"));
+        setText(robot, "add n/Half typed");
 
         pressKey(robot, KeyCode.UP);
         assertEquals(VALID_COMMAND, commandTextField.getText());
@@ -191,9 +213,9 @@ public class CommandBoxTest {
     @Test
     public void handleKeyPressed_downAfterEditingRecalledCommand_restoresTypedText(FxRobot robot) {
         enterCommand(robot, VALID_COMMAND);
-        robot.interact(() -> commandTextField.setText("add n/Half typed"));
+        setText(robot, "add n/Half typed");
         pressKey(robot, KeyCode.UP);
-        robot.interact(() -> commandTextField.setText(VALID_COMMAND + " edited"));
+        setText(robot, VALID_COMMAND + " edited");
 
         // The edit to the recalled command is dropped, and the half-typed command comes back
         pressKey(robot, KeyCode.DOWN);
@@ -204,7 +226,7 @@ public class CommandBoxTest {
     public void handleKeyPressed_upOrDownWithModifier_leavesTextUnchanged(FxRobot robot) {
         enterCommand(robot, VALID_COMMAND);
         enterCommand(robot, OTHER_VALID_COMMAND);
-        robot.interact(() -> commandTextField.setText("del"));
+        setText(robot, "del");
 
         for (KeyCode key : new KeyCode[] {KeyCode.UP, KeyCode.DOWN}) {
             for (KeyCode modifier : new KeyCode[] {KeyCode.SHIFT, KeyCode.CONTROL, KeyCode.ALT, KeyCode.META}) {
@@ -221,7 +243,7 @@ public class CommandBoxTest {
     @Test
     public void handleKeyPressed_otherKey_leavesTextUnchanged(FxRobot robot) {
         enterCommand(robot, VALID_COMMAND);
-        robot.interact(() -> commandTextField.setText("del"));
+        setText(robot, "del");
 
         pressKey(robot, KeyCode.LEFT);
         assertEquals("del", commandTextField.getText());
@@ -230,30 +252,12 @@ public class CommandBoxTest {
 
     @Test
     public void handleKeyPressed_pageUpAndPageDown_scrollResultAndKeepTypedText(FxRobot robot) {
-        enterCommand(robot, VALID_COMMAND);
-        robot.interact(() -> commandTextField.setText("del"));
-
-        pressKey(robot, KeyCode.PAGE_DOWN);
-        pressKey(robot, KeyCode.PAGE_UP);
-
-        assertEquals(List.of(VerticalDirection.DOWN, VerticalDirection.UP), scrolledDirections);
-        assertTrue(clientListScrolledDirections.isEmpty());
-        assertEquals("del", commandTextField.getText());
-        assertEquals(List.of(VALID_COMMAND), executedCommands);
+        assertPageKeysScroll(robot, scrolledDirections, clientListScrolledDirections);
     }
 
     @Test
     public void handleKeyPressed_shiftPageUpAndPageDown_scrollClientListAndKeepTypedText(FxRobot robot) {
-        enterCommand(robot, VALID_COMMAND);
-        robot.interact(() -> commandTextField.setText("del"));
-
-        pressKey(robot, KeyCode.PAGE_DOWN, KeyCode.SHIFT);
-        pressKey(robot, KeyCode.PAGE_UP, KeyCode.SHIFT);
-
-        assertEquals(List.of(VerticalDirection.DOWN, VerticalDirection.UP), clientListScrolledDirections);
-        assertTrue(scrolledDirections.isEmpty());
-        assertEquals("del", commandTextField.getText());
-        assertEquals(List.of(VALID_COMMAND), executedCommands);
+        assertPageKeysScroll(robot, clientListScrolledDirections, scrolledDirections, KeyCode.SHIFT);
     }
 
     @Test
@@ -268,24 +272,56 @@ public class CommandBoxTest {
     }
 
     /**
-     * Types {@code command} into the command box and presses Enter.
+     * Types {@code command} into {@code commandTextField} and presses Enter.
      */
-    private void enterCommand(FxRobot robot, String command) {
+    static void enterCommand(FxRobot robot, TextField commandTextField, String command) {
         robot.interact(() -> {
             commandTextField.setText(command);
             commandTextField.fireEvent(new ActionEvent());
         });
     }
 
+    private void enterCommand(FxRobot robot, String command) {
+        enterCommand(robot, commandTextField, command);
+    }
+
     /**
-     * Presses {@code key} while the command box is focused, holding down any {@code modifiers}
+     * Returns a press of {@code key} while holding down any {@code modifiers}
      * ({@code SHIFT}, {@code CONTROL}, {@code ALT} or {@code META}).
      */
-    private void pressKey(FxRobot robot, KeyCode key, KeyCode... modifiers) {
+    static KeyEvent createKeyPressedEvent(KeyCode key, KeyCode... modifiers) {
         List<KeyCode> heldKeys = List.of(modifiers);
-        KeyEvent event = new KeyEvent(KeyEvent.KEY_PRESSED, "", "", key, heldKeys.contains(KeyCode.SHIFT),
+        return new KeyEvent(KeyEvent.KEY_PRESSED, "", "", key, heldKeys.contains(KeyCode.SHIFT),
                 heldKeys.contains(KeyCode.CONTROL), heldKeys.contains(KeyCode.ALT), heldKeys.contains(KeyCode.META));
-        robot.interact(() -> commandTextField.fireEvent(event));
+    }
+
+    private void setText(FxRobot robot, String text) {
+        robot.interact(() -> commandTextField.setText(text));
+    }
+
+    /**
+     * Presses {@code key} while the command box is focused, holding down any {@code modifiers}.
+     */
+    private void pressKey(FxRobot robot, KeyCode key, KeyCode... modifiers) {
+        robot.interact(() -> commandTextField.fireEvent(createKeyPressedEvent(key, modifiers)));
+    }
+
+    /**
+     * Asserts that Page Down then Page Up, with {@code modifiers} held, scroll only what {@code scrolled} records,
+     * and leave the typed text as it is without running it.
+     */
+    private void assertPageKeysScroll(FxRobot robot, List<VerticalDirection> scrolled,
+            List<VerticalDirection> notScrolled, KeyCode... modifiers) {
+        enterCommand(robot, VALID_COMMAND);
+        setText(robot, "del");
+
+        pressKey(robot, KeyCode.PAGE_DOWN, modifiers);
+        pressKey(robot, KeyCode.PAGE_UP, modifiers);
+
+        assertEquals(List.of(VerticalDirection.DOWN, VerticalDirection.UP), scrolled);
+        assertTrue(notScrolled.isEmpty());
+        assertEquals("del", commandTextField.getText());
+        assertEquals(List.of(VALID_COMMAND), executedCommands);
     }
 
     private boolean hasErrorStyle() {

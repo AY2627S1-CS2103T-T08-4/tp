@@ -70,8 +70,8 @@ public class CommandBox extends UiPart<Region> {
         switch (key) {
             case PAGE_UP -> scroller.accept(VerticalDirection.UP);
             case PAGE_DOWN -> scroller.accept(VerticalDirection.DOWN);
-            case UP -> showRecalledCommand(commandHistory.getPreviousCommand(commandTextField.getText()));
-            case DOWN -> showRecalledCommand(commandHistory.getNextCommand());
+            case UP -> showRecalledCommand(commandHistory.recallPreviousCommand(commandTextField.getText()));
+            case DOWN -> showRecalledCommand(commandHistory.recallNextCommand());
             default -> {
                 return;
             }
@@ -87,13 +87,14 @@ public class CommandBox extends UiPart<Region> {
     }
 
     /**
-     * Shows {@code recalledCommand} in the command box with the cursor at the end, if there is one.
+     * Shows {@code recalledCommand} in the command box, if there is one, and puts the cursor at the end either way,
+     * as the text field has already moved it for the Up or Down key by the time this runs.
      */
     private void showRecalledCommand(Optional<String> recalledCommand) {
-        recalledCommand.ifPresent(command -> {
+        recalledCommand.ifPresentOrElse(command -> {
             commandTextField.setText(command);
             commandTextField.end();
-        });
+        }, commandTextField::end);
     }
 
     /**

@@ -18,7 +18,6 @@ import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 import org.testfx.util.WaitForAsyncUtils;
 
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
@@ -61,6 +60,8 @@ public class MainWindowTest {
     /** A command whose result is too long to show in full at the minimum width. */
     private static final String LONG_RESULT_COMMAND = "add n/Amirah Tan p/91234567 e/amirah@example.com a/"
             + "Blk 123 Yishun Ave 5 ".repeat(7) + "nt/" + "Weak at algebra ".repeat(12);
+    /** How long to wait for the detail panel's 200 ms animation, so that a slow machine does not fail a test. */
+    private static final int WAIT_SECONDS = 5;
 
     @TempDir
     public Path temporaryFolder;
@@ -75,6 +76,8 @@ public class MainWindowTest {
         MainWindow mainWindow = createMainWindow();
         mainWindow.fillInnerParts();
         detailPlaceholder = (Region) stage.getScene().lookup("#personDetailPanelPlaceholder");
+        // It stays at full opacity until it first closes, so this lets waitForDetailPanelToOpen see the fade-in finish
+        detailPlaceholder.setOpacity(0);
         stage.show();
     }
 
@@ -120,7 +123,7 @@ public class MainWindowTest {
 
     @Test
     public void executeCommand_errorWrapsAtMinimumWidth_shownInFullWithoutScrolling(FxRobot robot) {
-        robot.interact(() -> stage.setWidth(stage.getMinWidth()));
+        useMinimumWidth(robot);
         enterCommand(robot, "edit 1 p/123");
 
         Label resultMessage = getResultMessage();
@@ -133,9 +136,17 @@ public class MainWindowTest {
     public void pageDownInCommandBox_longResult_scrollsResult(FxRobot robot) {
         ScrollPane resultScrollPane = showLongResult(robot);
 
-        robot.interact(() -> getCommandTextField().fireEvent(createKeyPressedEvent(KeyCode.PAGE_DOWN)));
+        robot.interact(() -> getCommandTextField().fireEvent(CommandBoxTest.createKeyPressedEvent(KeyCode.PAGE_DOWN)));
 
         assertTrue(resultScrollPane.getVvalue() > resultScrollPane.getVmin());
+    }
+
+    @Test
+    public void pressEnterInCommandBox_runsCommand(FxRobot robot) {
+        robot.clickOn("#commandTextField");
+        robot.write(ListCommand.COMMAND_WORD).type(KeyCode.ENTER);
+        assertEquals("", getCommandTextField().getText());
+        assertTrue(getResultMessage().getText().startsWith(ListCommand.MESSAGE_SUCCESS));
     }
 
     @Test
@@ -232,7 +243,7 @@ public class MainWindowTest {
 
     @Test
     public void commandBox_minimumWidth_promptTextFits(FxRobot robot) {
-        robot.interact(() -> stage.setWidth(stage.getMinWidth()));
+        useMinimumWidth(robot);
         TextField commandTextField = getCommandTextField();
 
         Text promptText = new Text(commandTextField.getPromptText());
@@ -296,8 +307,7 @@ public class MainWindowTest {
 
         Button closeButton = (Button) stage.getScene().lookup("#closeDetailButton");
         robot.interact(closeButton::fire);
-        assertTrue(getPersonListView().getSelectionModel().isEmpty());
-        waitForDetailPanelToClose();
+        assertDetailPanelClosed();
     }
 
     @Test
@@ -309,8 +319,7 @@ public class MainWindowTest {
         assertFalse(getPersonListView().getSelectionModel().isEmpty());
 
         assertFalse(isKeyPassedToCommandBox(robot, KeyCode.ESCAPE));
-        assertTrue(getPersonListView().getSelectionModel().isEmpty());
-        waitForDetailPanelToClose();
+        assertDetailPanelClosed();
     }
 
     @Test
@@ -327,7 +336,7 @@ public class MainWindowTest {
         });
 
         assertEquals(0, clientContent.getWidth());
-        WaitForAsyncUtils.waitFor(1, TimeUnit.SECONDS, () -> detailPlaceholder.getPrefWidth() > 300);
+        WaitForAsyncUtils.waitFor(WAIT_SECONDS, TimeUnit.SECONDS, () -> detailPlaceholder.getPrefWidth() > 300);
     }
 
     @Test
@@ -479,8 +488,7 @@ public class MainWindowTest {
         // One client replaces another, as in an edit, but Charlotte is only hidden, not renamed
         enterCommand(robot, "find Ravi");
 
-        assertTrue(getPersonListView().getSelectionModel().isEmpty());
-        waitForDetailPanelToClose();
+        assertDetailPanelClosed();
     }
 
     @Test
@@ -490,13 +498,12 @@ public class MainWindowTest {
 
         enterCommand(robot, "delete 2");
 
-        assertTrue(getPersonListView().getSelectionModel().isEmpty());
-        waitForDetailPanelToClose();
+        assertDetailPanelClosed();
     }
 
     @Test
     public void selectClient_minimumWidth_detailPanelFitsInWindow(FxRobot robot) {
-        robot.interact(() -> stage.setWidth(stage.getMinWidth()));
+        useMinimumWidth(robot);
         addAndSelectClient(robot);
         waitForDetailPanelToOpen();
 
@@ -510,9 +517,7 @@ public class MainWindowTest {
         selectClient(robot, 0);
         waitForDetailPanelToOpen();
 
-        List<Node> cards = getPersonListView().lookupAll(".list-cell").stream()
-                .map(node -> (ListCell<?>) node)
-                .filter(cell -> cell.isVisible() && cell.getItem() != null)
+        List<Node> cards = PersonListPanelTest.getVisibleCells(getPersonListView()).stream()
                 .map(ListCell::getGraphic)
                 .toList();
         assertTrue(cards.size() >= 4);
@@ -527,7 +532,7 @@ public class MainWindowTest {
 
     @Test
     public void selectClient_minimumWidth_longNameAndAddressShownInFull(FxRobot robot) {
-        robot.interact(() -> stage.setWidth(stage.getMinWidth()));
+        useMinimumWidth(robot);
         enterCommand(robot, "add n/" + LONG_NAME + " p/98765432 e/hafiz@edu.sg a/" + LONG_ADDRESS);
         selectClient(robot, 0);
         waitForDetailPanelToOpen();
@@ -544,12 +549,12 @@ public class MainWindowTest {
         robot.interact(() -> stage.setWidth(1200));
         addAndSelectClient(robot);
         // In a window this wide, the panel opens to its widest, 520 pixels
-        WaitForAsyncUtils.waitFor(1, TimeUnit.SECONDS, () -> detailPlaceholder.getPrefWidth() >= 519);
+        WaitForAsyncUtils.waitFor(WAIT_SECONDS, TimeUnit.SECONDS, () -> detailPlaceholder.getPrefWidth() >= 519);
 
-        robot.interact(() -> stage.setWidth(stage.getMinWidth()));
+        useMinimumWidth(robot);
 
         // Times out if the panel keeps its width. Waits on the laid-out width, so the bounds checked next are current
-        WaitForAsyncUtils.waitFor(1, TimeUnit.SECONDS, () -> detailPlaceholder.getWidth() < 519);
+        WaitForAsyncUtils.waitFor(WAIT_SECONDS, TimeUnit.SECONDS, () -> detailPlaceholder.getWidth() < 519);
         assertDetailPanelFitsInWindow();
     }
 
@@ -567,18 +572,18 @@ public class MainWindowTest {
      * Types {@code command} into the command box and presses Enter.
      */
     private void enterCommand(FxRobot robot, String command) {
-        TextField commandTextField = getCommandTextField();
-        robot.interact(() -> {
-            commandTextField.setText(command);
-            commandTextField.fireEvent(new ActionEvent());
-        });
+        CommandBoxTest.enterCommand(robot, getCommandTextField(), command);
+    }
+
+    private void useMinimumWidth(FxRobot robot) {
+        robot.interact(() -> stage.setWidth(stage.getMinWidth()));
     }
 
     /**
      * Shows the result of {@code LONG_RESULT_COMMAND} at the minimum width, and returns the scroll pane it is in.
      */
     private ScrollPane showLongResult(FxRobot robot) {
-        robot.interact(() -> stage.setWidth(stage.getMinWidth()));
+        useMinimumWidth(robot);
         enterCommand(robot, LONG_RESULT_COMMAND);
         return (ScrollPane) stage.getScene().lookup("#resultScrollPane");
     }
@@ -664,12 +669,24 @@ public class MainWindowTest {
      * Waits for the detail panel's opening animation to finish, so that it is at its full width.
      */
     private void waitForDetailPanelToOpen() {
-        WaitForAsyncUtils.sleep(500, TimeUnit.MILLISECONDS);
+        try {
+            WaitForAsyncUtils.waitFor(WAIT_SECONDS, TimeUnit.SECONDS, () -> detailPlaceholder.getOpacity() == 1);
+        } catch (TimeoutException e) {
+            throw new AssertionError("Detail panel did not finish opening", e);
+        }
         WaitForAsyncUtils.waitForFxEvents();
     }
 
     private void waitForDetailPanelToClose() throws TimeoutException {
-        WaitForAsyncUtils.waitFor(1, TimeUnit.SECONDS, () -> !detailPlaceholder.isVisible());
+        WaitForAsyncUtils.waitFor(WAIT_SECONDS, TimeUnit.SECONDS, () -> !detailPlaceholder.isVisible());
+    }
+
+    /**
+     * Asserts that no client is selected, and waits for the detail panel to close.
+     */
+    private void assertDetailPanelClosed() throws TimeoutException {
+        assertTrue(getPersonListView().getSelectionModel().isEmpty());
+        waitForDetailPanelToClose();
     }
 
     /**
@@ -693,13 +710,9 @@ public class MainWindowTest {
         EventHandler<KeyEvent> handler = event -> isPassedOn.set(true);
         robot.interact(() -> {
             commandTextField.addEventHandler(KeyEvent.KEY_PRESSED, handler);
-            commandTextField.fireEvent(createKeyPressedEvent(key));
+            commandTextField.fireEvent(CommandBoxTest.createKeyPressedEvent(key));
             commandTextField.removeEventHandler(KeyEvent.KEY_PRESSED, handler);
         });
         return isPassedOn.get();
-    }
-
-    private KeyEvent createKeyPressedEvent(KeyCode keyCode) {
-        return new KeyEvent(KeyEvent.KEY_PRESSED, "", "", keyCode, false, false, false, false);
     }
 }

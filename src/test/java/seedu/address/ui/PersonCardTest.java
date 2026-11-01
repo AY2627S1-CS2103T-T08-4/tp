@@ -22,6 +22,7 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import seedu.address.model.person.Person;
 import seedu.address.testutil.PersonBuilder;
 
 @ExtendWith(ApplicationExtension.class)
@@ -74,6 +75,19 @@ public class PersonCardTest {
     }
 
     @Test
+    public void constructor_allDetails_eachLabelShowsItsDetail() {
+        Person person = compactCard.person;
+        assertEquals("10", getLabelText(compactCard, "#id"));
+        assertEquals(person.getName().fullName, getLabelText(compactCard, "#name"));
+        assertEquals(person.getPhone().value, getLabelText(compactCard, "#phone"));
+        assertEquals(person.getEmail().value, getLabelText(compactCard, "#email"));
+        assertEquals(person.getAddress().value, getLabelText(compactCard, "#address"));
+        assertEquals("Fee: " + person.getFee().value, getLabelText(compactCard, "#fee"));
+        assertEquals("Due: " + person.getDueDate().value, getLabelText(compactCard, "#dueDate"));
+        assertEquals("Weak at algebra", getLabelText(compactCard, "#note"));
+    }
+
+    @Test
     public void constructor_mixedCaseTags_sortedIgnoringCase() {
         List<String> shownTags = getTags(taggedCard).getChildren().stream()
                 .map(node -> ((Label) node).getText())
@@ -112,30 +126,22 @@ public class PersonCardTest {
 
     @Test
     public void constructor_feeOnly_showsFeeWithoutDueDate() {
-        assertShown(feeOnlyCard, "#billing", true);
-        assertShown(feeOnlyCard, "#fee", true);
-        assertShown(feeOnlyCard, "#dueDate", false);
+        assertBillingShown(feeOnlyCard, true, false);
     }
 
     @Test
     public void constructor_dueDateOnly_showsDueDateWithoutFee() {
-        assertShown(dueDateOnlyCard, "#billing", true);
-        assertShown(dueDateOnlyCard, "#fee", false);
-        assertShown(dueDateOnlyCard, "#dueDate", true);
+        assertBillingShown(dueDateOnlyCard, false, true);
     }
 
     @Test
     public void constructor_feeAndDueDate_showsBoth() {
-        assertShown(feeAndDueDateCard, "#billing", true);
-        assertShown(feeAndDueDateCard, "#fee", true);
-        assertShown(feeAndDueDateCard, "#dueDate", true);
+        assertBillingShown(feeAndDueDateCard, true, true);
     }
 
     @Test
     public void constructor_noFeeOrDueDate_hidesBillingRow() {
-        assertShown(plainCard, "#billing", false);
-        assertShown(plainCard, "#fee", false);
-        assertShown(plainCard, "#dueDate", false);
+        assertBillingShown(plainCard, false, false);
     }
 
     @Test
@@ -163,6 +169,10 @@ public class PersonCardTest {
         assertShownInFullAtEachWidth(robot, longSingleWordNameCard, "#name", LONG_SINGLE_WORD_NAME);
     }
 
+    private String getLabelText(PersonCard card, String id) {
+        return ((Label) card.getRoot().lookup(id)).getText();
+    }
+
     private FlowPane getTags(PersonCard card) {
         return (FlowPane) card.getRoot().lookup("#tags");
     }
@@ -175,6 +185,15 @@ public class PersonCardTest {
         Node node = card.getRoot().lookup(id);
         assertEquals(isShown, node.isVisible(), id + " visible");
         assertEquals(isShown, node.isManaged(), id + " managed");
+    }
+
+    /**
+     * Asserts that {@code card} shows its fee and due date as given, with the row holding them shown if either is.
+     */
+    private void assertBillingShown(PersonCard card, boolean isFeeShown, boolean isDueDateShown) {
+        assertShown(card, "#billing", isFeeShown || isDueDateShown);
+        assertShown(card, "#fee", isFeeShown);
+        assertShown(card, "#dueDate", isDueDateShown);
     }
 
     /**

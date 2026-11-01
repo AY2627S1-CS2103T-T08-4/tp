@@ -21,7 +21,7 @@ public class CommandHistory {
 
     /**
      * Saves {@code command} as the newest command and moves back to the end of the history,
-     * so that {@link #getPreviousCommand(String)} returns {@code command} next.
+     * so that {@link #recallPreviousCommand(String)} returns {@code command} next.
      */
     public void add(String command) {
         requireNonNull(command);
@@ -32,13 +32,13 @@ public class CommandHistory {
     /**
      * Moves back one command and returns it.
      * When moving back from past the newest command, {@code currentText} is kept as the draft,
-     * which {@link #getNextCommand()} returns after the newest command.
+     * which {@link #recallNextCommand()} returns after the newest command.
      * Returns an empty {@code Optional} if there is no earlier command to show,
      * either because nothing has been entered yet or because the oldest command is already shown.
      *
      * @param currentText The text in the command box.
      */
-    public Optional<String> getPreviousCommand(String currentText) {
+    public Optional<String> recallPreviousCommand(String currentText) {
         requireNonNull(currentText);
         if (currentIndex <= 0) {
             return Optional.empty();
@@ -56,7 +56,7 @@ public class CommandHistory {
      * Returns an empty {@code Optional} if there is no next command to show.
      * Returns the draft when moving past the newest command, so a half-typed command comes back.
      */
-    public Optional<String> getNextCommand() {
+    public Optional<String> recallNextCommand() {
         if (currentIndex >= commands.size()) {
             return Optional.empty();
         }
