@@ -1253,8 +1253,10 @@ The data file is `data/sieve.json` inside that folder.
     1. Prerequisites: Start from a valid data file (for example, run the missing-file case above, then close the
        app). Change the phone number of one client in `data/sieve.json` to `abc`. Note the file's checksum. Launch
        the app.<br>
-       Expected: A popup like the one for a malformed file appears, but its reason names the client and the invalid
-       value, for example `Client 'NAME': ` followed by the phone number rule. The client list is empty.
+       Expected: A popup like the one for a malformed file appears, but its reason names the client and gives the rule
+       for the field that is wrong, e.g. `Client 'Amirah Tan': Invalid Phone Number! Enter an 8-digit Singapore number 
+       starting with 3, 6, 8 or 9 (e.g. 91234567).` The invalid value itself (`abc`) is not shown. The client list is
+       empty.
 
     1. Test case: Repeat the command, `add n/John`, `list`/`find`/`help` and checksum steps from the malformed
        data file case.<br>
