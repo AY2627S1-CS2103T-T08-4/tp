@@ -854,7 +854,8 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 * 4a. Sieve cannot write to the data file for another reason, e.g. the disk is full.
 
-    * 4a1. Sieve shows a warning that the client was added to the current view but not saved.
+    * 4a1. Sieve shows an error saying that it could not save the data, and gives the reason. The client stays in
+      the client list on screen, but the change is not written to the data file.
 
       Use case ends.
 
@@ -893,7 +894,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 * 3b. No field to edit is provided.
 
-    * 3b1. Sieve shows an error message with the expected command format.
+    * 3b1. Sieve shows an error saying that at least one field to edit must be provided.
 
       Use case resumes at step 3.
 
@@ -1437,7 +1438,7 @@ The data file is `data/sieve.json` inside that folder.
     1. Prerequisites: Start with the sample data (delete `data/sieve.json` if it exists, or use a fresh folder).
 
     1. Test case: `find p/9112 2334`<br>
-       Expected: The displayed list does not change. An error message lists the characters allowed in keywords.
+       Expected: The displayed list does not change. An error message says that `find` only searches names, so keywords do not need a prefix such as `n/`, and that `filter` is the command for searching by phone or tag.
 
     1. Test case: `find t/sec4`<br>
        Expected: Same as previous.
