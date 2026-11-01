@@ -51,6 +51,7 @@
         "undo-redo-feature": "Undo/redo feature",
         "command-history-feature": "Command history feature",
         "input-validation": "Input validation",
+        "future-improvements": "Future improvements",
         "documentation-logging-testing-dev-ops": "Documentation, logging, testing, dev-ops",
         "appendix-requirements": "Appendix: Requirements",
         "product-scope": "Product scope",
@@ -154,14 +155,6 @@
       "title": "",
       "headings": {
         "sieve": "Sieve"
-      },
-      "headingKeywords": {}
-    },
-    {
-      "src": "team/johndoe.md",
-      "title": "John Doe's Project Portfolio Page",
-      "headings": {
-        "project-addressbook-level-3": "Project: AddressBook Level 3"
       },
       "headingKeywords": {}
     }

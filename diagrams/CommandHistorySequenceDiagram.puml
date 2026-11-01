@@ -18,7 +18,7 @@ activate TextField
 TextField --> CommandBox : currentText
 deactivate TextField
 
-CommandBox -> CommandHistory : getPreviousCommand(currentText)
+CommandBox -> CommandHistory : recallPreviousCommand(currentText)
 activate CommandHistory
 
 CommandHistory --> CommandBox : recalledCommand
@@ -29,12 +29,12 @@ opt recalledCommand is present
     activate TextField
     TextField --> CommandBox
     deactivate TextField
-
-    CommandBox -> TextField : end()
-    activate TextField
-    TextField --> CommandBox
-    deactivate TextField
 end
+
+CommandBox -> TextField : end()
+activate TextField
+TextField --> CommandBox
+deactivate TextField
 
 CommandBox --> user
 deactivate CommandBox
