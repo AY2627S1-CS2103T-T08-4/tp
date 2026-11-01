@@ -26,8 +26,8 @@ public class FindCommand extends Command {
             + "Example: " + COMMAND_WORD + " immanuel krishna";
 
     public static final String MESSAGE_INVALID_KEYWORDS =
-            "Search keywords can only contain letters, digits, hyphens <->, apostrophes <'>, full stops <.> "
-                    + "and parentheses <()>, and must include at least one letter or digit.";
+            "Search keywords can only contain letters, digits, hyphens, apostrophes, full stops "
+                    + "and parentheses, and must include at least one letter or digit.";
 
     public static final String MESSAGE_PREFIX_IN_KEYWORDS = "find only searches names, so keywords do not need "
             + "a prefix such as n/, e.g. find Amy. To search by phone or tag, use filter, e.g. filter t/Math.";
