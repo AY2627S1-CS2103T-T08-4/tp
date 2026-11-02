@@ -42,6 +42,7 @@ We are a team based in the [School of Computing, National University of Singapor
 [[github](http://github.com/Matcha1atte1)]
 
 * Role: Developer
+* Responsibilities: Find, notes
 
 ### Jonathan Neo
 
