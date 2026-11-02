@@ -363,11 +363,10 @@ The following sequence diagram shows how `filter` parses its phone and tag crite
 
 Both commands replace the selected immutable `Person` with a copy containing an updated tag set. `TagCommand` adds only tags the client does not already have, while `UntagCommand` removes only tags the client currently has. Tag names are normalized by trimming and collapsing repeated whitespace, and equality is case-insensitive. After a successful change, both commands preserve the currently displayed clients, replacing the updated client in that list even if it no longer matches an earlier filter. Confirmation messages report both the tags changed and the tags already present or not found. Matching tags use the spelling stored on the client. When no change is needed, the commands leave the model unchanged and report why no tags were changed.
 
-The following sequence diagrams show the parsing and execution flow for the two commands:
+The following sequence diagram shows the shared parsing and execution flow for both commands. `XYZ` stands for either
+`Tag` or `Untag`; the `alt` frame shows where their behaviour differs.
 
-<puml src="diagrams/TagSequenceDiagram.puml" alt="Interactions Inside the Logic and Model Components for the tag command" />
-
-<puml src="diagrams/UntagSequenceDiagram.puml" alt="Interactions Inside the Logic and Model Components for the untag command" />
+<puml src="diagrams/TagUntagSequenceDiagram.puml" alt="Interactions Inside the Logic and Model Components for the tag and untag commands" />
 
 ### Notes feature
 
@@ -928,7 +927,8 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 2. Sieve shows all clients in a numbered list
 3. Tutor requests to tag a specific client with one or more tags (e.g. a subject, a level or a lesson day)
 4. Sieve adds the tags to the client's existing tags and saves the change
-5. Sieve shows a confirmation listing only the newly added tags and displays the client with all their tags
+5. Sieve shows a confirmation listing the newly added tags and, if applicable, an `Already present:` section containing
+   requested tags the client already had. Sieve displays the client with all their tags
 
    Use case ends.
 
@@ -956,11 +956,13 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
       Use case resumes at step 3.
 
-* 4a. The client already has the given tag.
+* 4a. The client already has one or more of the given tags.
 
-    * 4a1. Sieve ignores the existing tag and lists only newly added tags in the confirmation.
+    * 4a1. Sieve ignores the existing tags. The confirmation lists the newly added tags, followed by an
+      `Already present:` section using the tags' stored spelling.
 
-    * 4a2. If the client already has every specified tag, Sieve reports that the client "has all of the tag(s)" and leaves the client unchanged.
+    * 4a2. If the client already has every specified tag, Sieve reports
+      `No tags added to CLIENT_NAME. Already present: TAGS.` and leaves the client unchanged.
 
       Use case continues from step 5.
 
@@ -972,7 +974,8 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 2. Sieve shows all clients in a numbered list
 3. Tutor requests to remove one or more tags from a specific client
 4. Sieve removes the specified tags that the client currently has and preserves all other tags
-5. Sieve confirms only the tags that were removed
+5. Sieve confirms the tags that were removed and, if applicable, shows a `Not found:` section containing requested
+   tags the client did not have
 
    Use case ends.
 
@@ -1149,6 +1152,37 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 * 3c. The selected client is deleted or removed from the displayed results by a search or filter.
 
     * 3c1. Sieve closes the detail panel and restores the full-width client list.
+
+      Use case ends.
+
+**Use case: UC9 - Filter clients by phone number or tags**
+
+**MSS**
+
+1. Tutor requests to filter clients by an exact phone number or tag
+2. Sieve validates the filter criterion
+3. Sieve shows the clients that match the criterion
+
+   Use case ends.
+
+**Extensions**
+
+* 1a. Tutor provides several phone numbers or tags, or both fields.
+
+    * 1a1. Sieve matches a client if any supplied phone number matches and all supplied tags match. If both fields are
+      supplied, the client must satisfy both conditions.
+
+      Use case resumes at step 2.
+
+* 2a. A supplied phone number is invalid, e.g. it is not an 8-digit Singapore number.
+
+    * 2a1. Sieve shows an error message about the phone number format and leaves the displayed list unchanged.
+
+      Use case resumes at step 1.
+
+* 3a. No client matches the filter criteria.
+
+    * 3a1. Sieve shows that 0 clients were found, with tips for filtering again.
 
       Use case ends.
 
@@ -1497,7 +1531,8 @@ The data file is `data/sieve.json` inside that folder.
        Expected: Only `Amirah Tan` is listed. Repeated spaces are collapsed, so `Sec  4` matches `Sec 4`.
 
     1. Test case: `filter t/Sec4`<br>
-       Expected: Only `Brandon Sim` is listed. `Sec4` remains distinct from `Sec 4`.
+       Expected: `Amirah Tan` and `Brandon Sim` are listed. `Amirah Tan` already had `Sec4` in the sample data, and
+       `Sec4` remains distinct from the newly added `Sec 4`.
 
     1. Test case: `filter t/Nothing`<br>
        Expected: No clients are listed. The status message shows `0 clients found matching your search term(s).`, followed by tips for filtering again.
