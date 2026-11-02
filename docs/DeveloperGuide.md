@@ -1931,6 +1931,8 @@ The data file is `data/sieve.json` inside that folder.
 
 1. Going back and forward through the history
 
+    1. Prerequisites: Relaunch the app, so that the command history is empty.
+
     1. Test case: `list`, then `find Amirah`, then press Up three times<br>
        Expected: The command box shows `find Amirah`, then `list`, then stays on `list`.
 

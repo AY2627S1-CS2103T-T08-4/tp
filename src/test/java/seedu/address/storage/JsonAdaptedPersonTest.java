@@ -300,6 +300,11 @@ public class JsonAdaptedPersonTest {
         assertEquals("#3", createPersonNamed(" ").getDisplayName(2));
     }
 
+    @Test
+    public void getDisplayName_missingName_returnsPositionInFile() {
+        assertEquals("#3", createPersonNamed(null).getDisplayName(2));
+    }
+
     private JsonAdaptedPerson createPersonNamed(String name) {
         return new JsonAdaptedPerson(name, VALID_PHONE, VALID_EMAIL, VALID_ADDRESS, VALID_NOTE, VALID_FEE,
                 VALID_DUE_DATE, VALID_TAGS);

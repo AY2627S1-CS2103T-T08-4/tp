@@ -114,6 +114,11 @@ public class ParserUtilTest {
     }
 
     @Test
+    public void parseName_accentedLetter_throwsParseException() {
+        assertThrows(ParseException.class, Name.MESSAGE_CONSTRAINTS, () -> ParserUtil.parseName("José"));
+    }
+
+    @Test
     public void parseName_tooLong_throwsParseException() {
         String tooLongName = "a".repeat(Name.MAX_LENGTH + 1);
         // The text the user reads. NameTest#getErrorMessage covers which invalid names get this message

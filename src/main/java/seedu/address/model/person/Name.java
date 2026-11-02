@@ -13,8 +13,8 @@ public class Name {
 
     public static final int MAX_LENGTH = 50;
     public static final String MESSAGE_CONSTRAINTS = String.format(
-            "Invalid Name! Names must start with a letter and can only contain letters, digits, spaces, "
-                    + "hyphens, apostrophes, full stops and parentheses, up to %d characters.",
+            "Invalid Name! Names must start with a letter and can only contain letters (A to Z), digits, "
+                    + "spaces, hyphens, apostrophes, full stops and parentheses, up to %d characters.",
             MAX_LENGTH);
 
     /**
