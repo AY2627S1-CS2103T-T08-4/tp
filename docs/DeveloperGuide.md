@@ -363,7 +363,8 @@ The following sequence diagram shows how `filter` parses its phone and tag crite
 
 Both commands replace the selected immutable `Person` with a copy containing an updated tag set. `TagCommand` adds only tags the client does not already have, while `UntagCommand` removes only tags the client currently has. Tag names are normalized by trimming and collapsing repeated whitespace, and equality is case-insensitive. After a successful change, both commands preserve the currently displayed clients, replacing the updated client in that list even if it no longer matches an earlier filter. Confirmation messages report both the tags changed and the tags already present or not found. Matching tags use the spelling stored on the client. When no change is needed, the commands leave the model unchanged and report why no tags were changed.
 
-The following sequence diagram shows the shared parsing and execution flow for both commands:
+The following sequence diagram shows the shared parsing and execution flow for both commands. `XYZ` stands for either
+`Tag` or `Untag`; the `alt` frame shows where their behaviour differs.
 
 <puml src="diagrams/TagUntagSequenceDiagram.puml" alt="Interactions Inside the Logic and Model Components for the tag and untag commands" />
 

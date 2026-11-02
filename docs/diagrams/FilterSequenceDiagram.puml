@@ -35,16 +35,14 @@ activate ArgumentTokenizer
 ArgumentTokenizer --> FilterCommandParser : tokenized arguments
 deactivate ArgumentTokenizer
 
-group validate and parse criteria
-    FilterCommandParser -> ParserUtil : parsePhone(phoneValue)
-    activate ParserUtil
-    ParserUtil --> FilterCommandParser : Phone
-    deactivate ParserUtil
-    FilterCommandParser -> ParserUtil : parseTag(tagValue)
-    activate ParserUtil
-    ParserUtil --> FilterCommandParser : Tag
-    deactivate ParserUtil
-end
+FilterCommandParser -> ParserUtil : parsePhone(phoneValue)
+activate ParserUtil
+ParserUtil --> FilterCommandParser : Phone
+deactivate ParserUtil
+FilterCommandParser -> ParserUtil : parseTag(tagValue)
+activate ParserUtil
+ParserUtil --> FilterCommandParser : Tag
+deactivate ParserUtil
 
 create Predicate
 FilterCommandParser -> Predicate : create(phones, tags)

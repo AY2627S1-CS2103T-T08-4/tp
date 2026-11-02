@@ -5,20 +5,25 @@ skinparam ArrowFontStyle plain
 box Logic LOGIC_COLOR_T1
 participant ":LogicManager" as LogicManager LOGIC_COLOR
 participant ":AddressBookParser" as AddressBookParser LOGIC_COLOR
-participant ":TagCommandParser /\n:UntagCommandParser" as CommandParser LOGIC_COLOR
+participant ":XYZCommandParser" as CommandParser LOGIC_COLOR
 participant "<<class>>\nArgumentTokenizer" as ArgumentTokenizer LOGIC_COLOR
 participant "<<class>>\nParserUtil" as ParserUtil LOGIC_COLOR
-participant "c:TagCommand /\nc:UntagCommand" as Command LOGIC_COLOR
+participant "c:XYZCommand" as Command LOGIC_COLOR
 end box
 
 box Model MODEL_COLOR_T1
 participant "m:Model" as Model MODEL_COLOR
 end box
 
-[-> LogicManager : execute("tag 1 t/Physics" /\n"untag 1 t/Physics")
+note over CommandParser, Command
+    commandText is a tag or untag command;
+    XYZ is Tag or Untag respectively
+end note
+
+[-> LogicManager : execute(commandText)
 activate LogicManager
 
-LogicManager -> AddressBookParser : parseCommand(userInput)
+LogicManager -> AddressBookParser : parseCommand(commandText)
 activate AddressBookParser
 
 create CommandParser
@@ -34,16 +39,14 @@ activate ArgumentTokenizer
 ArgumentTokenizer --> CommandParser : tokenized arguments
 deactivate ArgumentTokenizer
 
-group validate and parse index and tags
-    CommandParser -> ParserUtil : parseIndex(preamble)
-    activate ParserUtil
-    ParserUtil --> CommandParser : index
-    deactivate ParserUtil
-    CommandParser -> ParserUtil : parseTag(tagValue)
-    activate ParserUtil
-    ParserUtil --> CommandParser : Tag
-    deactivate ParserUtil
-end
+CommandParser -> ParserUtil : parseIndex(preamble)
+activate ParserUtil
+ParserUtil --> CommandParser : index
+deactivate ParserUtil
+CommandParser -> ParserUtil : parseTag(tagValue)
+activate ParserUtil
+ParserUtil --> CommandParser : Tag
+deactivate ParserUtil
 
 create Command
 CommandParser -> Command : create(index, tags)
