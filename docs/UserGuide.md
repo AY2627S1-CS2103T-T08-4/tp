@@ -150,7 +150,7 @@ Examples:
 
 **Names:**
 * A name must start with a letter, and can only contain letters, digits, spaces, hyphens (`-`), apostrophes (`'`), full stops (`.`) and parentheses (`()`), up to 50 characters. If a name is longer, the error says how many characters it has.
-* For example, `John Tan (NHHS)` and `Nur-Aisyah O'Brien` are accepted, but `Ravi s/o Kumar` and `Kumar a/l Ravi` are not, because of the `/`.
+* For example, `John Tan (NHHS)` and `Nur-Aisyah O'Brien` are accepted, but `Ravi s/o Kumar` is not, because of the `/`. Avoid `Kumar a/l Ravi` too: Sieve reads `a/` as the start of the address, so it would save the name `Kumar` with the address `l Ravi`.
 * A curly apostrophe (`’`), which phones and chat apps often type or paste instead of `'`, is saved as `'`. For example, `O’Brien` is saved as `O'Brien`.
 * Letters means `A` to `Z`, so names with accented letters (e.g. `José`) or Chinese characters are not supported.
 * Other symbols are not supported either, such as the `@` in `Tan Ah Kow @ Michael` or the comma in `Tan, Wei Ming`.
@@ -395,7 +395,7 @@ Brings back commands you entered earlier, so you can run them again or fix a typ
 * Your command history is cleared when you close Sieve.
 
 Examples:
-* `edit 1 p/9123 456` fails because the phone number has only 7 digits. The command stays in the command box, so add the missing digit and press Enter. You do not need Up for this.
+* `edit 1 p/9111 222` fails because the phone number has only 7 digits. The command stays in the command box, so add the missing digit and press Enter. You do not need Up for this.
 * You are halfway through typing `add n/Amirah Tan p/91234567` and want to check your last command. Press Up to see it, then press Down to get back what you were typing.
 * After `find Amirah`, `delete 1` and `list`, press Up three times to bring back `find Amirah`.
 

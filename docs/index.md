@@ -18,5 +18,7 @@
 
 **Acknowledgements**
 * This project is based on the AddressBook-Level3 project created by the [SE-EDU initiative](https://se-education.org).
-* Libraries used: [JavaFX](https://openjfx.io/), [Jackson](https://github.com/FasterXML/jackson), [JUnit5](https://github.com/junit-team/junit5)
+* Libraries used: [JavaFX](https://openjfx.io/), [Jackson](https://github.com/FasterXML/jackson), [JUnit5](https://github.com/junit-team/junit5), [TestFX](https://github.com/TestFX/TestFX), [Monocle](https://github.com/TestFX/Monocle)
 * Font: [Inter](https://github.com/rsms/inter), licensed under the [SIL Open Font License 1.1](https://openfontlicense.org)
+* UI design inspired by [TutorFlow](https://github.com/AY2526S2-CS2103T-T09-3/tp), a past CS2103T team project.
+* The full acknowledgements, including notable uses of AI, are in the [Developer Guide](DeveloperGuide.html#acknowledgements).
