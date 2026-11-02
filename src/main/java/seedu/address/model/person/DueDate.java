@@ -24,7 +24,7 @@ public class DueDate {
 
     public static final String MESSAGE_CONSTRAINTS =
         "Invalid Due date! Due dates must be a real date from 01-01-" + MIN_YEAR + " to 31-12-" + MAX_YEAR
-            + ", in the format DD-MM-YYYY, for example 01-11-2026.";
+            + ", in the format DD-MM-YYYY, for example 01-11-2030.";
     public static final String MESSAGE_PAST_DATE =
         "Invalid Due date! Due dates cannot be in the past. Use today's date or a later date.";
 
