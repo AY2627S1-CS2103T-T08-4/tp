@@ -25,6 +25,8 @@ import seedu.address.model.person.Person;
  * Panel containing the list of persons.
  */
 public class PersonListPanel extends UiPart<Region> {
+    public static final String MESSAGE_DATA_FILE_NOT_READ =
+        "The data file could not be read, so the list is empty. Please fix or delete the file and restart.";
     public static final String MESSAGE_NO_CLIENTS = "No clients yet. Use add to add one.";
     public static final String MESSAGE_ALL_CLIENTS_HIDDEN = "No clients to show. Use list to show all clients.";
 
@@ -48,6 +50,15 @@ public class PersonListPanel extends UiPart<Region> {
      * {@code allPersons} is every client, which decides what the placeholder suggests when none are shown.
      */
     public PersonListPanel(ObservableList<Person> personList, ObservableList<Person> allPersons) {
+        this(personList, allPersons, false);
+    }
+
+    /**
+     * Creates a {@code PersonListPanel} that shows {@code personList}, the clients currently displayed.
+     * {@code allPersons} is every client, which decides what the placeholder suggests when none are shown.
+     */
+    public PersonListPanel(ObservableList<Person> personList, ObservableList<Person> allPersons,
+                           boolean isReadOnlyMode) {
         super(FXML);
         this.allPersons = allPersons;
         allPersons.addListener((ListChangeListener<Person>) this::rememberRenamedClients);
@@ -64,8 +75,9 @@ public class PersonListPanel extends UiPart<Region> {
         clientCount.textProperty().bind(
                 Bindings.createStringBinding(() -> Messages.formatClientCount(personList.size()), personList));
         // With no clients at all, list can't help, so only suggest add. Otherwise, a search or filter hides them all
+        String noClientsMessage = isReadOnlyMode ? MESSAGE_DATA_FILE_NOT_READ : MESSAGE_NO_CLIENTS;
         placeholder.textProperty().bind(Bindings.when(Bindings.isEmpty(allPersons))
-                .then(MESSAGE_NO_CLIENTS)
+                .then(noClientsMessage)
                 .otherwise(MESSAGE_ALL_CLIENTS_HIDDEN));
     }
 

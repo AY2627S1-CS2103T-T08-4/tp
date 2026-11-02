@@ -147,14 +147,18 @@ A few parts of the main window are worth knowing about when changing them:
   `TagColor` picks it from the tag's name, ignoring case, so a tag has the same color on every client and every
   launch. `LightTheme.css` and `DarkTheme.css` each have one `#tags .tag-color-N` rule for each class. To add a color,
   add a rule to both files and raise `TagColor.PALETTE_SIZE` to match.
+
 * **Client count.** `PersonListPanel` binds the text of the count above the list to the displayed client list, which
   is the `Model`'s filtered list. The count therefore updates after any command that changes or narrows down the
   list, such as `delete` or `find`, without the commands having to update it.
-* **Empty list.** When no client is shown, the list's placeholder suggests `add` if Sieve has no clients at all, or
-  `list` if a search or filter hides them. `PersonListPanel` binds the placeholder to `Logic#getAllPersonList()`, the
-  unfiltered list, to tell the two apart. The client detail panel (below) does not get in the way: an empty list has
-  no selected client, so when `clear` or a search empties the list, the panel closes and the list, with its
-  placeholder, takes the full width again.
+
+* **Empty list.** When no client is shown, the list's placeholder depends on why. If Sieve has no clients and is in
+  read-only mode, it says the data file could not be read and suggests fixing or deleting it, because `add` would be
+  rejected. If Sieve has no clients otherwise, it suggests `add`. If a search or filter hides every client, it
+  suggests `list`. `PersonListPanel` binds the placeholder to `Logic#getAllPersonList()`, the unfiltered list, to tell 
+  the two apart. The client detail panel (below) does not get in the way: an empty list has no selected client, so when
+  `clear` or a search empties the list, the panel closes and the list, with its placeholder, takes the full width again.
+
 * **Keyboard shortcuts.** `CommandBox` handles the keys that belong to the command box. Enter runs the command, Up and
   Down recall commands (see [Command history feature](#command-history-feature)), Page Up and Page Down scroll the
   result, and Shift+Page Up and Shift+Page Down scroll the client list. `MainWindow` handles the other two. F1 opens
@@ -1248,7 +1252,9 @@ The data file is `data/sieve.json` inside that folder.
        the read-only check.
 
     1. Test case: `list`, then `find amirah`, then `help`<br>
-       Expected: Each command works as normal. `find amirah` lists no clients because the list is empty.
+       Expected: Each command works as normal. The empty list says `The data file could not be read, so the list is 
+       empty. Please fix or delete the file and restart.` `find amirah` lists no clients and 
+       shows `There are no clients to search.`
 
     1. Close the app and compare the file's checksum with the one you noted.<br>
        Expected: The checksums are identical, so the data file was not overwritten.
