@@ -23,7 +23,12 @@
 * Sieve uses [JavaFX](https://openjfx.io/) for its graphical user interface.
 * Sieve uses [Jackson](https://github.com/FasterXML/jackson) for JSON data storage.
 * Sieve uses [JUnit 5](https://junit.org/junit5/) for automated testing, and [TestFX](https://github.com/TestFX/TestFX)
-  to test its user interface.
+  to test its user interface, with [Monocle](https://github.com/TestFX/Monocle) to run those tests without a window.
+* The design of Sieve's user interface was inspired by
+  [TutorFlow](https://github.com/AY2526S2-CS2103T-T09-3/tp), a past CS2103T team project.
+* Notable uses of AI:
+  * Claude Code was used to review code, tests and documentation against the course's grading criteria, and to write
+    some code, test and documentation changes, which were reviewed and tested before being committed.
 
 --------------------------------------------------------------------------------------------------------------------
 
