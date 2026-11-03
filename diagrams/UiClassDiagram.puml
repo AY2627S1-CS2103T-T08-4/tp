@@ -47,14 +47,13 @@ PersonListPanel -down-> "*" PersonCard
 PersonCard ..> TagColor
 
 MainWindow -left-|> UiPart
+note bottom of UiPart
+CommandBox, ResultDisplay, HelpWindow,
+PersonListPanel, PersonCard,
+PersonDetailPanel and StatusBarFooter
+also extend UiPart.
+end note
 
-ResultDisplay --|> UiPart
-CommandBox --|> UiPart
-PersonListPanel --|> UiPart
-PersonCard --|> UiPart
-PersonDetailPanel --|> UiPart
-StatusBarFooter --|> UiPart
-HelpWindow --|> UiPart
 
 PersonCard ..> Model
 PersonDetailPanel ..> Model
@@ -66,5 +65,4 @@ HelpWindow -[hidden]left- CommandBox
 CommandBox -[hidden]left- ResultDisplay
 ResultDisplay -[hidden]left- StatusBarFooter
 
-MainWindow -[hidden]-|> UiPart
 @enduml
