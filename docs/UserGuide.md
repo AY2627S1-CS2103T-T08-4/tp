@@ -94,6 +94,8 @@ launches.
 Click anywhere on a client's row to open their detailed information panel on the right. The client list becomes more
 compact to make room for the panel, and the selected client remains highlighted.
 
+![Client details panel](images/clientDetailPanel.png)
+
 The panel can only be opened by clicking a client; there is no command or keyboard shortcut that opens it. The
 full-width client list shows the same details, while the panel presents one client's details separately for easier
 reading.
@@ -136,6 +138,7 @@ Examples:
 * A note is free text of up to 200 characters, for anything you want to remember about the client, e.g. `nt/Weak at algebra, prelims in March`. Leave it out if you have nothing to record.
 * A fee is the amount you charge the client, e.g. `fee/250` or `fee/180.50`. It is a number that is up to 7 digits and up to 2 decimal places, with no currency symbol. Sieve shows it with 2 decimal places (`250.00`).
 * A due date is the date the next payment is due, in the format `DD-MM-YYYY`, e.g. `due/01-11-2030`. It must be a real date, and cannot be before today. Once a due date has passed, it stays on the client until you change or clear it. Sieve only stores these two values and shows them on the client's card. It does not track payments or send reminders. Leave them out if you do not need them.
+* You cannot search or sort by fee or due date. To chase payments, tag clients `t/Unpaid`, then use `filter t/Unpaid`.
 </box>
 
 <box type="warning" seamless>
@@ -273,6 +276,7 @@ Adds one or more tags to an existing client.
 Format: `tag INDEX t/TAG [t/MORE_TAGS]...`
 
 * The index refers to the index number shown in the displayed client list and must be a positive integer.
+* Tagging several clients in one command is not supported.
 * Tags must be 1-20 characters long and contain only letters, numbers, and spaces.
 * Extra spaces inside a tag are treated as one, so `t/Sec  4` is stored as and considered the same tag as `t/Sec 4`.
 * New tags are added alongside the client's existing tags.
@@ -291,6 +295,7 @@ Removes one or more tags from an existing client.
 Format: `untag INDEX t/TAG [t/MORE_TAGS]...`
 
 * The index refers to the index number shown in the displayed client list and must be a positive integer.
+* Removing tags from several clients in one command is not supported.
 * Tag matching is case-insensitive; for example, `t/math` removes an existing `Math` tag.
 * Tags not currently attached to the client are ignored.
 * Other tags remain unchanged.
@@ -310,6 +315,7 @@ Format: `delete INDEX [, INDEX]...`
 * Deletes the clients at the specified indices.
 * Each index refers to the index number shown in the displayed client list and **must be a positive integer** 1, 2, 3, ...
 * To delete multiple clients, provide at least two comma-separated indices. Spaces around the commas are optional.
+* Ranges such as `1-3` are not supported.
 * Duplicate indices are not allowed.
 * All indices are checked before any client is deleted. If any index is invalid, no clients will be deleted.
 * If the displayed client list is empty, no client will be deleted and the following error will be shown:
@@ -444,6 +450,9 @@ Edit the data file only if you are confident that you can update it correctly.
 
 **Q**: Can I undo a change after closing and reopening Sieve?<br>
 **A**: No. Sieve only keeps the undo history while it is open, so check your changes before you exit. See [`undo`](#undoing-a-change-undo).
+
+**Q**: Can I import many clients at once?<br>
+**A**: No, importing is not supported. Add clients one at a time with `add`, or add them to `data/sieve.json` directly if you are comfortable editing the file.
 
 --------------------------------------------------------------------------------------------------------------------
 
