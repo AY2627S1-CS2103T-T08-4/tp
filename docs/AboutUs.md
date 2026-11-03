@@ -17,7 +17,7 @@ We are a team based in the [School of Computing, National University of Singapor
 [[github](https://github.com/NgXuXian)]
 
 * Role: Developer
-* Responsibilities: Data
+* Responsibilities: Read-only mode, storage, fee and due date
 
 ### Xu Haocheng
 
@@ -34,6 +34,7 @@ We are a team based in the [School of Computing, National University of Singapor
 [[github](https://github.com/Jigusheng)]
 
 * Role: Developer
+* Responsibilities: Filter, tag, untag
 
 ### Jovan Lim
 
@@ -51,4 +52,4 @@ We are a team based in the [School of Computing, National University of Singapor
 [[github](http://github.com/neo-jonathann)]
 
 * Role: Developer
-* Responsibilities: Data
+* Responsibilities: Delete, help, dark theme, client detail panel

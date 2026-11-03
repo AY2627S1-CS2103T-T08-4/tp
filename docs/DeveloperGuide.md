@@ -234,13 +234,16 @@ How the `Logic` component works:
    Note that although this is shown as a single step in the diagram above for simplicity, the code can require several
    interactions between the command object and the `Model` to complete the operation.
 1. The result of the command execution is encapsulated as a `CommandResult` object which is returned from `Logic`.
-1. **Read-only mode block:** If a `DataLoadingException` occurs during file parsing, `LogicManager` activates its
-   internal `isReadOnlyMode` flag. When this flag is true, `LogicManager#execute()` parses the command and then checks
+1. **Read-only mode block:** If `MainApp` catches a `DataLoadingException` while loading the data file, it creates
+   `LogicManager` in read-only mode, giving the reason. `LogicManager` then empties the client list and sets its
+   `isReadOnlyMode` flag. When this flag is true, `LogicManager#execute()` parses the command and then checks
    `Command#isMutating()`. A command that changes data (such as `add`, `delete`, `edit`, `clear`, `tag`, `untag`,
    `undo` or `redo`) is rejected with a `CommandException` before it runs, to protect the data file from being
    overwritten, while a malformed command still shows its usual parse error. Non-mutating commands like `list`, `find`
    and `help` remain fully operational. Every command that changes data must override `Command#isMutating()` to
-   return `true`. The activity diagram below shows how `LogicManager` handles a parsed command in read-only mode.
+   return `true`. Separately, if the data file exists but cannot be written to, `LogicManager#execute()` rejects a
+   command that changes data before it runs, with `READ_ONLY_FILE_ERROR_FORMAT`. The activity diagram below shows how
+   `LogicManager` handles a parsed command in read-only mode.
 
 <puml src="diagrams/ReadOnlyActivityDiagram.puml" width="300" />
 
@@ -759,14 +762,14 @@ Some checks are worth knowing about:
 
 **Target user profile**:
 
-* is a self-employed private tuition teacher
+* is a self-employed private tuition teacher in Singapore
 * works independently
 * manages a large and growing roster of clients
 * teaches clients across varying subjects and education levels
-* manages irregular and frequently changing schedules
+* groups clients by subject, level and lesson day
 * prefers typing to using the mouse, and types fast
 
-**Value proposition**: Tutors managing many clients with different subjects, levels, and constantly shifting schedules
+**Value proposition**: Tutors managing many clients with different subjects and levels
 often lose track of details across scattered notes or apps. Sieve keeps every client organised in one place and lets
 fast-typing tutors find and update client details quickly using commands, keeping admin work out of the way of teaching.
 
@@ -824,7 +827,8 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 **MSS**
 
-1. Tutor requests to add a client by providing the name, phone number, email address and address
+1. Tutor requests to add a client by providing the name, phone number, email address and address, and optionally tags,
+   a note, a fee and a due date
 2. Sieve validates the details
 3. Sieve adds the client to the end of the client list
 4. Sieve saves the updated client list to the data file
@@ -998,6 +1002,12 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
       Use case resumes at step 3.
 
+* 3c. No tag is provided.
+
+    * 3c1. Sieve shows an error message with the expected command format.
+
+      Use case resumes at step 3.
+
 * 4a. The client has none of the specified tags.
 
     * 4a1. Sieve reports that no tags were removed, lists the tags not found, and leaves the client unchanged.
@@ -1132,7 +1142,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 1. Tutor displays a list of clients.
 2. Tutor selects a client from the list.
-3. Sieve highlights that client, compacts the list and shows the client's details in a panel beside it.
+3. Sieve shows that client's details beside the list.
 
    Use case ends.
 
@@ -1144,19 +1154,19 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 * 3a. Tutor selects another displayed client.
 
-    * 3a1. Sieve moves the highlight and updates the open panel with that client's details.
+    * 3a1. Sieve shows that client's details instead.
 
       Use case resumes at step 3.
 
-* 3b. Tutor closes the detail panel.
+* 3b. Tutor closes the client's details.
 
-    * 3b1. Sieve clears the selection and restores the full-width client list.
+    * 3b1. Sieve clears the selection and shows only the list.
 
       Use case ends.
 
 * 3c. The selected client is deleted or removed from the displayed results by a search or filter.
 
-    * 3c1. Sieve closes the detail panel and restores the full-width client list.
+    * 3c1. Sieve closes the client's details and shows only the list.
 
       Use case ends.
 
@@ -1191,6 +1201,43 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
       Use case ends.
 
+**Use case: UC10 - Record a client's fee and due date**
+
+**MSS**
+
+1. Tutor requests to record a fee and a due date for a specific client in the list
+2. Sieve validates the values
+3. Sieve updates the client and saves the change
+4. Sieve shows a confirmation message and the updated client
+
+   Use case ends.
+
+**Extensions**
+
+* 1a. The given index is out of bounds.
+
+    * 1a1. Sieve shows an error message.
+
+      Use case resumes at step 1.
+
+* 1b. Tutor gives `fee/` or `due/` with no value.
+
+    * 1b1. Sieve removes that detail from the client and shows a confirmation message.
+
+      Use case ends.
+
+* 2a. The fee is invalid, or the due date is not a real date in the format `DD-MM-YYYY`.
+
+    * 2a1. Sieve shows an error message for the invalid field and leaves the client unchanged.
+
+      Use case resumes at step 1.
+
+* 2b. The due date is before today.
+
+    * 2b1. Sieve shows an error message saying that due dates cannot be in the past, and leaves the client unchanged.
+
+      Use case resumes at step 1.
+
 ### Non-Functional Requirements
 
 1. Sieve should work on any mainstream OS that has Java `25` or later installed.
@@ -1204,6 +1251,9 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
    tasks faster using commands than using mouse-based interactions.
 7. Client data should be stored locally in a human-editable JSON file, `data/sieve.json`. The file is not encrypted, so
    keeping it private is left to the user's operating system account.
+8. Sieve should be packaged as a single JAR file of at most 100 MB that runs without an installer.
+9. Sieve should work well at resolutions of 1920x1080 and higher at 100% and 125% screen scale, and stay usable at
+   1280x720 and higher at 150% screen scale.
 
 ### Glossary
 
